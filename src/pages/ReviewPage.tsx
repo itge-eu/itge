@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { Link, useParams } from "react-router"
+import ReactMarkdown from "react-markdown"
 import {
   getReviewBySlug,
   type FullReview,
@@ -115,9 +116,9 @@ function ReviewPage() {
 
         <section className="py-12">
           {review.body ? (
-            <div className="whitespace-pre-wrap text-lg leading-8 text-[var(--foreground)]">
-              {review.body}
-            </div>
+            <div className="review-content">
+			  <ReactMarkdown>{review.body}</ReactMarkdown>
+			</div>
           ) : (
             <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
               The full review has not been added yet.
