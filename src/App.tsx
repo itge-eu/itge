@@ -20,13 +20,13 @@ type FeaturedReviewRow = {
   summary: string
   reviewers: {
     name: string
-  }[]
+  } | null
   iems: {
     model: string
     manufacturers: {
       name: string
-    }[]
-  }[]
+    } | null
+  } | null
 }
 
 function getInitialTheme(): Theme {
@@ -88,23 +88,23 @@ function App() {
       return
     }
 
-    const rows = (data ?? []) as FeaturedReviewRow[]
-
+    const rows = (data ?? []) as unknown as FeaturedReviewRow[]
+	
     const reviews: FeaturedReview[] = rows
       .filter(
         (row) =>
-          row.reviewers.length > 0 &&
-          row.iems.length > 0 &&
-          row.iems[0].manufacturers.length > 0,
+          row.reviewers !== null &&
+          row.iems !== null &&
+          row.iems.manufacturers !== null,
       )
       .map((row) => ({
         id: row.id,
         rating: row.rating,
         title: row.title,
         summary: row.summary,
-        reviewer: row.reviewers[0].name,
-        model: row.iems[0].model,
-        brand: row.iems[0].manufacturers[0].name,
+        reviewer: row.reviewers!.name,
+        model: row.iems!.model,
+        brand: row.iems!.manufacturers!.name,
       }))
 
     setFeaturedReviews(reviews)
