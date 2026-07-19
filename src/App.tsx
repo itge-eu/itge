@@ -1,45 +1,33 @@
 import { useEffect, useState } from "react"
+import { supabase } from "./lib/supabase"
 
 type Theme = "light" | "dark"
 
-type Review = {
+type FeaturedReview = {
+  id: number
+  rating: number
+  title: string
+  summary: string
   brand: string
   model: string
-  rating: string
-  summary: string
   reviewer: string
-  tags: string[]
 }
 
-const featuredReviews: Review[] = [
-  {
-    brand: "Melody Wings",
-    model: "Neptune",
-    rating: "4.0",
-    summary:
-      "A refined and balanced presentation with strong technical ability and an easygoing character.",
-    reviewer: "Wessel",
-    tags: ["Balanced", "Technical", "Electronic"],
-  },
-  {
-    brand: "Night Oblivion",
-    model: "Longinus",
-    rating: "5.0",
-    summary:
-      "Emotional, spacious and effortlessly musical, with a presentation that keeps pulling you into the performance.",
-    reviewer: "Wessel",
-    tags: ["Musical", "Wide stage", "Alternative"],
-  },
-  {
-    brand: "Symphonium",
-    model: "Zenith",
-    rating: "4.0",
-    summary:
-      "A smooth and intimate listen with excellent separation and a calm, understated character.",
-    reviewer: "Wessel",
-    tags: ["Relaxed", "Intimate", "Acoustic"],
-  },
-]
+type FeaturedReviewRow = {
+  id: number
+  rating: number
+  title: string
+  summary: string
+  reviewers: {
+    name: string
+  }[]
+  iems: {
+    model: string
+    manufacturers: {
+      name: string
+    }[]
+  }[]
+}
 
 function getInitialTheme(): Theme {
   const savedTheme = localStorage.getItem("itge-theme")
@@ -55,7 +43,10 @@ function getInitialTheme(): Theme {
 
 function App() {
   const [theme, setTheme] = useState<Theme>(getInitialTheme)
-
+  const [featuredReviews, setFeaturedReviews] = useState<FeaturedReview[]>([])
+  const [reviewsLoading, setReviewsLoading] = useState(true)
+  const [reviewsError, setReviewsError] = useState<string | null>(null)
+ 
   useEffect(() => {
     const root = document.documentElement
     const isDark = theme === "dark"
@@ -63,6 +54,65 @@ function App() {
     root.classList.toggle("dark", isDark)
     localStorage.setItem("itge-theme", theme)
   }, [theme])
+  
+  useEffect(() => {
+  async function loadFeaturedReviews() {
+    setReviewsLoading(true)
+    setReviewsError(null)
+
+    const { data, error } = await supabase
+      .from("reviews")
+      .select(`
+        id,
+        rating,
+        title,
+        summary,
+        reviewers (
+          name
+        ),
+        iems (
+          model,
+          manufacturers (
+            name
+          )
+        )
+      `)
+      .eq("published", true)
+      .eq("featured", true)
+      .order("created_at", { ascending: false })
+
+    if (error) {
+      console.error("Could not load featured reviews:", error)
+      setReviewsError("The featured reviews could not be loaded.")
+      setReviewsLoading(false)
+      return
+    }
+
+    const rows = (data ?? []) as FeaturedReviewRow[]
+
+    const reviews: FeaturedReview[] = rows
+      .filter(
+        (row) =>
+          row.reviewers.length > 0 &&
+          row.iems.length > 0 &&
+          row.iems[0].manufacturers.length > 0,
+      )
+      .map((row) => ({
+        id: row.id,
+        rating: row.rating,
+        title: row.title,
+        summary: row.summary,
+        reviewer: row.reviewers[0].name,
+        model: row.iems[0].model,
+        brand: row.iems[0].manufacturers[0].name,
+      }))
+
+    setFeaturedReviews(reviews)
+    setReviewsLoading(false)
+  }
+
+  loadFeaturedReviews()
+}, [])
 
   const toggleTheme = () => {
     setTheme((currentTheme) =>
@@ -241,55 +291,67 @@ function App() {
               </a>
             </div>
 
-            <div className="mt-10 grid gap-6 lg:grid-cols-3">
-              {featuredReviews.map((review) => (
-                <article
-                  key={`${review.brand}-${review.model}`}
-                  className="group flex min-h-80 flex-col rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[var(--accent)] hover:bg-[var(--surface-soft)] dark:shadow-none"
-                >
-                  <div className="flex items-start justify-between gap-6">
-                    <div>
-                      <div className="text-sm text-[var(--muted)]">
-                        {review.brand}
-                      </div>
+{reviewsLoading && (
+  <div className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
+    Loading featured reviews…
+  </div>
+)}
 
-                      <h3 className="mt-1 text-2xl font-semibold">
-                        {review.model}
-                      </h3>
-                    </div>
+{reviewsError && (
+  <div className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
+    <p className="font-medium">Unable to load reviews</p>
+    <p className="mt-2 text-sm text-[var(--muted)]">
+      {reviewsError}
+    </p>
+  </div>
+)}
 
-                    <div className="rounded-full border border-[var(--border)] px-3 py-1 text-sm font-semibold">
-                      {review.rating}/5
-                    </div>
-                  </div>
+{!reviewsLoading && !reviewsError && featuredReviews.length === 0 && (
+  <div className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
+    No featured reviews have been published yet.
+  </div>
+)}
 
-                  <p className="mt-6 leading-7 text-[var(--muted)]">
-                    {review.summary}
-                  </p>
-
-                  <div className="mt-6 flex flex-wrap gap-2">
-                    {review.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="rounded-full bg-[var(--surface-soft)] px-3 py-1.5 text-xs text-[var(--muted)]"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="mt-auto flex items-center justify-between gap-4 pt-8 text-sm">
-                    <span className="text-[var(--muted)]">
-                      Reviewed by {review.reviewer}
-                    </span>
-
-                    <span className="font-medium text-[var(--accent)] transition group-hover:opacity-75">
-                      Read review →
-                    </span>
-                  </div>
-                </article>
-              ))}
+{!reviewsLoading && !reviewsError && featuredReviews.length > 0 && (
+  <div className="mt-10 grid gap-6 lg:grid-cols-3">
+    {featuredReviews.map((review) => (
+      <article
+        key={review.id}
+        className="group flex min-h-80 flex-col rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[var(--accent)] hover:bg-[var(--surface-soft)] dark:shadow-none"
+      >
+        <div className="flex items-start justify-between gap-6">
+          <div>
+            <div className="text-sm text-[var(--muted)]">
+              {review.brand}
             </div>
+
+            <h3 className="mt-1 text-2xl font-semibold">
+              {review.model}
+            </h3>
+          </div>
+
+          <div className="rounded-full border border-[var(--border)] px-3 py-1 text-sm font-semibold">
+            {Number(review.rating).toFixed(1)}/5
+          </div>
+        </div>
+
+        <p className="mt-6 leading-7 text-[var(--muted)]">
+          {review.summary}
+        </p>
+
+        <div className="mt-auto flex items-center justify-between gap-4 pt-8 text-sm">
+          <span className="text-[var(--muted)]">
+            Reviewed by {review.reviewer}
+          </span>
+
+          <span className="font-medium text-[var(--accent)] transition group-hover:opacity-75">
+            Read review →
+          </span>
+        </div>
+      </article>
+    ))}
+  </div>
+)}
           </div>
         </section>
 
