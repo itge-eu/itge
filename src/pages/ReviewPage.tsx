@@ -113,6 +113,16 @@ function ReviewPage() {
             {review.summary}
           </p>
         </header>
+		
+		{review.heroImageUrl && (
+          <figure className="mt-10 overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)]">
+            <img
+              src={review.heroImageUrl}
+              alt={`${review.brand} ${review.model}`}
+              className="aspect-[16/9] w-full object-cover"
+            />
+          </figure>
+        )}
 
         <section className="py-12">
           {review.body ? (
