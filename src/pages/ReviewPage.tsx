@@ -43,6 +43,7 @@ function ReviewPage() {
   if (loading) {
     return (
       <main className="min-h-screen bg-[var(--background)] px-6 py-20 text-[var(--foreground)]">
+
         <div className="mx-auto max-w-4xl text-[var(--muted)]">
           Loading review…
         </div>
@@ -53,15 +54,10 @@ function ReviewPage() {
   if (error) {
     return (
       <main className="min-h-screen bg-[var(--background)] px-6 py-20 text-[var(--foreground)]">
+
         <div className="mx-auto max-w-4xl">
           <p className="text-xl font-semibold">Unable to load review</p>
           <p className="mt-3 text-[var(--muted)]">{error}</p>
-          <Link
-            to="/"
-            className="mt-8 inline-block text-[var(--accent)]"
-          >
-            ← Back to homepage
-          </Link>
         </div>
       </main>
     )
@@ -70,6 +66,7 @@ function ReviewPage() {
   if (!review) {
     return (
       <main className="min-h-screen bg-[var(--background)] px-6 py-20 text-[var(--foreground)]">
+
         <div className="mx-auto max-w-4xl">
           <p className="text-xl font-semibold">Review not found</p>
           <Link
@@ -85,15 +82,9 @@ function ReviewPage() {
   
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
-      <article className="mx-auto max-w-4xl">
-        <Link
-          to="/"
-          className="text-sm font-medium text-[var(--accent)]"
-        >
-          ← Back to homepage
-        </Link>
 
-        <header className="mt-12 border-b border-[var(--border)] pb-12">
+      <article className="mx-auto max-w-4xl">
+        <header className="border-b border-[var(--border)] pb-12">
           <p className="text-sm uppercase tracking-[0.2em] text-[var(--accent)]">
             {review.brand}
           </p>

@@ -5,23 +5,27 @@ import ReviewPage from "./pages/ReviewPage"
 import AdminReviewsPage from "./pages/AdminReviewsPage";
 import AdminEditReviewPage from "./pages/AdminEditReviewPage";
 import ReviewsPage from "./pages/ReviewsPage";
+import Navbar from "./components/Navbar";
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/reviews/:slug" element={<ReviewPage />} />
-      <Route path="/admin/import" element={<ImportReviewPage />} />
-	  <Route path="/admin/reviews" element={<AdminReviewsPage />} />
-	  <Route
-        path="/admin/reviews/:id/edit"
-        element={<AdminEditReviewPage />}
-      />
-	  <Route
-        path="/reviews"
-        element={<ReviewsPage />}
-      />
-    </Routes>
+    <>  
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/reviews/:slug" element={<ReviewPage />} />
+        <Route path="/admin/import" element={<ImportReviewPage />} />
+	    <Route path="/admin/reviews" element={<AdminReviewsPage />} />
+	    <Route
+          path="/admin/reviews/:id/edit"
+          element={<AdminEditReviewPage />}
+        />
+	    <Route
+          path="/reviews"
+          element={<ReviewsPage />}
+        />
+      </Routes>
+	</>
   )
 }
 

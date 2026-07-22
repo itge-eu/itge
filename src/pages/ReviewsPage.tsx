@@ -24,17 +24,10 @@ function ReviewsPage() {
 
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
+
       <div className="mx-auto max-w-6xl">
-
         <div className="mb-12">
-          <Link
-            to="/"
-            className="text-sm text-[var(--accent)]"
-          >
-            ← Back to homepage
-          </Link>
-
-          <h1 className="mt-4 text-5xl font-semibold">
+          <h1 className="text-5xl font-semibold">
             Reviews
           </h1>
 

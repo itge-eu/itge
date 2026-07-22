@@ -79,6 +79,7 @@ function AdminReviewsPage() {
 
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
+
       <div className="mx-auto max-w-6xl">
         <Link to="/" className="text-sm font-medium text-[var(--accent)]">
           ← Back to homepage

@@ -331,6 +331,7 @@ function AdminEditReviewPage() {
   if (loading) {
     return (
       <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
+
         <div className="mx-auto max-w-6xl">
           <p className="text-[var(--muted)]">
             Loading review…
@@ -343,6 +344,7 @@ function AdminEditReviewPage() {
   if (error && review.id === 0) {
     return (
       <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
+
         <div className="mx-auto max-w-6xl">
           <Link
             to="/admin/reviews"
@@ -364,6 +366,7 @@ function AdminEditReviewPage() {
 
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-12 text-[var(--foreground)] lg:px-8">
+
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <Link
