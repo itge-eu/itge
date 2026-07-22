@@ -61,65 +61,84 @@ a {
 }
 
 .review-content {
-  font-size: 1.0625rem;
-  line-height: 1.8;
+  line-height: 1.75;
+  color: var(--foreground);
+}
+
+.review-content p {
+  margin: 1rem 0;
 }
 
 .review-content h1,
 .review-content h2,
-.review-content h3 {
-  color: var(--foreground);
-  font-weight: 600;
-  letter-spacing: -0.02em;
+.review-content h3,
+.review-content h4 {
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  font-weight: 700;
+  line-height: 1.25;
 }
 
 .review-content h1 {
-  margin-top: 3rem;
-  margin-bottom: 1.5rem;
-  font-size: 2.25rem;
+  font-size: 2rem;
 }
 
 .review-content h2 {
-  margin-top: 3rem;
-  margin-bottom: 1rem;
-  font-size: 1.75rem;
+  font-size: 1.6rem;
 }
 
 .review-content h3 {
-  margin-top: 2rem;
-  margin-bottom: 0.75rem;
   font-size: 1.3rem;
-}
-
-.review-content p {
-  margin: 1.25rem 0;
-  color: var(--muted);
 }
 
 .review-content ul,
 .review-content ol {
-  margin: 1.25rem 0;
+  margin: 1rem 0;
   padding-left: 1.5rem;
-  color: var(--muted);
+}
+
+.review-content ul {
+  list-style: disc;
+}
+
+.review-content ol {
+  list-style: decimal;
 }
 
 .review-content li {
-  margin: 0.45rem 0;
+  margin: 0.35rem 0;
 }
 
-.review-content img {
-  width: 100%;
-  margin: 2.5rem 0;
-  border-radius: 1.5rem;
-  border: 1px solid var(--border);
+.review-content strong {
+  font-weight: 700;
+}
+
+.review-content em {
+  font-style: italic;
 }
 
 .review-content a {
   color: var(--accent);
   text-decoration: underline;
-  text-underline-offset: 0.2em;
 }
 
-.review-content strong {
-  color: var(--foreground);
+.review-content img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1.5rem auto;
+  border-radius: 1rem;
+}
+
+.review-content blockquote {
+  margin: 1.5rem 0;
+  border-left: 3px solid var(--accent);
+  padding-left: 1rem;
+  color: var(--muted);
+}
+
+.review-content hr {
+  margin: 2rem 0;
+  border: 0;
+  border-top: 1px solid var(--border);
 }
