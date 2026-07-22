@@ -4,6 +4,7 @@ import {
   getReviewBySlug,
   type FullReview,
 } from "../lib/reviews"
+import { useMemo } from "react";
 
 function ReviewPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -11,6 +12,11 @@ function ReviewPage() {
   const [review, setReview] = useState<FullReview | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  
+  const preparedBody = useMemo(
+    () => prepareReviewHtml(review?.body ?? ""),
+    [review?.body],
+  )
 
   useEffect(() => {
     async function loadReview() {
@@ -76,7 +82,7 @@ function ReviewPage() {
       </main>
     )
   }
-
+  
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
       <article className="mx-auto max-w-4xl">
@@ -111,6 +117,30 @@ function ReviewPage() {
           <p className="mt-8 max-w-3xl text-xl leading-9 text-[var(--muted)]">
             {review.summary}
           </p>
+		  
+		  {(review.pros || review.cons) && (
+            <section className="grid gap-6 py-8 md:grid-cols-2">
+              {review.pros && (
+                <div className="rounded-2xl border border-green-500/30 bg-green-500/10 p-6">
+                  <h2 className="text-lg font-semibold">Pros</h2>
+          
+                  <p className="mt-3 whitespace-pre-line leading-7">
+                    {review.pros}
+                  </p>
+                </div>
+              )}
+          
+              {review.cons && (
+                <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-6">
+                  <h2 className="text-lg font-semibold">Cons</h2>
+          
+                  <p className="mt-3 whitespace-pre-line leading-7">
+                    {review.cons}
+                  </p>
+                </div>
+              )}
+            </section>
+          )}
         </header>
 		
 		{review.heroImageUrl && (
@@ -127,7 +157,7 @@ function ReviewPage() {
           {review.body ? (
             <div
               className="review-content"
-              dangerouslySetInnerHTML={{ __html: review.body }}
+              dangerouslySetInnerHTML={{ __html: preparedBody }}
             />
           ) : (
             <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
@@ -138,6 +168,35 @@ function ReviewPage() {
       </article>
     </main>
   )
+}
+
+function prepareReviewHtml(html: string) {
+  const document = new DOMParser().parseFromString(html, "text/html");
+
+  document.querySelectorAll(".bbCodeSpoiler").forEach((spoiler) => {
+    const title =
+      spoiler
+        .querySelector(".bbCodeSpoiler-button-title")
+        ?.textContent?.trim() || "Spoiler";
+
+    const content =
+      spoiler.querySelector(".bbCodeSpoiler-content")?.innerHTML || "";
+
+    const details = document.createElement("details");
+    details.className = "review-spoiler";
+
+    const summary = document.createElement("summary");
+    summary.textContent = title;
+
+    const contentWrapper = document.createElement("div");
+    contentWrapper.className = "review-spoiler-content";
+    contentWrapper.innerHTML = content;
+
+    details.append(summary, contentWrapper);
+    spoiler.replaceWith(details);
+  });
+
+  return document.body.innerHTML;
 }
 
 export default ReviewPage

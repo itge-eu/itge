@@ -14,6 +14,8 @@ export type FeaturedReview = {
 
 export type FullReview = FeaturedReview & {
   body: string | null
+  pros: string | null;
+  cons: string | null;
 }
 
 type ReviewRow = {
@@ -23,6 +25,8 @@ type ReviewRow = {
   title: string
   summary: string
   body?: string | null
+  pros?: string | null
+  cons?: string | null
   hero_image_url: string | null
   reviewers: {
     name: string
@@ -97,6 +101,8 @@ export async function getReviewBySlug(
       rating,
       title,
       summary,
+	  pros,
+	  cons,
       body,
       hero_image_url,
       reviewers (
@@ -126,5 +132,7 @@ export async function getReviewBySlug(
   return {
     ...mapReview(row),
     body: row.body ?? null,
+    pros: row.pros ?? null,
+    cons: row.cons ?? null,
   }
 }

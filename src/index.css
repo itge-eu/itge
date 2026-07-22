@@ -142,3 +142,22 @@ a {
   border: 0;
   border-top: 1px solid var(--border);
 }
+
+.review-spoiler {
+  margin: 1.5rem 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+}
+
+.review-spoiler summary {
+  cursor: pointer;
+  padding: 1rem 1.25rem;
+  font-weight: 600;
+}
+
+.review-spoiler-content {
+  padding: 0 1.25rem 1.25rem;
+  line-height: 1.75;
+}
