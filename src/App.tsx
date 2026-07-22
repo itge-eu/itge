@@ -4,6 +4,7 @@ import ImportReviewPage from "./pages/ImportReviewPage"
 import ReviewPage from "./pages/ReviewPage"
 import AdminReviewsPage from "./pages/AdminReviewsPage";
 import AdminEditReviewPage from "./pages/AdminEditReviewPage";
+import ReviewsPage from "./pages/ReviewsPage";
 
 function App() {
   return (
@@ -15,6 +16,10 @@ function App() {
 	  <Route
         path="/admin/reviews/:id/edit"
         element={<AdminEditReviewPage />}
+      />
+	  <Route
+        path="/reviews"
+        element={<ReviewsPage />}
       />
     </Routes>
   )

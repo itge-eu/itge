@@ -90,6 +90,38 @@ export async function getFeaturedReviews(): Promise<FeaturedReview[]> {
   return rows.map(mapReview)
 }
 
+export async function getAllReviews(): Promise<FeaturedReview[]> {
+  const { data, error } = await supabase
+    .from("reviews")
+    .select(`
+      id,
+      slug,
+      rating,
+      title,
+      summary,
+      hero_image_url,
+      reviewers (
+        name
+      ),
+      iems (
+        model,
+        manufacturers (
+          name
+        )
+      )
+    `)
+    .eq("published", true)
+    .order("created_at", { ascending: false })
+
+  if (error) {
+    throw error
+  }
+
+  const rows = (data ?? []) as unknown as ReviewRow[]
+
+  return rows.map(mapReview)
+}
+
 export async function getReviewBySlug(
   slug: string,
 ): Promise<FullReview | null> {

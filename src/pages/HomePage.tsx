@@ -221,12 +221,12 @@ function HomePage() {
                 </h2>
               </div>
 
-              <a
-                href="#all-reviews"
+              <Link
+                to="/reviews"
                 className="text-sm font-medium text-[var(--accent)] transition hover:opacity-75"
               >
                 View all reviews →
-              </a>
+              </Link>
             </div>
 
 {reviewsLoading && (
