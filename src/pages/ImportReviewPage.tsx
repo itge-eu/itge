@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import type { FormEvent } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { supabase } from "../lib/supabase";
 
 type HeadFiImage = {
@@ -12,6 +12,7 @@ type HeadFiImport = {
   source: "head-fi";
   sourceUrl: string;
   reviewId: string | null;
+  publishedAt: string | null;
   productSlug: string | null;
   author: string | null;
   rating: number | null;
@@ -72,7 +73,17 @@ function slugify(value: string) {
     .replace(/^-+|-+$/g, "");
 }
 
+function getIemLabel(iem: IemOption) {
+  const manufacturerName = iem.manufacturers?.name?.trim();
+
+  return manufacturerName
+    ? `${manufacturerName} ${iem.model}`
+    : iem.model;
+}
+
 function ImportReviewPage() {
+  const navigate = useNavigate();
+
   const [rawJson, setRawJson] = useState("");
   const [importData, setImportData] = useState<HeadFiImport | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -86,6 +97,8 @@ function ImportReviewPage() {
   const [iems, setIems] = useState<IemOption[]>([]);
   const [selectedReviewerId, setSelectedReviewerId] = useState("");
   const [selectedIemId, setSelectedIemId] = useState("");
+  const [iemSearch, setIemSearch] = useState("");
+  const [iemPickerOpen, setIemPickerOpen] = useState(false);
 
   const formattedRating = useMemo(() => {
     if (importData?.rating == null) {
@@ -94,6 +107,40 @@ function ImportReviewPage() {
 
     return `${importData.rating.toFixed(1)} / 5`;
   }, [importData]);
+  
+  const filteredIems = useMemo(() => {
+    const searchTerms = iemSearch
+      .toLowerCase()
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+  
+    if (searchTerms.length === 0) {
+      return iems.slice(0, 10);
+    }
+  
+    return iems
+      .filter((iem) => {
+        const searchableText = [
+          getIemLabel(iem),
+          iem.model,
+          iem.slug,
+        ]
+          .join(" ")
+          .toLowerCase();
+  
+        return searchTerms.every((term) =>
+          searchableText.includes(term),
+        );
+      })
+      .slice(0, 10);
+  }, [iems, iemSearch]);
+
+const selectedIem = useMemo(
+  () =>
+    iems.find((iem) => String(iem.id) === selectedIemId) ?? null,
+  [iems, selectedIemId],
+);
 
   async function findExistingReview(
     sourcePlatform: string,
@@ -182,16 +229,40 @@ function ImportReviewPage() {
       setReviewers(reviewerRows);
       setIems(iemRows);
 
-      const matchingIem = iemRows.find(
-        (iem) => iem.slug === parsed.productSlug,
-      );
+      const normalizedProductSlug = parsed.productSlug?.toLowerCase() ?? "";
+
+      const matchingIem =
+        iemRows.find(
+          (iem) => iem.slug.toLowerCase() === normalizedProductSlug,
+        ) ??
+        iemRows.find((iem) => {
+          const normalizedLabel = slugify(getIemLabel(iem));
+      
+          return (
+            normalizedLabel === normalizedProductSlug ||
+            normalizedLabel.includes(normalizedProductSlug) ||
+            normalizedProductSlug.includes(normalizedLabel)
+          );
+        });
+      
       if (matchingIem) {
         setSelectedIemId(String(matchingIem.id));
+        setIemSearch(getIemLabel(matchingIem));
+      } else {
+        setSelectedIemId("");
+        setIemSearch(
+          parsed.productSlug
+            ?.replace(/-/g, " ")
+            .replace(/\b\w/g, (letter) => letter.toUpperCase()) ?? "",
+        );
       }
+	  
       const matchingReviewer = reviewerRows.find(
         (reviewer) =>
-          reviewer.name.toLowerCase() === parsed.author?.toLowerCase(),
+          normalizeUsername(reviewer.name) ===
+          normalizeUsername(parsed.author),
       );
+
       if (matchingReviewer) {
         setSelectedReviewerId(String(matchingReviewer.id));
       }    } catch (parseError) {
@@ -266,6 +337,7 @@ async function handleSaveDraft() {
   const reviewPayload = {
     reviewer_id: Number(selectedReviewerId),
     iem_id: Number(selectedIemId),
+	published_at: importData.publishedAt,
   
     title: reviewTitle,
     slug: reviewSlug,
@@ -296,25 +368,26 @@ async function handleSaveDraft() {
   try {
     console.log("About to insert review:", reviewPayload);
   
-    const { error: insertError } = await supabase
+    const { data: insertedReview, error: insertError } = await supabase
       .from("reviews")
-      .insert(reviewPayload);
-  
-    console.log("Insert completed:", {
-      insertError,
-    });
-  
+      .insert(reviewPayload)
+      .select("id, slug")
+      .single();
+    
     if (insertError) {
       if (insertError.code === "23505") {
         throw new Error(
           "This review has already been imported, or its ITGE slug already exists.",
         );
       }
-  
+    
       throw insertError;
     }
+    
+    navigate(`/admin/reviews/${insertedReview.id}/edit`);
   
-    setSavedSlug(reviewPayload.slug);
+//    setSavedSlug(reviewPayload.slug);
+	
   } catch (saveError) {
     console.error("Saving review failed:", saveError);
   
@@ -338,6 +411,15 @@ async function handleSaveDraft() {
     setIems([]);
     setSelectedReviewerId("");
     setSelectedIemId("");
+	setIemSearch("");
+    setIemPickerOpen(false);
+  }
+  
+  function normalizeUsername(value: string | null | undefined) {
+    return (value ?? "")
+      .trim()
+      .replace(/^@/, "")
+      .toLowerCase();
   }
 
   return (
@@ -508,25 +590,90 @@ async function handleSaveDraft() {
                 )}
               </div>
 
-              <div>
-                <label htmlFor="iem" className="block text-sm font-semibold">
+              <div className="relative">
+                <label
+                  htmlFor="iem-search"
+                  className="block text-sm font-semibold"
+                >
                   ITGE IEM
                 </label>
-                <select
-                  id="iem"
-                  value={selectedIemId}
-                  onChange={(event) => setSelectedIemId(event.target.value)}
-                  className="mt-3 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3"
-                >
-                  <option value="">Select IEM</option>
-                  {iems.map((iem) => (
-                    <option key={iem.id} value={String(iem.id)}>
-                      {iem.manufacturers?.name
-                        ? `${iem.manufacturers.name} ${iem.model}`
-                        : iem.model}
-                    </option>
-                  ))}
-                </select>
+              
+                <input
+                  id="iem-search"
+                  type="text"
+                  value={iemSearch}
+                  autoComplete="off"
+                  placeholder="Search by manufacturer or model"
+                  onFocus={() => setIemPickerOpen(true)}
+                  onChange={(event) => {
+                    setIemSearch(event.target.value);
+                    setSelectedIemId("");
+                    setIemPickerOpen(true);
+                  }}
+                  className="mt-3 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 outline-none transition focus:border-[var(--accent)]"
+                />
+              
+                {iemPickerOpen && !selectedIem && (
+                  <div className="absolute z-20 mt-2 max-h-72 w-full overflow-y-auto rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2 shadow-xl">
+                    {filteredIems.length > 0 ? (
+                      filteredIems.map((iem) => (
+                        <button
+                          key={iem.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedIemId(String(iem.id));
+                            setIemSearch(getIemLabel(iem));
+                            setIemPickerOpen(false);
+                          }}
+                          className="block w-full rounded-lg px-3 py-3 text-left transition hover:bg-[var(--surface-soft)]"
+                        >
+                          <span className="block font-medium">
+                            {getIemLabel(iem)}
+                          </span>
+              
+                          <span className="mt-1 block text-xs text-[var(--muted)]">
+                            {iem.slug}
+                          </span>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="px-3 py-4">
+                        <p className="font-medium">No matching IEM found.</p>
+              
+                        <p className="mt-1 text-sm text-[var(--muted)]">
+                          Check the spelling or create the IEM before importing
+                          this review.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              
+                {selectedIem && (
+                  <div className="mt-3 flex items-center justify-between gap-4 rounded-xl border border-[var(--accent)] bg-[var(--accent)]/10 px-4 py-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.14em] text-[var(--muted)]">
+                        Selected IEM
+                      </p>
+              
+                      <p className="mt-1 font-semibold">
+                        {getIemLabel(selectedIem)}
+                      </p>
+                    </div>
+              
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedIemId("");
+                        setIemSearch("");
+                        setIemPickerOpen(true);
+                      }}
+                      className="text-sm font-medium text-[var(--accent)]"
+                    >
+                      Change
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 

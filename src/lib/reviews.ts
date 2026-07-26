@@ -79,7 +79,7 @@ export async function getFeaturedReviews(): Promise<FeaturedReview[]> {
     `)
     .eq("published", true)
     .eq("featured", true)
-    .order("created_at", { ascending: false })
+    .order("published_at", { ascending: false })
 
   if (error) {
     throw error
@@ -111,7 +111,7 @@ export async function getAllReviews(): Promise<FeaturedReview[]> {
       )
     `)
     .eq("published", true)
-    .order("created_at", { ascending: false })
+    .order("published_at", { ascending: false })
 
   if (error) {
     throw error
