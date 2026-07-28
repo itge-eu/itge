@@ -22,6 +22,10 @@ type ReviewForm = {
   updatedAt: string;
   reviewerName: string;
   iemName: string;
+  pendingImages: {
+    url: string;
+    alt: string;
+  }[];
 };
 
 function createEmptyReview(): ReviewForm {
@@ -45,6 +49,7 @@ function createEmptyReview(): ReviewForm {
     updatedAt: "",
     reviewerName: "",
     iemName: "",
+	pendingImages: [],
   };
 }
 
@@ -95,6 +100,7 @@ function AdminEditReviewPage() {
           summary,
           body,
 		  source_html,
+		  import_data,
           pros,
           cons,
           hero_image_url,
@@ -147,6 +153,11 @@ function AdminEditReviewPage() {
       const iemName = [manufacturerName, modelName]
         .filter(Boolean)
         .join(" ");
+		
+	  const pendingImages =
+      Array.isArray(data.import_data?.images)
+        ? data.import_data.images
+        : [];
 
       setReview({
         id: Number(data.id),
@@ -171,6 +182,7 @@ function AdminEditReviewPage() {
         updatedAt: data.updated_at ?? "",
         reviewerName: reviewerRelation?.name ?? "Unknown reviewer",
         iemName: iemName || "Unknown IEM",
+		pendingImages,
       });
 
       setLoading(false);
