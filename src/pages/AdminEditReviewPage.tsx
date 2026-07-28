@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { supabase } from "../lib/supabase";
+import {
+  uploadReviewImages,
+  type UploadedReviewImage,
+} from "../lib/reviewImages";
 
 type ReviewForm = {
   id: number;
@@ -78,6 +82,12 @@ function AdminEditReviewPage() {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [bodyMode, setBodyMode] = useState<"preview" | "html">("preview");
+  
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [imageUploadProgress, setImageUploadProgress] = useState("");
+  const [uploadedImages, setUploadedImages] = useState<
+    UploadedReviewImage[]
+  >([]);
 
   useEffect(() => {
     async function loadReview() {
@@ -338,6 +348,67 @@ function AdminEditReviewPage() {
 
     setSuccessMessage("Review returned to draft.");
     setSaving(false);
+  }
+  
+  async function handleUploadImages() {
+    if (!review.pendingImages.length) {
+      setError("No imported images were found for this review.");
+      return;
+    }
+  
+    setUploadingImages(true);
+    setError(null);
+    setSuccessMessage(null);
+    setImageUploadProgress("");
+  
+    try {
+      const uploaded = await uploadReviewImages(
+        review.id,
+        review.pendingImages,
+        (current, total) => {
+          setImageUploadProgress(
+            `Copying image ${current} of ${total}…`,
+          );
+        },
+      );
+  
+      setUploadedImages(uploaded);
+  
+      const firstImage = uploaded[0];
+  
+      if (firstImage) {
+        const { error: heroError } = await supabase
+          .from("reviews")
+          .update({
+            hero_image_url: firstImage.publicUrl,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", review.id);
+  
+        if (heroError) {
+          throw new Error(
+            `Images were uploaded, but the hero image could not be updated: ${heroError.message}`,
+          );
+        }
+  
+        updateField("heroImageUrl", firstImage.publicUrl);
+      }
+  
+      setSuccessMessage(
+        `${uploaded.length} image${uploaded.length === 1 ? "" : "s"} copied to Supabase.`,
+      );
+    } catch (uploadError) {
+      console.error("Review image upload failed:", uploadError);
+  
+      setError(
+        uploadError instanceof Error
+          ? uploadError.message
+          : "The images could not be uploaded.",
+      );
+    } finally {
+      setUploadingImages(false);
+      setImageUploadProgress("");
+    }
   }
 
   if (loading) {
@@ -696,6 +767,54 @@ function AdminEditReviewPage() {
                   </dd>
                 </div>
               </dl>
+            </div>
+			
+			<div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-lg font-semibold">
+                  Original imported images
+                </h2>
+            
+                <span className="text-sm text-[var(--muted)]">
+                  {review.pendingImages.length}
+                </span>
+              </div>
+            
+              {review.pendingImages.length > 0 ? (
+                <>
+                  <div className="mt-5 grid grid-cols-2 gap-3">
+                    {review.pendingImages.map((image, index) => (
+                      <img
+                        key={`${image.url}-${index}`}
+                        src={image.url}
+                        alt={image.alt || ""}
+                        className="aspect-square w-full rounded-xl object-cover"
+                      />
+                    ))}
+                  </div>
+            
+                  <button
+                    type="button"
+                    onClick={() => void handleUploadImages()}
+                    disabled={uploadingImages}
+                    className="mt-5 w-full rounded-xl bg-[var(--accent)] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {uploadingImages
+                      ? imageUploadProgress || "Copying images…"
+                      : "Copy images to Supabase"}
+                  </button>
+            
+                  {uploadedImages.length > 0 && (
+                    <p className="mt-3 text-sm text-green-600">
+                      {uploadedImages.length} images stored successfully.
+                    </p>
+                  )}
+                </>
+              ) : (
+                <p className="mt-4 text-sm text-[var(--muted)]">
+                  No images were included in the imported review.
+                </p>
+              )}
             </div>
 
             <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
