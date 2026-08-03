@@ -178,7 +178,13 @@ function HomePage() {
 
         <div className="mt-auto flex items-center justify-between gap-4 pt-8 text-sm">
           <span className="text-[var(--muted)]">
-            Reviewed by {review.reviewer}
+            Reviewed by{" "}
+            <Link
+              to={`/reviewers/${review.reviewerSlug}`}
+              className="font-semibold text-[var(--accent)] hover:underline"
+            >
+              {review.reviewer}
+            </Link>
           </span>
 
           <Link

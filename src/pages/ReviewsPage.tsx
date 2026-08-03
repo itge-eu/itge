@@ -141,7 +141,13 @@ function ReviewsPage() {
                     </h2>
 
                     <p className="mt-1 text-sm text-[var(--muted)]">
-                      Reviewed by {review.reviewer}
+                      Reviewed by{" "}
+                      <Link
+                        to={`/reviewers/${review.reviewerSlug}`}
+                        className="font-semibold text-[var(--accent)] hover:underline"
+                      >
+                        {review.reviewer}
+                      </Link>
                     </p>
 
                     <p className="mt-4 line-clamp-3 text-[var(--muted)]">

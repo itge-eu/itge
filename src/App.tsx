@@ -6,6 +6,7 @@ import AdminReviewsPage from "./pages/AdminReviewsPage";
 import AdminEditReviewPage from "./pages/AdminEditReviewPage";
 import ReviewsPage from "./pages/ReviewsPage";
 import Navbar from "./components/Navbar";
+import ReviewerPage from "./pages/ReviewerPage";
 
 function App() {
   return (
@@ -23,6 +24,10 @@ function App() {
 	    <Route
           path="/reviews"
           element={<ReviewsPage />}
+        />
+		<Route
+          path="/reviewers/:slug"
+          element={<ReviewerPage />}
         />
       </Routes>
 	</>

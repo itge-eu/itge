@@ -1,0 +1,152 @@
+import { supabase } from "./supabase";
+import type { FeaturedReview } from "./reviews";
+
+export type ReviewerProfile = {
+  id: number;
+  name: string;
+  slug: string;
+  bio: string | null;
+  avatarUrl: string | null;
+  country: string | null;
+  headfiUrl: string | null;
+  reviews: FeaturedReview[];
+};
+
+type ReviewRow = {
+  id: number;
+  slug: string;
+  rating: number;
+  title: string;
+  summary: string;
+  hero_image_url: string | null;
+
+  iems:
+    | {
+        model: string;
+        manufacturers:
+          | {
+              name: string;
+            }
+          | {
+              name: string;
+            }[]
+          | null;
+      }
+    | {
+        model: string;
+        manufacturers:
+          | {
+              name: string;
+            }
+          | {
+              name: string;
+            }[]
+          | null;
+      }[]
+    | null;
+};
+
+function getSingleRelation<T>(
+  relation: T | T[] | null | undefined,
+): T | null {
+  if (Array.isArray(relation)) {
+    return relation[0] ?? null;
+  }
+
+  return relation ?? null;
+}
+
+function mapReview(row: ReviewRow): FeaturedReview {
+  const iem = getSingleRelation(row.iems);
+  const manufacturer = getSingleRelation(
+    iem?.manufacturers,
+  );
+
+  if (!iem || !manufacturer) {
+    throw new Error(
+      `Review ${row.id} has incomplete data.`,
+    );
+  }
+
+  return {
+    id: row.id,
+    slug: row.slug,
+    rating: Number(row.rating),
+    title: row.title,
+    summary: row.summary,
+    brand: manufacturer.name,
+    model: iem.model,
+    reviewer: "",
+    reviewerSlug: "",
+    heroImageUrl: row.hero_image_url,
+  };
+}
+
+export async function getReviewerBySlug(
+  slug: string,
+): Promise<ReviewerProfile | null> {
+  const { data: reviewer, error } =
+    await supabase
+      .from("reviewers")
+      .select(`
+        id,
+        name,
+        slug,
+        bio,
+        avatar_url,
+        country,
+        headfi_url
+      `)
+      .eq("slug", slug)
+      .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  if (!reviewer) {
+    return null;
+  }
+
+  const { data: reviews, error: reviewsError } =
+    await supabase
+      .from("reviews")
+      .select(`
+        id,
+        slug,
+        rating,
+        title,
+        summary,
+        hero_image_url,
+        iems(
+          model,
+          manufacturers(
+            name
+          )
+        )
+      `)
+      .eq("reviewer_id", reviewer.id)
+      .eq("published", true)
+      .order("published_at", {
+        ascending: false,
+      });
+
+  if (reviewsError) {
+    throw reviewsError;
+  }
+
+  return {
+    id: reviewer.id,
+    name: reviewer.name,
+    slug: reviewer.slug,
+    bio: reviewer.bio,
+    avatarUrl: reviewer.avatar_url,
+    country: reviewer.country,
+    headfiUrl: reviewer.headfi_url,
+    reviews: (reviews ?? []).map((review) => ({
+      ...mapReview(review as ReviewRow),
+      reviewer: reviewer.name,
+      reviewerSlug: reviewer.slug,
+    })),
+  };
+}

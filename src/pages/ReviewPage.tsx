@@ -96,7 +96,13 @@ function ReviewPage() {
               </h1>
 
               <p className="mt-4 text-[var(--muted)]">
-                Reviewed by {review.reviewer}
+                Reviewed by{" "}
+                <Link
+                  to={`/reviewers/${review.reviewerSlug}`}
+                  className="font-semibold text-[var(--accent)] hover:underline"
+                >
+                  {review.reviewer}
+                </Link>
               </p>
 
               {review.artists.length > 0 && (
