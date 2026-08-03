@@ -34,6 +34,9 @@ function AdminReviewsPage() {
   const [reviews, setReviews] = useState<AdminReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deletingReviewId, setDeletingReviewId] = useState<number | null>(
+    null,
+  );
 
   useEffect(() => {
     async function loadReviews() {
@@ -76,6 +79,61 @@ function AdminReviewsPage() {
 
     void loadReviews();
   }, []);
+
+  async function handleDeleteReview(review: AdminReview) {
+    const displayName =
+      review.title?.trim() || `/reviews/${review.slug}`;
+
+    const confirmed = window.confirm(
+      `Delete "${displayName}" permanently?\n\n` +
+        "This will delete the review, its stored images and all related tags. " +
+        "This cannot be undone.",
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingReviewId(review.id);
+    setError(null);
+
+    try {
+      const { data, error: functionError } =
+        await supabase.functions.invoke<{
+          deletedReviewId?: number;
+          error?: string;
+        }>("delete-review", {
+          body: {
+            reviewId: review.id,
+          },
+        });
+
+      if (functionError) {
+        throw new Error(functionError.message);
+      }
+
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      setReviews((currentReviews) =>
+        currentReviews.filter(
+          (currentReview) =>
+            currentReview.id !== review.id,
+        ),
+      );
+    } catch (deleteError) {
+      console.error("Deleting review failed:", deleteError);
+
+      setError(
+        deleteError instanceof Error
+          ? deleteError.message
+          : "The review could not be deleted.",
+      );
+    } finally {
+      setDeletingReviewId(null);
+    }
+  }
 
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
@@ -216,6 +274,19 @@ function AdminReviewsPage() {
                       >
                         Edit
                       </Link>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          void handleDeleteReview(review)
+                        }
+                        disabled={deletingReviewId !== null}
+                        className="rounded-xl border border-red-500/40 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {deletingReviewId === review.id
+                          ? "Deleting…"
+                          : "Delete"}
+                      </button>
                     </div>
                   </article>
                 );

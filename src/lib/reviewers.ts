@@ -12,6 +12,16 @@ export type ReviewerProfile = {
   reviews: FeaturedReview[];
 };
 
+export type ReviewerSummary = {
+  id: number;
+  name: string;
+  slug: string;
+  bio: string | null;
+  avatarUrl: string | null;
+  country: string | null;
+  reviewCount: number;
+};
+
 type ReviewRow = {
   id: number;
   slug: string;
@@ -82,6 +92,62 @@ function mapReview(row: ReviewRow): FeaturedReview {
   };
 }
 
+export async function getReviewers(): Promise<
+  ReviewerSummary[]
+> {
+  const { data: reviewerRows, error: reviewerError } =
+    await supabase
+      .from("reviewers")
+      .select(`
+        id,
+        name,
+        slug,
+        bio,
+        avatar_url,
+        country
+      `)
+      .order("name", { ascending: true });
+
+  if (reviewerError) {
+    throw reviewerError;
+  }
+
+  const { data: reviewRows, error: reviewError } =
+    await supabase
+      .from("reviews")
+      .select(`
+        id,
+        reviewer_id
+      `)
+      .eq("published", true);
+
+  if (reviewError) {
+    throw reviewError;
+  }
+
+  const reviewCounts = new Map<number, number>();
+
+  for (const review of reviewRows ?? []) {
+    const reviewerId = Number(review.reviewer_id);
+
+    reviewCounts.set(
+      reviewerId,
+      (reviewCounts.get(reviewerId) ?? 0) + 1,
+    );
+  }
+
+  return (reviewerRows ?? []).map((reviewer) => ({
+    id: Number(reviewer.id),
+    name: reviewer.name,
+    slug: reviewer.slug,
+    bio: reviewer.bio,
+    avatarUrl: reviewer.avatar_url,
+    country: reviewer.country,
+    reviewCount:
+      reviewCounts.get(Number(reviewer.id)) ?? 0,
+  }));
+}
+
 export async function getReviewerBySlug(
   slug: string,
 ): Promise<ReviewerProfile | null> {
@@ -136,7 +202,7 @@ export async function getReviewerBySlug(
   }
 
   return {
-    id: reviewer.id,
+    id: Number(reviewer.id),
     name: reviewer.name,
     slug: reviewer.slug,
     bio: reviewer.bio,
