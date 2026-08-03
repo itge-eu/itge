@@ -210,7 +210,7 @@ function AdminEditReviewPage() {
             ? ""
             : String(data.rating),
         summary: data.summary ?? "",
-        body: data.source_html ?? data.body ?? "",
+        body: data.body ?? data.source_html ?? "",
         pros: data.pros ?? "",
         cons: data.cons ?? "",
         heroImageUrl: data.hero_image_url ?? "",
@@ -291,13 +291,18 @@ function AdminEditReviewPage() {
     const nextStatus = shouldPublish
       ? "published"
       : review.status;
+	  
+	const transformedBody = replaceReviewImageUrls(
+      review.body,
+      uploadedImages,
+    );
 
     const reviewPayload = {
       title: review.title.trim(),
       slug: review.slug.trim(),
       rating: parsedRating,
       summary: review.summary.trim() || null,
-      body: review.body.trim() || null,
+      body: transformedBody.trim() || null,
       pros: review.pros.trim() || null,
       cons: review.cons.trim() || null,
       hero_image_url:
@@ -329,6 +334,7 @@ function AdminEditReviewPage() {
 
     setReview((currentReview) => ({
       ...currentReview,
+      body: transformedBody,
       published: Boolean(data.published),
       status: data.status ?? nextStatus,
       updatedAt: data.updated_at ?? new Date().toISOString(),
