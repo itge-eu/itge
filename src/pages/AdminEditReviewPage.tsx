@@ -6,6 +6,10 @@ import {
   uploadReviewImages,
   type UploadedReviewImage,
 } from "../lib/reviewImages";
+import {
+  ArtistPicker,
+  type SelectedArtist,
+} from "../components/admin/ArtistPicker";
 
 type ReviewForm = {
   id: number;
@@ -72,6 +76,21 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
+function createArtistSlug(
+  name: string,
+  musicbrainzId: string,
+) {
+  const nameSlug = name
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return `${nameSlug}-${musicbrainzId.slice(0, 8)}`;
+}
+
 function AdminEditReviewPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -88,6 +107,10 @@ function AdminEditReviewPage() {
   const [imageUploadProgress, setImageUploadProgress] = useState("");
   const [uploadedImages, setUploadedImages] = useState<
     UploadedReviewImage[]
+  >([]);
+
+  const [selectedArtists, setSelectedArtists] = useState<
+    SelectedArtist[]
   >([]);
 
   useEffect(() => {
@@ -174,6 +197,62 @@ function AdminEditReviewPage() {
         })),
       );
 
+      const { data: artistRows, error: artistRowsError } =
+        await supabase
+          .from("review_artists")
+          .select(`
+            artists (
+              id,
+              musicbrainz_id,
+              name,
+              slug,
+              sort_name,
+              disambiguation,
+              country,
+              artist_type
+            )
+          `)
+          .eq("review_id", id);
+
+      if (artistRowsError) {
+        console.error(
+          "Loading review artists failed:",
+          artistRowsError,
+        );
+        setError(artistRowsError.message);
+        setLoading(false);
+        return;
+      }
+
+      const loadedArtists: SelectedArtist[] = [];
+      
+      for (const row of artistRows ?? []) {
+        const relation = Array.isArray(row.artists)
+          ? row.artists[0]
+          : row.artists;
+      
+        if (!relation) {
+          continue;
+        }
+      
+        loadedArtists.push({
+          databaseId: Number(relation.id),
+          musicbrainzId: relation.musicbrainz_id,
+          name: relation.name,
+          sortName: relation.sort_name ?? "",
+          disambiguation: relation.disambiguation ?? "",
+          country: relation.country ?? "",
+          type: relation.artist_type ?? "",
+          area: "",
+          beginDate: "",
+          endDate: "",
+          ended: false,
+          score: 100,
+        });
+      }
+
+      setSelectedArtists(loadedArtists);
+
       const iemRelation = Array.isArray(data.iems)
         ? data.iems[0]
         : data.iems;
@@ -195,7 +274,7 @@ function AdminEditReviewPage() {
       const iemName = [manufacturerName, modelName]
         .filter(Boolean)
         .join(" ");
-		
+        
       const pendingImages =
         Array.isArray(data.import_data?.images)
           ? data.import_data.images
@@ -233,6 +312,7 @@ function AdminEditReviewPage() {
     void loadReview();
   }, [id]);
 
+
   function updateField<K extends keyof ReviewForm>(
     field: K,
     value: ReviewForm[K],
@@ -241,6 +321,74 @@ function AdminEditReviewPage() {
       ...currentReview,
       [field]: value,
     }));
+  }
+
+  async function saveReviewArtists(reviewId: number) {
+    const artistIds: number[] = [];
+
+    for (const artist of selectedArtists) {
+      const { data: storedArtist, error: artistError } =
+        await supabase
+          .from("artists")
+          .upsert(
+            {
+              musicbrainz_id: artist.musicbrainzId,
+              name: artist.name,
+              slug: createArtistSlug(
+                artist.name,
+                artist.musicbrainzId,
+              ),
+              sort_name: artist.sortName || null,
+              disambiguation:
+                artist.disambiguation || null,
+              country: artist.country || null,
+              artist_type: artist.type || null,
+            },
+            {
+              onConflict: "musicbrainz_id",
+            },
+          )
+          .select("id")
+          .single();
+
+      if (artistError) {
+        throw new Error(
+          `Could not save artist ${artist.name}: ${artistError.message}`,
+        );
+      }
+
+      artistIds.push(Number(storedArtist.id));
+    }
+
+    const { error: deleteError } = await supabase
+      .from("review_artists")
+      .delete()
+      .eq("review_id", reviewId);
+
+    if (deleteError) {
+      throw new Error(
+        `Could not update review artists: ${deleteError.message}`,
+      );
+    }
+
+    if (artistIds.length === 0) {
+      return;
+    }
+
+    const { error: relationError } = await supabase
+      .from("review_artists")
+      .insert(
+        artistIds.map((artistId) => ({
+          review_id: reviewId,
+          artist_id: artistId,
+        })),
+      );
+
+    if (relationError) {
+      throw new Error(
+        `Could not attach artists to review: ${relationError.message}`,
+      );
+    }
   }
 
   async function saveReview(options?: {
@@ -291,8 +439,8 @@ function AdminEditReviewPage() {
     const nextStatus = shouldPublish
       ? "published"
       : review.status;
-	  
-	const transformedBody = replaceReviewImageUrls(
+      
+    const transformedBody = replaceReviewImageUrls(
       review.body,
       uploadedImages,
     );
@@ -327,6 +475,24 @@ function AdminEditReviewPage() {
     if (updateError) {
       console.error("Updating review failed:", updateError);
       setError(updateError.message);
+      setSaving(false);
+      setPublishing(false);
+      return;
+    }
+
+    try {
+      await saveReviewArtists(review.id);
+    } catch (artistError) {
+      console.error(
+        "Saving review artists failed:",
+        artistError,
+      );
+
+      setError(
+        artistError instanceof Error
+          ? artistError.message
+          : "The review was saved, but its artists could not be saved.",
+      );
       setSaving(false);
       setPublishing(false);
       return;
@@ -453,6 +619,7 @@ function AdminEditReviewPage() {
     review.body,
     uploadedImages,
   );
+
 
   if (loading) {
     return (
@@ -811,8 +978,13 @@ function AdminEditReviewPage() {
                 </div>
               </dl>
             </div>
-			
-			<div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
+        	
+            <ArtistPicker
+              selectedArtists={selectedArtists}
+              onChange={setSelectedArtists}
+            />
+
+        	<div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
               <div className="flex items-center justify-between gap-3">
                 <h2 className="text-lg font-semibold">
                   Original imported images

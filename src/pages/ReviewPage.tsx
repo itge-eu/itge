@@ -98,6 +98,28 @@ function ReviewPage() {
               <p className="mt-4 text-[var(--muted)]">
                 Reviewed by {review.reviewer}
               </p>
+
+              {review.artists.length > 0 && (
+                <div className="mt-6">
+                  <p className="text-sm font-semibold text-[var(--muted)]">
+                    Artists mentioned
+                  </p>
+
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {review.artists.map((artist) => (
+                      <Link
+                        key={artist.musicbrainzId}
+                        to={`/reviews?artist=${encodeURIComponent(
+                          artist.slug,
+                        )}`}
+                        className="rounded-full border border-[var(--accent)] bg-[var(--surface-soft)] px-3 py-2 text-sm font-semibold transition hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]"
+                      >
+                        {artist.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="w-fit rounded-full border border-[var(--border)] px-4 py-2 text-lg font-semibold">
