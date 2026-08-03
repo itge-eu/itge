@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { supabase } from "../lib/supabase";
 import {
+  replaceReviewImageUrls,
   uploadReviewImages,
   type UploadedReviewImage,
 } from "../lib/reviewImages";
@@ -53,7 +54,7 @@ function createEmptyReview(): ReviewForm {
     updatedAt: "",
     reviewerName: "",
     iemName: "",
-	pendingImages: [],
+    pendingImages: [],
   };
 }
 
@@ -109,8 +110,8 @@ function AdminEditReviewPage() {
           rating,
           summary,
           body,
-		  source_html,
-		  import_data,
+          source_html,
+          import_data,
           pros,
           cons,
           hero_image_url,
@@ -142,6 +143,37 @@ function AdminEditReviewPage() {
         return;
       }
 
+      const { data: imageRows, error: imageRowsError } =
+        await supabase
+          .from("review_images")
+          .select(`
+            storage_path,
+            public_url,
+            original_url,
+            alt_text
+          `)
+          .eq("review_id", id)
+          .order("sort_order");
+
+      if (imageRowsError) {
+        console.error(
+          "Loading stored review images failed:",
+          imageRowsError,
+        );
+        setError(imageRowsError.message);
+        setLoading(false);
+        return;
+      }
+
+      setUploadedImages(
+        (imageRows ?? []).map((image) => ({
+          storagePath: image.storage_path,
+          publicUrl: image.public_url,
+          originalUrl: image.original_url,
+          alt: image.alt_text ?? "",
+        })),
+      );
+
       const iemRelation = Array.isArray(data.iems)
         ? data.iems[0]
         : data.iems;
@@ -164,10 +196,10 @@ function AdminEditReviewPage() {
         .filter(Boolean)
         .join(" ");
 		
-	  const pendingImages =
-      Array.isArray(data.import_data?.images)
-        ? data.import_data.images
-        : [];
+      const pendingImages =
+        Array.isArray(data.import_data?.images)
+          ? data.import_data.images
+          : [];
 
       setReview({
         id: Number(data.id),
@@ -192,7 +224,7 @@ function AdminEditReviewPage() {
         updatedAt: data.updated_at ?? "",
         reviewerName: reviewerRelation?.name ?? "Unknown reviewer",
         iemName: iemName || "Unknown IEM",
-		pendingImages,
+        pendingImages,
       });
 
       setLoading(false);
@@ -410,6 +442,11 @@ function AdminEditReviewPage() {
       setImageUploadProgress("");
     }
   }
+
+  const previewHtml = replaceReviewImageUrls(
+    review.body,
+    uploadedImages,
+  );
 
   if (loading) {
     return (
@@ -663,7 +700,7 @@ function AdminEditReviewPage() {
                 {bodyMode === "preview" ? (
                   <div
                     className="review-content mt-3 rounded-xl border border-[var(--border)] bg-[var(--background)] p-5"
-                    dangerouslySetInnerHTML={{ __html: review.body }}
+                    dangerouslySetInnerHTML={{ __html: previewHtml }}
                   />
                 ) : (
                   <textarea
