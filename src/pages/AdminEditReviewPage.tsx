@@ -10,6 +10,12 @@ import {
   ArtistPicker,
   type SelectedArtist,
 } from "../components/admin/ArtistPicker";
+import {
+  GenrePicker,
+} from "../components/admin/GenrePicker";
+import {
+  type Genre,
+} from "../lib/genres";
 
 type ReviewForm = {
   id: number;
@@ -111,6 +117,10 @@ function AdminEditReviewPage() {
 
   const [selectedArtists, setSelectedArtists] = useState<
     SelectedArtist[]
+  >([]);
+  
+  const [selectedGenres, setSelectedGenres] = useState<
+    Genre[]
   >([]);
 
   useEffect(() => {
@@ -252,6 +262,50 @@ function AdminEditReviewPage() {
       }
 
       setSelectedArtists(loadedArtists);
+	  
+	  const { data: genreRows, error: genreRowsError } =
+        await supabase
+          .from("review_genres")
+          .select(`
+            genres (
+              id,
+              name,
+              slug,
+              sort_order
+            )
+          `)
+          .eq("review_id", id);
+      
+      if (genreRowsError) {
+        console.error(
+          "Loading review genres failed:",
+          genreRowsError,
+        );
+        setError(genreRowsError.message);
+        setLoading(false);
+        return;
+      }
+      
+      const loadedGenres: Genre[] = [];
+      
+      for (const row of genreRows ?? []) {
+        const relation = Array.isArray(row.genres)
+          ? row.genres[0]
+          : row.genres;
+      
+        if (!relation) {
+          continue;
+        }
+      
+        loadedGenres.push({
+          id: Number(relation.id),
+          name: relation.name,
+          slug: relation.slug,
+          sortOrder: Number(relation.sort_order),
+        });
+      }
+      
+      setSelectedGenres(loadedGenres);
 
       const iemRelation = Array.isArray(data.iems)
         ? data.iems[0]
@@ -391,6 +445,38 @@ function AdminEditReviewPage() {
     }
   }
 
+  async function saveReviewGenres(reviewId: number) {
+    const { error: deleteError } = await supabase
+      .from("review_genres")
+      .delete()
+      .eq("review_id", reviewId);
+  
+    if (deleteError) {
+      throw new Error(
+        `Could not update review genres: ${deleteError.message}`,
+      );
+    }
+  
+    if (selectedGenres.length === 0) {
+      return;
+    }
+  
+    const { error: insertError } = await supabase
+      .from("review_genres")
+      .insert(
+        selectedGenres.map((genre) => ({
+          review_id: reviewId,
+          genre_id: genre.id,
+        })),
+      );
+  
+    if (insertError) {
+      throw new Error(
+        `Could not attach genres to review: ${insertError.message}`,
+      );
+    }
+  }
+
   async function saveReview(options?: {
     publish?: boolean;
   }) {
@@ -482,6 +568,7 @@ function AdminEditReviewPage() {
 
     try {
       await saveReviewArtists(review.id);
+	  await saveReviewGenres(review.id);
     } catch (artistError) {
       console.error(
         "Saving review artists failed:",
@@ -982,6 +1069,11 @@ function AdminEditReviewPage() {
             <ArtistPicker
               selectedArtists={selectedArtists}
               onChange={setSelectedArtists}
+            />
+			
+			<GenrePicker
+              selectedGenres={selectedGenres}
+              onChange={setSelectedGenres}
             />
 
         	<div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">

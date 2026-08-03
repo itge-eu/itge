@@ -120,6 +120,28 @@ function ReviewPage() {
                   </div>
                 </div>
               )}
+			  
+			  {review.genres.length > 0 && (
+                <div className="mt-6">
+                  <p className="text-sm font-semibold text-[var(--muted)]">
+                    Genres covered
+                  </p>
+              
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {review.genres.map((genre) => (
+                      <Link
+                        key={genre.id}
+                        to={`/reviews?genre=${encodeURIComponent(
+                          genre.slug,
+                        )}`}
+                        className="rounded-full border border-[var(--border)] bg-[var(--surface-soft)] px-3 py-2 text-sm font-semibold transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                      >
+                        {genre.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="w-fit rounded-full border border-[var(--border)] px-4 py-2 text-lg font-semibold">

@@ -10,11 +10,13 @@ function ReviewsPage() {
 
   const [reviews, setReviews] = useState<FeaturedReview[]>([]);
   const [artistName, setArtistName] = useState<string | null>(null);
+  const [genreName, setGenreName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const artistSlug =
-    new URLSearchParams(location.search).get("artist");
+  const searchParams = new URLSearchParams(location.search);
+  const artistSlug = searchParams.get("artist");
+  const genreSlug = searchParams.get("genre");
 
   useEffect(() => {
     let cancelled = false;
@@ -26,11 +28,13 @@ function ReviewsPage() {
       try {
         const result = await getAllReviews({
           artistSlug: artistSlug ?? undefined,
+          genreSlug: genreSlug ?? undefined,
         });
 
         if (!cancelled) {
           setReviews(result.reviews);
           setArtistName(result.artistName);
+          setGenreName(result.genreName);
         }
       } catch (loadError) {
         console.error("Could not load reviews:", loadError);
@@ -39,6 +43,7 @@ function ReviewsPage() {
           setError("The reviews could not be loaded.");
           setReviews([]);
           setArtistName(null);
+          setGenreName(null);
         }
       } finally {
         if (!cancelled) {
@@ -52,15 +57,17 @@ function ReviewsPage() {
     return () => {
       cancelled = true;
     };
-  }, [artistSlug]);
+  }, [artistSlug, genreSlug]);
 
   const hasArtistFilter = Boolean(artistSlug);
+  const hasGenreFilter = Boolean(genreSlug);
+  const hasFilters = hasArtistFilter || hasGenreFilter;
 
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
       <div className="mx-auto max-w-6xl">
         <div className="mb-12">
-          {hasArtistFilter && (
+          {hasFilters && (
             <Link
               to="/reviews"
               className="mb-6 inline-block text-sm font-medium text-[var(--accent)]"
@@ -70,19 +77,27 @@ function ReviewsPage() {
           )}
 
           <h1 className="text-5xl font-semibold">
-            {hasArtistFilter
-              ? artistName
+            {artistName && genreName
+              ? `Reviews mentioning ${artistName} in ${genreName}`
+              : artistName
                 ? `Reviews mentioning ${artistName}`
-                : "Artist reviews"
-              : "Reviews"}
+                : genreName
+                  ? `${genreName} reviews`
+                  : hasFilters
+                    ? "Filtered reviews"
+                    : "Reviews"}
           </h1>
 
           <p className="mt-3 text-[var(--muted)]">
-            {hasArtistFilter
-              ? artistName
+            {artistName && genreName
+              ? `Published ITGE reviews tagged with ${genreName} that mention ${artistName}.`
+              : artistName
                 ? `Published ITGE reviews that mention ${artistName}.`
-                : "No artist with this link was found."
-              : "Browse every published review on ITGE."}
+                : genreName
+                  ? `Published ITGE reviews covering ${genreName}.`
+                  : hasFilters
+                    ? "No matching filter was found."
+                    : "Browse every published review on ITGE."}
           </p>
         </div>
 
@@ -96,8 +111,8 @@ function ReviewsPage() {
           </div>
         ) : reviews.length === 0 ? (
           <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
-            {hasArtistFilter
-              ? "No published reviews mention this artist yet."
+            {hasFilters
+              ? "No published reviews match these filters yet."
               : "No published reviews are available yet."}
           </div>
         ) : (
