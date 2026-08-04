@@ -222,16 +222,11 @@ function prepareReviewHtml(
   const document = new DOMParser().parseFromString(html, "text/html")
 
   if (heroImageUrl) {
-    const images = Array.from(
-      document.querySelectorAll<HTMLImageElement>("img"),
-    )
-
-    const matchingHeroImage = images.find((image) =>
-      imageUrlsMatch(image.src, heroImageUrl),
-    )
-
-    if (matchingHeroImage) {
-      removeImageWrapper(matchingHeroImage)
+    const firstImage =
+      document.querySelector<HTMLImageElement>("img")
+  
+    if (firstImage) {
+      removeImageWrapper(firstImage)
     }
   }
 
@@ -259,23 +254,6 @@ function prepareReviewHtml(
   })
 
   return document.body.innerHTML
-}
-
-function imageUrlsMatch(
-  bodyImageUrl: string,
-  heroImageUrl: string,
-) {
-  try {
-    const bodyUrl = new URL(bodyImageUrl, window.location.origin)
-    const heroUrl = new URL(heroImageUrl, window.location.origin)
-
-    return (
-      bodyUrl.origin === heroUrl.origin &&
-      bodyUrl.pathname === heroUrl.pathname
-    )
-  } catch {
-    return bodyImageUrl === heroImageUrl
-  }
 }
 
 function removeImageWrapper(image: HTMLImageElement) {
