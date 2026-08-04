@@ -14,8 +14,12 @@ function ReviewPage() {
   const [error, setError] = useState<string | null>(null)
   
   const preparedBody = useMemo(
-    () => prepareReviewHtml(review?.body ?? ""),
-    [review?.body],
+    () =>
+      prepareReviewHtml(
+        review?.body ?? "",
+        review?.heroImageUrl ?? null,
+      ),
+    [review?.body, review?.heroImageUrl],
   )
 
   useEffect(() => {
@@ -211,33 +215,103 @@ function ReviewPage() {
   )
 }
 
-function prepareReviewHtml(html: string) {
-  const document = new DOMParser().parseFromString(html, "text/html");
+function prepareReviewHtml(
+  html: string,
+  heroImageUrl: string | null,
+) {
+  const document = new DOMParser().parseFromString(html, "text/html")
+
+  if (heroImageUrl) {
+    const images = Array.from(
+      document.querySelectorAll<HTMLImageElement>("img"),
+    )
+
+    const matchingHeroImage = images.find((image) =>
+      imageUrlsMatch(image.src, heroImageUrl),
+    )
+
+    if (matchingHeroImage) {
+      removeImageWrapper(matchingHeroImage)
+    }
+  }
 
   document.querySelectorAll(".bbCodeSpoiler").forEach((spoiler) => {
     const title =
       spoiler
         .querySelector(".bbCodeSpoiler-button-title")
-        ?.textContent?.trim() || "Spoiler";
+        ?.textContent?.trim() || "Spoiler"
 
     const content =
-      spoiler.querySelector(".bbCodeSpoiler-content")?.innerHTML || "";
+      spoiler.querySelector(".bbCodeSpoiler-content")?.innerHTML || ""
 
-    const details = document.createElement("details");
-    details.className = "review-spoiler";
+    const details = document.createElement("details")
+    details.className = "review-spoiler"
 
-    const summary = document.createElement("summary");
-    summary.textContent = title;
+    const summary = document.createElement("summary")
+    summary.textContent = title
 
-    const contentWrapper = document.createElement("div");
-    contentWrapper.className = "review-spoiler-content";
-    contentWrapper.innerHTML = content;
+    const contentWrapper = document.createElement("div")
+    contentWrapper.className = "review-spoiler-content"
+    contentWrapper.innerHTML = content
 
-    details.append(summary, contentWrapper);
-    spoiler.replaceWith(details);
-  });
+    details.append(summary, contentWrapper)
+    spoiler.replaceWith(details)
+  })
 
-  return document.body.innerHTML;
+  return document.body.innerHTML
+}
+
+function imageUrlsMatch(
+  bodyImageUrl: string,
+  heroImageUrl: string,
+) {
+  try {
+    const bodyUrl = new URL(bodyImageUrl, window.location.origin)
+    const heroUrl = new URL(heroImageUrl, window.location.origin)
+
+    return (
+      bodyUrl.origin === heroUrl.origin &&
+      bodyUrl.pathname === heroUrl.pathname
+    )
+  } catch {
+    return bodyImageUrl === heroImageUrl
+  }
+}
+
+function removeImageWrapper(image: HTMLImageElement) {
+  const link = image.closest("a")
+
+  if (link && link.childElementCount === 1) {
+    const parent = link.parentElement
+
+    link.remove()
+    removeEmptyWrapper(parent)
+    return
+  }
+
+  const parent = image.parentElement
+
+  image.remove()
+  removeEmptyWrapper(parent)
+}
+
+function removeEmptyWrapper(
+  element: HTMLElement | null,
+) {
+  if (!element) {
+    return
+  }
+
+  const hasText = Boolean(element.textContent?.trim())
+  const hasContent = Boolean(
+    element.querySelector(
+      "img, video, iframe, table, ul, ol, blockquote",
+    ),
+  )
+
+  if (!hasText && !hasContent) {
+    element.remove()
+  }
 }
 
 export default ReviewPage

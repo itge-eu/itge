@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { Link } from "react-router-dom"
 
 type Theme = "light" | "dark"
 
@@ -34,7 +35,7 @@ function Navbar() {
   return (
     <header className="border-b border-[var(--border)] bg-[var(--background)]">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-8">
-        <a href="/" className="flex items-center gap-3">
+        <Link to="/" className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-sm font-semibold">
             IT
           </div>
@@ -48,36 +49,36 @@ function Navbar() {
               Independent listener reviews
             </div>
           </div>
-        </a>
+        </Link>
 
         <nav className="hidden items-center gap-8 text-sm text-[var(--muted)] md:flex">
-          <a
-            href="#reviews"
+          <Link
+            to="reviews"
             className="transition hover:text-[var(--foreground)]"
           >
             Reviews
-          </a>
+          </Link>
 
-          <a
-            href="#reviewers"
-            className="transition hover:text-[var(--foreground)]"
-          >
-            Reviewers
-          </a>
+          <Link
+		    to="reviewers"
+		    className="transition hover:text-[var(--foreground)]"
+		  >
+		    Reviewers
+		  </Link>
 
-          <a
-            href="#join"
-            className="transition hover:text-[var(--foreground)]"
-          >
-            Join
-          </a>
+          <Link
+		    to="join"
+		    className="transition hover:text-[var(--foreground)]"
+		  >
+		    Join
+		  </Link>
 
-          <a
-            href="#about"
+          <Link
+            to="about"
             className="transition hover:text-[var(--foreground)]"
           >
             About
-          </a>
+          </Link>
         </nav>
 
         <div className="flex items-center gap-3">
@@ -95,12 +96,12 @@ function Navbar() {
             {theme === "dark" ? <SunIcon /> : <MoonIcon />}
           </button>
 
-          <a
-            href="#reviews"
+          <Link
+            to="/#reviews"
             className="hidden rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[var(--accent-foreground)] transition hover:bg-[var(--accent-hover)] sm:inline-flex"
           >
             Browse reviews
-          </a>
+          </Link>
         </div>
       </div>
     </header>
