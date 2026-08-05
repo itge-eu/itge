@@ -191,6 +191,14 @@ function Navbar() {
           className="border-t border-[var(--border)] bg-[var(--background)] px-6 py-5 md:hidden"
         >
           <div className="mx-auto flex max-w-7xl flex-col gap-2">
+		    <Link
+              to="/discover"
+              onClick={closeMobileMenu}
+              className="rounded-xl px-4 py-3 font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
+            >
+              Discover
+            </Link>
+
             <Link
               to="/reviews"
               onClick={closeMobileMenu}
