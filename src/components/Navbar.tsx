@@ -122,14 +122,14 @@ function Navbar() {
           </Link>
 
           <Link
-            to="/join"
+            to="/#join"
             className="transition hover:text-[var(--foreground)]"
           >
             Join
           </Link>
 
           <Link
-            to="/about"
+            to="/#about"
             className="transition hover:text-[var(--foreground)]"
           >
             About
