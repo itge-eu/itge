@@ -11,4 +11,5 @@ export type SearchSuggestion = {
   name: string
   slug: string
   subtitle?: string
+  reviewCount: number
 }
