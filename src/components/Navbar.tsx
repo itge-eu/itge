@@ -63,7 +63,7 @@ function Navbar() {
 
   return (
     <header className="border-b border-[var(--border)] bg-[var(--background)]">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4 lg:px-8">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-5 lg:px-10">
         <Link
           to="/"
           className="flex shrink-0 items-center"
@@ -78,14 +78,14 @@ function Navbar() {
               aria-hidden="true"
               className="h-11 w-auto sm:hidden"
             />
-        
+
             <img
               src={`${import.meta.env.BASE_URL}branding/logo-compact-light.svg`}
               alt="IEM Tour Group Europe"
-              className="hidden h-11 w-auto sm:block"
+              className="hidden h-14 w-auto sm:block"
             />
           </span>
-        
+
           {/* Dark mode */}
           <span className="hidden items-center dark:flex">
             <img
@@ -94,11 +94,11 @@ function Navbar() {
               aria-hidden="true"
               className="h-11 w-auto sm:hidden"
             />
-        
+
             <img
               src={`${import.meta.env.BASE_URL}branding/logo-compact-dark.svg`}
               alt="IEM Tour Group Europe"
-              className="hidden h-11 w-auto sm:block"
+              className="hidden h-14 w-auto sm:block"
             />
           </span>
         </Link>
