@@ -34,6 +34,13 @@ function Footer() {
             aria-label="Footer navigation"
             className="grid content-start gap-4 text-sm"
           >
+		    <Link
+              to="/discover"
+              className="text-[var(--muted)] transition hover:text-[var(--accent)]"
+            >
+              Discover
+            </Link>
+
             <Link
               to="/reviews"
               className="text-[var(--muted)] transition hover:text-[var(--accent)]"

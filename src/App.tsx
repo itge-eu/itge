@@ -12,11 +12,17 @@ import ImportReviewPage from "./pages/ImportReviewPage"
 import AdminReviewsPage from "./pages/AdminReviewsPage"
 import AdminEditReviewPage from "./pages/AdminEditReviewPage"
 
+import DiscoverPage from "./pages/DiscoverPage"
+
 function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<HomePage />} />
+		<Route
+          path="/discover"
+          element={<DiscoverPage />}
+        />
 
         <Route path="/reviews" element={<ReviewsPage />} />
         <Route path="/reviews/:slug" element={<ReviewPage />} />
@@ -30,7 +36,7 @@ function App() {
           path="/admin/reviews/:id/edit"
           element={<AdminEditReviewPage />}
         />
-      </Route>
+		      </Route>
     </Routes>
   )
 }

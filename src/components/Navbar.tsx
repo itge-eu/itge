@@ -107,6 +107,15 @@ function Navbar() {
           aria-label="Main navigation"
           className="hidden items-center gap-8 text-sm text-[var(--muted)] md:flex"
         >
+		
+		  <Link
+            to="/discover"
+            onClick={closeMobileMenu}
+            className="rounded-xl px-4 py-3 font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
+          >
+            Discover
+          </Link>
+		  
           <Link
             to="/reviews"
             className="transition hover:text-[var(--foreground)]"
