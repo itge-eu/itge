@@ -1,41 +1,37 @@
 import { Route, Routes } from "react-router"
+
+import Layout from "./components/Layout"
+
 import HomePage from "./pages/HomePage"
-import ImportReviewPage from "./pages/ImportReviewPage"
+import ReviewsPage from "./pages/ReviewsPage"
 import ReviewPage from "./pages/ReviewPage"
-import AdminReviewsPage from "./pages/AdminReviewsPage";
-import AdminEditReviewPage from "./pages/AdminEditReviewPage";
-import ReviewsPage from "./pages/ReviewsPage";
-import Navbar from "./components/Navbar";
-import ReviewerPage from "./pages/ReviewerPage";
-import ReviewersPage from "./pages/ReviewersPage";
+import ReviewersPage from "./pages/ReviewersPage"
+import ReviewerPage from "./pages/ReviewerPage"
+
+import ImportReviewPage from "./pages/ImportReviewPage"
+import AdminReviewsPage from "./pages/AdminReviewsPage"
+import AdminEditReviewPage from "./pages/AdminEditReviewPage"
 
 function App() {
   return (
-    <>  
-      <Navbar />
-      <Routes>
+    <Routes>
+      <Route element={<Layout />}>
         <Route path="/" element={<HomePage />} />
+
+        <Route path="/reviews" element={<ReviewsPage />} />
         <Route path="/reviews/:slug" element={<ReviewPage />} />
+
+        <Route path="/reviewers" element={<ReviewersPage />} />
+        <Route path="/reviewers/:slug" element={<ReviewerPage />} />
+
         <Route path="/admin/import" element={<ImportReviewPage />} />
-	    <Route path="/admin/reviews" element={<AdminReviewsPage />} />
-	    <Route
+        <Route path="/admin/reviews" element={<AdminReviewsPage />} />
+        <Route
           path="/admin/reviews/:id/edit"
           element={<AdminEditReviewPage />}
         />
-	    <Route
-          path="/reviews"
-          element={<ReviewsPage />}
-        />
-		<Route
-          path="/reviewers"
-          element={<ReviewersPage />}
-        />
-		<Route
-          path="/reviewers/:slug"
-          element={<ReviewerPage />}
-        />
-      </Routes>
-	</>
+      </Route>
+    </Routes>
   )
 }
 

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="4096" height="4096" viewBox="0 0 4096 4096" fill="none"><metadata><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/"><rdf:Description><dc:creator>RealFaviconGenerator</dc:creator><dc:source>https://realfavicongenerator.net</dc:source></rdf:Description></rdf:RDF></metadata><title>IEM Tour Group logo</title><g transform="translate(0 528) scale(2.6425806452 2.6434782609)" shape-rendering="geometricPrecision">
+    <path d="M 273.540 482.060 A 510 510 0 0 1 1276.460 482.060 M 273.540 667.940 A 510 510 0 0 0 1276.460 667.940" fill="none" stroke="#0B1F33" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M 75 575 L 170 575 M 1380 575 L 1475 575 M 351 575 L 500 575 C 555 575 568 545 590 460 C 615 355 630 293 684 293 C 725 293 742 338 756 395 C 763 426 770 465 771 481 M 779 669 C 780 685 787 724 794 755 C 808 812 825 857 866 857 C 920 857 935 795 960 690 C 982 605 995 575 1050 575 L 1199 575" fill="none" stroke="#0B1F33" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"></path>
+    <circle cx="265" cy="575" r="59" fill="#B58A42"></circle>
+    <circle cx="1285" cy="575" r="59" fill="#B58A42"></circle>
+    <circle cx="775" cy="575" r="59" fill="#2456D4"></circle>
+  </g></svg>

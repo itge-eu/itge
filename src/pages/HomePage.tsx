@@ -34,7 +34,7 @@ function HomePage() {
 	
       <main>
         <section className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(22,199,132,0.11),transparent_38%)] dark:bg-[radial-gradient(circle_at_top_right,rgba(44,219,152,0.10),transparent_38%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(193,151,69,0.14),transparent_42%)] dark:bg-[radial-gradient(circle_at_top_right,rgba(193,151,69,0.12),transparent_42%)]" />
 
           <div className="relative mx-auto grid max-w-7xl gap-12 px-6 py-24 lg:grid-cols-[1.15fr_0.85fr] lg:px-8 lg:py-32">
             <div className="max-w-3xl">
@@ -128,76 +128,76 @@ function HomePage() {
               </Link>
             </div>
 
-{reviewsLoading && (
-  <div className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
-    Loading featured reviews…
-  </div>
-)}
-
-{reviewsError && (
-  <div className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
-    <p className="font-medium">Unable to load reviews</p>
-    <p className="mt-2 text-sm text-[var(--muted)]">
-      {reviewsError}
-    </p>
-  </div>
-)}
-
-{!reviewsLoading && !reviewsError && featuredReviews.length === 0 && (
-  <div className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
-    No featured reviews have been published yet.
-  </div>
-)}
-
-{!reviewsLoading && !reviewsError && featuredReviews.length > 0 && (
-  <div className="mt-10 grid gap-6 lg:grid-cols-3">
-    {featuredReviews.map((review) => (
-      <article
-        key={review.id}
-        className="group flex min-h-80 flex-col rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[var(--accent)] hover:bg-[var(--surface-soft)] dark:shadow-none"
-      >
-        <div className="flex items-start justify-between gap-6">
-          <div>
-            <div className="text-sm text-[var(--muted)]">
-              {review.brand}
+          {reviewsLoading && (
+            <div className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
+              Loading featured reviews…
             </div>
-
-            <h3 className="mt-1 text-2xl font-semibold">
-              {review.model}
-            </h3>
-          </div>
-
-          <div className="rounded-full border border-[var(--border)] px-3 py-1 text-sm font-semibold">
-            {Number(review.rating).toFixed(1)}/5
-          </div>
-        </div>
-
-        <p className="mt-6 leading-7 text-[var(--muted)]">
-          {review.summary}
-        </p>
-
-        <div className="mt-auto flex items-center justify-between gap-4 pt-8 text-sm">
-          <span className="text-[var(--muted)]">
-            Reviewed by{" "}
-            <Link
-              to={`/reviewers/${review.reviewerSlug}`}
-              className="font-semibold text-[var(--accent)] hover:underline"
-            >
-              {review.reviewer}
-            </Link>
-          </span>
-
-          <Link
-            to={`/reviews/${review.slug}`}
-            className="font-medium text-[var(--accent)] transition group-hover:opacity-75"
-          >
-            Read review →
-          </Link>
-        </div>
-      </article>
-    ))}
-  </div>
-)}
+          )}
+          
+          {reviewsError && (
+            <div className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
+              <p className="font-medium">Unable to load reviews</p>
+              <p className="mt-2 text-sm text-[var(--muted)]">
+                {reviewsError}
+              </p>
+            </div>
+          )}
+          
+          {!reviewsLoading && !reviewsError && featuredReviews.length === 0 && (
+            <div className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
+              No featured reviews have been published yet.
+            </div>
+          )}
+          
+          {!reviewsLoading && !reviewsError && featuredReviews.length > 0 && (
+            <div className="mt-10 grid gap-6 lg:grid-cols-3">
+              {featuredReviews.map((review) => (
+                <article
+                  key={review.id}
+                  className="group flex min-h-80 flex-col rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[var(--accent)] hover:bg-[var(--surface-soft)] dark:shadow-none"
+                >
+                  <div className="flex items-start justify-between gap-6">
+                    <div>
+                      <div className="text-sm text-[var(--muted)]">
+                        {review.brand}
+                      </div>
+          
+                      <h3 className="mt-1 text-2xl font-semibold">
+                        {review.model}
+                      </h3>
+                    </div>
+          
+                    <div className="rounded-full border border-[var(--border)] px-3 py-1 text-sm font-semibold">
+                      {Number(review.rating).toFixed(1)}/5
+                    </div>
+                  </div>
+          
+                  <p className="mt-6 leading-7 text-[var(--muted)]">
+                    {review.summary}
+                  </p>
+          
+                  <div className="mt-auto flex items-center justify-between gap-4 pt-8 text-sm">
+                    <span className="text-[var(--muted)]">
+                      Reviewed by{" "}
+                      <Link
+                        to={`/reviewers/${review.reviewerSlug}`}
+                        className="font-semibold text-[var(--accent)] hover:underline"
+                      >
+                        {review.reviewer}
+                      </Link>
+                    </span>
+          
+                    <Link
+                      to={`/reviews/${review.slug}`}
+                      className="font-medium text-[var(--accent)] transition group-hover:opacity-75"
+                    >
+                      Read review →
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
           </div>
         </section>
 
@@ -332,13 +332,6 @@ function HomePage() {
           </div>
         </section>
       </main>
-
-      <footer className="border-t border-[var(--border)] bg-[var(--background)] px-6 py-8 lg:px-8">
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 text-sm text-[var(--muted)] sm:flex-row sm:items-center sm:justify-between">
-          <span>© 2026 IEM Tour Group Europe</span>
-          <span>Independent reviews. Shared listening.</span>
-        </div>
-      </footer>
     </div>
   )
 }

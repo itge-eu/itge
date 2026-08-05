@@ -34,21 +34,37 @@ function Navbar() {
   }
   return (
     <header className="border-b border-[var(--border)] bg-[var(--background)]">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-8">
-        <Link to="/" className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-sm font-semibold">
-            IT
-          </div>
-
-          <div>
-            <div className="text-sm font-semibold tracking-wide">
-              IEM Tour Group Europe
-            </div>
-
-            <div className="text-xs text-[var(--muted)]">
-              Independent listener reviews
-            </div>
-          </div>
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4 lg:px-8">
+        <Link
+          to="/"
+          className="flex shrink-0 items-center"
+          aria-label="IEM Tour Group Europe homepage"
+        >
+          <picture>
+            <source
+              media="(max-width: 639px)"
+              srcSet={`${import.meta.env.BASE_URL}branding/icon-light.svg`}
+            />
+        
+            <img
+              src={`${import.meta.env.BASE_URL}branding/logo-compact-light.svg`}
+              alt="IEM Tour Group Europe"
+              className="h-11 w-auto dark:hidden"
+            />
+          </picture>
+        
+          <picture>
+            <source
+              media="(max-width: 639px)"
+              srcSet={`${import.meta.env.BASE_URL}branding/icon-dark.svg`}
+            />
+        
+            <img
+              src={`${import.meta.env.BASE_URL}branding/logo-compact-dark.svg`}
+              alt="IEM Tour Group Europe"
+              className="hidden h-11 w-auto dark:block"
+            />
+          </picture>
         </Link>
 
         <nav className="hidden items-center gap-8 text-sm text-[var(--muted)] md:flex">
