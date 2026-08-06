@@ -12,6 +12,21 @@ export type IemReviewer = {
   reviewCount: number
 }
 
+export type IemDirectoryItem = {
+  id: number
+  model: string
+  slug: string
+  manufacturer: {
+    id: number
+    name: string
+  }
+  heroImageUrl: string | null
+  reviewCount: number
+  reviewerCount: number
+  averageRating: number | null
+  latestReviewAt: string | null
+}
+
 export type IemProfile = {
   id: number
   model: string
@@ -44,6 +59,41 @@ type IemRow = {
     | {
         id: number
         name: string
+      }[]
+    | null
+}
+
+type IemDirectoryRow = {
+  id: number
+  model: string
+  slug: string
+
+  manufacturers:
+    | {
+        id: number
+        name: string
+      }
+    | {
+        id: number
+        name: string
+      }[]
+    | null
+
+  reviews:
+    | {
+        id: number
+        rating: number
+        hero_image_url: string | null
+        published_at: string | null
+
+        reviewers:
+          | {
+              slug: string
+            }
+          | {
+              slug: string
+            }[]
+          | null
       }[]
     | null
 }
@@ -414,4 +464,112 @@ export async function getIemBySlug(
     genres: collectGenres(rows),
     reviews,
   }
+}
+
+export async function getIems(): Promise<
+  IemDirectoryItem[]
+> {
+  const { data, error } = await supabase
+    .from("iems")
+    .select(`
+      id,
+      model,
+      slug,
+
+      manufacturers (
+        id,
+        name
+      ),
+
+      reviews!inner (
+        id,
+        rating,
+        hero_image_url,
+        published_at,
+
+        reviewers (
+          slug
+        )
+      )
+    `)
+    .eq("reviews.published", true)
+
+  if (error) {
+    throw error
+  }
+
+  const rows =
+    (data ?? []) as unknown as IemDirectoryRow[]
+
+  return rows.flatMap((row) => {
+    const manufacturer = getSingleRelation(
+      row.manufacturers,
+    )
+
+    if (!manufacturer) {
+      return []
+    }
+
+    const reviews = [...(row.reviews ?? [])].sort(
+      (first, second) => {
+        const firstTime = first.published_at
+          ? new Date(first.published_at).getTime()
+          : 0
+
+        const secondTime = second.published_at
+          ? new Date(second.published_at).getTime()
+          : 0
+
+        return secondTime - firstTime
+      },
+    )
+
+    if (reviews.length === 0) {
+      return []
+    }
+
+    const reviewerSlugs = new Set<string>()
+
+    reviews.forEach((review) => {
+      const reviewer = getSingleRelation(
+        review.reviewers,
+      )
+
+      if (reviewer) {
+        reviewerSlugs.add(reviewer.slug)
+      }
+    })
+
+    const ratingTotal = reviews.reduce(
+      (total, review) =>
+        total + Number(review.rating),
+      0,
+    )
+
+    return [
+      {
+        id: Number(row.id),
+        model: row.model,
+        slug: row.slug,
+
+        manufacturer: {
+          id: Number(manufacturer.id),
+          name: manufacturer.name,
+        },
+
+        heroImageUrl:
+          reviews.find(
+            (review) =>
+              review.hero_image_url !== null,
+          )?.hero_image_url ?? null,
+
+        reviewCount: reviews.length,
+        reviewerCount: reviewerSlugs.size,
+        averageRating:
+          ratingTotal / reviews.length,
+        latestReviewAt:
+          reviews[0]?.published_at ?? null,
+      },
+    ]
+  })
 }
