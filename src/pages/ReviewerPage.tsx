@@ -1,55 +1,80 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react"
+import { Link, useParams } from "react-router"
+
+import ReviewerAvatar from "../components/reviewers/ReviewerAvatar"
+
 import {
   getReviewerBySlug,
   type ReviewerProfile,
-} from "../lib/reviewers";
+} from "../lib/reviewers"
 
 function ReviewerPage() {
-  const { slug } = useParams<{ slug: string }>();
+  const { slug } = useParams<{ slug: string }>()
 
   const [reviewer, setReviewer] =
-    useState<ReviewerProfile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+    useState<ReviewerProfile | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(
+    null,
+  )
 
   useEffect(() => {
+    let cancelled = false
+
     async function loadReviewer() {
       if (!slug) {
-        setError("No reviewer was specified.");
-        setLoading(false);
-        return;
+        setError("No reviewer was specified.")
+        setLoading(false)
+        return
       }
 
       try {
-        const result = await getReviewerBySlug(slug);
-        setReviewer(result);
+        const result = await getReviewerBySlug(slug)
+
+        if (!cancelled) {
+          setReviewer(result)
+        }
       } catch (loadError) {
         console.error(
           "Could not load reviewer:",
           loadError,
-        );
-        setError("The reviewer could not be loaded.");
+        )
+
+        if (!cancelled) {
+          setError(
+            "The reviewer could not be loaded.",
+          )
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false)
+        }
       }
     }
 
-    void loadReviewer();
-  }, [slug]);
+    void loadReviewer()
+
+    return () => {
+      cancelled = true
+    }
+  }, [slug])
 
   const averageRating = useMemo(() => {
     if (!reviewer || reviewer.reviews.length === 0) {
-      return null;
+      return null
     }
 
     const total = reviewer.reviews.reduce(
       (sum, review) => sum + review.rating,
       0,
-    );
+    )
 
-    return total / reviewer.reviews.length;
-  }, [reviewer]);
+    return total / reviewer.reviews.length
+  }, [reviewer])
 
   if (loading) {
     return (
@@ -58,7 +83,7 @@ function ReviewerPage() {
           Loading reviewer…
         </div>
       </main>
-    );
+    )
   }
 
   if (error) {
@@ -74,7 +99,7 @@ function ReviewerPage() {
           </p>
         </div>
       </main>
-    );
+    )
   }
 
   if (!reviewer) {
@@ -86,14 +111,14 @@ function ReviewerPage() {
           </p>
 
           <Link
-            to="/reviews"
+            to="/reviewers"
             className="mt-8 inline-block text-[var(--accent)]"
           >
-            ← Back to reviews
+            ← Back to reviewers
           </Link>
         </div>
       </main>
-    );
+    )
   }
 
   return (
@@ -101,17 +126,13 @@ function ReviewerPage() {
       <div className="mx-auto max-w-6xl">
         <header className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 sm:p-10">
           <div className="flex flex-col gap-8 sm:flex-row sm:items-start">
-            {reviewer.avatarUrl ? (
-              <img
-                src={reviewer.avatarUrl}
-                alt={reviewer.name}
-                className="h-28 w-28 rounded-3xl object-cover"
-              />
-            ) : (
-              <div className="flex h-28 w-28 items-center justify-center rounded-3xl bg-[var(--surface-soft)] text-4xl font-semibold text-[var(--accent)]">
-                {reviewer.name.charAt(0).toUpperCase()}
-              </div>
-            )}
+            <ReviewerAvatar
+              name={reviewer.name}
+              slug={reviewer.slug}
+              size="xl"
+              shape="rounded"
+              eager
+            />
 
             <div className="flex-1">
               <p className="text-sm uppercase tracking-[0.2em] text-[var(--accent)]">
@@ -180,14 +201,16 @@ function ReviewerPage() {
               </h2>
 
               <p className="mt-2 text-[var(--muted)]">
-                Every published review from this reviewer.
+                Every published review from this
+                reviewer.
               </p>
             </div>
           </div>
 
           {reviewer.reviews.length === 0 ? (
             <div className="mt-8 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
-              This reviewer has no published reviews yet.
+              This reviewer has no published reviews
+              yet.
             </div>
           ) : (
             <div className="mt-8 grid gap-8">
@@ -196,16 +219,17 @@ function ReviewerPage() {
                   key={review.id}
                   className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6"
                 >
-                  <div className="flex gap-6">
+                  <div className="flex flex-col gap-6 sm:flex-row">
                     {review.heroImageUrl && (
                       <img
                         src={review.heroImageUrl}
                         alt={`${review.brand} ${review.model}`}
-                        className="h-28 w-28 shrink-0 rounded-2xl object-cover"
+                        loading="lazy"
+                        className="aspect-[16/9] w-full rounded-2xl object-cover sm:h-28 sm:w-28 sm:shrink-0"
                       />
                     )}
 
-                    <div className="flex-1">
+                    <div className="min-w-0 flex-1">
                       <p className="text-sm uppercase tracking-widest text-[var(--accent)]">
                         {review.brand}
                       </p>
@@ -218,7 +242,7 @@ function ReviewerPage() {
                         {review.summary}
                       </p>
 
-                      <div className="mt-4 flex items-center justify-between gap-4">
+                      <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
                         <span className="rounded-full border border-[var(--border)] px-3 py-1 text-sm font-semibold">
                           {review.rating.toFixed(1)}/5
                         </span>
@@ -239,7 +263,7 @@ function ReviewerPage() {
         </section>
       </div>
     </main>
-  );
+  )
 }
 
-export default ReviewerPage;
+export default ReviewerPage
