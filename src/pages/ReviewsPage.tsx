@@ -1,4 +1,8 @@
-import { useEffect, useMemo, useState } from "react"
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react"
 import {
   useLocation,
   useNavigate,
@@ -19,11 +23,19 @@ function ReviewsPage() {
   const location = useLocation()
   const navigate = useNavigate()
 
-  const [reviews, setReviews] = useState<FeaturedReview[]>([])
-  const [artistName, setArtistName] = useState<string | null>(null)
-  const [genreName, setGenreName] = useState<string | null>(null)
+  const [reviews, setReviews] = useState<
+    FeaturedReview[]
+  >([])
+  const [artistName, setArtistName] = useState<
+    string | null
+  >(null)
+  const [genreName, setGenreName] = useState<
+    string | null
+  >(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(
+    null,
+  )
 
   const searchParams = useMemo(
     () => new URLSearchParams(location.search),
@@ -33,7 +45,8 @@ function ReviewsPage() {
   const artistSlug = searchParams.get("artist")
   const genreSlug = searchParams.get("genre")
   const iemName = searchParams.get("iem")
-  const manufacturerName = searchParams.get("manufacturer")
+  const manufacturerName =
+    searchParams.get("manufacturer")
   const reviewerName = searchParams.get("reviewer")
 
   useEffect(() => {
@@ -47,6 +60,10 @@ function ReviewsPage() {
         const result = await getAllReviews({
           artistSlug: artistSlug ?? undefined,
           genreSlug: genreSlug ?? undefined,
+          iemName: iemName ?? undefined,
+          manufacturerName:
+            manufacturerName ?? undefined,
+          reviewerName: reviewerName ?? undefined,
         })
 
         if (!cancelled) {
@@ -55,10 +72,15 @@ function ReviewsPage() {
           setGenreName(result.genreName)
         }
       } catch (loadError) {
-        console.error("Could not load reviews:", loadError)
+        console.error(
+          "Could not load reviews:",
+          loadError,
+        )
 
         if (!cancelled) {
-          setError("The reviews could not be loaded.")
+          setError(
+            "The reviews could not be loaded.",
+          )
           setReviews([])
           setArtistName(null)
           setGenreName(null)
@@ -75,37 +97,9 @@ function ReviewsPage() {
     return () => {
       cancelled = true
     }
-  }, [artistSlug, genreSlug])
-
-  const visibleReviews = useMemo(() => {
-    return reviews.filter((review) => {
-      if (
-        iemName &&
-        review.model.toLowerCase() !== iemName.toLowerCase()
-      ) {
-        return false
-      }
-
-      if (
-        manufacturerName &&
-        review.brand.toLowerCase() !==
-          manufacturerName.toLowerCase()
-      ) {
-        return false
-      }
-
-      if (
-        reviewerName &&
-        review.reviewer.toLowerCase() !==
-          reviewerName.toLowerCase()
-      ) {
-        return false
-      }
-
-      return true
-    })
   }, [
-    reviews,
+    artistSlug,
+    genreSlug,
     iemName,
     manufacturerName,
     reviewerName,
@@ -152,7 +146,10 @@ function ReviewsPage() {
         break
 
       case "manufacturer":
-        params.set("manufacturer", suggestion.name)
+        params.set(
+          "manufacturer",
+          suggestion.name,
+        )
         break
 
       case "reviewer":
@@ -169,12 +166,18 @@ function ReviewsPage() {
         <ReviewsHeader
           artistName={artistName}
           genreName={genreName}
-          additionalFilterType={additionalFilterType}
-          additionalFilterName={additionalFilterName}
+          additionalFilterType={
+            additionalFilterType
+          }
+          additionalFilterName={
+            additionalFilterName
+          }
           hasFilters={hasFilters}
         />
 
-        <ReviewSearch onSelect={handleSearchSelection} />
+        <ReviewSearch
+          onSelect={handleSearchSelection}
+        />
 
         {loading ? (
           <p className="text-[var(--muted)]">
@@ -184,14 +187,14 @@ function ReviewsPage() {
           <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-5 py-4">
             {error}
           </div>
-        ) : visibleReviews.length === 0 ? (
+        ) : reviews.length === 0 ? (
           <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
             {hasFilters
-              ? "No published reviews match this filter yet."
+              ? "No published reviews match these filters yet."
               : "No published reviews are available yet."}
           </div>
         ) : (
-          <ReviewGrid reviews={visibleReviews} />
+          <ReviewGrid reviews={reviews} />
         )}
       </div>
     </main>

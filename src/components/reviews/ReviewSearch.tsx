@@ -14,6 +14,7 @@ import type {
 
 type ReviewSearchProps = {
   onSelect: (suggestion: SearchSuggestion) => void
+  suggestionsOverride?: SearchSuggestion[]
 }
 
 const TYPE_LABELS: Record<SearchSuggestionType, string> = {
@@ -74,7 +75,10 @@ function getMatchPriority(
   return 4
 }
 
-function ReviewSearch({ onSelect }: ReviewSearchProps) {
+function ReviewSearch({
+  onSelect,
+  suggestionsOverride,
+}: ReviewSearchProps) {
   const [query, setQuery] = useState("")
   const [suggestions, setSuggestions] = useState<
     SearchSuggestion[]
@@ -88,15 +92,22 @@ function ReviewSearch({ onSelect }: ReviewSearchProps) {
   const listRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    if (suggestionsOverride) {
+      setSuggestions(suggestionsOverride)
+      setLoading(false)
+      setError(null)
+      return
+    }
+  
     let cancelled = false
-
+  
     async function loadSuggestions() {
       setLoading(true)
       setError(null)
-
+  
       try {
         const result = await getSearchSuggestions()
-
+  
         if (!cancelled) {
           setSuggestions(result)
         }
@@ -105,9 +116,11 @@ function ReviewSearch({ onSelect }: ReviewSearchProps) {
           "Could not load search suggestions:",
           loadError,
         )
-
+  
         if (!cancelled) {
-          setError("Search suggestions could not be loaded.")
+          setError(
+            "Search suggestions could not be loaded.",
+          )
         }
       } finally {
         if (!cancelled) {
@@ -115,13 +128,13 @@ function ReviewSearch({ onSelect }: ReviewSearchProps) {
         }
       }
     }
-
+  
     void loadSuggestions()
-
+  
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [suggestionsOverride])
 
   useEffect(() => {
     const handlePointerDown = (event: MouseEvent) => {

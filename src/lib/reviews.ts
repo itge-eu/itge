@@ -40,13 +40,13 @@ type ReviewArtistRow = {
         id: number
         musicbrainz_id: string
         name: string
-		slug: string
+        slug: string
       }
     | {
         id: number
         musicbrainz_id: string
         name: string
-		slug: string
+        slug: string
       }[]
     | null
 }
@@ -79,11 +79,11 @@ type ReviewRow = {
   reviewers:
     | {
         name: string
-		slug: string
+        slug: string
       }
     | {
         name: string
-		slug: string
+        slug: string
       }[]
     | null
   iems:
@@ -124,6 +124,10 @@ function getSingleRelation<T>(
   return relation ?? null
 }
 
+function normalizeValue(value: string): string {
+  return value.trim().toLocaleLowerCase()
+}
+
 function mapReview(row: ReviewRow): FeaturedReview {
   const reviewer = getSingleRelation(row.reviewers)
   const iem = getSingleRelation(row.iems)
@@ -144,7 +148,7 @@ function mapReview(row: ReviewRow): FeaturedReview {
     title: row.title,
     summary: row.summary,
     reviewer: reviewer.name,
-	reviewerSlug: reviewer.slug,
+    reviewerSlug: reviewer.slug,
     model: iem.model,
     brand: manufacturer.name,
     heroImageUrl: row.hero_image_url,
@@ -166,7 +170,7 @@ function mapReviewArtists(
         id: Number(artist.id),
         musicbrainzId: artist.musicbrainz_id,
         name: artist.name,
-		slug: artist.slug,
+        slug: artist.slug,
       },
     ]
   })
@@ -206,7 +210,7 @@ export async function getFeaturedReviews(): Promise<
       hero_image_url,
       reviewers (
         name,
-		slug
+        slug
       ),
       iems (
         model,
@@ -231,6 +235,9 @@ export async function getFeaturedReviews(): Promise<
 export type ReviewFilters = {
   artistSlug?: string
   genreSlug?: string
+  iemName?: string
+  manufacturerName?: string
+  reviewerName?: string
 }
 
 export type ReviewsResult = {
@@ -242,8 +249,16 @@ export type ReviewsResult = {
 export async function getAllReviews(
   filters: ReviewFilters = {},
 ): Promise<ReviewsResult> {
-  const artistSlug = filters.artistSlug?.trim() || null
-  const genreSlug = filters.genreSlug?.trim() || null
+  const artistSlug =
+    filters.artistSlug?.trim() || null
+  const genreSlug =
+    filters.genreSlug?.trim() || null
+  const iemName =
+    filters.iemName?.trim() || null
+  const manufacturerName =
+    filters.manufacturerName?.trim() || null
+  const reviewerName =
+    filters.reviewerName?.trim() || null
 
   let artistName: string | null = null
   let genreName: string | null = null
@@ -276,11 +291,13 @@ export async function getAllReviews(
 
     artistName = artistData.name
 
-    const { data: relationData, error: relationError } =
-      await supabase
-        .from("review_artists")
-        .select("review_id")
-        .eq("artist_id", artistData.id)
+    const {
+      data: relationData,
+      error: relationError,
+    } = await supabase
+      .from("review_artists")
+      .select("review_id")
+      .eq("artist_id", artistData.id)
 
     if (relationError) {
       throw relationError
@@ -316,11 +333,13 @@ export async function getAllReviews(
 
     genreName = genreData.name
 
-    const { data: relationData, error: relationError } =
-      await supabase
-        .from("review_genres")
-        .select("review_id")
-        .eq("genre_id", genreData.id)
+    const {
+      data: relationData,
+      error: relationError,
+    } = await supabase
+      .from("review_genres")
+      .select("review_id")
+      .eq("genre_id", genreData.id)
 
     if (relationError) {
       throw relationError
@@ -335,6 +354,7 @@ export async function getAllReviews(
 
   if (artistReviewIds && genreReviewIds) {
     const genreIdSet = new Set(genreReviewIds)
+
     reviewIds = artistReviewIds.filter((reviewId) =>
       genreIdSet.has(reviewId),
     )
@@ -363,7 +383,7 @@ export async function getAllReviews(
       hero_image_url,
       reviewers (
         name,
-		slug
+        slug
       ),
       iems (
         model,
@@ -386,9 +406,38 @@ export async function getAllReviews(
   }
 
   const rows = (data ?? []) as unknown as ReviewRow[]
+  const mappedReviews = rows.map(mapReview)
+
+  const reviews = mappedReviews.filter((review) => {
+    if (
+      iemName &&
+      normalizeValue(review.model) !==
+        normalizeValue(iemName)
+    ) {
+      return false
+    }
+
+    if (
+      manufacturerName &&
+      normalizeValue(review.brand) !==
+        normalizeValue(manufacturerName)
+    ) {
+      return false
+    }
+
+    if (
+      reviewerName &&
+      normalizeValue(review.reviewer) !==
+        normalizeValue(reviewerName)
+    ) {
+      return false
+    }
+
+    return true
+  })
 
   return {
-    reviews: rows.map(mapReview),
+    reviews,
     artistName,
     genreName,
   }
@@ -411,7 +460,7 @@ export async function getReviewBySlug(
       hero_image_url,
       reviewers (
         name,
-		slug
+        slug
       ),
       iems (
         model,
@@ -424,10 +473,10 @@ export async function getReviewBySlug(
           id,
           musicbrainz_id,
           name,
-		  slug
+          slug
         )
       ),
-	  review_genres (
+      review_genres (
         genres (
           id,
           name,
@@ -455,6 +504,6 @@ export async function getReviewBySlug(
     pros: row.pros ?? null,
     cons: row.cons ?? null,
     artists: mapReviewArtists(row.review_artists),
-	genres: mapReviewGenres(row.review_genres),
+    genres: mapReviewGenres(row.review_genres),
   }
 }
