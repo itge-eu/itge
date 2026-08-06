@@ -122,9 +122,12 @@ function IemPage() {
         <header className="overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)]">
           <div className="grid lg:grid-cols-[minmax(0,1fr)_24rem]">
             <div className="p-8 sm:p-10">
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
+              <Link
+                to={`/manufacturers/${iem.manufacturer.slug}`}
+                className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)] transition hover:opacity-70"
+              >
                 {iem.manufacturer.name}
-              </p>
+              </Link>
 
               <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-6xl">
                 {iem.model}

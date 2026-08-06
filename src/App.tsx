@@ -13,6 +13,7 @@ import AdminEditReviewPage from "./pages/AdminEditReviewPage"
 import DiscoverPage from "./pages/DiscoverPage"
 import IemPage from "./pages/IemPage"
 import IemsPage from "./pages/IemsPage"
+import ManufacturerPage from "./pages/ManufacturerPage"
 
 function App() {
   return (
@@ -29,6 +30,8 @@ function App() {
 		
 		<Route path="/iems" element={<IemsPage />} />
 		<Route path="/iems/:slug" element={<IemPage />} />
+		
+		<Route path="/manufacturers/:slug" element={<ManufacturerPage />} />
 
         <Route path="/reviewers" element={<ReviewersPage />} />
         <Route path="/reviewers/:slug" element={<ReviewerPage />} />

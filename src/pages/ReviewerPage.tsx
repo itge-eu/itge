@@ -4,13 +4,12 @@ import {
   useState,
 } from "react"
 import { Link, useParams } from "react-router"
-
 import ReviewerAvatar from "../components/reviewers/ReviewerAvatar"
-
 import {
   getReviewerBySlug,
   type ReviewerProfile,
 } from "../lib/reviewers"
+import ReviewGrid from "../components/reviews/ReviewGrid"
 
 function ReviewerPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -213,51 +212,8 @@ function ReviewerPage() {
               yet.
             </div>
           ) : (
-            <div className="mt-8 grid gap-8">
-              {reviewer.reviews.map((review) => (
-                <article
-                  key={review.id}
-                  className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6"
-                >
-                  <div className="flex flex-col gap-6 sm:flex-row">
-                    {review.heroImageUrl && (
-                      <img
-                        src={review.heroImageUrl}
-                        alt={`${review.brand} ${review.model}`}
-                        loading="lazy"
-                        className="aspect-[16/9] w-full rounded-2xl object-cover sm:h-28 sm:w-28 sm:shrink-0"
-                      />
-                    )}
-
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm uppercase tracking-widest text-[var(--accent)]">
-                        {review.brand}
-                      </p>
-
-                      <h3 className="mt-1 text-2xl font-semibold">
-                        {review.model}
-                      </h3>
-
-                      <p className="mt-4 line-clamp-3 text-[var(--muted)]">
-                        {review.summary}
-                      </p>
-
-                      <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
-                        <span className="rounded-full border border-[var(--border)] px-3 py-1 text-sm font-semibold">
-                          {review.rating.toFixed(1)}/5
-                        </span>
-
-                        <Link
-                          to={`/reviews/${review.slug}`}
-                          className="font-medium text-[var(--accent)]"
-                        >
-                          Read review →
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </article>
-              ))}
+            <div className="mt-8">
+              <ReviewGrid reviews={reviewer.reviews} />
             </div>
           )}
         </section>

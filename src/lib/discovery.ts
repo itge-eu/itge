@@ -192,7 +192,7 @@ function mapDiscoveryReview(
   const iemEntity: DiscoveryIem = {
     id: Number(iem.id),
     name: iem.model,
-    slug: slugify(iem.model),
+    slug: iem.slug,
     manufacturerId: Number(manufacturer.id),
     manufacturerName: manufacturer.name,
   }
@@ -249,6 +249,7 @@ export async function getDiscoveryReviews(): Promise<
       iems (
         id,
         model,
+        slug,
         manufacturers (
           id,
           name

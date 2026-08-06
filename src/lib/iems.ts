@@ -19,6 +19,7 @@ export type IemDirectoryItem = {
   manufacturer: {
     id: number
     name: string
+	slug: string
   }
   heroImageUrl: string | null
   reviewCount: number
@@ -35,6 +36,7 @@ export type IemProfile = {
   manufacturer: {
     id: number
     name: string
+	slug: string
   }
 
   averageRating: number | null
@@ -55,10 +57,12 @@ type IemRow = {
     | {
         id: number
         name: string
+		slug: string
       }
     | {
         id: number
         name: string
+		slug: string
       }[]
     | null
 }
@@ -72,10 +76,12 @@ type IemDirectoryRow = {
     | {
         id: number
         name: string
+		slug: string
       }
     | {
         id: number
         name: string
+		slug: string
       }[]
     | null
 
@@ -157,9 +163,11 @@ type IemReviewRow = {
         manufacturers:
           | {
               name: string
+			  slug: string
             }
           | {
               name: string
+			  slug: string
             }[]
           | null
       }
@@ -170,9 +178,11 @@ type IemReviewRow = {
         manufacturers:
           | {
               name: string
+			  slug: string
             }
           | {
               name: string
+			  slug: string
             }[]
           | null
       }[]
@@ -358,7 +368,8 @@ export async function getIemBySlug(
         slug,
         manufacturers (
           id,
-          name
+          name,
+		  slug
         )
       `)
       .eq("slug", normalizedSlug)
@@ -403,7 +414,8 @@ export async function getIemBySlug(
           model,
           slug,
           manufacturers (
-            name
+            name,
+			slug
           )
         ),
 
@@ -452,6 +464,7 @@ export async function getIemBySlug(
     manufacturer: {
       id: Number(manufacturer.id),
       name: manufacturer.name,
+	  slug: manufacturer.slug,
     },
 
     averageRating:
@@ -478,7 +491,8 @@ export async function getIems(): Promise<
 
       manufacturers (
         id,
-        name
+        name,
+		slug
       ),
 
       reviews!inner (
@@ -555,6 +569,7 @@ export async function getIems(): Promise<
         manufacturer: {
           id: Number(manufacturer.id),
           name: manufacturer.name,
+		  slug: manufacturer.slug,
         },
 
         heroImageUrl:
