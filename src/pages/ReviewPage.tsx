@@ -128,7 +128,12 @@ function ReviewPage() {
           <div className="mt-4 flex flex-col justify-between gap-6 sm:flex-row sm:items-start">
             <div className="min-w-0">
               <h1 className="text-4xl font-semibold tracking-tight sm:text-6xl">
-                {review.model}
+                <Link
+                  to={`/iems/${review.iemSlug}`}
+                  className="transition hover:text-[var(--accent)]"
+                >
+                  {review.model}
+                </Link>
               </h1>
 
               <Link

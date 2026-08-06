@@ -68,6 +68,7 @@ type DiscoveryReviewRow = {
     | {
         id: number
         model: string
+		slug: string
         manufacturers:
           | {
               id: number
@@ -82,6 +83,7 @@ type DiscoveryReviewRow = {
     | {
         id: number
         model: string
+		slug: string
         manufacturers:
           | {
               id: number
@@ -210,6 +212,7 @@ function mapDiscoveryReview(
       summary: row.summary,
       brand: manufacturer.name,
       model: iem.model,
+	  iemSlug: iem.slug,
       reviewer: reviewer.name,
       reviewerSlug: reviewer.slug,
       heroImageUrl: row.hero_image_url,

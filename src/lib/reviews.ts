@@ -21,6 +21,7 @@ export type FeaturedReview = {
   summary: string
   brand: string
   model: string
+  iemSlug: string
   reviewer: string
   reviewerSlug: string
   heroImageUrl: string | null
@@ -89,6 +90,7 @@ type ReviewRow = {
   iems:
     | {
         model: string
+		slug: string
         manufacturers:
           | {
               name: string
@@ -100,6 +102,7 @@ type ReviewRow = {
       }
     | {
         model: string
+		slug: string
         manufacturers:
           | {
               name: string
@@ -150,6 +153,7 @@ function mapReview(row: ReviewRow): FeaturedReview {
     reviewer: reviewer.name,
     reviewerSlug: reviewer.slug,
     model: iem.model,
+	iemSlug: iem.slug,
     brand: manufacturer.name,
     heroImageUrl: row.hero_image_url,
   }
@@ -214,6 +218,7 @@ export async function getFeaturedReviews(): Promise<
       ),
       iems (
         model,
+		slug,
         manufacturers (
           name
         )
@@ -387,6 +392,7 @@ export async function getAllReviews(
       ),
       iems (
         model,
+		slug,
         manufacturers (
           name
         )
@@ -464,6 +470,7 @@ export async function getReviewBySlug(
       ),
       iems (
         model,
+		slug,
         manufacturers (
           name
         )

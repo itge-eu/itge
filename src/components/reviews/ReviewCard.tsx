@@ -1,4 +1,5 @@
 import { Link } from "react-router"
+
 import type { FeaturedReview } from "../../lib/reviews"
 
 type ReviewCardProps = {
@@ -6,15 +7,25 @@ type ReviewCardProps = {
 }
 
 function ReviewCard({ review }: ReviewCardProps) {
+  const iemUrl = `/iems/${review.iemSlug}`
+  const reviewUrl = `/reviews/${review.slug}`
+
   return (
     <article className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
       <div className="flex flex-col gap-6 sm:flex-row">
         {review.heroImageUrl && (
-          <img
-            src={review.heroImageUrl}
-            alt={`${review.brand} ${review.model}`}
-            className="h-48 w-full shrink-0 rounded-2xl object-cover sm:h-28 sm:w-28"
-          />
+          <Link
+            to={iemUrl}
+            aria-label={`View ${review.brand} ${review.model}`}
+            className="block shrink-0 overflow-hidden rounded-2xl"
+          >
+            <img
+              src={review.heroImageUrl}
+              alt={`${review.brand} ${review.model}`}
+              loading="lazy"
+              className="h-48 w-full rounded-2xl object-cover transition duration-200 hover:scale-[1.02] hover:opacity-90 sm:h-28 sm:w-28"
+            />
+          </Link>
         )}
 
         <div className="min-w-0 flex-1">
@@ -23,7 +34,12 @@ function ReviewCard({ review }: ReviewCardProps) {
           </p>
 
           <h2 className="mt-1 text-2xl font-semibold">
-            {review.model}
+            <Link
+              to={iemUrl}
+              className="transition hover:text-[var(--accent)]"
+            >
+              {review.model}
+            </Link>
           </h2>
 
           <p className="mt-1 text-sm text-[var(--muted)]">
@@ -46,7 +62,7 @@ function ReviewCard({ review }: ReviewCardProps) {
             </span>
 
             <Link
-              to={`/reviews/${review.slug}`}
+              to={reviewUrl}
               className="font-medium text-[var(--accent)] transition hover:opacity-75"
             >
               Read review →

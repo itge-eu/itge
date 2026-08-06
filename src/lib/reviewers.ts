@@ -33,6 +33,7 @@ type ReviewRow = {
   iems:
     | {
         model: string;
+		slug: string;
         manufacturers:
           | {
               name: string;
@@ -44,6 +45,7 @@ type ReviewRow = {
       }
     | {
         model: string;
+		slug: string;
         manufacturers:
           | {
               name: string;
@@ -86,6 +88,7 @@ function mapReview(row: ReviewRow): FeaturedReview {
     summary: row.summary,
     brand: manufacturer.name,
     model: iem.model,
+	iemSlug: iem.slug,
     reviewer: "",
     reviewerSlug: "",
     heroImageUrl: row.hero_image_url,
@@ -186,6 +189,7 @@ export async function getReviewerBySlug(
         hero_image_url,
         iems(
           model,
+		  slug,
           manufacturers(
             name
           )

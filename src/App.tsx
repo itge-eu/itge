@@ -7,12 +7,11 @@ import ReviewsPage from "./pages/ReviewsPage"
 import ReviewPage from "./pages/ReviewPage"
 import ReviewersPage from "./pages/ReviewersPage"
 import ReviewerPage from "./pages/ReviewerPage"
-
 import ImportReviewPage from "./pages/ImportReviewPage"
 import AdminReviewsPage from "./pages/AdminReviewsPage"
 import AdminEditReviewPage from "./pages/AdminEditReviewPage"
-
 import DiscoverPage from "./pages/DiscoverPage"
+import IemPage from "./pages/IemPage"
 
 function App() {
   return (
@@ -26,6 +25,8 @@ function App() {
 
         <Route path="/reviews" element={<ReviewsPage />} />
         <Route path="/reviews/:slug" element={<ReviewPage />} />
+		
+		<Route path="/iems/:slug" element={<IemPage />} />
 
         <Route path="/reviewers" element={<ReviewersPage />} />
         <Route path="/reviewers/:slug" element={<ReviewerPage />} />
