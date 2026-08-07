@@ -18,6 +18,7 @@ function getInitialTheme(): Theme {
 function Navbar() {
   const [theme, setTheme] = useState<Theme>(getInitialTheme)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mobileExploreOpen, setMobileExploreOpen] = useState(false)
 
   const location = useLocation()
 
@@ -31,6 +32,7 @@ function Navbar() {
 
   useEffect(() => {
     setMobileMenuOpen(false)
+    setMobileExploreOpen(false)
   }, [location.pathname])
 
   useEffect(() => {
@@ -41,6 +43,7 @@ function Navbar() {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setMobileMenuOpen(false)
+        setMobileExploreOpen(false)
       }
     }
 
@@ -59,10 +62,11 @@ function Navbar() {
 
   const closeMobileMenu = () => {
     setMobileMenuOpen(false)
+    setMobileExploreOpen(false)
   }
 
   return (
-    <header className="border-b border-[var(--border)] bg-[var(--background)]">
+    <header className="relative z-50 border-b border-[var(--border)] bg-[var(--background)]">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-5 lg:px-10">
         <Link
           to="/"
@@ -103,26 +107,25 @@ function Navbar() {
           </span>
         </Link>
 
+        {/* Desktop navigation */}
         <nav
           aria-label="Main navigation"
-          className="hidden items-center gap-8 text-sm text-[var(--muted)] md:flex"
+          className="hidden items-center gap-7 text-sm text-[var(--muted)] md:flex"
         >
-		
-		  <Link
+          <Link
             to="/discover"
-            onClick={closeMobileMenu}
             className="rounded-xl px-4 py-3 font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
           >
             Discover
           </Link>
-		  
+
           <Link
             to="/reviews"
             className="transition hover:text-[var(--foreground)]"
           >
             Reviews
           </Link>
-		  
+
           <Link
             to="/iems"
             className="transition hover:text-[var(--foreground)]"
@@ -131,18 +134,46 @@ function Navbar() {
           </Link>
 
           <Link
-            to="/manufacturers"
-            className="transition hover:text-[var(--foreground)]"
-          >
-            Manufacturers
-          </Link>
-
-          <Link
             to="/reviewers"
             className="transition hover:text-[var(--foreground)]"
           >
             Reviewers
           </Link>
+
+          {/* Explore dropdown */}
+          <div className="group relative">
+            <button
+              type="button"
+              className="flex items-center gap-1.5 py-3 transition hover:text-[var(--foreground)] group-focus-within:text-[var(--foreground)]"
+              aria-haspopup="true"
+            >
+              Explore
+
+              <ChevronDownIcon />
+            </button>
+
+            <div className="invisible absolute left-1/2 top-full w-52 -translate-x-1/2 pt-2 opacity-0 transition duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+              <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-2 shadow-xl">
+                <ExploreLink
+                  to="/artists"
+                  title="Artists"
+                  description="Browse listening references"
+                />
+
+                <ExploreLink
+                  to="/genres"
+                  title="Genres"
+                  description="Explore reviews by genre"
+                />
+
+                <ExploreLink
+                  to="/manufacturers"
+                  title="Manufacturers"
+                  description="Browse IEM makers"
+                />
+              </div>
+            </div>
+          </div>
 
           <Link
             to="/#join"
@@ -183,7 +214,9 @@ function Navbar() {
 
           <button
             type="button"
-            onClick={() => setMobileMenuOpen((current) => !current)}
+            onClick={() =>
+              setMobileMenuOpen((current) => !current)
+            }
             className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] transition hover:border-[var(--accent)] hover:bg-[var(--surface-soft)] md:hidden"
             aria-label={
               mobileMenuOpen
@@ -198,6 +231,7 @@ function Navbar() {
         </div>
       </div>
 
+      {/* Mobile navigation */}
       {mobileMenuOpen && (
         <nav
           id="mobile-navigation"
@@ -205,61 +239,98 @@ function Navbar() {
           className="border-t border-[var(--border)] bg-[var(--background)] px-6 py-5 md:hidden"
         >
           <div className="mx-auto flex max-w-7xl flex-col gap-2">
-		    <Link
+            <MobileLink
               to="/discover"
               onClick={closeMobileMenu}
-              className="rounded-xl px-4 py-3 font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
             >
               Discover
-            </Link>
+            </MobileLink>
 
-            <Link
+            <MobileLink
               to="/reviews"
               onClick={closeMobileMenu}
-              className="rounded-xl px-4 py-3 font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
             >
               Reviews
-            </Link>
-			
-            <Link
+            </MobileLink>
+
+            <MobileLink
               to="/iems"
               onClick={closeMobileMenu}
-              className="rounded-xl px-4 py-3 font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
             >
               IEMs
-            </Link>
-			
-            <Link
-              to="/manufacturers"
-              onClick={closeMobileMenu}
-              className="rounded-xl px-4 py-3 font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
-            >
-              Manufacturers
-            </Link>
-			
-			<Link
+            </MobileLink>
+
+            <MobileLink
               to="/reviewers"
               onClick={closeMobileMenu}
-              className="rounded-xl px-4 py-3 font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
             >
               Reviewers
-            </Link>
+            </MobileLink>
 
-            <Link
-              to="/join"
+            {/* Mobile Explore */}
+            <div>
+              <button
+                type="button"
+                onClick={() =>
+                  setMobileExploreOpen(
+                    (current) => !current,
+                  )
+                }
+                className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
+                aria-expanded={mobileExploreOpen}
+              >
+                Explore
+
+                <span
+                  className={`transition-transform duration-200 ${
+                    mobileExploreOpen
+                      ? "rotate-180"
+                      : ""
+                  }`}
+                >
+                  <ChevronDownIcon />
+                </span>
+              </button>
+
+              {mobileExploreOpen && (
+                <div className="ml-4 mt-1 flex flex-col gap-1 border-l border-[var(--border)] pl-3">
+                  <MobileExploreLink
+                    to="/artists"
+                    onClick={closeMobileMenu}
+                  >
+                    Artists
+                  </MobileExploreLink>
+
+                  <MobileExploreLink
+                    to="/genres"
+                    onClick={closeMobileMenu}
+                  >
+                    Genres
+                  </MobileExploreLink>
+
+                  <MobileExploreLink
+                    to="/manufacturers"
+                    onClick={closeMobileMenu}
+                  >
+                    Manufacturers
+                  </MobileExploreLink>
+                </div>
+              )}
+            </div>
+
+            <MobileLink
+              to="/#join"
               onClick={closeMobileMenu}
-              className="rounded-xl px-4 py-3 font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
             >
               Join
-            </Link>
+            </MobileLink>
 
-            <Link
-              to="/about"
+            <MobileLink
+              to="/#about"
               onClick={closeMobileMenu}
-              className="rounded-xl px-4 py-3 font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
             >
               About
-            </Link>
+            </MobileLink>
 
             <Link
               to="/reviews"
@@ -272,6 +343,88 @@ function Navbar() {
         </nav>
       )}
     </header>
+  )
+}
+
+function ExploreLink({
+  to,
+  title,
+  description,
+}: {
+  to: string
+  title: string
+  description: string
+}) {
+  return (
+    <Link
+      to={to}
+      className="block rounded-xl px-4 py-3 transition hover:bg-[var(--surface-soft)] focus:bg-[var(--surface-soft)] focus:outline-none"
+    >
+      <p className="font-semibold text-[var(--foreground)]">
+        {title}
+      </p>
+
+      <p className="mt-0.5 text-xs leading-5 text-[var(--muted)]">
+        {description}
+      </p>
+    </Link>
+  )
+}
+
+function MobileLink({
+  to,
+  onClick,
+  children,
+}: {
+  to: string
+  onClick: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <Link
+      to={to}
+      onClick={onClick}
+      className="rounded-xl px-4 py-3 font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
+    >
+      {children}
+    </Link>
+  )
+}
+
+function MobileExploreLink({
+  to,
+  onClick,
+  children,
+}: {
+  to: string
+  onClick: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <Link
+      to={to}
+      onClick={onClick}
+      className="rounded-xl px-4 py-2.5 text-sm font-medium text-[var(--muted)] transition hover:bg-[var(--surface-soft)] hover:text-[var(--foreground)]"
+    >
+      {children}
+    </Link>
+  )
+}
+
+function ChevronDownIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m6 9 6 6 6-6" />
+    </svg>
   )
 }
 

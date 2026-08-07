@@ -15,6 +15,10 @@ import IemPage from "./pages/IemPage"
 import IemsPage from "./pages/IemsPage"
 import ManufacturerPage from "./pages/ManufacturerPage"
 import ManufacturersPage from "./pages/ManufacturersPage"
+import ArtistsPage from "./pages/ArtistsPage"
+import ArtistPage from "./pages/ArtistPage"
+import GenresPage from "./pages/GenresPage"
+import GenrePage from "./pages/GenrePage"
 
 function App() {
   return (
@@ -37,6 +41,12 @@ function App() {
 		
         <Route path="/reviewers" element={<ReviewersPage />} />
         <Route path="/reviewers/:slug" element={<ReviewerPage />} />
+		
+		<Route path="/artists" element={<ArtistsPage />} />
+		<Route path="/artists/:slug" element={<ArtistPage />} />
+		
+		<Route path="/genres" element={<GenresPage />} />
+		<Route path="/genres/:slug" element={<GenrePage />} />
 
         <Route path="/admin/import" element={<ImportReviewPage />} />
         <Route path="/admin/reviews" element={<AdminReviewsPage />} />

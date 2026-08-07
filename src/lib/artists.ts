@@ -2,69 +2,19 @@ import { supabase } from "./supabase"
 
 import type { FeaturedReview } from "./reviews"
 
-/**
- * Existing admin-facing genre type.
- * Keep this because GenrePicker/AdminEditReviewPage use it.
- */
-export type Genre = {
+export type ArtistSummary = {
   id: number
+  musicbrainzId: string
   name: string
   slug: string
-  sortOrder: number
-}
-
-type GenreRow = {
-  id: number
-  name: string
-  slug: string
-  sort_order: number
-}
-
-/**
- * Existing function used by admin pages.
- * Keep its return type and behaviour unchanged.
- */
-export async function getGenres(): Promise<Genre[]> {
-  const { data, error } = await supabase
-    .from("genres")
-    .select(`
-      id,
-      name,
-      slug,
-      sort_order
-    `)
-    .order("sort_order", { ascending: true })
-    .order("name", { ascending: true })
-
-  if (error) {
-    throw new Error(
-      `Could not load genres: ${error.message}`,
-    )
-  }
-
-  return ((data ?? []) as GenreRow[]).map(
-    (genre) => ({
-      id: Number(genre.id),
-      name: genre.name,
-      slug: genre.slug,
-      sortOrder: Number(genre.sort_order),
-    }),
-  )
-}
-
-/**
- * Public directory/profile types.
- */
-export type GenreSummary = {
-  id: number
-  name: string
-  slug: string
+  country: string | null
+  artistType: string | null
   reviewCount: number
   iemCount: number
   reviewerCount: number
 }
 
-export type GenreIemSummary = {
+export type ArtistIemSummary = {
   id: number
   model: string
   slug: string
@@ -73,22 +23,31 @@ export type GenreIemSummary = {
   reviewCount: number
 }
 
-export type GenreReviewerSummary = {
+export type ArtistReviewerSummary = {
   id: number
   name: string
   slug: string
   reviewCount: number
 }
 
-export type GenreProfile = GenreSummary & {
+export type ArtistProfile = ArtistSummary & {
   reviews: FeaturedReview[]
-  iems: GenreIemSummary[]
-  reviewers: GenreReviewerSummary[]
+  iems: ArtistIemSummary[]
+  reviewers: ArtistReviewerSummary[]
 }
 
-type ReviewGenreRelationRow = {
+type ArtistRow = {
+  id: number
+  musicbrainz_id: string
+  name: string
+  slug: string
+  country: string | null
+  artist_type: string | null
+}
+
+type RelationRow = {
   review_id: number
-  genre_id: number
+  artist_id: number
 }
 
 type PublishedReviewRow = {
@@ -97,34 +56,31 @@ type PublishedReviewRow = {
   reviewer_id: number | null
 }
 
-/**
- * Public genre directory.
- * Separate from getGenres() so we don't break admin code.
- */
-export async function getGenreDirectory(): Promise<
-  GenreSummary[]
+export async function getArtists(): Promise<
+  ArtistSummary[]
 > {
   const [
-    genresResult,
+    artistsResult,
     relationsResult,
     reviewsResult,
   ] = await Promise.all([
     supabase
-      .from("genres")
+      .from("artists")
       .select(`
         id,
+        musicbrainz_id,
         name,
         slug,
-        sort_order
+        country,
+        artist_type
       `)
-      .order("sort_order", { ascending: true })
       .order("name", { ascending: true }),
 
     supabase
-      .from("review_genres")
+      .from("review_artists")
       .select(`
         review_id,
-        genre_id
+        artist_id
       `),
 
     supabase
@@ -138,7 +94,7 @@ export async function getGenreDirectory(): Promise<
   ])
 
   const firstError =
-    genresResult.error ||
+    artistsResult.error ||
     relationsResult.error ||
     reviewsResult.error
 
@@ -146,12 +102,11 @@ export async function getGenreDirectory(): Promise<
     throw firstError
   }
 
-  const genres =
-    (genresResult.data ?? []) as GenreRow[]
+  const artists =
+    (artistsResult.data ?? []) as ArtistRow[]
 
   const relations =
-    (relationsResult.data ??
-      []) as ReviewGenreRelationRow[]
+    (relationsResult.data ?? []) as RelationRow[]
 
   const publishedReviews =
     (reviewsResult.data ??
@@ -167,14 +122,14 @@ export async function getGenreDirectory(): Promise<
     ]),
   )
 
-  return genres
-    .map((genre) => {
+  return artists
+    .map((artist) => {
       const reviewIds = new Set<number>()
 
       for (const relation of relations) {
         if (
-          Number(relation.genre_id) ===
-          Number(genre.id)
+          Number(relation.artist_id) ===
+          Number(artist.id)
         ) {
           reviewIds.add(
             Number(relation.review_id),
@@ -209,20 +164,24 @@ export async function getGenreDirectory(): Promise<
       }
 
       return {
-        id: Number(genre.id),
-        name: genre.name,
-        slug: genre.slug,
+        id: Number(artist.id),
+        musicbrainzId:
+          artist.musicbrainz_id,
+        name: artist.name,
+        slug: artist.slug,
+        country: artist.country,
+        artistType: artist.artist_type,
         reviewCount,
         iemCount: iemIds.size,
         reviewerCount: reviewerIds.size,
       }
     })
     .filter(
-      (genre) => genre.reviewCount > 0,
+      (artist) => artist.reviewCount > 0,
     )
 }
 
-type GenreDetailReviewRow = {
+type ArtistDetailReviewRow = {
   id: number
   slug: string
   rating: number
@@ -291,18 +250,29 @@ function getSingleRelation<T>(
   return relation ?? null
 }
 
-function mapGenreReview(
-  row: GenreDetailReviewRow,
+function mapArtistReview(
+  row: ArtistDetailReviewRow,
 ): FeaturedReview {
-  const reviewer = getSingleRelation(row.reviewers)
-  const iem = getSingleRelation(row.iems)
-  const manufacturer = getSingleRelation(
-    iem?.manufacturers,
+  const reviewer = getSingleRelation(
+    row.reviewers,
   )
 
-  if (!reviewer || !iem || !manufacturer) {
+  const iem = getSingleRelation(
+    row.iems,
+  )
+
+  const manufacturer =
+    getSingleRelation(
+      iem?.manufacturers,
+    )
+
+  if (
+    !reviewer ||
+    !iem ||
+    !manufacturer
+  ) {
     throw new Error(
-      `Review ${row.id} has incomplete genre data`,
+      `Review ${row.id} has incomplete artist data`,
     )
   }
 
@@ -313,34 +283,41 @@ function mapGenreReview(
     title: row.title,
     summary: row.summary,
     brand: manufacturer.name,
-    manufacturerSlug: manufacturer.slug,
+    manufacturerSlug:
+      manufacturer.slug,
     model: iem.model,
     iemSlug: iem.slug,
     reviewer: reviewer.name,
     reviewerSlug: reviewer.slug,
-    heroImageUrl: row.hero_image_url,
+    heroImageUrl:
+      row.hero_image_url,
   }
 }
 
-export async function getGenreBySlug(
+export async function getArtistBySlug(
   slug: string,
-): Promise<GenreProfile | null> {
-  const { data: genre, error: genreError } =
-    await supabase
-      .from("genres")
-      .select(`
-        id,
-        name,
-        slug
-      `)
-      .eq("slug", slug)
-      .maybeSingle()
+): Promise<ArtistProfile | null> {
+  const {
+    data: artist,
+    error: artistError,
+  } = await supabase
+    .from("artists")
+    .select(`
+      id,
+      musicbrainz_id,
+      name,
+      slug,
+      country,
+      artist_type
+    `)
+    .eq("slug", slug)
+    .maybeSingle()
 
-  if (genreError) {
-    throw genreError
+  if (artistError) {
+    throw artistError
   }
 
-  if (!genre) {
+  if (!artist) {
     return null
   }
 
@@ -348,11 +325,11 @@ export async function getGenreBySlug(
     data: relations,
     error: relationError,
   } = await supabase
-    .from("review_genres")
+    .from("review_artists")
     .select(`
       review_id
     `)
-    .eq("genre_id", genre.id)
+    .eq("artist_id", artist.id)
 
   if (relationError) {
     throw relationError
@@ -360,17 +337,23 @@ export async function getGenreBySlug(
 
   const reviewIds = Array.from(
     new Set(
-      (relations ?? []).map((relation) =>
-        Number(relation.review_id),
+      (relations ?? []).map(
+        (relation) =>
+          Number(relation.review_id),
       ),
     ),
   )
 
   if (reviewIds.length === 0) {
     return {
-      id: Number(genre.id),
-      name: genre.name,
-      slug: genre.slug,
+      id: Number(artist.id),
+      musicbrainzId:
+        artist.musicbrainz_id,
+      name: artist.name,
+      slug: artist.slug,
+      country: artist.country,
+      artistType:
+        artist.artist_type,
       reviewCount: 0,
       iemCount: 0,
       reviewerCount: 0,
@@ -380,39 +363,41 @@ export async function getGenreBySlug(
     }
   }
 
-  const { data: reviews, error: reviewsError } =
-    await supabase
-      .from("reviews")
-      .select(`
-        id,
-        slug,
-        rating,
-        title,
-        summary,
-        hero_image_url,
+  const {
+    data: reviews,
+    error: reviewsError,
+  } = await supabase
+    .from("reviews")
+    .select(`
+      id,
+      slug,
+      rating,
+      title,
+      summary,
+      hero_image_url,
 
-        reviewers (
+      reviewers (
+        id,
+        name,
+        slug
+      ),
+
+      iems (
+        id,
+        model,
+        slug,
+        manufacturers (
           id,
           name,
           slug
-        ),
-
-        iems (
-          id,
-          model,
-          slug,
-          manufacturers (
-            id,
-            name,
-            slug
-          )
         )
-      `)
-      .in("id", reviewIds)
-      .eq("published", true)
-      .order("published_at", {
-        ascending: false,
-      })
+      )
+    `)
+    .in("id", reviewIds)
+    .eq("published", true)
+    .order("published_at", {
+      ascending: false,
+    })
 
   if (reviewsError) {
     throw reviewsError
@@ -420,89 +405,124 @@ export async function getGenreBySlug(
 
   const rows =
     (reviews ??
-      []) as unknown as GenreDetailReviewRow[]
+      []) as unknown as ArtistDetailReviewRow[]
 
-  const mappedReviews = rows.map(mapGenreReview)
+  const mappedReviews =
+    rows.map(mapArtistReview)
 
   const iemMap = new Map<
     number,
-    GenreIemSummary
+    ArtistIemSummary
   >()
 
   const reviewerMap = new Map<
     number,
-    GenreReviewerSummary
+    ArtistReviewerSummary
   >()
 
   for (const row of rows) {
-    const reviewer = getSingleRelation(
-      row.reviewers,
-    )
+    const reviewer =
+      getSingleRelation(
+        row.reviewers,
+      )
 
-    const iem = getSingleRelation(row.iems)
+    const iem =
+      getSingleRelation(
+        row.iems,
+      )
 
-    const manufacturer = getSingleRelation(
-      iem?.manufacturers,
-    )
+    const manufacturer =
+      getSingleRelation(
+        iem?.manufacturers,
+      )
 
-    if (!reviewer || !iem || !manufacturer) {
+    if (
+      !reviewer ||
+      !iem ||
+      !manufacturer
+    ) {
       continue
     }
 
-    const existingIem = iemMap.get(
-      Number(iem.id),
-    )
+    const existingIem =
+      iemMap.get(Number(iem.id))
 
     if (existingIem) {
       existingIem.reviewCount += 1
     } else {
-      iemMap.set(Number(iem.id), {
-        id: Number(iem.id),
-        model: iem.model,
-        slug: iem.slug,
-        manufacturerName: manufacturer.name,
-        manufacturerSlug: manufacturer.slug,
-        reviewCount: 1,
-      })
+      iemMap.set(
+        Number(iem.id),
+        {
+          id: Number(iem.id),
+          model: iem.model,
+          slug: iem.slug,
+          manufacturerName:
+            manufacturer.name,
+          manufacturerSlug:
+            manufacturer.slug,
+          reviewCount: 1,
+        },
+      )
     }
 
-    const existingReviewer = reviewerMap.get(
-      Number(reviewer.id),
-    )
+    const existingReviewer =
+      reviewerMap.get(
+        Number(reviewer.id),
+      )
 
     if (existingReviewer) {
       existingReviewer.reviewCount += 1
     } else {
-      reviewerMap.set(Number(reviewer.id), {
-        id: Number(reviewer.id),
-        name: reviewer.name,
-        slug: reviewer.slug,
-        reviewCount: 1,
-      })
+      reviewerMap.set(
+        Number(reviewer.id),
+        {
+          id: Number(
+            reviewer.id,
+          ),
+          name: reviewer.name,
+          slug: reviewer.slug,
+          reviewCount: 1,
+        },
+      )
     }
   }
 
-  const iems = Array.from(iemMap.values()).sort(
+  const iems = Array.from(
+    iemMap.values(),
+  ).sort(
     (first, second) =>
-      second.reviewCount - first.reviewCount ||
-      first.model.localeCompare(second.model),
+      second.reviewCount -
+        first.reviewCount ||
+      first.model.localeCompare(
+        second.model,
+      ),
   )
 
   const reviewers = Array.from(
     reviewerMap.values(),
   ).sort(
     (first, second) =>
-      second.reviewCount - first.reviewCount ||
-      first.name.localeCompare(second.name),
+      second.reviewCount -
+        first.reviewCount ||
+      first.name.localeCompare(
+        second.name,
+      ),
   )
 
   return {
-    id: Number(genre.id),
-    name: genre.name,
-    slug: genre.slug,
-    reviewCount: mappedReviews.length,
+    id: Number(artist.id),
+    musicbrainzId:
+      artist.musicbrainz_id,
+    name: artist.name,
+    slug: artist.slug,
+    country: artist.country,
+    artistType:
+      artist.artist_type,
+    reviewCount:
+      mappedReviews.length,
     iemCount: iems.length,
-    reviewerCount: reviewers.length,
+    reviewerCount:
+      reviewers.length,
     reviews: mappedReviews,
     iems,
     reviewers,
