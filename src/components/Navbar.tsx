@@ -19,6 +19,7 @@ function Navbar() {
   const [theme, setTheme] = useState<Theme>(getInitialTheme)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [mobileExploreOpen, setMobileExploreOpen] = useState(false)
+  const [desktopExploreOpen, setDesktopExploreOpen] = useState(false)
 
   const location = useLocation()
 
@@ -33,18 +34,18 @@ function Navbar() {
   useEffect(() => {
     setMobileMenuOpen(false)
     setMobileExploreOpen(false)
+    setDesktopExploreOpen(false)
   }, [location.pathname])
 
   useEffect(() => {
-    if (!mobileMenuOpen) {
-      return
-    }
-
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setMobileMenuOpen(false)
-        setMobileExploreOpen(false)
+      if (event.key !== "Escape") {
+        return
       }
+
+      setMobileMenuOpen(false)
+      setMobileExploreOpen(false)
+      setDesktopExploreOpen(false)
     }
 
     window.addEventListener("keydown", handleEscape)
@@ -52,7 +53,7 @@ function Navbar() {
     return () => {
       window.removeEventListener("keydown", handleEscape)
     }
-  }, [mobileMenuOpen])
+  }, [])
 
   const toggleTheme = () => {
     setTheme((currentTheme) =>
@@ -65,6 +66,10 @@ function Navbar() {
     setMobileExploreOpen(false)
   }
 
+  const closeDesktopExplore = () => {
+    setDesktopExploreOpen(false)
+  }
+
   return (
     <header className="relative z-50 border-b border-[var(--border)] bg-[var(--background)]">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-5 lg:px-10">
@@ -72,7 +77,10 @@ function Navbar() {
           to="/"
           className="flex shrink-0 items-center"
           aria-label="IEM Tour Group Europe homepage"
-          onClick={closeMobileMenu}
+          onClick={() => {
+            closeMobileMenu()
+            closeDesktopExplore()
+          }}
         >
           {/* Light mode */}
           <span className="flex items-center dark:hidden">
@@ -114,6 +122,7 @@ function Navbar() {
         >
           <Link
             to="/discover"
+            onClick={closeDesktopExplore}
             className="rounded-xl px-4 py-3 font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
           >
             Discover
@@ -121,6 +130,7 @@ function Navbar() {
 
           <Link
             to="/reviews"
+            onClick={closeDesktopExplore}
             className="transition hover:text-[var(--foreground)]"
           >
             Reviews
@@ -128,6 +138,7 @@ function Navbar() {
 
           <Link
             to="/iems"
+            onClick={closeDesktopExplore}
             className="transition hover:text-[var(--foreground)]"
           >
             IEMs
@@ -135,48 +146,76 @@ function Navbar() {
 
           <Link
             to="/reviewers"
+            onClick={closeDesktopExplore}
             className="transition hover:text-[var(--foreground)]"
           >
             Reviewers
           </Link>
 
           {/* Explore dropdown */}
-          <div className="group relative">
+          <div
+            className="relative"
+            onMouseEnter={() => setDesktopExploreOpen(true)}
+            onMouseLeave={() => setDesktopExploreOpen(false)}
+          >
             <button
               type="button"
-              className="flex items-center gap-1.5 py-3 transition hover:text-[var(--foreground)] group-focus-within:text-[var(--foreground)]"
+              onClick={() =>
+                setDesktopExploreOpen(
+                  (current) => !current,
+                )
+              }
+              onFocus={() =>
+                setDesktopExploreOpen(true)
+              }
+              className="flex items-center gap-1.5 py-3 transition hover:text-[var(--foreground)]"
               aria-haspopup="true"
+              aria-expanded={desktopExploreOpen}
             >
               Explore
 
-              <ChevronDownIcon />
+              <span
+                className={`transition-transform duration-200 ${
+                  desktopExploreOpen
+                    ? "rotate-180"
+                    : ""
+                }`}
+              >
+                <ChevronDownIcon />
+              </span>
             </button>
 
-            <div className="invisible absolute left-1/2 top-full w-52 -translate-x-1/2 pt-2 opacity-0 transition duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
-              <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-2 shadow-xl">
-                <ExploreLink
-                  to="/artists"
-                  title="Artists"
-                  description="Browse listening references"
-                />
+            {desktopExploreOpen && (
+              <div className="absolute left-1/2 top-full w-52 -translate-x-1/2 pt-2">
+                <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-2 shadow-xl">
+                  <ExploreLink
+                    to="/artists"
+                    title="Artists"
+                    description="Browse listening references"
+                    onClick={closeDesktopExplore}
+                  />
 
-                <ExploreLink
-                  to="/genres"
-                  title="Genres"
-                  description="Explore reviews by genre"
-                />
+                  <ExploreLink
+                    to="/genres"
+                    title="Genres"
+                    description="Explore reviews by genre"
+                    onClick={closeDesktopExplore}
+                  />
 
-                <ExploreLink
-                  to="/manufacturers"
-                  title="Manufacturers"
-                  description="Browse IEM makers"
-                />
+                  <ExploreLink
+                    to="/manufacturers"
+                    title="Manufacturers"
+                    description="Browse IEM makers"
+                    onClick={closeDesktopExplore}
+                  />
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           <Link
             to="/#join"
+            onClick={closeDesktopExplore}
             className="transition hover:text-[var(--foreground)]"
           >
             Join
@@ -184,6 +223,7 @@ function Navbar() {
 
           <Link
             to="/#about"
+            onClick={closeDesktopExplore}
             className="transition hover:text-[var(--foreground)]"
           >
             About
@@ -207,6 +247,7 @@ function Navbar() {
 
           <Link
             to="/reviews"
+            onClick={closeDesktopExplore}
             className="hidden rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[var(--accent-foreground)] transition hover:bg-[var(--accent-hover)] sm:inline-flex"
           >
             Browse reviews
@@ -215,7 +256,9 @@ function Navbar() {
           <button
             type="button"
             onClick={() =>
-              setMobileMenuOpen((current) => !current)
+              setMobileMenuOpen(
+                (current) => !current,
+              )
             }
             className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] transition hover:border-[var(--accent)] hover:bg-[var(--surface-soft)] md:hidden"
             aria-label={
@@ -350,14 +393,17 @@ function ExploreLink({
   to,
   title,
   description,
+  onClick,
 }: {
   to: string
   title: string
   description: string
+  onClick?: () => void
 }) {
   return (
     <Link
       to={to}
+      onClick={onClick}
       className="block rounded-xl px-4 py-3 transition hover:bg-[var(--surface-soft)] focus:bg-[var(--surface-soft)] focus:outline-none"
     >
       <p className="font-semibold text-[var(--foreground)]">
