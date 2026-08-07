@@ -2,31 +2,59 @@ import { useEffect, useState } from "react"
 import { Link } from "react-router"
 import {
   getFeaturedReviews,
+  getLatestReviews,
   type FeaturedReview,
 } from "../lib/reviews"
+import ReviewCard from "../components/reviews/ReviewCard"
 
 function HomePage() {
   const [featuredReviews, setFeaturedReviews] = useState<FeaturedReview[]>([])
   const [reviewsLoading, setReviewsLoading] = useState(true)
   const [reviewsError, setReviewsError] = useState<string | null>(null)
+  const [latestReviews, setLatestReviews] =
+  useState<FeaturedReview[]>([])
   
   useEffect(() => {
-    async function loadFeaturedReviews() {
+    let cancelled = false
+  
+    async function loadReviews() {
       setReviewsLoading(true)
       setReviewsError(null)
   
       try {
-        const reviews = await getFeaturedReviews()
-        setFeaturedReviews(reviews)
+        const [featured, latest] =
+          await Promise.all([
+            getFeaturedReviews(),
+            getLatestReviews(3),
+          ])
+  
+        if (!cancelled) {
+          setFeaturedReviews(featured)
+          setLatestReviews(latest)
+        }
       } catch (error) {
-        console.error("Could not load featured reviews:", error)
-        setReviewsError("The featured reviews could not be loaded.")
+        console.error(
+          "Could not load homepage reviews:",
+          error,
+        )
+  
+        if (!cancelled) {
+          setReviewsError(
+            "The reviews could not be loaded.",
+          )
+        }
       } finally {
-        setReviewsLoading(false)
+        if (!cancelled) {
+          setReviewsLoading(false)
+        }
       }
     }
   
-    loadFeaturedReviews()
+    void loadReviews()
+  
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   return (
@@ -106,13 +134,13 @@ function HomePage() {
 
         <section
           id="reviews"
-          className="border-t border-[var(--border)] bg-[var(--background)] px-6 py-20 lg:px-8"
+          className="border-t border-[var(--border)] bg-[var(--surface-soft)] px-6 py-20 lg:px-8"
         >
           <div className="mx-auto max-w-7xl">
             <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
               <div>
                 <p className="text-sm uppercase tracking-[0.2em] text-[var(--accent)]">
-                  Latest listening notes
+                  ITGE PICKS
                 </p>
 
                 <h2 className="mt-3 text-3xl font-semibold tracking-tight">
@@ -152,52 +180,52 @@ function HomePage() {
           {!reviewsLoading && !reviewsError && featuredReviews.length > 0 && (
             <div className="mt-10 grid gap-6 lg:grid-cols-3">
               {featuredReviews.map((review) => (
-                <article
+                <ReviewCard
                   key={review.id}
-                  className="group flex min-h-80 flex-col rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[var(--accent)] hover:bg-[var(--surface-soft)] dark:shadow-none"
-                >
-                  <div className="flex items-start justify-between gap-6">
-                    <div>
-                      <div className="text-sm text-[var(--muted)]">
-                        {review.brand}
-                      </div>
-          
-                      <h3 className="mt-1 text-2xl font-semibold">
-                        {review.model}
-                      </h3>
-                    </div>
-          
-                    <div className="rounded-full border border-[var(--border)] px-3 py-1 text-sm font-semibold">
-                      {Number(review.rating).toFixed(1)}/5
-                    </div>
-                  </div>
-          
-                  <p className="mt-6 leading-7 text-[var(--muted)]">
-                    {review.summary}
-                  </p>
-          
-                  <div className="mt-auto flex items-center justify-between gap-4 pt-8 text-sm">
-                    <span className="text-[var(--muted)]">
-                      Reviewed by{" "}
-                      <Link
-                        to={`/reviewers/${review.reviewerSlug}`}
-                        className="font-semibold text-[var(--accent)] hover:underline"
-                      >
-                        {review.reviewer}
-                      </Link>
-                    </span>
-          
-                    <Link
-                      to={`/reviews/${review.slug}`}
-                      className="font-medium text-[var(--accent)] transition group-hover:opacity-75"
-                    >
-                      Read review →
-                    </Link>
-                  </div>
-                </article>
+                  review={review}
+                  variant="home"
+                />
               ))}
             </div>
+
           )}
+          </div>
+        </section>
+		
+		<section className="border-t border-[var(--border)] bg-[var(--background)] px-6 py-20 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+              <div>
+                <p className="text-sm uppercase tracking-[0.2em] text-[var(--accent)]">
+                  Latest listening notes
+                </p>
+        
+                <h2 className="mt-3 text-3xl font-semibold tracking-tight">
+                  Latest reviews
+                </h2>
+              </div>
+        
+              <Link
+                to="/reviews"
+                className="text-sm font-medium text-[var(--accent)] transition hover:opacity-75"
+              >
+                View all reviews →
+              </Link>
+            </div>
+        
+            {!reviewsLoading &&
+              !reviewsError &&
+              latestReviews.length > 0 && (
+                <div className="mt-10 grid gap-6 lg:grid-cols-3">
+                  {latestReviews.map((review) => (
+                    <ReviewCard
+                      key={review.id}
+                      review={review}
+                      variant="home"
+                    />
+                  ))}
+                </div>
+              )}
           </div>
         </section>
 

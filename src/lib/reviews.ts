@@ -263,6 +263,47 @@ export async function getFeaturedReviews(): Promise<
   return rows.map(mapReview)
 }
 
+export async function getLatestReviews(
+  limit = 3,
+): Promise<FeaturedReview[]> {
+  const { data, error } = await supabase
+    .from("reviews")
+    .select(`
+      id,
+      slug,
+      rating,
+      title,
+      summary,
+      hero_image_url,
+      reviewers (
+        name,
+        slug
+      ),
+      iems (
+        model,
+        slug,
+        manufacturers (
+          name,
+          slug
+        )
+      )
+    `)
+    .eq("published", true)
+    .order("published_at", {
+      ascending: false,
+    })
+    .limit(limit)
+
+  if (error) {
+    throw error
+  }
+
+  const rows =
+    (data ?? []) as unknown as ReviewRow[]
+
+  return rows.map(mapReview)
+}
+
 export type ReviewFilters = {
   artistSlug?: string
   genreSlug?: string
