@@ -6,6 +6,11 @@ import type {
   ReviewGenre,
 } from "./reviews"
 
+import {
+  getImpressionsByIemId,
+  type ImpressionSummary,
+} from "./impressions"
+
 export type IemReviewer = {
   name: string
   slug: string
@@ -16,16 +21,32 @@ export type IemDirectoryItem = {
   id: number
   model: string
   slug: string
+
   manufacturer: {
     id: number
     name: string
-	slug: string
+    slug: string
   }
+
   heroImageUrl: string | null
+
   reviewCount: number
   reviewerCount: number
   averageRating: number | null
   latestReviewAt: string | null
+
+  /*
+   * Impression-aware directory fields.
+   *
+   * Optional temporarily because manufacturers.ts
+   * still constructs the older review-only shape.
+   * We'll make these required again when manufacturer
+   * integration is updated next.
+   */
+  impressionCount?: number
+  coverageCount?: number
+  contributorCount?: number
+  latestActivityAt?: string | null
 }
 
 export type IemProfile = {
@@ -36,9 +57,9 @@ export type IemProfile = {
   manufacturer: {
     id: number
     name: string
-	slug: string
+    slug: string
   }
-  
+
   releaseYear: number | null
   driverConfiguration: string | null
   launchPrice: number | null
@@ -51,12 +72,14 @@ export type IemProfile = {
   artists: ReviewArtist[]
   genres: ReviewGenre[]
   reviews: FeaturedReview[]
+  impressions: ImpressionSummary[]
 }
 
 type IemRow = {
   id: number
   model: string
   slug: string
+
   release_year: number | null
   driver_configuration: string | null
   launch_price: string | number | null
@@ -66,12 +89,43 @@ type IemRow = {
     | {
         id: number
         name: string
-		slug: string
+        slug: string
       }
     | {
         id: number
         name: string
-		slug: string
+        slug: string
+      }[]
+    | null
+}
+
+type IemDirectoryReviewRow = {
+  id: number
+  rating: number
+  hero_image_url: string | null
+  published_at: string | null
+
+  reviewers:
+    | {
+        slug: string
+      }
+    | {
+        slug: string
+      }[]
+    | null
+}
+
+type IemDirectoryImpressionRow = {
+  id: number
+  hero_image_url: string | null
+  published_at: string | null
+
+  reviewers:
+    | {
+        slug: string
+      }
+    | {
+        slug: string
       }[]
     | null
 }
@@ -85,31 +139,21 @@ type IemDirectoryRow = {
     | {
         id: number
         name: string
-		slug: string
+        slug: string
       }
     | {
         id: number
         name: string
-		slug: string
+        slug: string
       }[]
     | null
 
   reviews:
-    | {
-        id: number
-        rating: number
-        hero_image_url: string | null
-        published_at: string | null
+    | IemDirectoryReviewRow[]
+    | null
 
-        reviewers:
-          | {
-              slug: string
-            }
-          | {
-              slug: string
-            }[]
-          | null
-      }[]
+  impressions:
+    | IemDirectoryImpressionRow[]
     | null
 }
 
@@ -172,11 +216,11 @@ type IemReviewRow = {
         manufacturers:
           | {
               name: string
-			  slug: string
+              slug: string
             }
           | {
               name: string
-			  slug: string
+              slug: string
             }[]
           | null
       }
@@ -187,18 +231,23 @@ type IemReviewRow = {
         manufacturers:
           | {
               name: string
-			  slug: string
+              slug: string
             }
           | {
               name: string
-			  slug: string
+              slug: string
             }[]
           | null
       }[]
     | null
 
-  review_artists?: ReviewArtistRelationRow[] | null
-  review_genres?: ReviewGenreRelationRow[] | null
+  review_artists?:
+    | ReviewArtistRelationRow[]
+    | null
+
+  review_genres?:
+    | ReviewGenreRelationRow[]
+    | null
 }
 
 function getSingleRelation<T>(
@@ -214,13 +263,22 @@ function getSingleRelation<T>(
 function mapFeaturedReview(
   row: IemReviewRow,
 ): FeaturedReview {
-  const reviewer = getSingleRelation(row.reviewers)
-  const iem = getSingleRelation(row.iems)
-  const manufacturer = getSingleRelation(
-    iem?.manufacturers,
-  )
+  const reviewer =
+    getSingleRelation(row.reviewers)
 
-  if (!reviewer || !iem || !manufacturer) {
+  const iem =
+    getSingleRelation(row.iems)
+
+  const manufacturer =
+    getSingleRelation(
+      iem?.manufacturers,
+    )
+
+  if (
+    !reviewer ||
+    !iem ||
+    !manufacturer
+  ) {
     throw new Error(
       `Review ${row.id} has incomplete IEM page data`,
     )
@@ -232,52 +290,75 @@ function mapFeaturedReview(
     rating: Number(row.rating),
     title: row.title,
     summary: row.summary,
+
     brand: manufacturer.name,
-	manufacturerSlug: manufacturer.slug,
+    manufacturerSlug:
+      manufacturer.slug,
+
     model: iem.model,
     iemSlug: iem.slug,
+
     reviewer: reviewer.name,
     reviewerSlug: reviewer.slug,
-    heroImageUrl: row.hero_image_url,
+
+    heroImageUrl:
+      row.hero_image_url,
   }
 }
 
 function collectReviewers(
   rows: IemReviewRow[],
 ): IemReviewer[] {
-  const reviewers = new Map<string, IemReviewer>()
+  const reviewers =
+    new Map<string, IemReviewer>()
 
   rows.forEach((row) => {
-    const reviewer = getSingleRelation(row.reviewers)
+    const reviewer =
+      getSingleRelation(
+        row.reviewers,
+      )
 
     if (!reviewer) {
       return
     }
 
-    const existing = reviewers.get(reviewer.slug)
+    const existing =
+      reviewers.get(
+        reviewer.slug,
+      )
 
     if (existing) {
       existing.reviewCount += 1
       return
     }
 
-    reviewers.set(reviewer.slug, {
-      name: reviewer.name,
-      slug: reviewer.slug,
-      reviewCount: 1,
-    })
+    reviewers.set(
+      reviewer.slug,
+      {
+        name: reviewer.name,
+        slug: reviewer.slug,
+        reviewCount: 1,
+      },
+    )
   })
 
-  return Array.from(reviewers.values()).sort(
+  return Array.from(
+    reviewers.values(),
+  ).sort(
     (first, second) => {
       const countDifference =
-        second.reviewCount - first.reviewCount
+        second.reviewCount -
+        first.reviewCount
 
-      if (countDifference !== 0) {
+      if (
+        countDifference !== 0
+      ) {
         return countDifference
       }
 
-      return first.name.localeCompare(second.name)
+      return first.name.localeCompare(
+        second.name,
+      )
     },
   )
 }
@@ -285,109 +366,177 @@ function collectReviewers(
 function collectArtists(
   rows: IemReviewRow[],
 ): ReviewArtist[] {
-  const artists = new Map<number, ReviewArtist>()
+  const artists =
+    new Map<
+      number,
+      ReviewArtist
+    >()
 
   rows.forEach((row) => {
-    ;(row.review_artists ?? []).forEach(
-      (relation) => {
-        const artist = getSingleRelation(
+    ;(
+      row.review_artists ?? []
+    ).forEach((relation) => {
+      const artist =
+        getSingleRelation(
           relation.artists,
         )
 
-        if (!artist || artists.has(Number(artist.id))) {
-          return
-        }
+      if (
+        !artist ||
+        artists.has(
+          Number(artist.id),
+        )
+      ) {
+        return
+      }
 
-        artists.set(Number(artist.id), {
-          id: Number(artist.id),
-          musicbrainzId: artist.musicbrainz_id,
+      artists.set(
+        Number(artist.id),
+        {
+          id: Number(
+            artist.id,
+          ),
+          musicbrainzId:
+            artist.musicbrainz_id,
           name: artist.name,
           slug: artist.slug,
-        })
-      },
-    )
+        },
+      )
+    })
   })
 
-  return Array.from(artists.values()).sort(
+  return Array.from(
+    artists.values(),
+  ).sort(
     (first, second) =>
-      first.name.localeCompare(second.name),
+      first.name.localeCompare(
+        second.name,
+      ),
   )
 }
 
 function collectGenres(
   rows: IemReviewRow[],
 ): ReviewGenre[] {
-  const genres = new Map<number, ReviewGenre>()
+  const genres =
+    new Map<
+      number,
+      ReviewGenre
+    >()
 
   rows.forEach((row) => {
-    ;(row.review_genres ?? []).forEach(
-      (relation) => {
-        const genre = getSingleRelation(
+    ;(
+      row.review_genres ?? []
+    ).forEach((relation) => {
+      const genre =
+        getSingleRelation(
           relation.genres,
         )
 
-        if (!genre || genres.has(Number(genre.id))) {
-          return
-        }
+      if (
+        !genre ||
+        genres.has(
+          Number(genre.id),
+        )
+      ) {
+        return
+      }
 
-        genres.set(Number(genre.id), {
-          id: Number(genre.id),
+      genres.set(
+        Number(genre.id),
+        {
+          id: Number(
+            genre.id,
+          ),
           name: genre.name,
           slug: genre.slug,
-        })
-      },
-    )
+        },
+      )
+    })
   })
 
-  return Array.from(genres.values()).sort(
+  return Array.from(
+    genres.values(),
+  ).sort(
     (first, second) =>
-      first.name.localeCompare(second.name),
+      first.name.localeCompare(
+        second.name,
+      ),
   )
 }
 
 function calculateAverageRating(
   reviews: FeaturedReview[],
 ): number | null {
-  if (reviews.length === 0) {
+  if (
+    reviews.length === 0
+  ) {
     return null
   }
 
-  const total = reviews.reduce(
-    (sum, review) => sum + review.rating,
-    0,
-  )
+  const total =
+    reviews.reduce(
+      (sum, review) =>
+        sum + review.rating,
+      0,
+    )
 
-  return total / reviews.length
+  return (
+    total /
+    reviews.length
+  )
+}
+
+function timestampValue(
+  value: string | null,
+): number {
+  if (!value) {
+    return 0
+  }
+
+  const time =
+    new Date(value).getTime()
+
+  return Number.isNaN(time)
+    ? 0
+    : time
 }
 
 export async function getIemBySlug(
   slug: string,
 ): Promise<IemProfile | null> {
-  const normalizedSlug = slug.trim()
+  const normalizedSlug =
+    slug.trim()
 
   if (!normalizedSlug) {
     return null
   }
 
-  const { data: iemData, error: iemError } =
-    await supabase
-      .from("iems")
-      .select(`
+  const {
+    data: iemData,
+    error: iemError,
+  } = await supabase
+    .from("iems")
+    .select(`
+      id,
+      model,
+      slug,
+      release_year,
+      driver_configuration,
+      launch_price,
+      launch_currency,
+
+      manufacturers (
         id,
-        model,
-        slug,
-		release_year,
-        driver_configuration,
-        launch_price,
-        launch_currency,
-        manufacturers (
-          id,
-          name,
-		  slug
-        )
-      `)
-      .eq("slug", normalizedSlug)
-      .maybeSingle()
+        name,
+        slug
+      )
+    `)
+    .eq(
+      "slug",
+      normalizedSlug,
+    )
+    .maybeSingle()
 
   if (iemError) {
     throw iemError
@@ -397,10 +546,13 @@ export async function getIemBySlug(
     return null
   }
 
-  const iem = iemData as unknown as IemRow
-  const manufacturer = getSingleRelation(
-    iem.manufacturers,
-  )
+  const iem =
+    iemData as unknown as IemRow
+
+  const manufacturer =
+    getSingleRelation(
+      iem.manufacturers,
+    )
 
   if (!manufacturer) {
     throw new Error(
@@ -408,67 +560,96 @@ export async function getIemBySlug(
     )
   }
 
-  const { data: reviewData, error: reviewError } =
-    await supabase
-      .from("reviews")
-      .select(`
-        id,
-        slug,
-        rating,
-        title,
-        summary,
-        hero_image_url,
+  const {
+    data: reviewData,
+    error: reviewError,
+  } = await supabase
+    .from("reviews")
+    .select(`
+      id,
+      slug,
+      rating,
+      title,
+      summary,
+      hero_image_url,
 
-        reviewers (
+      reviewers (
+        name,
+        slug
+      ),
+
+      iems (
+        model,
+        slug,
+
+        manufacturers (
           name,
           slug
-        ),
-
-        iems (
-          model,
-          slug,
-          manufacturers (
-            name,
-			slug
-          )
-        ),
-
-        review_artists (
-          artists (
-            id,
-            musicbrainz_id,
-            name,
-            slug
-          )
-        ),
-
-        review_genres (
-          genres (
-            id,
-            name,
-            slug
-          )
         )
-      `)
-      .eq("iem_id", Number(iem.id))
-      .eq("published", true)
-      .order("published_at", {
+      ),
+
+      review_artists (
+        artists (
+          id,
+          musicbrainz_id,
+          name,
+          slug
+        )
+      ),
+
+      review_genres (
+        genres (
+          id,
+          name,
+          slug
+        )
+      )
+    `)
+    .eq(
+      "iem_id",
+      Number(iem.id),
+    )
+    .eq(
+      "published",
+      true,
+    )
+    .order(
+      "published_at",
+      {
         ascending: false,
-      })
+      },
+    )
 
   if (reviewError) {
     throw reviewError
   }
 
   const rows =
-    (reviewData ?? []) as unknown as IemReviewRow[]
+    (reviewData ??
+      []) as unknown as IemReviewRow[]
 
-  const reviews = rows.map(mapFeaturedReview)
+  const reviews =
+    rows.map(
+      mapFeaturedReview,
+    )
+
+  const impressions =
+    await getImpressionsByIemId(
+      Number(iem.id),
+    )
 
   const heroImageUrl =
     reviews.find(
-      (review) => review.heroImageUrl !== null,
-    )?.heroImageUrl ?? null
+      (review) =>
+        review.heroImageUrl !==
+        null,
+    )?.heroImageUrl ??
+    impressions.find(
+      (impression) =>
+        impression.heroImageUrl !==
+        null,
+    )?.heroImageUrl ??
+    null
 
   return {
     id: Number(iem.id),
@@ -476,43 +657,63 @@ export async function getIemBySlug(
     slug: iem.slug,
 
     manufacturer: {
-      id: Number(manufacturer.id),
+      id: Number(
+        manufacturer.id,
+      ),
       name: manufacturer.name,
-	  slug: manufacturer.slug,
+      slug: manufacturer.slug,
     },
-	
-	releaseYear:
-      iem.release_year == null
+
+    releaseYear:
+      iem.release_year ==
+      null
         ? null
-        : Number(iem.release_year),
-    
+        : Number(
+            iem.release_year,
+          ),
+
     driverConfiguration:
       iem.driver_configuration,
-    
+
     launchPrice:
-      iem.launch_price == null
+      iem.launch_price ==
+      null
         ? null
-        : Number(iem.launch_price),
-    
+        : Number(
+            iem.launch_price,
+          ),
+
     launchCurrency:
       iem.launch_currency,
 
     averageRating:
-      calculateAverageRating(reviews),
+      calculateAverageRating(
+        reviews,
+      ),
 
     heroImageUrl,
 
-    reviewers: collectReviewers(rows),
-    artists: collectArtists(rows),
-    genres: collectGenres(rows),
+    reviewers:
+      collectReviewers(rows),
+
+    artists:
+      collectArtists(rows),
+
+    genres:
+      collectGenres(rows),
+
     reviews,
+    impressions,
   }
 }
 
 export async function getIems(): Promise<
   IemDirectoryItem[]
 > {
-  const { data, error } = await supabase
+  const {
+    data,
+    error,
+  } = await supabase
     .from("iems")
     .select(`
       id,
@@ -522,10 +723,10 @@ export async function getIems(): Promise<
       manufacturers (
         id,
         name,
-		slug
+        slug
       ),
 
-      reviews!inner (
+      reviews (
         id,
         rating,
         hero_image_url,
@@ -534,87 +735,225 @@ export async function getIems(): Promise<
         reviewers (
           slug
         )
+      ),
+
+      impressions (
+        id,
+        hero_image_url,
+        published_at,
+
+        reviewers (
+          slug
+        )
       )
     `)
-    .eq("reviews.published", true)
+    .eq(
+      "reviews.published",
+      true,
+    )
+    .eq(
+      "impressions.published",
+      true,
+    )
 
   if (error) {
     throw error
   }
 
   const rows =
-    (data ?? []) as unknown as IemDirectoryRow[]
+    (data ??
+      []) as unknown as IemDirectoryRow[]
 
-  return rows.flatMap((row) => {
-    const manufacturer = getSingleRelation(
-      row.manufacturers,
-    )
+  return rows.flatMap(
+    (row) => {
+      const manufacturer =
+        getSingleRelation(
+          row.manufacturers,
+        )
 
-    if (!manufacturer) {
-      return []
-    }
+      if (!manufacturer) {
+        return []
+      }
 
-    const reviews = [...(row.reviews ?? [])].sort(
-      (first, second) => {
-        const firstTime = first.published_at
-          ? new Date(first.published_at).getTime()
-          : 0
-
-        const secondTime = second.published_at
-          ? new Date(second.published_at).getTime()
-          : 0
-
-        return secondTime - firstTime
-      },
-    )
-
-    if (reviews.length === 0) {
-      return []
-    }
-
-    const reviewerSlugs = new Set<string>()
-
-    reviews.forEach((review) => {
-      const reviewer = getSingleRelation(
-        review.reviewers,
+      const reviews = [
+        ...(row.reviews ??
+          []),
+      ].sort(
+        (first, second) =>
+          timestampValue(
+            second.published_at,
+          ) -
+          timestampValue(
+            first.published_at,
+          ),
       )
 
-      if (reviewer) {
-        reviewerSlugs.add(reviewer.slug)
+      const impressions = [
+        ...(row.impressions ??
+          []),
+      ].sort(
+        (first, second) =>
+          timestampValue(
+            second.published_at,
+          ) -
+          timestampValue(
+            first.published_at,
+          ),
+      )
+
+      /*
+       * Directory should only contain
+       * IEMs represented by actual
+       * published ITGE content.
+       */
+      if (
+        reviews.length === 0 &&
+        impressions.length ===
+          0
+      ) {
+        return []
       }
-    })
 
-    const ratingTotal = reviews.reduce(
-      (total, review) =>
-        total + Number(review.rating),
-      0,
-    )
+      const reviewReviewerSlugs =
+        new Set<string>()
 
-    return [
-      {
-        id: Number(row.id),
-        model: row.model,
-        slug: row.slug,
+      const contributorSlugs =
+        new Set<string>()
 
-        manufacturer: {
-          id: Number(manufacturer.id),
-          name: manufacturer.name,
-		  slug: manufacturer.slug,
+      reviews.forEach(
+        (review) => {
+          const reviewer =
+            getSingleRelation(
+              review.reviewers,
+            )
+
+          if (!reviewer) {
+            return
+          }
+
+          reviewReviewerSlugs.add(
+            reviewer.slug,
+          )
+
+          contributorSlugs.add(
+            reviewer.slug,
+          )
         },
+      )
 
-        heroImageUrl:
-          reviews.find(
-            (review) =>
-              review.hero_image_url !== null,
-          )?.hero_image_url ?? null,
+      impressions.forEach(
+        (impression) => {
+          const reviewer =
+            getSingleRelation(
+              impression.reviewers,
+            )
 
-        reviewCount: reviews.length,
-        reviewerCount: reviewerSlugs.size,
-        averageRating:
-          ratingTotal / reviews.length,
-        latestReviewAt:
-          reviews[0]?.published_at ?? null,
-      },
-    ]
-  })
+          if (!reviewer) {
+            return
+          }
+
+          contributorSlugs.add(
+            reviewer.slug,
+          )
+        },
+      )
+
+      const ratingTotal =
+        reviews.reduce(
+          (
+            total,
+            review,
+          ) =>
+            total +
+            Number(
+              review.rating,
+            ),
+          0,
+        )
+
+      const averageRating =
+        reviews.length === 0
+          ? null
+          : ratingTotal /
+            reviews.length
+
+      const latestReviewAt =
+        reviews[0]
+          ?.published_at ??
+        null
+
+      const latestImpressionAt =
+        impressions[0]
+          ?.published_at ??
+        null
+
+      const latestActivityAt =
+        timestampValue(
+          latestReviewAt,
+        ) >=
+        timestampValue(
+          latestImpressionAt,
+        )
+          ? latestReviewAt
+          : latestImpressionAt
+
+      const heroImageUrl =
+        reviews.find(
+          (review) =>
+            review.hero_image_url !==
+            null,
+        )?.hero_image_url ??
+        impressions.find(
+          (impression) =>
+            impression.hero_image_url !==
+            null,
+        )?.hero_image_url ??
+        null
+
+      return [
+        {
+          id: Number(
+            row.id,
+          ),
+
+          model: row.model,
+          slug: row.slug,
+
+          manufacturer: {
+            id: Number(
+              manufacturer.id,
+            ),
+            name:
+              manufacturer.name,
+            slug:
+              manufacturer.slug,
+          },
+
+          heroImageUrl,
+
+          reviewCount:
+            reviews.length,
+
+          impressionCount:
+            impressions.length,
+
+          coverageCount:
+            reviews.length +
+            impressions.length,
+
+          reviewerCount:
+            reviewReviewerSlugs.size,
+
+          contributorCount:
+            contributorSlugs.size,
+
+          averageRating,
+
+          latestReviewAt,
+
+          latestActivityAt,
+        },
+      ]
+    },
+  )
 }

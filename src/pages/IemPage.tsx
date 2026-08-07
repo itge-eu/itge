@@ -3,35 +3,47 @@ import {
   useMemo,
   useState,
 } from "react"
-import { Link, useParams } from "react-router"
+import {
+  Link,
+  useParams,
+} from "react-router"
+
 import ReviewGrid from "../components/reviews/ReviewGrid"
+import ImpressionCard from "../components/impressions/ImpressionCard"
 import ReviewerAvatar from "../components/reviewers/ReviewerAvatar"
+import Breadcrumbs from "../components/navigation/Breadcrumbs"
+import PageState from "../components/layout/PageState"
+
 import {
   getIemBySlug,
   type IemProfile,
 } from "../lib/iems"
-import Breadcrumbs from "../components/navigation/Breadcrumbs"
+
 import usePageMetadata from "../hooks/usePageMetadata"
-import PageState from "../components/layout/PageState"
 
 function IemPage() {
-  const { slug } = useParams<{ slug: string }>()
+  const { slug } =
+    useParams<{ slug: string }>()
 
   const [iem, setIem] =
-    useState<IemProfile | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(
-    null,
-  )
-  
+    useState<IemProfile | null>(
+      null,
+    )
+
+  const [loading, setLoading] =
+    useState(true)
+
+  const [error, setError] =
+    useState<string | null>(null)
+
   usePageMetadata({
     title: iem
       ? `${iem.manufacturer.name} ${iem.model} | ITGE`
       : "IEM | ITGE",
-  
+
     description: iem
-      ? `Reviews, specifications and coverage for the ${iem.manufacturer.name} ${iem.model}.`
-      : "Explore IEM reviews and coverage from ITGE.",
+      ? `Reviews, listening impressions, specifications and coverage for the ${iem.manufacturer.name} ${iem.model}.`
+      : "Explore IEM reviews, impressions and coverage from ITGE.",
   })
 
   useEffect(() => {
@@ -39,7 +51,9 @@ function IemPage() {
 
     async function loadIem() {
       if (!slug) {
-        setError("No IEM was specified.")
+        setError(
+          "No IEM was specified.",
+        )
         setLoading(false)
         return
       }
@@ -48,7 +62,10 @@ function IemPage() {
       setError(null)
 
       try {
-        const result = await getIemBySlug(slug)
+        const result =
+          await getIemBySlug(
+            slug,
+          )
 
         if (!cancelled) {
           setIem(result)
@@ -78,15 +95,48 @@ function IemPage() {
     }
   }, [slug])
 
-  const totalReviewerReviews = useMemo(
-    () =>
-      iem?.reviewers.reduce(
-        (total, reviewer) =>
-          total + reviewer.reviewCount,
-        0,
-      ) ?? 0,
-    [iem],
-  )
+  const totalReviewerReviews =
+    useMemo(
+      () =>
+        iem?.reviewers.reduce(
+          (
+            total,
+            reviewer,
+          ) =>
+            total +
+            reviewer.reviewCount,
+          0,
+        ) ?? 0,
+      [iem],
+    )
+
+  const contributorCount =
+    useMemo(() => {
+      if (!iem) {
+        return 0
+      }
+
+      const contributorSlugs =
+        new Set<string>()
+
+      iem.reviewers.forEach(
+        (reviewer) => {
+          contributorSlugs.add(
+            reviewer.slug,
+          )
+        },
+      )
+
+      iem.impressions.forEach(
+        (impression) => {
+          contributorSlugs.add(
+            impression.reviewer.slug,
+          )
+        },
+      )
+
+      return contributorSlugs.size
+    }, [iem])
 
   if (loading) {
     return (
@@ -111,7 +161,7 @@ function IemPage() {
 
   if (!iem) {
     return (
-       <PageState
+      <PageState
         eyebrow="404"
         title="IEM not found"
         message="The IEM you were looking for doesn’t exist or is no longer available."
@@ -124,14 +174,16 @@ function IemPage() {
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
       <div className="mx-auto max-w-6xl">
-	    <Breadcrumbs
+        <Breadcrumbs
           items={[
             {
               label: "IEMs",
               to: "/iems",
             },
             {
-              label: iem.manufacturer.name,
+              label:
+                iem.manufacturer
+                  .name,
               to: `/manufacturers/${iem.manufacturer.slug}`,
             },
             {
@@ -139,6 +191,7 @@ function IemPage() {
             },
           ]}
         />
+
         <header className="overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)]">
           <div className="grid lg:grid-cols-[minmax(0,1fr)_24rem]">
             <div className="p-8 sm:p-10">
@@ -146,7 +199,11 @@ function IemPage() {
                 to={`/manufacturers/${iem.manufacturer.slug}`}
                 className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)] transition hover:opacity-70"
               >
-                {iem.manufacturer.name}
+                {
+                  iem
+                    .manufacturer
+                    .name
+                }
               </Link>
 
               <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-6xl">
@@ -154,21 +211,34 @@ function IemPage() {
               </h1>
 
               <p className="mt-5 max-w-2xl text-lg leading-8 text-[var(--muted)]">
-                Community reviews, reviewer coverage
-                and music references for the{" "}
-                {iem.manufacturer.name} {iem.model}.
+                Community reviews,
+                listening impressions
+                and music references
+                for the{" "}
+                {
+                  iem
+                    .manufacturer
+                    .name
+                }{" "}
+                {iem.model}.
               </p>
 
-              <div className="mt-8 grid gap-4 sm:grid-cols-3">
+              <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <StatCard
                   label="Published reviews"
                   value={iem.reviews.length.toString()}
                 />
 
                 <StatCard
-                  label="Average rating"
+                  label="Published impressions"
+                  value={iem.impressions.length.toString()}
+                />
+
+                <StatCard
+                  label="Average review rating"
                   value={
-                    iem.averageRating == null
+                    iem.averageRating ==
+                    null
                       ? "—"
                       : `${iem.averageRating.toFixed(
                           1,
@@ -177,34 +247,40 @@ function IemPage() {
                 />
 
                 <StatCard
-                  label="Reviewers"
-                  value={iem.reviewers.length.toString()}
+                  label="Contributors"
+                  value={contributorCount.toString()}
                 />
               </div>
-			  {(iem.driverConfiguration ||
+
+              {(iem.driverConfiguration ||
                 iem.releaseYear ||
-                iem.launchPrice != null) && (
+                iem.launchPrice !=
+                  null) && (
                 <div className="mt-6 border-t border-[var(--border)] pt-6">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
                     Product details
                   </p>
-              
+
                   <div className="mt-4 grid gap-5 sm:grid-cols-3">
                     {iem.driverConfiguration && (
                       <ProductDetail
                         label="Driver configuration"
-                        value={iem.driverConfiguration}
+                        value={
+                          iem.driverConfiguration
+                        }
                       />
                     )}
-              
-                    {iem.releaseYear != null && (
+
+                    {iem.releaseYear !=
+                      null && (
                       <ProductDetail
                         label="Released"
                         value={iem.releaseYear.toString()}
                       />
                     )}
-              
-                    {iem.launchPrice != null && (
+
+                    {iem.launchPrice !=
+                      null && (
                       <ProductDetail
                         label="Launch price"
                         value={formatLaunchPrice(
@@ -220,100 +296,135 @@ function IemPage() {
 
             {iem.heroImageUrl ? (
               <img
-                src={iem.heroImageUrl}
+                src={
+                  iem.heroImageUrl
+                }
                 alt={`${iem.manufacturer.name} ${iem.model}`}
                 className="aspect-[16/10] h-full w-full object-cover lg:aspect-auto"
               />
             ) : (
               <div className="flex min-h-64 items-center justify-center border-t border-[var(--border)] bg-[var(--surface-soft)] p-8 text-center text-[var(--muted)] lg:border-l lg:border-t-0">
-                No IEM image is available yet.
+                No IEM image is
+                available yet.
               </div>
             )}
           </div>
         </header>
 
-        {iem.reviewers.length > 0 && (
+        {iem.reviewers.length >
+          0 && (
           <section className="mt-12">
             <SectionHeader
-              eyebrow="Community"
+              eyebrow="Full reviews"
               title="Reviewed by"
               description={`${iem.reviewers.length} ${
-                iem.reviewers.length === 1
+                iem.reviewers
+                  .length === 1
                   ? "reviewer has"
                   : "reviewers have"
               } published ${totalReviewerReviews} ${
-                totalReviewerReviews === 1
+                totalReviewerReviews ===
+                1
                   ? "review"
                   : "reviews"
               } of this IEM.`}
             />
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {iem.reviewers.map((reviewer) => (
-                <Link
-                  key={reviewer.slug}
-                  to={`/reviewers/${reviewer.slug}`}
-                  className="group flex items-center gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 transition hover:-translate-y-0.5 hover:border-[var(--accent)]"
-                >
-                  <ReviewerAvatar
-                    name={reviewer.name}
-                    slug={reviewer.slug}
-                    size="md"
-                    shape="circle"
-                  />
+              {iem.reviewers.map(
+                (reviewer) => (
+                  <Link
+                    key={
+                      reviewer.slug
+                    }
+                    to={`/reviewers/${reviewer.slug}`}
+                    className="group flex items-center gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 transition hover:-translate-y-0.5 hover:border-[var(--accent)]"
+                  >
+                    <ReviewerAvatar
+                      name={
+                        reviewer.name
+                      }
+                      slug={
+                        reviewer.slug
+                      }
+                      size="md"
+                      shape="circle"
+                    />
 
-                  <div className="min-w-0">
-                    <p className="truncate font-semibold group-hover:text-[var(--accent)]">
-                      {reviewer.name}
-                    </p>
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold group-hover:text-[var(--accent)]">
+                        {
+                          reviewer.name
+                        }
+                      </p>
 
-                    <p className="mt-1 text-sm text-[var(--muted)]">
-                      {reviewer.reviewCount}{" "}
-                      {reviewer.reviewCount === 1
-                        ? "review"
-                        : "reviews"}
-                    </p>
-                  </div>
-                </Link>
-              ))}
+                      <p className="mt-1 text-sm text-[var(--muted)]">
+                        {
+                          reviewer.reviewCount
+                        }{" "}
+                        {reviewer.reviewCount ===
+                        1
+                          ? "review"
+                          : "reviews"}
+                      </p>
+                    </div>
+                  </Link>
+                ),
+              )}
             </div>
           </section>
         )}
 
-        {(iem.artists.length > 0 ||
-          iem.genres.length > 0) && (
+        {(iem.artists.length >
+          0 ||
+          iem.genres.length >
+            0) && (
           <section className="mt-12 grid gap-8 lg:grid-cols-2">
-            {iem.artists.length > 0 && (
+            {iem.artists.length >
+              0 && (
               <TagPanel
                 eyebrow="Listening references"
                 title="Artists mentioned"
               >
-                {iem.artists.map((artist) => (
-                  <Link
-                    key={artist.id}
-                    to={`/artists/${artist.slug}`}
-                    className="rounded-full border border-[var(--accent)]/45 bg-[var(--accent)]/10 px-3 py-2 text-sm font-semibold transition hover:border-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]"
-                  >
-                    {artist.name}
-                  </Link>
-                ))}
+                {iem.artists.map(
+                  (artist) => (
+                    <Link
+                      key={
+                        artist.id
+                      }
+                      to={`/artists/${artist.slug}`}
+                      className="rounded-full border border-[var(--accent)]/45 bg-[var(--accent)]/10 px-3 py-2 text-sm font-semibold transition hover:border-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]"
+                    >
+                      {
+                        artist.name
+                      }
+                    </Link>
+                  ),
+                )}
               </TagPanel>
             )}
 
-            {iem.genres.length > 0 && (
+            {iem.genres.length >
+              0 && (
               <TagPanel
                 eyebrow="Music coverage"
                 title="Genres represented"
               >
-                {iem.genres.map((genre) => (
-                  <Link
-                    key={genre.id}
-                    to={`/genres/${genre.slug}`}
-                    className="rounded-full border border-[var(--border)] bg-[var(--surface-soft)] px-3 py-2 text-sm font-semibold transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
-                  >
-                    {genre.name}
-                  </Link>
-                ))}
+                {iem.genres.map(
+                  (genre) => (
+                    <Link
+                      key={
+                        genre.id
+                      }
+                      to={`/genres/${genre.slug}`}
+                      className="rounded-full border border-[var(--border)] bg-[var(--surface-soft)] px-3 py-2 text-sm font-semibold transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                    >
+                      {
+                        genre.name
+                      }
+                    </Link>
+                  ),
+                )}
               </TagPanel>
             )}
           </section>
@@ -324,20 +435,68 @@ function IemPage() {
             eyebrow="Review library"
             title={`Reviews of ${iem.model}`}
             description={
-              iem.reviews.length === 0
+              iem.reviews.length ===
+              0
                 ? "No published reviews are available yet."
                 : `Read every published ITGE review of the ${iem.manufacturer.name} ${iem.model}.`
             }
           />
 
           <div className="mt-8">
-            {iem.reviews.length === 0 ? (
+            {iem.reviews.length ===
+            0 ? (
               <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
-                This IEM does not have any published
+                This IEM does not
+                have any published
                 reviews yet.
               </div>
             ) : (
-              <ReviewGrid reviews={iem.reviews} />
+              <ReviewGrid
+                reviews={
+                  iem.reviews
+                }
+              />
+            )}
+          </div>
+        </section>
+
+        <section className="mt-14 border-t border-[var(--border)] pt-14">
+          <SectionHeader
+            eyebrow="Listening notes"
+            title={`Impressions of ${iem.model}`}
+            description={
+              iem.impressions
+                .length === 0
+                ? "No published impressions are available yet."
+                : `Read short-form listening impressions of the ${iem.manufacturer.name} ${iem.model}.`
+            }
+          />
+
+          <div className="mt-8">
+            {iem.impressions
+              .length === 0 ? (
+              <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
+                This IEM does not
+                have any published
+                impressions yet.
+              </div>
+            ) : (
+              <div className="grid gap-6 lg:grid-cols-2">
+                {iem.impressions.map(
+                  (
+                    impression,
+                  ) => (
+                    <ImpressionCard
+                      key={
+                        impression.id
+                      }
+                      impression={
+                        impression
+                      }
+                    />
+                  ),
+                )}
+              </div>
             )}
           </div>
         </section>
@@ -417,18 +576,29 @@ function formatLaunchPrice(
   currency: string | null,
 ): string {
   if (!currency) {
-    return price.toLocaleString("en-US")
+    return price.toLocaleString(
+      "en-US",
+    )
   }
 
   try {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency,
-      maximumFractionDigits:
-        Number.isInteger(price) ? 0 : 2,
-    }).format(price)
+    return new Intl.NumberFormat(
+      "en-US",
+      {
+        style: "currency",
+        currency,
+        maximumFractionDigits:
+          Number.isInteger(
+            price,
+          )
+            ? 0
+            : 2,
+      },
+    ).format(price)
   } catch {
-    return `${price.toLocaleString("en-US")} ${currency}`
+    return `${price.toLocaleString(
+      "en-US",
+    )} ${currency}`
   }
 }
 
