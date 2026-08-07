@@ -20,6 +20,8 @@ import ArtistPage from "./pages/ArtistPage"
 import GenresPage from "./pages/GenresPage"
 import GenrePage from "./pages/GenrePage"
 import NotFoundPage from "./pages/NotFoundPage"
+import ImpressionsPage from "./pages/ImpressionsPage"
+import ImpressionPage from "./pages/ImpressionPage"
 
 function App() {
   return (
@@ -30,6 +32,9 @@ function App() {
 
         <Route path="/reviews" element={<ReviewsPage />} />
         <Route path="/reviews/:slug" element={<ReviewPage />} />
+		
+		<Route path="/impressions" element={<ImpressionsPage />} />
+		<Route path="/impressions/:slug" element={<ImpressionPage />} />
 		
 		<Route path="/iems" element={<IemsPage />} />
 		<Route path="/iems/:slug" element={<IemPage />} />

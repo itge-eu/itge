@@ -1,34 +1,66 @@
 import { useEffect, useState } from "react"
-import { Link, useLocation } from "react-router-dom"
+import {
+  Link,
+  useLocation,
+} from "react-router-dom"
 
 type Theme = "light" | "dark"
 
 function getInitialTheme(): Theme {
-  const savedTheme = localStorage.getItem("itge-theme")
+  const savedTheme =
+    localStorage.getItem("itge-theme")
 
-  if (savedTheme === "light" || savedTheme === "dark") {
+  if (
+    savedTheme === "light" ||
+    savedTheme === "dark"
+  ) {
     return savedTheme
   }
 
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
+  return window.matchMedia(
+    "(prefers-color-scheme: dark)",
+  ).matches
     ? "dark"
     : "light"
 }
 
 function Navbar() {
-  const [theme, setTheme] = useState<Theme>(getInitialTheme)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [mobileExploreOpen, setMobileExploreOpen] = useState(false)
-  const [desktopExploreOpen, setDesktopExploreOpen] = useState(false)
+  const [theme, setTheme] =
+    useState<Theme>(getInitialTheme)
+
+  const [
+    mobileMenuOpen,
+    setMobileMenuOpen,
+  ] = useState(false)
+
+  const [
+    mobileExploreOpen,
+    setMobileExploreOpen,
+  ] = useState(false)
+
+  const [
+    desktopExploreOpen,
+    setDesktopExploreOpen,
+  ] = useState(false)
 
   const location = useLocation()
 
   useEffect(() => {
-    const root = document.documentElement
-    const isDark = theme === "dark"
+    const root =
+      document.documentElement
 
-    root.classList.toggle("dark", isDark)
-    localStorage.setItem("itge-theme", theme)
+    const isDark =
+      theme === "dark"
+
+    root.classList.toggle(
+      "dark",
+      isDark,
+    )
+
+    localStorage.setItem(
+      "itge-theme",
+      theme,
+    )
   }, [theme])
 
   useEffect(() => {
@@ -38,7 +70,9 @@ function Navbar() {
   }, [location.pathname])
 
   useEffect(() => {
-    const handleEscape = (event: KeyboardEvent) => {
+    const handleEscape = (
+      event: KeyboardEvent,
+    ) => {
       if (event.key !== "Escape") {
         return
       }
@@ -48,16 +82,24 @@ function Navbar() {
       setDesktopExploreOpen(false)
     }
 
-    window.addEventListener("keydown", handleEscape)
+    window.addEventListener(
+      "keydown",
+      handleEscape,
+    )
 
     return () => {
-      window.removeEventListener("keydown", handleEscape)
+      window.removeEventListener(
+        "keydown",
+        handleEscape,
+      )
     }
   }, [])
 
   const toggleTheme = () => {
     setTheme((currentTheme) =>
-      currentTheme === "dark" ? "light" : "dark",
+      currentTheme === "dark"
+        ? "light"
+        : "dark",
     )
   }
 
@@ -82,7 +124,6 @@ function Navbar() {
             closeDesktopExplore()
           }}
         >
-          {/* Light mode */}
           <span className="flex items-center dark:hidden">
             <img
               src={`${import.meta.env.BASE_URL}branding/icon-light.svg`}
@@ -98,7 +139,6 @@ function Navbar() {
             />
           </span>
 
-          {/* Dark mode */}
           <span className="hidden items-center dark:flex">
             <img
               src={`${import.meta.env.BASE_URL}branding/icon-dark.svg`}
@@ -115,10 +155,9 @@ function Navbar() {
           </span>
         </Link>
 
-        {/* Desktop navigation */}
         <nav
           aria-label="Main navigation"
-          className="hidden items-center gap-7 text-sm text-[var(--muted)] md:flex"
+          className="hidden items-center gap-6 text-sm text-[var(--muted)] md:flex"
         >
           <Link
             to="/discover"
@@ -137,6 +176,14 @@ function Navbar() {
           </Link>
 
           <Link
+            to="/impressions"
+            onClick={closeDesktopExplore}
+            className="transition hover:text-[var(--foreground)]"
+          >
+            Impressions
+          </Link>
+
+          <Link
             to="/iems"
             onClick={closeDesktopExplore}
             className="transition hover:text-[var(--foreground)]"
@@ -152,11 +199,14 @@ function Navbar() {
             Reviewers
           </Link>
 
-          {/* Explore dropdown */}
           <div
             className="relative"
-            onMouseEnter={() => setDesktopExploreOpen(true)}
-            onMouseLeave={() => setDesktopExploreOpen(false)}
+            onMouseEnter={() =>
+              setDesktopExploreOpen(true)
+            }
+            onMouseLeave={() =>
+              setDesktopExploreOpen(false)
+            }
           >
             <button
               type="button"
@@ -170,7 +220,9 @@ function Navbar() {
               }
               className="flex items-center gap-1.5 py-3 transition hover:text-[var(--foreground)]"
               aria-haspopup="true"
-              aria-expanded={desktopExploreOpen}
+              aria-expanded={
+                desktopExploreOpen
+              }
             >
               Explore
 
@@ -192,21 +244,27 @@ function Navbar() {
                     to="/artists"
                     title="Artists"
                     description="Browse listening references"
-                    onClick={closeDesktopExplore}
+                    onClick={
+                      closeDesktopExplore
+                    }
                   />
 
                   <ExploreLink
                     to="/genres"
                     title="Genres"
                     description="Explore reviews by genre"
-                    onClick={closeDesktopExplore}
+                    onClick={
+                      closeDesktopExplore
+                    }
                   />
 
                   <ExploreLink
                     to="/manufacturers"
                     title="Manufacturers"
                     description="Browse IEM makers"
-                    onClick={closeDesktopExplore}
+                    onClick={
+                      closeDesktopExplore
+                    }
                   />
                 </div>
               </div>
@@ -236,13 +294,19 @@ function Navbar() {
             onClick={toggleTheme}
             className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] transition hover:border-[var(--accent)] hover:bg-[var(--surface-soft)]"
             aria-label={`Switch to ${
-              theme === "dark" ? "light" : "dark"
+              theme === "dark"
+                ? "light"
+                : "dark"
             } mode`}
             title={`Switch to ${
-              theme === "dark" ? "light" : "dark"
+              theme === "dark"
+                ? "light"
+                : "dark"
             } mode`}
           >
-            {theme === "dark" ? <SunIcon /> : <MoonIcon />}
+            {theme === "dark"
+              ? <SunIcon />
+              : <MoonIcon />}
           </button>
 
           <Link
@@ -266,15 +330,18 @@ function Navbar() {
                 ? "Close navigation menu"
                 : "Open navigation menu"
             }
-            aria-expanded={mobileMenuOpen}
+            aria-expanded={
+              mobileMenuOpen
+            }
             aria-controls="mobile-navigation"
           >
-            {mobileMenuOpen ? <CloseIcon /> : <MenuIcon />}
+            {mobileMenuOpen
+              ? <CloseIcon />
+              : <MenuIcon />}
           </button>
         </div>
       </div>
 
-      {/* Mobile navigation */}
       {mobileMenuOpen && (
         <nav
           id="mobile-navigation"
@@ -297,6 +364,13 @@ function Navbar() {
             </MobileLink>
 
             <MobileLink
+              to="/impressions"
+              onClick={closeMobileMenu}
+            >
+              Impressions
+            </MobileLink>
+
+            <MobileLink
               to="/iems"
               onClick={closeMobileMenu}
             >
@@ -310,7 +384,6 @@ function Navbar() {
               Reviewers
             </MobileLink>
 
-            {/* Mobile Explore */}
             <div>
               <button
                 type="button"
@@ -320,7 +393,9 @@ function Navbar() {
                   )
                 }
                 className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
-                aria-expanded={mobileExploreOpen}
+                aria-expanded={
+                  mobileExploreOpen
+                }
               >
                 Explore
 
@@ -339,21 +414,27 @@ function Navbar() {
                 <div className="ml-4 mt-1 flex flex-col gap-1 border-l border-[var(--border)] pl-3">
                   <MobileExploreLink
                     to="/artists"
-                    onClick={closeMobileMenu}
+                    onClick={
+                      closeMobileMenu
+                    }
                   >
                     Artists
                   </MobileExploreLink>
 
                   <MobileExploreLink
                     to="/genres"
-                    onClick={closeMobileMenu}
+                    onClick={
+                      closeMobileMenu
+                    }
                   >
                     Genres
                   </MobileExploreLink>
 
                   <MobileExploreLink
                     to="/manufacturers"
-                    onClick={closeMobileMenu}
+                    onClick={
+                      closeMobileMenu
+                    }
                   >
                     Manufacturers
                   </MobileExploreLink>

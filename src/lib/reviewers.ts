@@ -1,5 +1,9 @@
 import { supabase } from "./supabase"
 import type { FeaturedReview } from "./reviews"
+import {
+  getImpressionsByReviewerId,
+  type ImpressionSummary,
+} from "./impressions"
 
 export type ReviewerProfile = {
   id: number
@@ -11,6 +15,7 @@ export type ReviewerProfile = {
   country: string | null
   headfiUrl: string | null
   reviews: FeaturedReview[]
+  impressions: ImpressionSummary[]
 }
 
 export type ReviewerSummary = {
@@ -22,6 +27,7 @@ export type ReviewerSummary = {
   avatarUrl: string | null
   country: string | null
   reviewCount: number
+  impressionCount: number
 }
 
 type ReviewRow = {
@@ -160,31 +166,61 @@ export async function getReviewers(): Promise<
     throw reviewerError
   }
 
-  const {
-    data: reviewRows,
-    error: reviewError,
-  } = await supabase
-    .from("reviews")
-    .select(`
-      id,
-      reviewer_id
-    `)
-    .eq("published", true)
+  const [
+    reviewsResult,
+    impressionsResult,
+  ] = await Promise.all([
+    supabase
+      .from("reviews")
+      .select(`
+        id,
+        reviewer_id
+      `)
+      .eq("published", true),
 
-  if (reviewError) {
-    throw reviewError
+    supabase
+      .from("impressions")
+      .select(`
+        id,
+        reviewer_id
+      `)
+      .eq("published", true),
+  ])
+
+  if (reviewsResult.error) {
+    throw reviewsResult.error
+  }
+
+  if (impressionsResult.error) {
+    throw impressionsResult.error
   }
 
   const reviewCounts =
     new Map<number, number>()
 
-  for (const review of reviewRows ?? []) {
+  const impressionCounts =
+    new Map<number, number>()
+
+  for (const review of reviewsResult.data ?? []) {
     const reviewerId =
       Number(review.reviewer_id)
 
     reviewCounts.set(
       reviewerId,
       (reviewCounts.get(reviewerId) ?? 0) + 1,
+    )
+  }
+
+  for (
+    const impression of
+    impressionsResult.data ?? []
+  ) {
+    const reviewerId =
+      Number(impression.reviewer_id)
+
+    impressionCounts.set(
+      reviewerId,
+      (impressionCounts.get(reviewerId) ?? 0) + 1,
     )
   }
 
@@ -197,8 +233,14 @@ export async function getReviewers(): Promise<
       bio: reviewer.bio,
       avatarUrl: reviewer.avatar_url,
       country: reviewer.country,
+
       reviewCount:
         reviewCounts.get(
+          Number(reviewer.id),
+        ) ?? 0,
+
+      impressionCount:
+        impressionCounts.get(
           Number(reviewer.id),
         ) ?? 0,
     }),
@@ -270,6 +312,11 @@ export async function getReviewerBySlug(
     throw reviewsError
   }
 
+  const impressions =
+    await getImpressionsByReviewerId(
+      Number(reviewer.id),
+    )
+
   return {
     id: Number(reviewer.id),
     name: reviewer.name,
@@ -289,5 +336,7 @@ export async function getReviewerBySlug(
         reviewerSlug: reviewer.slug,
       }),
     ),
+
+    impressions,
   }
 }

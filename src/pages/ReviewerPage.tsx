@@ -4,33 +4,40 @@ import {
   useState,
 } from "react"
 import { useParams } from "react-router"
+
 import ReviewerAvatar from "../components/reviewers/ReviewerAvatar"
+import ReviewGrid from "../components/reviews/ReviewGrid"
+import ImpressionCard from "../components/impressions/ImpressionCard"
+import Breadcrumbs from "../components/navigation/Breadcrumbs"
+import PageState from "../components/layout/PageState"
+
 import {
+  countryCodeToName,
   getReviewerBySlug,
   type ReviewerProfile,
 } from "../lib/reviewers"
-import ReviewGrid from "../components/reviews/ReviewGrid"
-import Breadcrumbs from "../components/navigation/Breadcrumbs"
+
 import usePageMetadata from "../hooks/usePageMetadata"
-import PageState from "../components/layout/PageState"
-import { countryCodeToName } from "../lib/reviewers"
 
 function ReviewerPage() {
   const { slug } = useParams<{ slug: string }>()
 
   const [reviewer, setReviewer] =
     useState<ReviewerProfile | null>(null)
+
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(
-    null,
-  )
-  
+
+  const [error, setError] = useState<
+    string | null
+  >(null)
+
   usePageMetadata({
     title: reviewer
       ? `${reviewer.name} | ITGE`
       : "Reviewer | ITGE",
+
     description: reviewer
-      ? `Read IEM reviews by ${reviewer.name} at ITGE.`
+      ? `Explore IEM reviews and listening impressions by ${reviewer.name} at ITGE.`
       : "Meet the reviewers behind ITGE.",
   })
 
@@ -45,7 +52,8 @@ function ReviewerPage() {
       }
 
       try {
-        const result = await getReviewerBySlug(slug)
+        const result =
+          await getReviewerBySlug(slug)
 
         if (!cancelled) {
           setReviewer(result)
@@ -76,16 +84,23 @@ function ReviewerPage() {
   }, [slug])
 
   const averageRating = useMemo(() => {
-    if (!reviewer || reviewer.reviews.length === 0) {
+    if (
+      !reviewer ||
+      reviewer.reviews.length === 0
+    ) {
       return null
     }
 
-    const total = reviewer.reviews.reduce(
-      (sum, review) => sum + review.rating,
-      0,
-    )
+    const total =
+      reviewer.reviews.reduce(
+        (sum, review) =>
+          sum + review.rating,
+        0,
+      )
 
-    return total / reviewer.reviews.length
+    return (
+      total / reviewer.reviews.length
+    )
   }, [reviewer])
 
   if (loading) {
@@ -124,7 +139,7 @@ function ReviewerPage() {
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
       <div className="mx-auto max-w-6xl">
-	    <Breadcrumbs
+        <Breadcrumbs
           items={[
             {
               label: "Reviewers",
@@ -135,6 +150,7 @@ function ReviewerPage() {
             },
           ]}
         />
+
         <header className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 sm:p-10">
           <div className="flex flex-col gap-8 sm:flex-row sm:items-start">
             <div className="relative shrink-0">
@@ -145,7 +161,7 @@ function ReviewerPage() {
                 shape="rounded"
                 eager
               />
-            
+
               {!reviewer.active && (
                 <div className="pointer-events-none absolute inset-0 rounded-2xl bg-black/35" />
               )}
@@ -168,9 +184,11 @@ function ReviewerPage() {
                     className={`fi fi-${reviewer.country.toLowerCase()} rounded-sm`}
                     aria-hidden="true"
                   />
-              
+
                   <span>
-                    {countryCodeToName(reviewer.country)}
+                    {countryCodeToName(
+                      reviewer.country,
+                    )}
                   </span>
                 </p>
               )}
@@ -194,7 +212,7 @@ function ReviewerPage() {
             </div>
           </div>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
+          <div className="mt-8 grid gap-4 sm:grid-cols-3">
             <div className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5">
               <p className="text-sm text-[var(--muted)]">
                 Published reviews
@@ -207,30 +225,44 @@ function ReviewerPage() {
 
             <div className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5">
               <p className="text-sm text-[var(--muted)]">
-                Average rating
+                Published impressions
+              </p>
+
+              <p className="mt-2 text-3xl font-semibold">
+                {reviewer.impressions.length}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5">
+              <p className="text-sm text-[var(--muted)]">
+                Average review rating
               </p>
 
               <p className="mt-2 text-3xl font-semibold">
                 {averageRating == null
                   ? "—"
-                  : `${averageRating.toFixed(1)}/5`}
+                  : `${averageRating.toFixed(
+                      1,
+                    )}/5`}
               </p>
             </div>
           </div>
         </header>
 
         <section className="mt-12">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <h2 className="text-3xl font-semibold">
-                Reviews by {reviewer.name}
-              </h2>
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
+              Full reviews
+            </p>
 
-              <p className="mt-2 text-[var(--muted)]">
-                Every published review from this
-                reviewer.
-              </p>
-            </div>
+            <h2 className="mt-2 text-3xl font-semibold tracking-tight">
+              Reviews by {reviewer.name}
+            </h2>
+
+            <p className="mt-2 text-[var(--muted)]">
+              Every published full review from this
+              reviewer.
+            </p>
           </div>
 
           {reviewer.reviews.length === 0 ? (
@@ -240,7 +272,44 @@ function ReviewerPage() {
             </div>
           ) : (
             <div className="mt-8">
-              <ReviewGrid reviews={reviewer.reviews} />
+              <ReviewGrid
+                reviews={reviewer.reviews}
+              />
+            </div>
+          )}
+        </section>
+
+        <section className="mt-14 border-t border-[var(--border)] pt-14">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
+              Listening notes
+            </p>
+
+            <h2 className="mt-2 text-3xl font-semibold tracking-tight">
+              Impressions by {reviewer.name}
+            </h2>
+
+            <p className="mt-2 max-w-2xl text-[var(--muted)]">
+              Short-form listening impressions published
+              by this reviewer.
+            </p>
+          </div>
+
+          {reviewer.impressions.length === 0 ? (
+            <div className="mt-8 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
+              This reviewer has no published impressions
+              yet.
+            </div>
+          ) : (
+            <div className="mt-8 grid gap-6 lg:grid-cols-2">
+              {reviewer.impressions.map(
+                (impression) => (
+                  <ImpressionCard
+                    key={impression.id}
+                    impression={impression}
+                  />
+                ),
+              )}
             </div>
           )}
         </section>

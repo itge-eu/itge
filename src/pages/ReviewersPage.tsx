@@ -1,23 +1,26 @@
 import { useEffect, useState } from "react"
 import { Link } from "react-router"
+
 import ReviewerAvatar from "../components/reviewers/ReviewerAvatar"
+
 import {
+  countryCodeToName,
   getReviewers,
   type ReviewerSummary,
 } from "../lib/reviewers"
+
 import usePageMetadata from "../hooks/usePageMetadata"
-import { countryCodeToName } from "../lib/reviewers"
 
 function ReviewersPage() {
   const [reviewers, setReviewers] = useState<
     ReviewerSummary[]
   >([])
 
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] =
+    useState(true)
 
-  const [error, setError] = useState<
-    string | null
-  >(null)
+  const [error, setError] =
+    useState<string | null>(null)
 
   const activeReviewers = reviewers.filter(
     (reviewer) => reviewer.active,
@@ -26,11 +29,11 @@ function ReviewersPage() {
   const formerReviewers = reviewers.filter(
     (reviewer) => !reviewer.active,
   )
-  
+
   usePageMetadata({
     title: "Reviewers | ITGE",
     description:
-      "Meet the reviewers behind IEM Tour Group Europe and explore their reviews.",
+      "Meet the reviewers behind IEM Tour Group Europe and explore their reviews and listening impressions.",
   })
 
   useEffect(() => {
@@ -41,7 +44,8 @@ function ReviewersPage() {
       setError(null)
 
       try {
-        const result = await getReviewers()
+        const result =
+          await getReviewers()
 
         if (!cancelled) {
           setReviewers(result)
@@ -85,7 +89,8 @@ function ReviewersPage() {
 
           <p className="mt-4 max-w-2xl text-lg leading-8 text-[var(--muted)]">
             Meet the reviewers behind the ITGE review
-            library.
+            library and short-form listening
+            impressions.
           </p>
         </header>
 
@@ -120,12 +125,14 @@ function ReviewersPage() {
               </div>
 
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {activeReviewers.map((reviewer) => (
-                  <ReviewerCard
-                    key={reviewer.id}
-                    reviewer={reviewer}
-                  />
-                ))}
+                {activeReviewers.map(
+                  (reviewer) => (
+                    <ReviewerCard
+                      key={reviewer.id}
+                      reviewer={reviewer}
+                    />
+                  ),
+                )}
               </div>
             </section>
 
@@ -142,8 +149,8 @@ function ReviewersPage() {
 
                   <p className="mt-2 max-w-2xl text-[var(--muted)]">
                     Previous members of the ITGE
-                    reviewer community. Their published
-                    reviews remain part of our review
+                    reviewer community. Their reviews
+                    and impressions remain part of our
                     library.
                   </p>
                 </div>
@@ -207,9 +214,11 @@ function ReviewerCard({
                 className={`fi fi-${reviewer.country.toLowerCase()} rounded-sm`}
                 aria-hidden="true"
               />
-          
+
               <span>
-                {countryCodeToName(reviewer.country)}
+                {countryCodeToName(
+                  reviewer.country,
+                )}
               </span>
             </p>
           )}
@@ -228,12 +237,28 @@ function ReviewerCard({
         </p>
       )}
 
-      <p className="mt-5 text-sm font-semibold text-[var(--accent)]">
-        {reviewer.reviewCount}{" "}
-        {reviewer.reviewCount === 1
-          ? "published review"
-          : "published reviews"}
-      </p>
+      <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-semibold text-[var(--accent)]">
+        <span>
+          {reviewer.reviewCount}{" "}
+          {reviewer.reviewCount === 1
+            ? "review"
+            : "reviews"}
+        </span>
+
+        <span
+          aria-hidden="true"
+          className="text-[var(--muted)]"
+        >
+          ·
+        </span>
+
+        <span>
+          {reviewer.impressionCount}{" "}
+          {reviewer.impressionCount === 1
+            ? "impression"
+            : "impressions"}
+        </span>
+      </div>
     </Link>
   )
 }
