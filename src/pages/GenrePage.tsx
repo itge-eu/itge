@@ -7,6 +7,8 @@ import { Link, useParams } from "react-router"
 import Breadcrumbs from "../components/navigation/Breadcrumbs"
 import ReviewGrid from "../components/reviews/ReviewGrid"
 import ReviewerAvatar from "../components/reviewers/ReviewerAvatar"
+import usePageMetadata from "../hooks/usePageMetadata"
+import PageState from "../components/layout/PageState"
 
 import {
   getGenreBySlug,
@@ -24,6 +26,15 @@ function GenrePage() {
   const [error, setError] = useState<
     string | null
   >(null)
+
+  usePageMetadata({
+    title: genre
+      ? `${genre.name} | ITGE`
+      : "Genre | ITGE",
+    description: genre
+      ? `Explore IEM reviews covering ${genre.name} music.`
+      : "Explore IEM reviews by music genre at ITGE.",
+  })
 
   useEffect(() => {
     let cancelled = false
@@ -72,40 +83,34 @@ function GenrePage() {
 
   if (loading) {
     return (
-      <PageMessage>
-        Loading genre…
-      </PageMessage>
+      <PageState
+        eyebrow="Genre"
+        title="Loading genre…"
+      />
     )
   }
 
   if (error) {
     return (
-      <PageMessage>
-        <p className="text-xl font-semibold text-[var(--foreground)]">
-          Unable to load genre
-        </p>
-
-        <p className="mt-3">
-          {error}
-        </p>
-      </PageMessage>
+      <PageState
+        eyebrow="Genre"
+        title="Unable to load genre"
+        message={error}
+        backTo="/genres"
+        backLabel="Back to genres"
+      />
     )
   }
 
   if (!genre) {
     return (
-      <PageMessage>
-        <p className="text-xl font-semibold text-[var(--foreground)]">
-          Genre not found
-        </p>
-
-        <Link
-          to="/genres"
-          className="mt-8 inline-block font-medium text-[var(--accent)]"
-        >
-          ← Back to genres
-        </Link>
-      </PageMessage>
+      <PageState
+        eyebrow="404"
+        title="Genre not found"
+        message="The genre you were looking for doesn’t exist or is no longer available."
+        backTo="/genres"
+        backLabel="Back to genres"
+      />
     )
   }
 
@@ -269,20 +274,6 @@ function GenrePage() {
             </div>
           </section>
         )}
-      </div>
-    </main>
-  )
-}
-
-function PageMessage({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return (
-    <main className="min-h-screen bg-[var(--background)] px-6 py-20 text-[var(--foreground)]">
-      <div className="mx-auto max-w-7xl text-[var(--muted)]">
-        {children}
       </div>
     </main>
   )

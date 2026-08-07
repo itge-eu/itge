@@ -3,13 +3,12 @@ import {
   useMemo,
   useState,
 } from "react"
-
 import IemCard from "../components/iems/IemCard"
-
 import {
   getIems,
   type IemDirectoryItem,
 } from "../lib/iems"
+import usePageMetadata from "../hooks/usePageMetadata"
 
 type IemSort =
   | "most-reviewed"
@@ -32,6 +31,12 @@ function IemsPage() {
   const [error, setError] = useState<string | null>(
     null,
   )
+  
+  usePageMetadata({
+    title: "IEMs | ITGE",
+    description:
+      "Browse IEMs reviewed by the IEM Tour Group Europe community.",
+  })
 
   useEffect(() => {
     let cancelled = false

@@ -3,7 +3,7 @@ import {
   useMemo,
   useState,
 } from "react"
-import { Link, useParams } from "react-router"
+import { useParams } from "react-router"
 import ReviewerAvatar from "../components/reviewers/ReviewerAvatar"
 import {
   getReviewerBySlug,
@@ -11,6 +11,8 @@ import {
 } from "../lib/reviewers"
 import ReviewGrid from "../components/reviews/ReviewGrid"
 import Breadcrumbs from "../components/navigation/Breadcrumbs"
+import usePageMetadata from "../hooks/usePageMetadata"
+import PageState from "../components/layout/PageState"
 
 function ReviewerPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -21,6 +23,15 @@ function ReviewerPage() {
   const [error, setError] = useState<string | null>(
     null,
   )
+  
+  usePageMetadata({
+    title: reviewer
+      ? `${reviewer.name} | ITGE`
+      : "Reviewer | ITGE",
+    description: reviewer
+      ? `Read IEM reviews by ${reviewer.name} at ITGE.`
+      : "Meet the reviewers behind ITGE.",
+  })
 
   useEffect(() => {
     let cancelled = false
@@ -78,46 +89,34 @@ function ReviewerPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[var(--background)] px-6 py-20 text-[var(--foreground)]">
-        <div className="mx-auto max-w-6xl text-[var(--muted)]">
-          Loading reviewer…
-        </div>
-      </main>
+      <PageState
+        eyebrow="Reviewer"
+        title="Loading reviewer…"
+      />
     )
   }
 
   if (error) {
     return (
-      <main className="min-h-screen bg-[var(--background)] px-6 py-20 text-[var(--foreground)]">
-        <div className="mx-auto max-w-6xl">
-          <p className="text-xl font-semibold">
-            Unable to load reviewer
-          </p>
-
-          <p className="mt-3 text-[var(--muted)]">
-            {error}
-          </p>
-        </div>
-      </main>
+      <PageState
+        eyebrow="Reviewer"
+        title="Unable to load reviewer"
+        message={error}
+        backTo="/reviewers"
+        backLabel="Back to reviewers"
+      />
     )
   }
 
   if (!reviewer) {
     return (
-      <main className="min-h-screen bg-[var(--background)] px-6 py-20 text-[var(--foreground)]">
-        <div className="mx-auto max-w-6xl">
-          <p className="text-xl font-semibold">
-            Reviewer not found
-          </p>
-
-          <Link
-            to="/reviewers"
-            className="mt-8 inline-block text-[var(--accent)]"
-          >
-            ← Back to reviewers
-          </Link>
-        </div>
-      </main>
+      <PageState
+        eyebrow="404"
+        title="Reviewer not found"
+        message="The reviewer you were looking for doesn’t exist or is no longer available."
+        backTo="/reviewers"
+        backLabel="Back to reviewers"
+      />
     )
   }
 

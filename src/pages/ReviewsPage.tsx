@@ -11,6 +11,7 @@ import {
 import ReviewGrid from "../components/reviews/ReviewGrid"
 import ReviewsHeader from "../components/reviews/ReviewsHeader"
 import ReviewSearch from "../components/reviews/ReviewSearch"
+import usePageMetadata from "../hooks/usePageMetadata"
 
 import {
   getAllReviews,
@@ -49,6 +50,12 @@ function ReviewsPage() {
     searchParams.get("manufacturer")
   const reviewerName = searchParams.get("reviewer")
 
+  usePageMetadata({
+    title: "Reviews | ITGE",
+    description:
+      "Browse independent IEM reviews from ITGE reviewers.",
+  })
+  
   useEffect(() => {
     let cancelled = false
 

@@ -19,16 +19,14 @@ import ArtistsPage from "./pages/ArtistsPage"
 import ArtistPage from "./pages/ArtistPage"
 import GenresPage from "./pages/GenresPage"
 import GenrePage from "./pages/GenrePage"
+import NotFoundPage from "./pages/NotFoundPage"
 
 function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<HomePage />} />
-		<Route
-          path="/discover"
-          element={<DiscoverPage />}
-        />
+		<Route path="/discover" element={<DiscoverPage />} />
 
         <Route path="/reviews" element={<ReviewsPage />} />
         <Route path="/reviews/:slug" element={<ReviewPage />} />
@@ -50,10 +48,9 @@ function App() {
 
         <Route path="/admin/import" element={<ImportReviewPage />} />
         <Route path="/admin/reviews" element={<AdminReviewsPage />} />
-        <Route
-          path="/admin/reviews/:id/edit"
-          element={<AdminEditReviewPage />}
-        />
+        <Route path="/admin/reviews/:id/edit" element={<AdminEditReviewPage />} />
+		
+		<Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
   )

@@ -3,11 +3,11 @@ import {
   useState,
 } from "react"
 import { Link } from "react-router"
-
 import {
   getGenreDirectory,
   type GenreSummary,
 } from "../lib/genres"
+import usePageMetadata from "../hooks/usePageMetadata"
 
 function GenresPage() {
   const [genres, setGenres] = useState<
@@ -19,6 +19,12 @@ function GenresPage() {
   const [error, setError] = useState<
     string | null
   >(null)
+  
+  usePageMetadata({
+    title: "Genres | ITGE",
+    description:
+      "Explore ITGE IEM reviews by music genre.",
+  })
 
   useEffect(() => {
     let cancelled = false

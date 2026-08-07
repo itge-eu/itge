@@ -3,11 +3,11 @@ import {
   useState,
 } from "react"
 import { Link } from "react-router"
-
 import {
   getArtists,
   type ArtistSummary,
 } from "../lib/artists"
+import usePageMetadata from "../hooks/usePageMetadata"
 
 function ArtistsPage() {
   const [artists, setArtists] = useState<
@@ -19,6 +19,12 @@ function ArtistsPage() {
   const [error, setError] = useState<
     string | null
   >(null)
+
+  usePageMetadata({
+    title: "Artists | ITGE",
+    description:
+      "Explore artists used as listening references in ITGE IEM reviews.",
+  })
 
   useEffect(() => {
     let cancelled = false

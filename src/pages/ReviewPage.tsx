@@ -10,6 +10,8 @@ import {
   type FullReview,
 } from "../lib/reviews"
 import Breadcrumbs from "../components/navigation/Breadcrumbs"
+import usePageMetadata from "../hooks/usePageMetadata"
+import PageState from "../components/layout/PageState"
 
 function ReviewPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -29,7 +31,17 @@ function ReviewPage() {
       ),
     [review?.body, review?.heroImageUrl],
   )
-
+  
+  usePageMetadata({
+    title: review
+      ? `${review.model} review by ${review.reviewer} | ITGE`
+      : "Review | ITGE",
+  
+    description: review
+      ? `${review.brand} ${review.model} review by ${review.reviewer}. ${review.summary}`
+      : "Independent IEM reviews from ITGE.",
+  })
+    
   useEffect(() => {
     let cancelled = false
 
@@ -73,46 +85,34 @@ function ReviewPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[var(--background)] px-6 py-20 text-[var(--foreground)]">
-        <div className="mx-auto max-w-4xl text-[var(--muted)]">
-          Loading review…
-        </div>
-      </main>
+      <PageState
+        eyebrow="Review"
+        title="Loading review…"
+      />
     )
   }
 
   if (error) {
     return (
-      <main className="min-h-screen bg-[var(--background)] px-6 py-20 text-[var(--foreground)]">
-        <div className="mx-auto max-w-4xl">
-          <p className="text-xl font-semibold">
-            Unable to load review
-          </p>
-
-          <p className="mt-3 text-[var(--muted)]">
-            {error}
-          </p>
-        </div>
-      </main>
+      <PageState
+        eyebrow="Review"
+        title="Unable to load review"
+        message={error}
+        backTo="/reviews"
+        backLabel="Back to reviews"
+      />
     )
   }
 
   if (!review) {
     return (
-      <main className="min-h-screen bg-[var(--background)] px-6 py-20 text-[var(--foreground)]">
-        <div className="mx-auto max-w-4xl">
-          <p className="text-xl font-semibold">
-            Review not found
-          </p>
-
-          <Link
-            to="/reviews"
-            className="mt-8 inline-block text-[var(--accent)]"
-          >
-            ← Back to reviews
-          </Link>
-        </div>
-      </main>
+      <PageState
+        eyebrow="404"
+        title="Review not found"
+        message="The review you were looking for doesn’t exist or is no longer available."
+        backTo="/reviews"
+        backLabel="Back to reviews"
+      />
     )
   }
 

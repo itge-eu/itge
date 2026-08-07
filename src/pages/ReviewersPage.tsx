@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react"
 import { Link } from "react-router"
-
 import ReviewerAvatar from "../components/reviewers/ReviewerAvatar"
-
 import {
   getReviewers,
   type ReviewerSummary,
 } from "../lib/reviewers"
+import usePageMetadata from "../hooks/usePageMetadata"
 
 function ReviewersPage() {
   const [reviewers, setReviewers] = useState<
@@ -26,6 +25,12 @@ function ReviewersPage() {
   const formerReviewers = reviewers.filter(
     (reviewer) => !reviewer.active,
   )
+  
+  usePageMetadata({
+    title: "Reviewers | ITGE",
+    description:
+      "Meet the reviewers behind IEM Tour Group Europe and explore their reviews.",
+  })
 
   useEffect(() => {
     let cancelled = false

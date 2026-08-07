@@ -3,27 +3,24 @@ import {
   useMemo,
   useState,
 } from "react"
-
 import DiscoveryFilters from "../components/discover/DiscoveryFilters"
 import DiscoveryResults from "../components/discover/DiscoveryResults"
 import ReviewSearch from "../components/reviews/ReviewSearch"
-
 import {
   buildDiscoveryState,
   getDiscoveryReviews,
 } from "../lib/discovery"
-
 import {
   EMPTY_DISCOVERY_FILTERS,
   EMPTY_DISCOVERY_SUGGESTIONS,
   type DiscoveryReview,
   type SelectedDiscoveryFilters,
 } from "../types/discovery"
-
 import type {
   SearchSuggestion,
   SearchSuggestionType,
 } from "../types/search"
+import usePageMetadata from "../hooks/usePageMetadata"
 
 function DiscoverPage() {
   const [discoveryReviews, setDiscoveryReviews] =
@@ -41,6 +38,12 @@ function DiscoverPage() {
 
   const [mobileFiltersOpen, setMobileFiltersOpen] =
     useState(false)
+
+  usePageMetadata({
+    title: "Discover | ITGE",
+    description:
+      "Discover IEM reviews by product, reviewer, manufacturer, artist and genre.",
+  })
 
   useEffect(() => {
     let cancelled = false

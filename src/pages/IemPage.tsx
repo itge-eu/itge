@@ -11,6 +11,8 @@ import {
   type IemProfile,
 } from "../lib/iems"
 import Breadcrumbs from "../components/navigation/Breadcrumbs"
+import usePageMetadata from "../hooks/usePageMetadata"
+import PageState from "../components/layout/PageState"
 
 function IemPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -21,6 +23,16 @@ function IemPage() {
   const [error, setError] = useState<string | null>(
     null,
   )
+  
+  usePageMetadata({
+    title: iem
+      ? `${iem.manufacturer.name} ${iem.model} | ITGE`
+      : "IEM | ITGE",
+  
+    description: iem
+      ? `Reviews, specifications and coverage for the ${iem.manufacturer.name} ${iem.model}.`
+      : "Explore IEM reviews and coverage from ITGE.",
+  })
 
   useEffect(() => {
     let cancelled = false
@@ -78,40 +90,34 @@ function IemPage() {
 
   if (loading) {
     return (
-      <PageMessage>
-        Loading IEM…
-      </PageMessage>
+      <PageState
+        eyebrow="IEM"
+        title="Loading IEM…"
+      />
     )
   }
 
   if (error) {
     return (
-      <PageMessage>
-        <p className="text-xl font-semibold">
-          Unable to load IEM
-        </p>
-
-        <p className="mt-3 text-[var(--muted)]">
-          {error}
-        </p>
-      </PageMessage>
+      <PageState
+        eyebrow="IEM"
+        title="Unable to load IEM"
+        message={error}
+        backTo="/iems"
+        backLabel="Back to IEMs"
+      />
     )
   }
 
   if (!iem) {
     return (
-      <PageMessage>
-        <p className="text-xl font-semibold">
-          IEM not found
-        </p>
-
-        <Link
-          to="/discover"
-          className="mt-8 inline-block font-medium text-[var(--accent)]"
-        >
-          ← Back to Discover
-        </Link>
-      </PageMessage>
+       <PageState
+        eyebrow="404"
+        title="IEM not found"
+        message="The IEM you were looking for doesn’t exist or is no longer available."
+        backTo="/iems"
+        backLabel="Back to IEMs"
+      />
     )
   }
 
@@ -285,9 +291,7 @@ function IemPage() {
                 {iem.artists.map((artist) => (
                   <Link
                     key={artist.id}
-                    to={`/reviews?artist=${encodeURIComponent(
-                      artist.slug,
-                    )}`}
+                    to={`/artists/${artist.slug}`}
                     className="rounded-full border border-[var(--accent)]/45 bg-[var(--accent)]/10 px-3 py-2 text-sm font-semibold transition hover:border-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]"
                   >
                     {artist.name}
@@ -304,9 +308,7 @@ function IemPage() {
                 {iem.genres.map((genre) => (
                   <Link
                     key={genre.id}
-                    to={`/reviews?genre=${encodeURIComponent(
-                      genre.slug,
-                    )}`}
+                    to={`/genres/${genre.slug}`}
                     className="rounded-full border border-[var(--border)] bg-[var(--surface-soft)] px-3 py-2 text-sm font-semibold transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
                   >
                     {genre.name}
@@ -339,20 +341,6 @@ function IemPage() {
             )}
           </div>
         </section>
-      </div>
-    </main>
-  )
-}
-
-function PageMessage({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return (
-    <main className="min-h-screen bg-[var(--background)] px-6 py-20 text-[var(--foreground)]">
-      <div className="mx-auto max-w-6xl text-[var(--muted)]">
-        {children}
       </div>
     </main>
   )

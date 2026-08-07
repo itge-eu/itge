@@ -3,11 +3,11 @@ import {
   useState,
 } from "react"
 import { Link } from "react-router"
-
 import {
   getManufacturers,
   type ManufacturerDirectoryItem,
 } from "../lib/manufacturers"
+import usePageMetadata from "../hooks/usePageMetadata"
 
 function ManufacturersPage() {
   const [manufacturers, setManufacturers] =
@@ -18,6 +18,12 @@ function ManufacturersPage() {
   const [error, setError] = useState<
     string | null
   >(null)
+
+  usePageMetadata({
+    title: "Manufacturers | ITGE",
+    description:
+      "Browse IEM manufacturers covered by IEM Tour Group Europe.",
+  })
 
   useEffect(() => {
     let cancelled = false

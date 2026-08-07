@@ -7,6 +7,8 @@ import { Link, useParams } from "react-router"
 import Breadcrumbs from "../components/navigation/Breadcrumbs"
 import ReviewGrid from "../components/reviews/ReviewGrid"
 import ReviewerAvatar from "../components/reviewers/ReviewerAvatar"
+import usePageMetadata from "../hooks/usePageMetadata"
+import PageState from "../components/layout/PageState"
 
 import {
   getArtistBySlug,
@@ -24,6 +26,15 @@ function ArtistPage() {
   const [error, setError] = useState<
     string | null
   >(null)
+
+  usePageMetadata({
+    title: artist
+      ? `${artist.name} | ITGE`
+      : "Artist | ITGE",
+    description: artist
+      ? `Explore IEM reviews that feature ${artist.name} as a listening reference.`
+      : "Explore artists used as listening references by ITGE reviewers.",
+  })
 
   useEffect(() => {
     let cancelled = false
@@ -72,40 +83,34 @@ function ArtistPage() {
 
   if (loading) {
     return (
-      <PageMessage>
-        Loading artist…
-      </PageMessage>
+      <PageState
+        eyebrow="Artist"
+        title="Loading artist…"
+      />
     )
   }
 
   if (error) {
     return (
-      <PageMessage>
-        <p className="text-xl font-semibold text-[var(--foreground)]">
-          Unable to load artist
-        </p>
-
-        <p className="mt-3">
-          {error}
-        </p>
-      </PageMessage>
+      <PageState
+        eyebrow="Artist"
+        title="Unable to load artist"
+        message={error}
+        backTo="/artists"
+        backLabel="Back to artists"
+      />
     )
   }
 
   if (!artist) {
     return (
-      <PageMessage>
-        <p className="text-xl font-semibold text-[var(--foreground)]">
-          Artist not found
-        </p>
-
-        <Link
-          to="/artists"
-          className="mt-8 inline-block font-medium text-[var(--accent)]"
-        >
-          ← Back to artists
-        </Link>
-      </PageMessage>
+      <PageState
+        eyebrow="404"
+        title="Artist not found"
+        message="The artist you were looking for doesn’t exist or is no longer available."
+        backTo="/artists"
+        backLabel="Back to artists"
+      />
     )
   }
 
@@ -284,20 +289,6 @@ function ArtistPage() {
             </div>
           </section>
         )}
-      </div>
-    </main>
-  )
-}
-
-function PageMessage({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return (
-    <main className="min-h-screen bg-[var(--background)] px-6 py-20 text-[var(--foreground)]">
-      <div className="mx-auto max-w-7xl text-[var(--muted)]">
-        {children}
       </div>
     </main>
   )

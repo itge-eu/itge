@@ -12,6 +12,8 @@ import {
   type ManufacturerProfile,
 } from "../lib/manufacturers"
 import Breadcrumbs from "../components/navigation/Breadcrumbs"
+import usePageMetadata from "../hooks/usePageMetadata"
+import PageState from "../components/layout/PageState"
 
 function ManufacturerPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -24,6 +26,15 @@ function ManufacturerPage() {
   const [error, setError] = useState<string | null>(
     null,
   )
+  
+  usePageMetadata({
+    title: manufacturer
+      ? `${manufacturer.name} | ITGE`
+      : "Manufacturer | ITGE",
+    description: manufacturer
+      ? `Explore ${manufacturer.name} IEMs and reviews at ITGE.`
+      : "Explore IEM manufacturers covered by ITGE.",
+  })
 
   useEffect(() => {
     let cancelled = false
@@ -82,40 +93,34 @@ function ManufacturerPage() {
 
   if (loading) {
     return (
-      <PageMessage>
-        Loading manufacturer…
-      </PageMessage>
+      <PageState
+        eyebrow="Manufacturer"
+        title="Loading manufacturer…"
+      />
     )
   }
 
   if (error) {
     return (
-      <PageMessage>
-        <p className="text-xl font-semibold text-[var(--foreground)]">
-          Unable to load manufacturer
-        </p>
-
-        <p className="mt-3">
-          {error}
-        </p>
-      </PageMessage>
+      <PageState
+        eyebrow="Manufacturer"
+        title="Unable to load manufacturer"
+        message={error}
+        backTo="/manufacturers"
+        backLabel="Back to manufacturers"
+      />
     )
   }
 
   if (!manufacturer) {
     return (
-      <PageMessage>
-        <p className="text-xl font-semibold text-[var(--foreground)]">
-          Manufacturer not found
-        </p>
-
-        <Link
-          to="/iems"
-          className="mt-8 inline-block font-medium text-[var(--accent)]"
-        >
-          ← Back to IEMs
-        </Link>
-      </PageMessage>
+      <PageState
+        eyebrow="404"
+        title="Manufacturer not found"
+        message="The manufacturer you were looking for doesn’t exist or is no longer available."
+        backTo="/manufacturers"
+        backLabel="Back to manufacturers"
+      />
     )
   }
 
@@ -316,20 +321,6 @@ function ManufacturerPage() {
             </div>
           )}
         </section>
-      </div>
-    </main>
-  )
-}
-
-function PageMessage({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return (
-    <main className="min-h-screen bg-[var(--background)] px-6 py-20 text-[var(--foreground)]">
-      <div className="mx-auto max-w-7xl text-[var(--muted)]">
-        {children}
       </div>
     </main>
   )
