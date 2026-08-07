@@ -37,9 +37,11 @@ type ReviewRow = {
         manufacturers:
           | {
               name: string;
+			  slug: string;
             }
           | {
               name: string;
+			  slug: string;
             }[]
           | null;
       }
@@ -49,9 +51,11 @@ type ReviewRow = {
         manufacturers:
           | {
               name: string;
+			  slug: string;
             }
           | {
               name: string;
+			  slug: string;
             }[]
           | null;
       }[]
@@ -87,6 +91,7 @@ function mapReview(row: ReviewRow): FeaturedReview {
     title: row.title,
     summary: row.summary,
     brand: manufacturer.name,
+	manufacturerSlug: manufacturer.slug,
     model: iem.model,
 	iemSlug: iem.slug,
     reviewer: "",
@@ -191,7 +196,8 @@ export async function getReviewerBySlug(
           model,
 		  slug,
           manufacturers(
-            name
+            name,
+			slug
           )
         )
       `)

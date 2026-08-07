@@ -34,9 +34,12 @@ function ReviewCard({ review }: ReviewCardProps) {
         )}
 
         <div className="min-w-0 flex-1">
-          <p className="text-sm uppercase tracking-widest text-[var(--accent)]">
+          <Link
+            to={`/manufacturers/${review.manufacturerSlug}`}
+            className="pointer-events-auto relative z-20 text-sm uppercase tracking-widest text-[var(--accent)] transition hover:opacity-70"
+          >
             {review.brand}
-          </p>
+          </Link>
 
           <h2 className="mt-1 text-2xl font-semibold">
             <Link

@@ -20,6 +20,7 @@ export type FeaturedReview = {
   title: string
   summary: string
   brand: string
+  manufacturerSlug: string
   model: string
   iemSlug: string
   reviewer: string
@@ -31,7 +32,7 @@ export type FullReview = FeaturedReview & {
   body: string | null
   pros: string | null
   cons: string | null
-  
+    
   releaseYear: number | null
   driverConfiguration: string | null
   launchPrice: number | null
@@ -104,9 +105,11 @@ type ReviewRow = {
         manufacturers:
           | {
               name: string
+			  slug?: string
             }
           | {
               name: string
+			  slug?: string
             }[]
           | null
       }
@@ -120,9 +123,11 @@ type ReviewRow = {
         manufacturers:
           | {
               name: string
+			  slug?: string
             }
           | {
               name: string
+			  slug?: string
             }[]
           | null
       }[]
@@ -152,7 +157,12 @@ function mapReview(row: ReviewRow): FeaturedReview {
     iem?.manufacturers,
   )
 
-  if (!reviewer || !iem || !manufacturer) {
+  if (
+    !reviewer ||
+    !iem ||
+    !manufacturer ||
+    !manufacturer.slug
+  ) {
     throw new Error(
       `Review ${row.id} has incomplete related data`,
     )
@@ -169,6 +179,7 @@ function mapReview(row: ReviewRow): FeaturedReview {
     model: iem.model,
 	iemSlug: iem.slug,
     brand: manufacturer.name,
+	manufacturerSlug: manufacturer.slug,
     heroImageUrl: row.hero_image_url,
   }
 }
@@ -234,7 +245,8 @@ export async function getFeaturedReviews(): Promise<
         model,
 		slug,
         manufacturers (
-          name
+          name,
+		  slug
         )
       )
     `)
@@ -408,7 +420,8 @@ export async function getAllReviews(
         model,
 		slug,
         manufacturers (
-          name
+          name,
+		  slug
         )
       )
     `)
@@ -490,7 +503,8 @@ export async function getReviewBySlug(
         launch_price,
         launch_currency,
         manufacturers (
-          name
+          name,
+		  slug
         )
       ),
       review_artists (
@@ -530,12 +544,22 @@ export async function getReviewBySlug(
       `Review ${row.id} has no associated IEM`,
     )
   }
+  
+  const manufacturer = getSingleRelation(iem.manufacturers)
+  
+  if (!manufacturer?.slug) {
+    throw new Error(
+      `Review ${row.id} has no manufacturer slug`,
+    )
+  }
 
   return {
     ...mapReview(row),
     body: row.body ?? null,
     pros: row.pros ?? null,
     cons: row.cons ?? null,
+	
+	manufacturerSlug: manufacturer.slug,
 	
 	releaseYear:
       iem.release_year == null

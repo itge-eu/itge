@@ -121,9 +121,12 @@ function ReviewPage() {
     <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
       <article className="mx-auto max-w-4xl">
         <header className="border-b border-[var(--border)] pb-12">
-          <p className="text-sm uppercase tracking-[0.2em] text-[var(--accent)]">
+          <Link
+            to={`/manufacturers/${review.manufacturerSlug}`}
+            className="inline-block text-sm uppercase tracking-[0.2em] text-[var(--accent)] transition hover:opacity-70"
+          >
             {review.brand}
-          </p>
+          </Link>
 
           <div className="mt-4 flex flex-col justify-between gap-6 sm:flex-row sm:items-start">
             <div className="min-w-0">

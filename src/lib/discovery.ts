@@ -73,10 +73,12 @@ type DiscoveryReviewRow = {
           | {
               id: number
               name: string
+			  slug: string
             }
           | {
               id: number
               name: string
+			  slug: string
             }[]
           | null
       }
@@ -88,10 +90,12 @@ type DiscoveryReviewRow = {
           | {
               id: number
               name: string
+			  slug: string
             }
           | {
               id: number
               name: string
+			  slug: string
             }[]
           | null
       }[]
@@ -211,6 +215,7 @@ function mapDiscoveryReview(
       title: row.title,
       summary: row.summary,
       brand: manufacturer.name,
+	  manufacturerSlug: manufacturer.slug,
       model: iem.model,
 	  iemSlug: iem.slug,
       reviewer: reviewer.name,
@@ -252,7 +257,8 @@ export async function getDiscoveryReviews(): Promise<
         slug,
         manufacturers (
           id,
-          name
+          name,
+		  slug
         )
       ),
 

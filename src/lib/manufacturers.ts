@@ -137,6 +137,7 @@ function mapFeaturedReview(
     summary: row.summary,
 
     brand: manufacturer.name,
+	manufacturerSlug: manufacturer.slug,
     model: iem.model,
     iemSlug: iem.slug,
 
