@@ -6,6 +6,7 @@ import {
   type ReviewerSummary,
 } from "../lib/reviewers"
 import usePageMetadata from "../hooks/usePageMetadata"
+import { countryCodeToName } from "../lib/reviewers"
 
 function ReviewersPage() {
   const [reviewers, setReviewers] = useState<
@@ -201,8 +202,15 @@ function ReviewerCard({
           </h3>
 
           {reviewer.country && (
-            <p className="mt-1 text-sm text-[var(--muted)]">
-              {reviewer.country}
+            <p className="mt-1 flex items-center gap-2 text-sm text-[var(--muted)]">
+              <span
+                className={`fi fi-${reviewer.country.toLowerCase()} rounded-sm`}
+                aria-hidden="true"
+              />
+          
+              <span>
+                {countryCodeToName(reviewer.country)}
+              </span>
             </p>
           )}
 

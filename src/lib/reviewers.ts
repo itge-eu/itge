@@ -1,89 +1,94 @@
-import { supabase } from "./supabase";
-import type { FeaturedReview } from "./reviews";
+import { supabase } from "./supabase"
+import type { FeaturedReview } from "./reviews"
 
 export type ReviewerProfile = {
-  id: number;
-  name: string;
-  slug: string;
-  active: boolean;
-  bio: string | null;
-  avatarUrl: string | null;
-  country: string | null;
-  headfiUrl: string | null;
-  reviews: FeaturedReview[];
-};
+  id: number
+  name: string
+  slug: string
+  active: boolean
+  bio: string | null
+  avatarUrl: string | null
+  country: string | null
+  headfiUrl: string | null
+  reviews: FeaturedReview[]
+}
 
 export type ReviewerSummary = {
-  id: number;
-  name: string;
-  slug: string;
-  active: boolean;
-  bio: string | null;
-  avatarUrl: string | null;
-  country: string | null;
-  reviewCount: number;
-};
+  id: number
+  name: string
+  slug: string
+  active: boolean
+  bio: string | null
+  avatarUrl: string | null
+  country: string | null
+  reviewCount: number
+}
 
 type ReviewRow = {
-  id: number;
-  slug: string;
-  rating: number;
-  title: string;
-  summary: string;
-  hero_image_url: string | null;
+  id: number
+  slug: string
+  rating: number
+  title: string
+  summary: string
+  hero_image_url: string | null
 
   iems:
     | {
-        model: string;
-		slug: string;
+        model: string
+        slug: string
+
         manufacturers:
           | {
-              name: string;
-			  slug: string;
+              name: string
+              slug: string
             }
           | {
-              name: string;
-			  slug: string;
+              name: string
+              slug: string
             }[]
-          | null;
+          | null
       }
     | {
-        model: string;
-		slug: string;
+        model: string
+        slug: string
+
         manufacturers:
           | {
-              name: string;
-			  slug: string;
+              name: string
+              slug: string
             }
           | {
-              name: string;
-			  slug: string;
+              name: string
+              slug: string
             }[]
-          | null;
+          | null
       }[]
-    | null;
-};
+    | null
+}
 
 function getSingleRelation<T>(
   relation: T | T[] | null | undefined,
 ): T | null {
   if (Array.isArray(relation)) {
-    return relation[0] ?? null;
+    return relation[0] ?? null
   }
 
-  return relation ?? null;
+  return relation ?? null
 }
 
-function mapReview(row: ReviewRow): FeaturedReview {
-  const iem = getSingleRelation(row.iems);
+function mapReview(
+  row: ReviewRow,
+): FeaturedReview {
+  const iem = getSingleRelation(row.iems)
+
   const manufacturer = getSingleRelation(
     iem?.manufacturers,
-  );
+  )
 
   if (!iem || !manufacturer) {
     throw new Error(
       `Review ${row.id} has incomplete data.`,
-    );
+    )
   }
 
   return {
@@ -93,142 +98,196 @@ function mapReview(row: ReviewRow): FeaturedReview {
     title: row.title,
     summary: row.summary,
     brand: manufacturer.name,
-	manufacturerSlug: manufacturer.slug,
+    manufacturerSlug: manufacturer.slug,
     model: iem.model,
-	iemSlug: iem.slug,
+    iemSlug: iem.slug,
     reviewer: "",
     reviewerSlug: "",
     heroImageUrl: row.hero_image_url,
-  };
+  }
+}
+
+export function countryCodeToName(
+  countryCode: string,
+): string {
+  const normalizedCode =
+    countryCode.trim().toUpperCase()
+
+  if (!normalizedCode) {
+    return ""
+  }
+
+  try {
+    const regionNames =
+      new Intl.DisplayNames(
+        ["en"],
+        {
+          type: "region",
+        },
+      )
+
+    return (
+      regionNames.of(normalizedCode) ??
+      normalizedCode
+    )
+  } catch {
+    return normalizedCode
+  }
 }
 
 export async function getReviewers(): Promise<
   ReviewerSummary[]
 > {
-  const { data: reviewerRows, error: reviewerError } =
-    await supabase
-      .from("reviewers")
-      .select(`
-        id,
-        name,
-        slug,
-		active,
-        bio,
-        avatar_url,
-        country
-      `)
-      .order("name", { ascending: true });
+  const {
+    data: reviewerRows,
+    error: reviewerError,
+  } = await supabase
+    .from("reviewers")
+    .select(`
+      id,
+      name,
+      slug,
+      active,
+      bio,
+      avatar_url,
+      country
+    `)
+    .order("name", {
+      ascending: true,
+    })
 
   if (reviewerError) {
-    throw reviewerError;
+    throw reviewerError
   }
 
-  const { data: reviewRows, error: reviewError } =
-    await supabase
-      .from("reviews")
-      .select(`
-        id,
-        reviewer_id
-      `)
-      .eq("published", true);
+  const {
+    data: reviewRows,
+    error: reviewError,
+  } = await supabase
+    .from("reviews")
+    .select(`
+      id,
+      reviewer_id
+    `)
+    .eq("published", true)
 
   if (reviewError) {
-    throw reviewError;
+    throw reviewError
   }
 
-  const reviewCounts = new Map<number, number>();
+  const reviewCounts =
+    new Map<number, number>()
 
   for (const review of reviewRows ?? []) {
-    const reviewerId = Number(review.reviewer_id);
+    const reviewerId =
+      Number(review.reviewer_id)
 
     reviewCounts.set(
       reviewerId,
       (reviewCounts.get(reviewerId) ?? 0) + 1,
-    );
+    )
   }
 
-  return (reviewerRows ?? []).map((reviewer) => ({
-    id: Number(reviewer.id),
-    name: reviewer.name,
-    slug: reviewer.slug,
-	active: reviewer.active,
-    bio: reviewer.bio,
-    avatarUrl: reviewer.avatar_url,
-    country: reviewer.country,
-    reviewCount:
-      reviewCounts.get(Number(reviewer.id)) ?? 0,
-  }));
+  return (reviewerRows ?? []).map(
+    (reviewer) => ({
+      id: Number(reviewer.id),
+      name: reviewer.name,
+      slug: reviewer.slug,
+      active: reviewer.active,
+      bio: reviewer.bio,
+      avatarUrl: reviewer.avatar_url,
+      country: reviewer.country,
+      reviewCount:
+        reviewCounts.get(
+          Number(reviewer.id),
+        ) ?? 0,
+    }),
+  )
 }
 
 export async function getReviewerBySlug(
   slug: string,
 ): Promise<ReviewerProfile | null> {
-  const { data: reviewer, error } =
-    await supabase
-      .from("reviewers")
-      .select(`
-        id,
-        name,
-        slug,
-		active,
-        bio,
-        avatar_url,
-        country,
-        headfi_url
-      `)
-      .eq("slug", slug)
-      .maybeSingle();
+  const {
+    data: reviewer,
+    error,
+  } = await supabase
+    .from("reviewers")
+    .select(`
+      id,
+      name,
+      slug,
+      active,
+      bio,
+      avatar_url,
+      country,
+      headfi_url
+    `)
+    .eq("slug", slug)
+    .maybeSingle()
 
   if (error) {
-    throw error;
+    throw error
   }
 
   if (!reviewer) {
-    return null;
+    return null
   }
 
-  const { data: reviews, error: reviewsError } =
-    await supabase
-      .from("reviews")
-      .select(`
-        id,
+  const {
+    data: reviews,
+    error: reviewsError,
+  } = await supabase
+    .from("reviews")
+    .select(`
+      id,
+      slug,
+      rating,
+      title,
+      summary,
+      hero_image_url,
+
+      iems (
+        model,
         slug,
-        rating,
-        title,
-        summary,
-        hero_image_url,
-        iems(
-          model,
-		  slug,
-          manufacturers(
-            name,
-			slug
-          )
+
+        manufacturers (
+          name,
+          slug
         )
-      `)
-      .eq("reviewer_id", reviewer.id)
-      .eq("published", true)
-      .order("published_at", {
-        ascending: false,
-      });
+      )
+    `)
+    .eq(
+      "reviewer_id",
+      reviewer.id,
+    )
+    .eq("published", true)
+    .order("published_at", {
+      ascending: false,
+    })
 
   if (reviewsError) {
-    throw reviewsError;
+    throw reviewsError
   }
 
   return {
     id: Number(reviewer.id),
     name: reviewer.name,
     slug: reviewer.slug,
-	active: reviewer.active,
+    active: reviewer.active,
     bio: reviewer.bio,
     avatarUrl: reviewer.avatar_url,
     country: reviewer.country,
     headfiUrl: reviewer.headfi_url,
-    reviews: (reviews ?? []).map((review) => ({
-      ...mapReview(review as ReviewRow),
-      reviewer: reviewer.name,
-      reviewerSlug: reviewer.slug,
-    })),
-  };
+
+    reviews: (reviews ?? []).map(
+      (review) => ({
+        ...mapReview(
+          review as unknown as ReviewRow,
+        ),
+        reviewer: reviewer.name,
+        reviewerSlug: reviewer.slug,
+      }),
+    ),
+  }
 }

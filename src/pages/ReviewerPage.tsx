@@ -13,6 +13,7 @@ import ReviewGrid from "../components/reviews/ReviewGrid"
 import Breadcrumbs from "../components/navigation/Breadcrumbs"
 import usePageMetadata from "../hooks/usePageMetadata"
 import PageState from "../components/layout/PageState"
+import { countryCodeToName } from "../lib/reviewers"
 
 function ReviewerPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -162,8 +163,15 @@ function ReviewerPage() {
               </h1>
 
               {reviewer.country && (
-                <p className="mt-3 text-[var(--muted)]">
-                  {reviewer.country}
+                <p className="mt-3 flex items-center gap-2 text-[var(--muted)]">
+                  <span
+                    className={`fi fi-${reviewer.country.toLowerCase()} rounded-sm`}
+                    aria-hidden="true"
+                  />
+              
+                  <span>
+                    {countryCodeToName(reviewer.country)}
+                  </span>
                 </p>
               )}
 
