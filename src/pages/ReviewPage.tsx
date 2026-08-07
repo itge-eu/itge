@@ -218,7 +218,7 @@ function ReviewPage() {
                     {review.artists.map((artist) => (
                       <Link
                         key={artist.musicbrainzId}
-                        to={`/reviews?artist=${encodeURIComponent(
+                        to={`/artists/${encodeURIComponent(
                           artist.slug,
                         )}`}
                         className="rounded-full border border-[var(--accent)] bg-[var(--surface-soft)] px-3 py-2 text-sm font-semibold transition hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]"
@@ -240,7 +240,7 @@ function ReviewPage() {
                     {review.genres.map((genre) => (
                       <Link
                         key={genre.id}
-                        to={`/reviews?genre=${encodeURIComponent(
+                        to={`/genres/${encodeURIComponent(
                           genre.slug,
                         )}`}
                         className="rounded-full border border-[var(--border)] bg-[var(--surface-soft)] px-3 py-2 text-sm font-semibold transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
