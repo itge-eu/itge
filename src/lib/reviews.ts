@@ -31,6 +31,12 @@ export type FullReview = FeaturedReview & {
   body: string | null
   pros: string | null
   cons: string | null
+  
+  releaseYear: number | null
+  driverConfiguration: string | null
+  launchPrice: number | null
+  launchCurrency: string | null
+  
   artists: ReviewArtist[]
   genres: ReviewGenre[]
 }
@@ -91,6 +97,10 @@ type ReviewRow = {
     | {
         model: string
 		slug: string
+		release_year?: number | null
+        driver_configuration?: string | null
+        launch_price?: string | number | null
+        launch_currency?: string | null
         manufacturers:
           | {
               name: string
@@ -103,6 +113,10 @@ type ReviewRow = {
     | {
         model: string
 		slug: string
+		release_year?: number | null
+        driver_configuration?: string | null
+        launch_price?: string | number | null
+        launch_currency?: string | null
         manufacturers:
           | {
               name: string
@@ -471,6 +485,10 @@ export async function getReviewBySlug(
       iems (
         model,
 		slug,
+		release_year,
+        driver_configuration,
+        launch_price,
+        launch_currency,
         manufacturers (
           name
         )
@@ -504,12 +522,37 @@ export async function getReviewBySlug(
   }
 
   const row = data as unknown as ReviewRow
+  
+  const iem = getSingleRelation(row.iems)
+
+  if (!iem) {
+    throw new Error(
+      `Review ${row.id} has no associated IEM`,
+    )
+  }
 
   return {
     ...mapReview(row),
     body: row.body ?? null,
     pros: row.pros ?? null,
     cons: row.cons ?? null,
+	
+	releaseYear:
+      iem.release_year == null
+        ? null
+        : Number(iem.release_year),
+  
+    driverConfiguration:
+      iem.driver_configuration ?? null,
+  
+    launchPrice:
+      iem.launch_price == null
+        ? null
+        : Number(iem.launch_price),
+  
+    launchCurrency:
+      iem.launch_currency ?? null,
+	
     artists: mapReviewArtists(row.review_artists),
     genres: mapReviewGenres(row.review_genres),
   }

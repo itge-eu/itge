@@ -135,6 +135,41 @@ function ReviewPage() {
                   {review.model}
                 </Link>
               </h1>
+			  
+			  {(review.driverConfiguration ||
+                review.releaseYear != null ||
+                review.launchPrice != null) && (
+                <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-[var(--muted)]">
+                  {review.driverConfiguration && (
+                    <span>{review.driverConfiguration}</span>
+                  )}
+              
+                  {review.driverConfiguration &&
+                    review.releaseYear != null && (
+                      <span aria-hidden="true">·</span>
+                    )}
+              
+                  {review.releaseYear != null && (
+                    <span>Released {review.releaseYear}</span>
+                  )}
+              
+                  {(review.driverConfiguration ||
+                    review.releaseYear != null) &&
+                    review.launchPrice != null && (
+                      <span aria-hidden="true">·</span>
+                    )}
+              
+                  {review.launchPrice != null && (
+                    <span>
+                      Launch price{" "}
+                      {formatLaunchPrice(
+                        review.launchPrice,
+                        review.launchCurrency,
+                      )}
+                    </span>
+                  )}
+                </div>
+              )}
 
               <Link
                 to={`/reviewers/${review.reviewerSlug}`}
@@ -266,6 +301,26 @@ function ReviewPage() {
       </article>
     </main>
   )
+}
+
+function formatLaunchPrice(
+  price: number,
+  currency: string | null,
+): string {
+  if (!currency) {
+    return price.toLocaleString("en-US")
+  }
+
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency,
+      maximumFractionDigits:
+        Number.isInteger(price) ? 0 : 2,
+    }).format(price)
+  } catch {
+    return `${price.toLocaleString("en-US")} ${currency}`
+  }
 }
 
 function prepareReviewHtml(

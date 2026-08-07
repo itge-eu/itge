@@ -161,6 +161,41 @@ function IemPage() {
                   value={iem.reviewers.length.toString()}
                 />
               </div>
+			  {(iem.driverConfiguration ||
+                iem.releaseYear ||
+                iem.launchPrice != null) && (
+                <div className="mt-6 border-t border-[var(--border)] pt-6">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+                    Product details
+                  </p>
+              
+                  <div className="mt-4 grid gap-5 sm:grid-cols-3">
+                    {iem.driverConfiguration && (
+                      <ProductDetail
+                        label="Driver configuration"
+                        value={iem.driverConfiguration}
+                      />
+                    )}
+              
+                    {iem.releaseYear != null && (
+                      <ProductDetail
+                        label="Released"
+                        value={iem.releaseYear.toString()}
+                      />
+                    )}
+              
+                    {iem.launchPrice != null && (
+                      <ProductDetail
+                        label="Launch price"
+                        value={formatLaunchPrice(
+                          iem.launchPrice,
+                          iem.launchCurrency,
+                        )}
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {iem.heroImageUrl ? (
@@ -353,6 +388,46 @@ function SectionHeader({
       </p>
     </div>
   )
+}
+
+function ProductDetail({
+  label,
+  value,
+}: {
+  label: string
+  value: string
+}) {
+  return (
+    <div>
+      <p className="text-sm text-[var(--muted)]">
+        {label}
+      </p>
+
+      <p className="mt-1 font-semibold">
+        {value}
+      </p>
+    </div>
+  )
+}
+
+function formatLaunchPrice(
+  price: number,
+  currency: string | null,
+): string {
+  if (!currency) {
+    return price.toLocaleString("en-US")
+  }
+
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency,
+      maximumFractionDigits:
+        Number.isInteger(price) ? 0 : 2,
+    }).format(price)
+  } catch {
+    return `${price.toLocaleString("en-US")} ${currency}`
+  }
 }
 
 function TagPanel({

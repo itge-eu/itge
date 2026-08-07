@@ -38,6 +38,11 @@ export type IemProfile = {
     name: string
 	slug: string
   }
+  
+  releaseYear: number | null
+  driverConfiguration: string | null
+  launchPrice: number | null
+  launchCurrency: string | null
 
   averageRating: number | null
   heroImageUrl: string | null
@@ -52,6 +57,10 @@ type IemRow = {
   id: number
   model: string
   slug: string
+  release_year: number | null
+  driver_configuration: string | null
+  launch_price: string | number | null
+  launch_currency: string | null
 
   manufacturers:
     | {
@@ -366,6 +375,10 @@ export async function getIemBySlug(
         id,
         model,
         slug,
+		release_year,
+        driver_configuration,
+        launch_price,
+        launch_currency,
         manufacturers (
           id,
           name,
@@ -466,6 +479,22 @@ export async function getIemBySlug(
       name: manufacturer.name,
 	  slug: manufacturer.slug,
     },
+	
+	releaseYear:
+      iem.release_year == null
+        ? null
+        : Number(iem.release_year),
+    
+    driverConfiguration:
+      iem.driver_configuration,
+    
+    launchPrice:
+      iem.launch_price == null
+        ? null
+        : Number(iem.launch_price),
+    
+    launchCurrency:
+      iem.launch_currency,
 
     averageRating:
       calculateAverageRating(reviews),
