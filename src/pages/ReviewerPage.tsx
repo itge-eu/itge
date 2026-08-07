@@ -137,17 +137,25 @@ function ReviewerPage() {
         />
         <header className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 sm:p-10">
           <div className="flex flex-col gap-8 sm:flex-row sm:items-start">
-            <ReviewerAvatar
-              name={reviewer.name}
-              slug={reviewer.slug}
-              size="xl"
-              shape="rounded"
-              eager
-            />
+            <div className="relative shrink-0">
+              <ReviewerAvatar
+                name={reviewer.name}
+                slug={reviewer.slug}
+                size="xl"
+                shape="rounded"
+                eager
+              />
+            
+              {!reviewer.active && (
+                <div className="pointer-events-none absolute inset-0 rounded-2xl bg-black/35" />
+              )}
+            </div>
 
             <div className="flex-1">
               <p className="text-sm uppercase tracking-[0.2em] text-[var(--accent)]">
-                ITGE reviewer
+                {reviewer.active
+                  ? "ITGE reviewer"
+                  : "Former ITGE reviewer"}
               </p>
 
               <h1 className="mt-3 text-4xl font-semibold tracking-tight sm:text-6xl">

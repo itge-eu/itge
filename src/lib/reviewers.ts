@@ -5,6 +5,7 @@ export type ReviewerProfile = {
   id: number;
   name: string;
   slug: string;
+  active: boolean;
   bio: string | null;
   avatarUrl: string | null;
   country: string | null;
@@ -16,6 +17,7 @@ export type ReviewerSummary = {
   id: number;
   name: string;
   slug: string;
+  active: boolean;
   bio: string | null;
   avatarUrl: string | null;
   country: string | null;
@@ -110,6 +112,7 @@ export async function getReviewers(): Promise<
         id,
         name,
         slug,
+		active,
         bio,
         avatar_url,
         country
@@ -148,6 +151,7 @@ export async function getReviewers(): Promise<
     id: Number(reviewer.id),
     name: reviewer.name,
     slug: reviewer.slug,
+	active: reviewer.active,
     bio: reviewer.bio,
     avatarUrl: reviewer.avatar_url,
     country: reviewer.country,
@@ -166,6 +170,7 @@ export async function getReviewerBySlug(
         id,
         name,
         slug,
+		active,
         bio,
         avatar_url,
         country,
@@ -215,6 +220,7 @@ export async function getReviewerBySlug(
     id: Number(reviewer.id),
     name: reviewer.name,
     slug: reviewer.slug,
+	active: reviewer.active,
     bio: reviewer.bio,
     avatarUrl: reviewer.avatar_url,
     country: reviewer.country,
