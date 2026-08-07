@@ -4,13 +4,12 @@ import {
   useState,
 } from "react"
 import { Link, useParams } from "react-router"
-
 import ReviewerAvatar from "../components/reviewers/ReviewerAvatar"
-
 import {
   getReviewBySlug,
   type FullReview,
 } from "../lib/reviews"
+import Breadcrumbs from "../components/navigation/Breadcrumbs"
 
 function ReviewPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -120,6 +119,21 @@ function ReviewPage() {
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
       <article className="mx-auto max-w-4xl">
+	    <Breadcrumbs
+          items={[
+            {
+              label: "Reviews",
+              to: "/reviews",
+            },
+            {
+              label: review.model,
+              to: `/iems/${review.iemSlug}`,
+            },
+            {
+              label: `${review.reviewer} review`,
+            },
+          ]}
+        />
         <header className="border-b border-[var(--border)] pb-12">
           <Link
             to={`/manufacturers/${review.manufacturerSlug}`}

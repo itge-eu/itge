@@ -31,6 +31,14 @@ export type ManufacturerProfile = {
   latestReviews: FeaturedReview[]
 }
 
+export type ManufacturerDirectoryItem = {
+  id: number
+  name: string
+  slug: string
+  iemCount: number
+  reviewCount: number
+}
+
 type ManufacturerRow = {
   id: number
   name: string
@@ -473,4 +481,81 @@ export async function getManufacturerBySlug(
     latestReviews:
       reviews.slice(0, 6),
   }
+}
+
+export async function getManufacturers(): Promise<
+  ManufacturerDirectoryItem[]
+> {
+  const { data, error } = await supabase
+    .from("manufacturers")
+    .select(`
+      id,
+      name,
+      slug,
+
+      iems (
+        id,
+        reviews (
+          id,
+          published
+        )
+      )
+    `)
+
+  if (error) {
+    throw error
+  }
+
+  const rows = (data ?? []) as unknown as {
+    id: number
+    name: string
+    slug: string
+
+    iems:
+      | {
+          id: number
+          reviews:
+            | {
+                id: number
+                published: boolean
+              }[]
+            | null
+        }[]
+      | null
+  }[]
+
+  return rows
+    .map((manufacturer) => {
+      const iems = manufacturer.iems ?? []
+
+      const reviewedIems = iems.filter((iem) =>
+        (iem.reviews ?? []).some(
+          (review) => review.published,
+        ),
+      )
+
+      const reviewCount = reviewedIems.reduce(
+        (total, iem) =>
+          total +
+          (iem.reviews ?? []).filter(
+            (review) => review.published,
+          ).length,
+        0,
+      )
+
+      return {
+        id: Number(manufacturer.id),
+        name: manufacturer.name,
+        slug: manufacturer.slug,
+        iemCount: reviewedIems.length,
+        reviewCount,
+      }
+    })
+    .filter(
+      (manufacturer) =>
+        manufacturer.reviewCount > 0,
+    )
+    .sort((first, second) =>
+      first.name.localeCompare(second.name),
+    )
 }

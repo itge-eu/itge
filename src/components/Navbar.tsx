@@ -131,6 +131,13 @@ function Navbar() {
           </Link>
 
           <Link
+            to="/manufacturers"
+            className="transition hover:text-[var(--foreground)]"
+          >
+            Manufacturers
+          </Link>
+
+          <Link
             to="/reviewers"
             className="transition hover:text-[var(--foreground)]"
           >
@@ -220,6 +227,14 @@ function Navbar() {
               className="rounded-xl px-4 py-3 font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
             >
               IEMs
+            </Link>
+			
+            <Link
+              to="/manufacturers"
+              onClick={closeMobileMenu}
+              className="rounded-xl px-4 py-3 font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
+            >
+              Manufacturers
             </Link>
 			
 			<Link

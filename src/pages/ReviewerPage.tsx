@@ -10,6 +10,7 @@ import {
   type ReviewerProfile,
 } from "../lib/reviewers"
 import ReviewGrid from "../components/reviews/ReviewGrid"
+import Breadcrumbs from "../components/navigation/Breadcrumbs"
 
 function ReviewerPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -123,6 +124,17 @@ function ReviewerPage() {
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
       <div className="mx-auto max-w-6xl">
+	    <Breadcrumbs
+          items={[
+            {
+              label: "Reviewers",
+              to: "/reviewers",
+            },
+            {
+              label: reviewer.name,
+            },
+          ]}
+        />
         <header className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 sm:p-10">
           <div className="flex flex-col gap-8 sm:flex-row sm:items-start">
             <ReviewerAvatar

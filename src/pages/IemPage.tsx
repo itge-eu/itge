@@ -4,14 +4,13 @@ import {
   useState,
 } from "react"
 import { Link, useParams } from "react-router"
-
 import ReviewGrid from "../components/reviews/ReviewGrid"
 import ReviewerAvatar from "../components/reviewers/ReviewerAvatar"
-
 import {
   getIemBySlug,
   type IemProfile,
 } from "../lib/iems"
+import Breadcrumbs from "../components/navigation/Breadcrumbs"
 
 function IemPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -119,6 +118,21 @@ function IemPage() {
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
       <div className="mx-auto max-w-6xl">
+	    <Breadcrumbs
+          items={[
+            {
+              label: "IEMs",
+              to: "/iems",
+            },
+            {
+              label: iem.manufacturer.name,
+              to: `/manufacturers/${iem.manufacturer.slug}`,
+            },
+            {
+              label: iem.model,
+            },
+          ]}
+        />
         <header className="overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)]">
           <div className="grid lg:grid-cols-[minmax(0,1fr)_24rem]">
             <div className="p-8 sm:p-10">

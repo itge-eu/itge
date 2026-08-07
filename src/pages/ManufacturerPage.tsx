@@ -4,15 +4,14 @@ import {
   useState,
 } from "react"
 import { Link, useParams } from "react-router"
-
 import IemCard from "../components/iems/IemCard"
 import ReviewGrid from "../components/reviews/ReviewGrid"
 import ReviewerAvatar from "../components/reviewers/ReviewerAvatar"
-
 import {
   getManufacturerBySlug,
   type ManufacturerProfile,
 } from "../lib/manufacturers"
+import Breadcrumbs from "../components/navigation/Breadcrumbs"
 
 function ManufacturerPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -123,6 +122,17 @@ function ManufacturerPage() {
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
       <div className="mx-auto max-w-7xl">
+	    <Breadcrumbs
+          items={[
+            {
+              label: "Manufacturers",
+              to: "/manufacturers",
+            },
+            {
+              label: manufacturer.name,
+            },
+          ]}
+        />
         <header className="overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)]">
           <div className="grid lg:grid-cols-[minmax(0,1fr)_26rem]">
             <div className="p-8 sm:p-10">
