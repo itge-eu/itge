@@ -24,6 +24,7 @@ import ImpressionsPage from "./pages/ImpressionsPage"
 import ImpressionPage from "./pages/ImpressionPage"
 import ImportImpressionPage from "./pages/ImportImpressionPage"
 import AdminEditImpressionPage from "./pages/AdminEditImpressionPage"
+import AdminImpressionsPage from "./pages/AdminImpressionsPage"
 
 function App() {
   return (
@@ -57,6 +58,7 @@ function App() {
 		<Route path="/admin/import-impression" element={<ImportImpressionPage />} />
 		
         <Route path="/admin/reviews" element={<AdminReviewsPage />} />
+        <Route path="/admin/impressions" element={<AdminImpressionsPage />} />
 		
         <Route path="/admin/reviews/:id/edit" element={<AdminEditReviewPage />} />
 		<Route path="/admin/impressions/:id/edit" element={<AdminEditImpressionPage />} />
