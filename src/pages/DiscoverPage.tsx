@@ -3,46 +3,77 @@ import {
   useMemo,
   useState,
 } from "react"
+
 import DiscoveryFilters from "../components/discover/DiscoveryFilters"
 import DiscoveryResults from "../components/discover/DiscoveryResults"
 import ReviewSearch from "../components/reviews/ReviewSearch"
+
 import {
   buildDiscoveryState,
-  getDiscoveryReviews,
+  getDiscoveryItems,
 } from "../lib/discovery"
+
 import {
   EMPTY_DISCOVERY_FILTERS,
   EMPTY_DISCOVERY_SUGGESTIONS,
-  type DiscoveryReview,
+  type DiscoveryContentType,
+  type DiscoveryItem,
   type SelectedDiscoveryFilters,
 } from "../types/discovery"
+
 import type {
   SearchSuggestion,
   SearchSuggestionType,
 } from "../types/search"
+
 import usePageMetadata from "../hooks/usePageMetadata"
 
 function DiscoverPage() {
-  const [discoveryReviews, setDiscoveryReviews] =
-    useState<DiscoveryReview[]>([])
+  const [
+    discoveryItems,
+    setDiscoveryItems,
+  ] =
+    useState<
+      DiscoveryItem[]
+    >([])
 
-  const [selectedFilters, setSelectedFilters] =
-    useState<SelectedDiscoveryFilters>({
-      ...EMPTY_DISCOVERY_FILTERS,
-    })
+  const [
+    selectedFilters,
+    setSelectedFilters,
+  ] =
+    useState<SelectedDiscoveryFilters>(
+      {
+        ...EMPTY_DISCOVERY_FILTERS,
+      },
+    )
 
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(
-    null,
-  )
+  const [
+    contentType,
+    setContentType,
+  ] =
+    useState<DiscoveryContentType>(
+      "all",
+    )
 
-  const [mobileFiltersOpen, setMobileFiltersOpen] =
-    useState(false)
+  const [loading, setLoading] =
+    useState(true)
+
+  const [error, setError] =
+    useState<string | null>(
+      null,
+    )
+
+  const [
+    mobileFiltersOpen,
+    setMobileFiltersOpen,
+  ] = useState(false)
 
   usePageMetadata({
-    title: "Discover | ITGE",
+    title:
+      "Discover | ITGE",
+
     description:
-      "Discover IEM reviews by product, reviewer, manufacturer, artist and genre.",
+      "Discover IEM reviews and listening impressions by product, reviewer, manufacturer, artist and genre.",
   })
 
   useEffect(() => {
@@ -53,10 +84,13 @@ function DiscoverPage() {
       setError(null)
 
       try {
-        const result = await getDiscoveryReviews()
+        const result =
+          await getDiscoveryItems()
 
         if (!cancelled) {
-          setDiscoveryReviews(result)
+          setDiscoveryItems(
+            result,
+          )
         }
       } catch (loadError) {
         console.error(
@@ -65,7 +99,10 @@ function DiscoverPage() {
         )
 
         if (!cancelled) {
-          setDiscoveryReviews([])
+          setDiscoveryItems(
+            [],
+          )
+
           setError(
             "The Discover data could not be loaded.",
           )
@@ -84,64 +121,100 @@ function DiscoverPage() {
     }
   }, [])
 
-  const discoveryState = useMemo(() => {
-    if (discoveryReviews.length === 0) {
-      return {
-        matchingReviews: [],
-        suggestions: {
-          ...EMPTY_DISCOVERY_SUGGESTIONS,
-        },
+  const discoveryState =
+    useMemo(() => {
+      if (
+        discoveryItems.length ===
+        0
+      ) {
+        return {
+          matchingItems: [],
+          suggestions: {
+            ...EMPTY_DISCOVERY_SUGGESTIONS,
+          },
+        }
       }
-    }
 
-    return buildDiscoveryState(
-      discoveryReviews,
+      return buildDiscoveryState(
+        discoveryItems,
+        selectedFilters,
+        contentType,
+      )
+    }, [
+      discoveryItems,
       selectedFilters,
+      contentType,
+    ])
+
+  const searchSuggestions =
+    useMemo(
+      () => [
+        ...discoveryState
+          .suggestions.iem,
+
+        ...discoveryState
+          .suggestions
+          .manufacturer,
+
+        ...discoveryState
+          .suggestions.artist,
+
+        ...discoveryState
+          .suggestions.genre,
+
+        ...discoveryState
+          .suggestions
+          .reviewer,
+      ],
+      [
+        discoveryState
+          .suggestions,
+      ],
     )
-  }, [discoveryReviews, selectedFilters])
 
-  const searchSuggestions = useMemo(
-    () => [
-      ...discoveryState.suggestions.iem,
-      ...discoveryState.suggestions.manufacturer,
-      ...discoveryState.suggestions.artist,
-      ...discoveryState.suggestions.genre,
-      ...discoveryState.suggestions.reviewer,
-    ],
-    [discoveryState.suggestions],
-  )
+  const activeFilterCount =
+    Object.values(
+      selectedFilters,
+    ).filter(Boolean).length
 
-  const activeFilterCount = Object.values(
-    selectedFilters,
-  ).filter(Boolean).length
-
-  const hasFilters = activeFilterCount > 0
+  const hasFilters =
+    activeFilterCount > 0
 
   const handleSelection = (
     suggestion: SearchSuggestion,
   ) => {
-    setSelectedFilters((current) => {
-      const existing = current[suggestion.type]
+    setSelectedFilters(
+      (current) => {
+        const existing =
+          current[
+            suggestion.type
+          ]
 
-      const selectingSameItem =
-        existing?.id === suggestion.id
+        const selectingSameItem =
+          existing?.id ===
+          suggestion.id
 
-      return {
-        ...current,
-        [suggestion.type]: selectingSameItem
-          ? null
-          : suggestion,
-      }
-    })
+        return {
+          ...current,
+
+          [suggestion.type]:
+            selectingSameItem
+              ? null
+              : suggestion,
+        }
+      },
+    )
   }
 
   const removeFilter = (
     type: SearchSuggestionType,
   ) => {
-    setSelectedFilters((current) => ({
-      ...current,
-      [type]: null,
-    }))
+    setSelectedFilters(
+      (current) => ({
+        ...current,
+        [type]: null,
+      }),
+    )
   }
 
   const clearFilters = () => {
@@ -159,21 +232,36 @@ function DiscoverPage() {
           </p>
 
           <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
-            Discover reviews through what matters
+            Discover coverage
+            through what matters
             to you.
           </h1>
 
           <p className="mt-5 text-lg leading-8 text-[var(--muted)]">
-            Search directly or combine IEM,
-            manufacturer, artist, genre and reviewer
-            filters. Every available option leads to
-            at least one matching review.
+            Search directly or
+            combine IEM,
+            manufacturer, artist,
+            genre and contributor
+            filters across full
+            reviews and listening
+            impressions.
           </p>
         </header>
 
+        <div className="mb-6">
+          <ContentTypeSelector
+            value={contentType}
+            onChange={
+              setContentType
+            }
+          />
+        </div>
+
         <div className="mb-10 rounded-3xl border border-[var(--border)] bg-[var(--surface-soft)] p-5 sm:p-7">
           <ReviewSearch
-            onSelect={handleSelection}
+            onSelect={
+              handleSelection
+            }
             suggestionsOverride={
               searchSuggestions
             }
@@ -185,28 +273,34 @@ function DiscoverPage() {
             type="button"
             onClick={() =>
               setMobileFiltersOpen(
-                (current) => !current,
+                (current) =>
+                  !current,
               )
             }
-            aria-expanded={mobileFiltersOpen}
+            aria-expanded={
+              mobileFiltersOpen
+            }
             aria-controls="mobile-discovery-filters"
             className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-5 py-3 font-semibold transition hover:border-[var(--accent)]"
           >
             <FilterIcon />
 
             Filters
-            {activeFilterCount > 0 &&
+
+            {activeFilterCount >
+              0 &&
               ` (${activeFilterCount})`}
           </button>
 
           <span className="text-sm text-[var(--muted)]">
             {loading
               ? "Loading..."
-              : `${discoveryState.matchingReviews.length} ${
-                  discoveryState.matchingReviews
+              : `${discoveryState.matchingItems.length} ${
+                  discoveryState
+                    .matchingItems
                     .length === 1
-                    ? "review"
-                    : "reviews"
+                    ? "result"
+                    : "results"
                 }`}
           </span>
         </div>
@@ -218,7 +312,8 @@ function DiscoverPage() {
           >
             {loading ? (
               <p className="text-sm text-[var(--muted)]">
-                Loading filters...
+                Loading
+                filters...
               </p>
             ) : error ? (
               <p className="text-sm text-red-600 dark:text-red-400">
@@ -227,14 +322,21 @@ function DiscoverPage() {
             ) : (
               <DiscoveryFilters
                 groupedSuggestions={
-                  discoveryState.suggestions
+                  discoveryState
+                    .suggestions
                 }
                 selectedFilters={
                   selectedFilters
                 }
-                onSelect={handleSelection}
-                onRemove={removeFilter}
-                onClear={clearFilters}
+                onSelect={
+                  handleSelection
+                }
+                onRemove={
+                  removeFilter
+                }
+                onClear={
+                  clearFilters
+                }
               />
             )}
           </div>
@@ -245,7 +347,8 @@ function DiscoverPage() {
             <div className="sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-5">
               {loading ? (
                 <p className="text-sm text-[var(--muted)]">
-                  Loading filters...
+                  Loading
+                  filters...
                 </p>
               ) : error ? (
                 <p className="text-sm text-red-600 dark:text-red-400">
@@ -254,30 +357,116 @@ function DiscoverPage() {
               ) : (
                 <DiscoveryFilters
                   groupedSuggestions={
-                    discoveryState.suggestions
+                    discoveryState
+                      .suggestions
                   }
                   selectedFilters={
                     selectedFilters
                   }
-                  onSelect={handleSelection}
-                  onRemove={removeFilter}
-                  onClear={clearFilters}
+                  onSelect={
+                    handleSelection
+                  }
+                  onRemove={
+                    removeFilter
+                  }
+                  onClear={
+                    clearFilters
+                  }
                 />
               )}
             </div>
           </aside>
 
           <DiscoveryResults
-            reviews={
-              discoveryState.matchingReviews
+            items={
+              discoveryState
+                .matchingItems
+            }
+            contentType={
+              contentType
             }
             loading={loading}
             error={error}
-            hasFilters={hasFilters}
+            hasFilters={
+              hasFilters
+            }
           />
         </div>
       </div>
     </main>
+  )
+}
+
+function ContentTypeSelector({
+  value,
+  onChange,
+}: {
+  value: DiscoveryContentType
+
+  onChange: (
+    value: DiscoveryContentType,
+  ) => void
+}) {
+  const options: {
+    value: DiscoveryContentType
+    label: string
+  }[] = [
+    {
+      value: "all",
+      label: "All",
+    },
+    {
+      value: "review",
+      label: "Reviews",
+    },
+    {
+      value: "impression",
+      label: "Impressions",
+    },
+  ]
+
+  return (
+    <div>
+      <p className="mb-3 text-sm font-semibold text-[var(--muted)]">
+        Content type
+      </p>
+
+      <div className="inline-flex flex-wrap gap-2 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-2">
+        {options.map(
+          (option) => {
+            const selected =
+              value ===
+              option.value
+
+            return (
+              <button
+                key={
+                  option.value
+                }
+                type="button"
+                onClick={() =>
+                  onChange(
+                    option.value,
+                  )
+                }
+                aria-pressed={
+                  selected
+                }
+                className={`rounded-xl px-5 py-2.5 text-sm font-semibold transition ${
+                  selected
+                    ? "bg-[var(--accent)] text-[var(--accent-foreground)]"
+                    : "text-[var(--muted)] hover:bg-[var(--surface-soft)] hover:text-[var(--foreground)]"
+                }`}
+              >
+                {
+                  option.label
+                }
+              </button>
+            )
+          },
+        )}
+      </div>
+    </div>
   )
 }
 

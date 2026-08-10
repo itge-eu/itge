@@ -5,19 +5,29 @@ import type {
   SearchSuggestionType,
 } from "../../types/search"
 
-export type SelectedDiscoveryFilters = Record<
-  SearchSuggestionType,
-  SearchSuggestion | null
->
+export type SelectedDiscoveryFilters =
+  Record<
+    SearchSuggestionType,
+    SearchSuggestion | null
+  >
 
 type DiscoveryFiltersProps = {
   groupedSuggestions: Record<
     SearchSuggestionType,
     SearchSuggestion[]
   >
-  selectedFilters: SelectedDiscoveryFilters
-  onSelect: (suggestion: SearchSuggestion) => void
-  onRemove: (type: SearchSuggestionType) => void
+
+  selectedFilters:
+    SelectedDiscoveryFilters
+
+  onSelect: (
+    suggestion: SearchSuggestion,
+  ) => void
+
+  onRemove: (
+    type: SearchSuggestionType,
+  ) => void
+
   onClear: () => void
 }
 
@@ -43,7 +53,7 @@ const FILTER_GROUPS: {
   },
   {
     type: "reviewer",
-    title: "Reviewers",
+    title: "Contributors",
   },
 ]
 
@@ -54,12 +64,17 @@ function DiscoveryFilters({
   onRemove,
   onClear,
 }: DiscoveryFiltersProps) {
-  const activeFilters = FILTER_GROUPS.flatMap(
-    ({ type }) => {
-      const filter = selectedFilters[type]
-      return filter ? [filter] : []
-    },
-  )
+  const activeFilters =
+    FILTER_GROUPS.flatMap(
+      ({ type }) => {
+        const filter =
+          selectedFilters[type]
+
+        return filter
+          ? [filter]
+          : []
+      },
+    )
 
   return (
     <div>
@@ -70,11 +85,14 @@ function DiscoveryFilters({
           </h2>
 
           <p className="mt-1 text-sm text-[var(--muted)]">
-            Combine categories to narrow the reviews.
+            Combine categories
+            to narrow the
+            coverage.
           </p>
         </div>
 
-        {activeFilters.length > 0 && (
+        {activeFilters.length >
+          0 && (
           <button
             type="button"
             onClick={onClear}
@@ -85,36 +103,59 @@ function DiscoveryFilters({
         )}
       </div>
 
-      {activeFilters.length > 0 && (
+      {activeFilters.length >
+        0 && (
         <div className="mb-5 flex flex-wrap gap-2">
-          {activeFilters.map((filter) => (
-            <button
-              key={filter.type}
-              type="button"
-              onClick={() => onRemove(filter.type)}
-              aria-label={`Remove ${filter.name} filter`}
-              className="inline-flex max-w-full items-center gap-2 rounded-full border border-[var(--accent)]/40 bg-[var(--accent)]/10 px-3 py-2 text-xs font-medium transition hover:border-[var(--accent)]"
-            >
-              <span className="truncate">
-                {filter.name}
-              </span>
+          {activeFilters.map(
+            (filter) => (
+              <button
+                key={
+                  filter.type
+                }
+                type="button"
+                onClick={() =>
+                  onRemove(
+                    filter.type,
+                  )
+                }
+                aria-label={`Remove ${filter.name} filter`}
+                className="inline-flex max-w-full items-center gap-2 rounded-full border border-[var(--accent)]/40 bg-[var(--accent)]/10 px-3 py-2 text-xs font-medium transition hover:border-[var(--accent)]"
+              >
+                <span className="truncate">
+                  {
+                    filter.name
+                  }
+                </span>
 
-              <CloseIcon />
-            </button>
-          ))}
+                <CloseIcon />
+              </button>
+            ),
+          )}
         </div>
       )}
 
-      {FILTER_GROUPS.map((group) => (
-        <DiscoveryFilterGroup
-          key={group.type}
-          type={group.type}
-          title={group.title}
-          items={groupedSuggestions[group.type]}
-          selectedItem={selectedFilters[group.type]}
-          onSelect={onSelect}
-        />
-      ))}
+      {FILTER_GROUPS.map(
+        (group) => (
+          <DiscoveryFilterGroup
+            key={group.type}
+            type={group.type}
+            title={group.title}
+            items={
+              groupedSuggestions[
+                group.type
+              ]
+            }
+            selectedItem={
+              selectedFilters[
+                group.type
+              ]
+            }
+            onSelect={
+              onSelect
+            }
+          />
+        ),
+      )}
     </div>
   )
 }

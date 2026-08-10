@@ -1,38 +1,58 @@
-import { useEffect, useState } from "react"
+import {
+  useEffect,
+  useState,
+} from "react"
 
-import ReviewGrid from "../reviews/ReviewGrid"
+import ReviewCard from "../reviews/ReviewCard"
+import ImpressionCard from "../impressions/ImpressionCard"
 
-import type { FeaturedReview } from "../../lib/reviews"
+import type {
+  DiscoveryContentType,
+  DiscoveryItem,
+} from "../../types/discovery"
 
 type DiscoveryResultsProps = {
-  reviews: FeaturedReview[]
+  items: DiscoveryItem[]
+
+  contentType:
+    DiscoveryContentType
+
   loading: boolean
   error: string | null
   hasFilters: boolean
 }
 
-const REVIEWS_PER_PAGE = 12
+const ITEMS_PER_PAGE = 12
 
 function DiscoveryResults({
-  reviews,
+  items,
+  contentType,
   loading,
   error,
   hasFilters,
 }: DiscoveryResultsProps) {
-  const [visibleCount, setVisibleCount] =
-    useState(REVIEWS_PER_PAGE)
-
-  useEffect(() => {
-    setVisibleCount(REVIEWS_PER_PAGE)
-  }, [reviews])
-
-  const visibleReviews = reviews.slice(
-    0,
+  const [
     visibleCount,
+    setVisibleCount,
+  ] = useState(
+    ITEMS_PER_PAGE,
   )
 
-  const hasMoreReviews =
-    visibleCount < reviews.length
+  useEffect(() => {
+    setVisibleCount(
+      ITEMS_PER_PAGE,
+    )
+  }, [items])
+
+  const visibleItems =
+    items.slice(
+      0,
+      visibleCount,
+    )
+
+  const hasMoreItems =
+    visibleCount <
+    items.length
 
   return (
     <section aria-live="polite">
@@ -44,75 +64,136 @@ function DiscoveryResults({
 
           <h2 className="mt-2 text-3xl font-semibold tracking-tight">
             {loading
-              ? "Finding reviews..."
-              : `${reviews.length} matching ${
-                  reviews.length === 1
-                    ? "review"
-                    : "reviews"
-                }`}
+              ? "Finding coverage..."
+              : buildResultTitle(
+                  items.length,
+                  contentType,
+                )}
           </h2>
 
           <p className="mt-2 text-sm text-[var(--muted)]">
             {hasFilters
               ? "Results update whenever you change a filter."
-              : "Showing every published ITGE review."}
+              : buildDefaultDescription(
+                  contentType,
+                )}
           </p>
         </div>
 
         {!loading &&
           !error &&
-          reviews.length > REVIEWS_PER_PAGE && (
+          items.length >
+            ITEMS_PER_PAGE && (
             <span className="text-sm text-[var(--muted)]">
-              Showing {visibleReviews.length} of{" "}
-              {reviews.length}
+              Showing{" "}
+              {
+                visibleItems.length
+              }{" "}
+              of {items.length}
             </span>
           )}
       </div>
 
       {loading ? (
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
-          Loading matching reviews...
+          Loading matching
+          coverage...
         </div>
       ) : error ? (
         <div className="rounded-3xl border border-red-500/30 bg-red-500/10 p-8">
           <p className="font-semibold">
-            Unable to load reviews
+            Unable to load
+            coverage
           </p>
 
           <p className="mt-2 text-sm text-[var(--muted)]">
             {error}
           </p>
         </div>
-      ) : reviews.length === 0 ? (
+      ) : items.length ===
+        0 ? (
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
           <p className="font-semibold">
-            No reviews match this combination
+            No coverage matches
+            this combination
           </p>
 
           <p className="mt-2 text-sm text-[var(--muted)]">
-            Remove one of the selected filters to
-            broaden the results.
+            Remove one of the
+            selected filters or
+            choose another content
+            type to broaden the
+            results.
           </p>
         </div>
       ) : (
         <>
-          <ReviewGrid reviews={visibleReviews} />
+          <div className="grid gap-8">
+            {visibleItems.map(
+              (item) => {
+                if (
+                  item.type ===
+                  "review"
+                ) {
+                  return (
+                    <div
+                      key={`review-${item.review.id}`}
+                    >
+                      {contentType ===
+                        "all" && (
+                        <ContentLabel>
+                          Review
+                        </ContentLabel>
+                      )}
 
-          {hasMoreReviews && (
+                      <ReviewCard
+                        review={
+                          item.review
+                        }
+                      />
+                    </div>
+                  )
+                }
+
+                return (
+                  <div
+                    key={`impression-${item.impression.id}`}
+                  >
+                    {contentType ===
+                      "all" && (
+                      <ContentLabel>
+                        Impression
+                      </ContentLabel>
+                    )}
+
+                    <ImpressionCard
+                      impression={
+                        item.impression
+                      }
+                    />
+                  </div>
+                )
+              },
+            )}
+          </div>
+
+          {hasMoreItems && (
             <div className="mt-10 flex justify-center">
               <button
                 type="button"
                 onClick={() =>
-                  setVisibleCount((current) =>
-                    Math.min(
-                      current + REVIEWS_PER_PAGE,
-                      reviews.length,
-                    ),
+                  setVisibleCount(
+                    (current) =>
+                      Math.min(
+                        current +
+                          ITEMS_PER_PAGE,
+                        items.length,
+                      ),
                   )
                 }
                 className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-6 py-3 font-semibold transition hover:border-[var(--accent)] hover:bg-[var(--surface-soft)]"
               >
-                Load more reviews
+                Load more
               </button>
             </div>
           )}
@@ -120,6 +201,71 @@ function DiscoveryResults({
       )}
     </section>
   )
+}
+
+function ContentLabel({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
+      {children}
+    </p>
+  )
+}
+
+function buildResultTitle(
+  count: number,
+  contentType:
+    DiscoveryContentType,
+) {
+  if (
+    contentType === "review"
+  ) {
+    return `${count} matching ${
+      count === 1
+        ? "review"
+        : "reviews"
+    }`
+  }
+
+  if (
+    contentType ===
+    "impression"
+  ) {
+    return `${count} matching ${
+      count === 1
+        ? "impression"
+        : "impressions"
+    }`
+  }
+
+  return `${count} matching ${
+    count === 1
+      ? "result"
+      : "results"
+  }`
+}
+
+function buildDefaultDescription(
+  contentType:
+    DiscoveryContentType,
+) {
+  if (
+    contentType === "review"
+  ) {
+    return "Showing every published ITGE review."
+  }
+
+  if (
+    contentType ===
+    "impression"
+  ) {
+    return "Showing every published ITGE listening impression."
+  }
+
+  return "Showing all published ITGE reviews and listening impressions."
 }
 
 export default DiscoveryResults

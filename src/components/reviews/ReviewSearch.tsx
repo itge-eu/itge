@@ -98,16 +98,16 @@ function ReviewSearch({
       setError(null)
       return
     }
-  
+
     let cancelled = false
-  
+
     async function loadSuggestions() {
       setLoading(true)
       setError(null)
-  
+
       try {
         const result = await getSearchSuggestions()
-  
+
         if (!cancelled) {
           setSuggestions(result)
         }
@@ -116,7 +116,7 @@ function ReviewSearch({
           "Could not load search suggestions:",
           loadError,
         )
-  
+
         if (!cancelled) {
           setError(
             "Search suggestions could not be loaded.",
@@ -128,9 +128,9 @@ function ReviewSearch({
         }
       }
     }
-  
+
     void loadSuggestions()
-  
+
     return () => {
       cancelled = true
     }
@@ -504,7 +504,7 @@ function ReviewSearch({
                               )}
 
                               <span>
-                                {getReviewCountLabel(
+                                {getCoverageCountLabel(
                                   suggestion,
                                 )}
                               </span>
@@ -543,20 +543,76 @@ function getPluralTypeLabel(
   }
 }
 
-function getReviewCountLabel(
+function getCoverageCountLabel(
   suggestion: SearchSuggestion,
 ): string {
-  const count = suggestion.reviewCount
-  const reviewWord = count === 1 ? "review" : "reviews"
+  const reviewResultCount =
+    suggestion.reviewResultCount
 
-  if (
-    suggestion.type === "artist" ||
-    suggestion.type === "genre"
-  ) {
-    return `Mentioned in ${count} ${reviewWord}`
+  const impressionResultCount =
+    suggestion.impressionResultCount
+
+  const hasDiscoveryCounts =
+    reviewResultCount !== undefined ||
+    impressionResultCount !== undefined
+
+  /*
+   * Normal site search is still review-only.
+   * If Discover has not supplied its separate counts,
+   * preserve the existing wording.
+   */
+  if (!hasDiscoveryCounts) {
+    const count = suggestion.reviewCount
+    const reviewWord =
+      count === 1 ? "review" : "reviews"
+
+    if (
+      suggestion.type === "artist" ||
+      suggestion.type === "genre"
+    ) {
+      return `Mentioned in ${count} ${reviewWord}`
+    }
+
+    return `${count} ${reviewWord}`
   }
 
-  return `${count} ${reviewWord}`
+  const parts: string[] = []
+
+  if (
+    reviewResultCount !== undefined &&
+    reviewResultCount > 0
+  ) {
+    parts.push(
+      `${reviewResultCount} ${
+        reviewResultCount === 1
+          ? "review"
+          : "reviews"
+      }`,
+    )
+  }
+
+  if (
+    impressionResultCount !== undefined &&
+    impressionResultCount > 0
+  ) {
+    parts.push(
+      `${impressionResultCount} ${
+        impressionResultCount === 1
+          ? "impression"
+          : "impressions"
+      }`,
+    )
+  }
+
+  /*
+   * Should only occur for a selected suggestion that
+   * is being kept visible with a zero count.
+   */
+  if (parts.length === 0) {
+    return "0 results"
+  }
+
+  return parts.join(" · ")
 }
 
 function highlightMatch(

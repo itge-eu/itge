@@ -1,8 +1,15 @@
 import type { FeaturedReview } from "../lib/reviews"
+import type { ImpressionSummary } from "../lib/impressions"
+
 import type {
   SearchSuggestion,
   SearchSuggestionType,
 } from "./search"
+
+export type DiscoveryContentType =
+  | "all"
+  | "review"
+  | "impression"
 
 export type DiscoveryEntity = {
   id: number
@@ -10,13 +17,14 @@ export type DiscoveryEntity = {
   slug: string
 }
 
-export type DiscoveryIem = DiscoveryEntity & {
-  manufacturerId: number
-  manufacturerName: string
-}
+export type DiscoveryIem =
+  DiscoveryEntity & {
+    manufacturerId: number
+    manufacturerName: string
+  }
 
-export type DiscoveryReview = {
-  review: FeaturedReview
+type DiscoveryItemBase = {
+  publishedAt: string | null
 
   iem: DiscoveryIem
   manufacturer: DiscoveryEntity
@@ -26,33 +34,53 @@ export type DiscoveryReview = {
   genres: DiscoveryEntity[]
 }
 
-export type SelectedDiscoveryFilters = Record<
-  SearchSuggestionType,
-  SearchSuggestion | null
->
+export type DiscoveryReviewItem =
+  DiscoveryItemBase & {
+    type: "review"
+    review: FeaturedReview
+  }
 
-export type DiscoverySuggestions = Record<
-  SearchSuggestionType,
-  SearchSuggestion[]
->
+export type DiscoveryImpressionItem =
+  DiscoveryItemBase & {
+    type: "impression"
+    impression: ImpressionSummary
+  }
+
+export type DiscoveryItem =
+  | DiscoveryReviewItem
+  | DiscoveryImpressionItem
+
+export type SelectedDiscoveryFilters =
+  Record<
+    SearchSuggestionType,
+    SearchSuggestion | null
+  >
+
+export type DiscoverySuggestions =
+  Record<
+    SearchSuggestionType,
+    SearchSuggestion[]
+  >
 
 export type DiscoveryState = {
-  matchingReviews: FeaturedReview[]
+  matchingItems: DiscoveryItem[]
   suggestions: DiscoverySuggestions
 }
 
-export const EMPTY_DISCOVERY_FILTERS: SelectedDiscoveryFilters = {
-  iem: null,
-  manufacturer: null,
-  reviewer: null,
-  artist: null,
-  genre: null,
-}
+export const EMPTY_DISCOVERY_FILTERS: SelectedDiscoveryFilters =
+  {
+    iem: null,
+    manufacturer: null,
+    reviewer: null,
+    artist: null,
+    genre: null,
+  }
 
-export const EMPTY_DISCOVERY_SUGGESTIONS: DiscoverySuggestions = {
-  iem: [],
-  manufacturer: [],
-  reviewer: [],
-  artist: [],
-  genre: [],
-}
+export const EMPTY_DISCOVERY_SUGGESTIONS: DiscoverySuggestions =
+  {
+    iem: [],
+    manufacturer: [],
+    reviewer: [],
+    artist: [],
+    genre: [],
+  }
