@@ -170,6 +170,7 @@ function DiscoveryResults({
                       impression={
                         item.impression
                       }
+					  variant="compact"
                     />
                   </div>
                 )
