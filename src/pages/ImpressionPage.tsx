@@ -237,23 +237,7 @@ function ImpressionPage() {
               )}
             </div>
           </div>
-
-          {impression.summary && (
-            <p className="mt-8 max-w-3xl text-xl leading-9 text-[var(--muted)]">
-              {impression.summary}
-            </p>
-          )}
         </header>
-
-        {impression.heroImageUrl && (
-          <figure className="mt-10 overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)]">
-            <img
-              src={impression.heroImageUrl}
-              alt={`${impression.iem.manufacturer.name} ${impression.iem.model}`}
-              className="aspect-[16/9] w-full object-cover"
-            />
-          </figure>
-        )}
 
         <section className="py-12">
           {impression.body ? (

@@ -2,14 +2,25 @@ import { Route, Routes } from "react-router"
 
 import Layout from "./components/Layout"
 
+import RequireAdmin from "./components/admin/RequireAdmin"
+
+import AdminLoginPage from "./pages/AdminLoginPage"
+import AdminPage from "./pages/AdminPage"
+
+import ImportReviewPage from "./pages/ImportReviewPage"
+import AdminEditReviewPage from "./pages/AdminEditReviewPage"
+import AdminReviewsPage from "./pages/AdminReviewsPage"
+
+import ImportImpressionPage from "./pages/ImportImpressionPage"
+import AdminEditImpressionPage from "./pages/AdminEditImpressionPage"
+import AdminImpressionsPage from "./pages/AdminImpressionsPage"
+
 import HomePage from "./pages/HomePage"
 import ReviewsPage from "./pages/ReviewsPage"
 import ReviewPage from "./pages/ReviewPage"
 import ReviewersPage from "./pages/ReviewersPage"
 import ReviewerPage from "./pages/ReviewerPage"
-import ImportReviewPage from "./pages/ImportReviewPage"
-import AdminReviewsPage from "./pages/AdminReviewsPage"
-import AdminEditReviewPage from "./pages/AdminEditReviewPage"
+
 import DiscoverPage from "./pages/DiscoverPage"
 import IemPage from "./pages/IemPage"
 import IemsPage from "./pages/IemsPage"
@@ -22,9 +33,6 @@ import GenrePage from "./pages/GenrePage"
 import NotFoundPage from "./pages/NotFoundPage"
 import ImpressionsPage from "./pages/ImpressionsPage"
 import ImpressionPage from "./pages/ImpressionPage"
-import ImportImpressionPage from "./pages/ImportImpressionPage"
-import AdminEditImpressionPage from "./pages/AdminEditImpressionPage"
-import AdminImpressionsPage from "./pages/AdminImpressionsPage"
 
 function App() {
   return (
@@ -54,14 +62,17 @@ function App() {
 		<Route path="/genres" element={<GenresPage />} />
 		<Route path="/genres/:slug" element={<GenrePage />} />
 
-        <Route path="/admin/import" element={<ImportReviewPage />} />
-		<Route path="/admin/import-impression" element={<ImportImpressionPage />} />
-		
-        <Route path="/admin/reviews" element={<AdminReviewsPage />} />
-        <Route path="/admin/impressions" element={<AdminImpressionsPage />} />
-		
-        <Route path="/admin/reviews/:id/edit" element={<AdminEditReviewPage />} />
-		<Route path="/admin/impressions/:id/edit" element={<AdminEditImpressionPage />} />
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+
+        <Route element={<RequireAdmin />}>
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/admin/reviews" element={<AdminReviewsPage />} />
+          <Route path="/admin/reviews/:id/edit" element={<AdminEditReviewPage />} />
+          <Route path="/admin/impressions" element={<AdminImpressionsPage />} />
+          <Route path="/admin/impressions/:id/edit" element={<AdminEditImpressionPage />} />
+          <Route path="/admin/import" element={<ImportReviewPage />} />
+          <Route path="/admin/import-impression" element={<ImportImpressionPage />} />
+        </Route>
 		
 		<Route path="*" element={<NotFoundPage />} />
       </Route>
