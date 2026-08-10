@@ -5,13 +5,19 @@ import type {
 } from "./reviews"
 
 import type {
+  ImpressionSummary,
+} from "./impressions"
+
+import type {
   IemDirectoryItem,
 } from "./iems"
 
-export type ManufacturerReviewer = {
+export type ManufacturerContributor = {
   name: string
   slug: string
   reviewCount: number
+  impressionCount: number
+  coverageCount: number
 }
 
 export type ManufacturerProfile = {
@@ -24,19 +30,26 @@ export type ManufacturerProfile = {
   averageRating: number | null
 
   reviewCount: number
-  reviewerCount: number
+  impressionCount: number
+  coverageCount: number
+  contributorCount: number
 
-  reviewers: ManufacturerReviewer[]
+  contributors: ManufacturerContributor[]
   iems: IemDirectoryItem[]
+
   latestReviews: FeaturedReview[]
+  latestImpressions: ImpressionSummary[]
 }
 
 export type ManufacturerDirectoryItem = {
   id: number
   name: string
   slug: string
+
   iemCount: number
   reviewCount: number
+  impressionCount: number
+  coverageCount: number
 }
 
 type ManufacturerRow = {
@@ -76,12 +89,12 @@ type ManufacturerReviewRow = {
           | {
               id: number
               name: string
-			  slug: string
+              slug: string
             }
           | {
               id: number
               name: string
-			  slug: string
+              slug: string
             }[]
           | null
       }
@@ -94,12 +107,75 @@ type ManufacturerReviewRow = {
           | {
               id: number
               name: string
-			  slug: string
+              slug: string
             }
           | {
               id: number
               name: string
-			  slug: string
+              slug: string
+            }[]
+          | null
+      }[]
+    | null
+}
+
+type ManufacturerImpressionRow = {
+  id: number
+  slug: string
+  title: string
+  summary: string | null
+  body: string | null
+  hero_image_url: string | null
+  published_at: string | null
+  source_url: string | null
+
+  reviewers:
+    | {
+        id: number
+        name: string
+        slug: string
+      }
+    | {
+        id: number
+        name: string
+        slug: string
+      }[]
+    | null
+
+  iems:
+    | {
+        id: number
+        model: string
+        slug: string
+
+        manufacturers:
+          | {
+              id: number
+              name: string
+              slug: string
+            }
+          | {
+              id: number
+              name: string
+              slug: string
+            }[]
+          | null
+      }
+    | {
+        id: number
+        model: string
+        slug: string
+
+        manufacturers:
+          | {
+              id: number
+              name: string
+              slug: string
+            }
+          | {
+              id: number
+              name: string
+              slug: string
             }[]
           | null
       }[]
@@ -116,22 +192,44 @@ function getSingleRelation<T>(
   return relation ?? null
 }
 
+function timestampValue(
+  value: string | null,
+): number {
+  if (!value) {
+    return 0
+  }
+
+  const time =
+    new Date(value).getTime()
+
+  return Number.isNaN(time)
+    ? 0
+    : time
+}
+
 function mapFeaturedReview(
   row: ManufacturerReviewRow,
 ): FeaturedReview {
-  const reviewer = getSingleRelation(
-    row.reviewers,
-  )
+  const reviewer =
+    getSingleRelation(
+      row.reviewers,
+    )
 
-  const iem = getSingleRelation(
-    row.iems,
-  )
+  const iem =
+    getSingleRelation(
+      row.iems,
+    )
 
-  const manufacturer = getSingleRelation(
-    iem?.manufacturers,
-  )
+  const manufacturer =
+    getSingleRelation(
+      iem?.manufacturers,
+    )
 
-  if (!reviewer || !iem || !manufacturer) {
+  if (
+    !reviewer ||
+    !iem ||
+    !manufacturer
+  ) {
     throw new Error(
       `Review ${row.id} has incomplete manufacturer page data`,
     )
@@ -145,228 +243,506 @@ function mapFeaturedReview(
     summary: row.summary,
 
     brand: manufacturer.name,
-	manufacturerSlug: manufacturer.slug,
+    manufacturerSlug:
+      manufacturer.slug,
+
     model: iem.model,
     iemSlug: iem.slug,
 
     reviewer: reviewer.name,
-    reviewerSlug: reviewer.slug,
+    reviewerSlug:
+      reviewer.slug,
 
-    heroImageUrl: row.hero_image_url,
+    heroImageUrl:
+      row.hero_image_url,
   }
 }
 
-function collectReviewers(
-  rows: ManufacturerReviewRow[],
-): ManufacturerReviewer[] {
-  const reviewers =
-    new Map<string, ManufacturerReviewer>()
-
-  rows.forEach((row) => {
-    const reviewer = getSingleRelation(
+function mapImpression(
+  row: ManufacturerImpressionRow,
+): ImpressionSummary {
+  const reviewer =
+    getSingleRelation(
       row.reviewers,
     )
+
+  const iem =
+    getSingleRelation(
+      row.iems,
+    )
+
+  const manufacturer =
+    getSingleRelation(
+      iem?.manufacturers,
+    )
+
+  if (
+    !reviewer ||
+    !iem ||
+    !manufacturer
+  ) {
+    throw new Error(
+      `Impression ${row.id} has incomplete manufacturer page data`,
+    )
+  }
+
+  return {
+    id: Number(row.id),
+    slug: row.slug,
+    title: row.title,
+    summary: row.summary,
+	body: row.body,
+    heroImageUrl:
+      row.hero_image_url,
+    publishedAt:
+      row.published_at,
+
+    reviewer: {
+      id: Number(reviewer.id),
+      name: reviewer.name,
+      slug: reviewer.slug,
+    },
+    
+    iem: {
+      id: Number(iem.id),
+      model: iem.model,
+      slug: iem.slug,
+    
+      manufacturer: {
+        id: Number(manufacturer.id),
+        name: manufacturer.name,
+        slug: manufacturer.slug,
+      },
+    },
+  }
+}
+
+function collectContributors(
+  reviewRows: ManufacturerReviewRow[],
+  impressionRows: ManufacturerImpressionRow[],
+): ManufacturerContributor[] {
+  const contributors =
+    new Map<
+      string,
+      ManufacturerContributor
+    >()
+
+  reviewRows.forEach((row) => {
+    const reviewer =
+      getSingleRelation(
+        row.reviewers,
+      )
 
     if (!reviewer) {
       return
     }
 
     const existing =
-      reviewers.get(reviewer.slug)
+      contributors.get(
+        reviewer.slug,
+      )
 
     if (existing) {
       existing.reviewCount += 1
+      existing.coverageCount += 1
       return
     }
 
-    reviewers.set(reviewer.slug, {
-      name: reviewer.name,
-      slug: reviewer.slug,
-      reviewCount: 1,
-    })
-  })
-
-  return Array.from(
-    reviewers.values(),
-  ).sort((first, second) => {
-    const countDifference =
-      second.reviewCount - first.reviewCount
-
-    if (countDifference !== 0) {
-      return countDifference
-    }
-
-    return first.name.localeCompare(
-      second.name,
+    contributors.set(
+      reviewer.slug,
+      {
+        name: reviewer.name,
+        slug: reviewer.slug,
+        reviewCount: 1,
+        impressionCount: 0,
+        coverageCount: 1,
+      },
     )
   })
+
+  impressionRows.forEach(
+    (row) => {
+      const reviewer =
+        getSingleRelation(
+          row.reviewers,
+        )
+
+      if (!reviewer) {
+        return
+      }
+
+      const existing =
+        contributors.get(
+          reviewer.slug,
+        )
+
+      if (existing) {
+        existing.impressionCount +=
+          1
+        existing.coverageCount += 1
+        return
+      }
+
+      contributors.set(
+        reviewer.slug,
+        {
+          name: reviewer.name,
+          slug: reviewer.slug,
+          reviewCount: 0,
+          impressionCount: 1,
+          coverageCount: 1,
+        },
+      )
+    },
+  )
+
+  return Array.from(
+    contributors.values(),
+  ).sort(
+    (first, second) => {
+      const coverageDifference =
+        second.coverageCount -
+        first.coverageCount
+
+      if (
+        coverageDifference !== 0
+      ) {
+        return coverageDifference
+      }
+
+      return first.name.localeCompare(
+        second.name,
+      )
+    },
+  )
 }
 
 function collectIems(
-  rows: ManufacturerReviewRow[],
+  reviewRows: ManufacturerReviewRow[],
+  impressionRows: ManufacturerImpressionRow[],
 ): IemDirectoryItem[] {
-  const iems = new Map<
-    number,
-    {
+  type CollectedIem = {
+    id: number
+    model: string
+    slug: string
+
+    manufacturer: {
+      id: number
+      name: string
+      slug: string
+    }
+
+    reviews: ManufacturerReviewRow[]
+    impressions: ManufacturerImpressionRow[]
+  }
+
+  const iems =
+    new Map<
+      number,
+      CollectedIem
+    >()
+
+  function ensureIem(
+    iem: {
       id: number
       model: string
       slug: string
-      manufacturer: {
-        id: number
-        name: string
-		slug: string
-      }
-      reviews: ManufacturerReviewRow[]
-    }
-  >()
-
-  rows.forEach((row) => {
-    const iem = getSingleRelation(row.iems)
-
+      manufacturers:
+        | {
+            id: number
+            name: string
+            slug: string
+          }
+        | {
+            id: number
+            name: string
+            slug: string
+          }[]
+        | null
+    },
+  ): CollectedIem | null {
     const manufacturer =
       getSingleRelation(
-        iem?.manufacturers,
+        iem.manufacturers,
       )
 
-    if (!iem || !manufacturer) {
-      return
+    if (!manufacturer) {
+      return null
     }
 
-    const existing = iems.get(
-      Number(iem.id),
-    )
+    const id =
+      Number(iem.id)
+
+    const existing =
+      iems.get(id)
 
     if (existing) {
-      existing.reviews.push(row)
+      return existing
+    }
+
+    const created: CollectedIem =
+      {
+        id,
+        model: iem.model,
+        slug: iem.slug,
+
+        manufacturer: {
+          id: Number(
+            manufacturer.id,
+          ),
+          name:
+            manufacturer.name,
+          slug:
+            manufacturer.slug,
+        },
+
+        reviews: [],
+        impressions: [],
+      }
+
+    iems.set(id, created)
+
+    return created
+  }
+
+  reviewRows.forEach((row) => {
+    const iem =
+      getSingleRelation(
+        row.iems,
+      )
+
+    if (!iem) {
       return
     }
 
-    iems.set(Number(iem.id), {
-      id: Number(iem.id),
-      model: iem.model,
-      slug: iem.slug,
-
-      manufacturer: {
-        id: Number(manufacturer.id),
-        name: manufacturer.name,
-		slug: manufacturer.slug,
-      },
-
-      reviews: [row],
-    })
+    ensureIem(iem)?.reviews.push(
+      row,
+    )
   })
 
-  return Array.from(iems.values())
+  impressionRows.forEach(
+    (row) => {
+      const iem =
+        getSingleRelation(
+          row.iems,
+        )
+
+      if (!iem) {
+        return
+      }
+
+      ensureIem(
+        iem,
+      )?.impressions.push(
+        row,
+      )
+    },
+  )
+
+  return Array.from(
+    iems.values(),
+  )
     .map((iem) => {
       const sortedReviews = [
         ...iem.reviews,
-      ].sort((first, second) => {
-        const firstTime =
-          first.published_at
-            ? new Date(
-                first.published_at,
-              ).getTime()
-            : 0
+      ].sort(
+        (first, second) =>
+          timestampValue(
+            second.published_at,
+          ) -
+          timestampValue(
+            first.published_at,
+          ),
+      )
 
-        const secondTime =
-          second.published_at
-            ? new Date(
-                second.published_at,
-              ).getTime()
-            : 0
+      const sortedImpressions = [
+        ...iem.impressions,
+      ].sort(
+        (first, second) =>
+          timestampValue(
+            second.published_at,
+          ) -
+          timestampValue(
+            first.published_at,
+          ),
+      )
 
-        return secondTime - firstTime
-      })
-
-      const reviewerSlugs =
+      const reviewReviewerSlugs =
         new Set<string>()
 
-      sortedReviews.forEach((review) => {
-        const reviewer =
-          getSingleRelation(
-            review.reviewers,
-          )
+      const contributorSlugs =
+        new Set<string>()
 
-        if (reviewer) {
-          reviewerSlugs.add(
+      sortedReviews.forEach(
+        (review) => {
+          const reviewer =
+            getSingleRelation(
+              review.reviewers,
+            )
+
+          if (!reviewer) {
+            return
+          }
+
+          reviewReviewerSlugs.add(
             reviewer.slug,
           )
-        }
-      })
+
+          contributorSlugs.add(
+            reviewer.slug,
+          )
+        },
+      )
+
+      sortedImpressions.forEach(
+        (impression) => {
+          const reviewer =
+            getSingleRelation(
+              impression.reviewers,
+            )
+
+          if (!reviewer) {
+            return
+          }
+
+          contributorSlugs.add(
+            reviewer.slug,
+          )
+        },
+      )
 
       const ratingTotal =
         sortedReviews.reduce(
-          (total, review) =>
+          (
+            total,
+            review,
+          ) =>
             total +
-            Number(review.rating),
+            Number(
+              review.rating,
+            ),
           0,
         )
+
+      const latestReviewAt =
+        sortedReviews[0]
+          ?.published_at ??
+        null
+
+      const latestImpressionAt =
+        sortedImpressions[0]
+          ?.published_at ??
+        null
+
+      const latestActivityAt =
+        timestampValue(
+          latestReviewAt,
+        ) >=
+        timestampValue(
+          latestImpressionAt,
+        )
+          ? latestReviewAt
+          : latestImpressionAt
+
+      const heroImageUrl =
+        sortedReviews.find(
+          (review) =>
+            review.hero_image_url !==
+            null,
+        )?.hero_image_url ??
+        sortedImpressions.find(
+          (impression) =>
+            impression.hero_image_url !==
+            null,
+        )?.hero_image_url ??
+        null
 
       return {
         id: iem.id,
         model: iem.model,
         slug: iem.slug,
-        manufacturer: iem.manufacturer,
 
-        heroImageUrl:
-          sortedReviews.find(
-            (review) =>
-              review.hero_image_url !==
-              null,
-          )?.hero_image_url ?? null,
+        manufacturer:
+          iem.manufacturer,
+
+        heroImageUrl,
 
         reviewCount:
           sortedReviews.length,
 
+        impressionCount:
+          sortedImpressions.length,
+
+        coverageCount:
+          sortedReviews.length +
+          sortedImpressions.length,
+
         reviewerCount:
-          reviewerSlugs.size,
+          reviewReviewerSlugs.size,
+
+        contributorCount:
+          contributorSlugs.size,
 
         averageRating:
-          sortedReviews.length === 0
+          sortedReviews.length ===
+          0
             ? null
             : ratingTotal /
               sortedReviews.length,
 
-        latestReviewAt:
-          sortedReviews[0]
-            ?.published_at ?? null,
+        latestReviewAt,
+        latestActivityAt,
       }
     })
-    .sort((first, second) => {
-      const reviewDifference =
-        second.reviewCount -
-        first.reviewCount
+    .sort(
+      (first, second) => {
+        const coverageDifference =
+          (second.coverageCount ??
+            0) -
+          (first.coverageCount ??
+            0)
 
-      if (reviewDifference !== 0) {
-        return reviewDifference
-      }
+        if (
+          coverageDifference !==
+          0
+        ) {
+          return coverageDifference
+        }
 
-      return first.model.localeCompare(
-        second.model,
-      )
-    })
+        return first.model.localeCompare(
+          second.model,
+        )
+      },
+    )
 }
 
 function calculateAverageRating(
   reviews: FeaturedReview[],
 ): number | null {
-  if (reviews.length === 0) {
+  if (
+    reviews.length === 0
+  ) {
     return null
   }
 
-  const total = reviews.reduce(
-    (sum, review) =>
-      sum + review.rating,
-    0,
-  )
+  const total =
+    reviews.reduce(
+      (sum, review) =>
+        sum + review.rating,
+      0,
+    )
 
-  return total / reviews.length
+  return (
+    total /
+    reviews.length
+  )
 }
 
 export async function getManufacturerBySlug(
   slug: string,
 ): Promise<ManufacturerProfile | null> {
-  const normalizedSlug = slug.trim()
+  const normalizedSlug =
+    slug.trim()
 
   if (!normalizedSlug) {
     return null
@@ -383,7 +759,10 @@ export async function getManufacturerBySlug(
       slug,
       website
     `)
-    .eq("slug", normalizedSlug)
+    .eq(
+      "slug",
+      normalizedSlug,
+    )
     .maybeSingle()
 
   if (manufacturerError) {
@@ -397,96 +776,203 @@ export async function getManufacturerBySlug(
   const manufacturer =
     manufacturerData as ManufacturerRow
 
-  const {
-    data: reviewData,
-    error: reviewError,
-  } = await supabase
-    .from("reviews")
-    .select(`
-      id,
-      slug,
-      rating,
-      title,
-      summary,
-      hero_image_url,
-      published_at,
+  const [
+    reviewsResult,
+    impressionsResult,
+  ] = await Promise.all([
+    supabase
+      .from("reviews")
+      .select(`
+        id,
+        slug,
+        rating,
+        title,
+        summary,
+		body,
+        hero_image_url,
+        published_at,
 
-      reviewers (
-        name,
-        slug
+        reviewers (
+		  id,
+          name,
+          slug
+        ),
+
+        iems!inner (
+          id,
+          model,
+          slug,
+
+          manufacturers!inner (
+            id,
+            name,
+            slug
+          )
+        )
+      `)
+      .eq(
+        "iems.manufacturer_id",
+        Number(
+          manufacturer.id,
+        ),
+      )
+      .eq(
+        "published",
+        true,
+      )
+      .order(
+        "published_at",
+        {
+          ascending: false,
+        },
       ),
 
-      iems!inner (
+    supabase
+      .from("impressions")
+      .select(`
         id,
-        model,
         slug,
+        title,
+        summary,
+		body,
+        hero_image_url,
+        published_at,
+        source_url,
 
-        manufacturers!inner (
-          id,
+        reviewers (
+		  id,
           name,
-		  slug
-        )
-      )
-    `)
-    .eq(
-      "iems.manufacturer_id",
-      Number(manufacturer.id),
-    )
-    .eq("published", true)
-    .order("published_at", {
-      ascending: false,
-    })
+          slug
+        ),
 
-  if (reviewError) {
-    throw reviewError
+        iems!inner (
+          id,
+          model,
+          slug,
+
+          manufacturers!inner (
+            id,
+            name,
+            slug
+          )
+        )
+      `)
+      .eq(
+        "iems.manufacturer_id",
+        Number(
+          manufacturer.id,
+        ),
+      )
+      .eq(
+        "published",
+        true,
+      )
+      .order(
+        "published_at",
+        {
+          ascending: false,
+        },
+      ),
+  ])
+
+  if (reviewsResult.error) {
+    throw reviewsResult.error
   }
 
-  const rows =
-    (reviewData ??
+  if (impressionsResult.error) {
+    throw impressionsResult.error
+  }
+
+  const reviewRows =
+    (reviewsResult.data ??
       []) as unknown as ManufacturerReviewRow[]
 
-  const reviews = rows.map(
-    mapFeaturedReview,
-  )
+  const impressionRows =
+    (impressionsResult.data ??
+      []) as unknown as ManufacturerImpressionRow[]
 
-  const reviewers =
-    collectReviewers(rows)
+  const reviews =
+    reviewRows.map(
+      mapFeaturedReview,
+    )
+
+  const impressions =
+    impressionRows.map(
+      mapImpression,
+    )
+
+  const contributors =
+    collectContributors(
+      reviewRows,
+      impressionRows,
+    )
 
   const iems =
-    collectIems(rows)
+    collectIems(
+      reviewRows,
+      impressionRows,
+    )
 
   const heroImageUrl =
     reviews.find(
       (review) =>
-        review.heroImageUrl !== null,
-    )?.heroImageUrl ?? null
+        review.heroImageUrl !==
+        null,
+    )?.heroImageUrl ??
+    impressions.find(
+      (impression) =>
+        impression.heroImageUrl !==
+        null,
+    )?.heroImageUrl ??
+    null
 
   return {
-    id: Number(manufacturer.id),
+    id: Number(
+      manufacturer.id,
+    ),
     name: manufacturer.name,
     slug: manufacturer.slug,
-    website: manufacturer.website,
+    website:
+      manufacturer.website,
 
     heroImageUrl,
+
     averageRating:
-      calculateAverageRating(reviews),
+      calculateAverageRating(
+        reviews,
+      ),
 
-    reviewCount: reviews.length,
-    reviewerCount:
-      reviewers.length,
+    reviewCount:
+      reviews.length,
 
-    reviewers,
+    impressionCount:
+      impressions.length,
+
+    coverageCount:
+      reviews.length +
+      impressions.length,
+
+    contributorCount:
+      contributors.length,
+
+    contributors,
     iems,
 
     latestReviews:
       reviews.slice(0, 6),
+
+    latestImpressions:
+      impressions.slice(0, 6),
   }
 }
 
 export async function getManufacturers(): Promise<
   ManufacturerDirectoryItem[]
 > {
-  const { data, error } = await supabase
+  const {
+    data,
+    error,
+  } = await supabase
     .from("manufacturers")
     .select(`
       id,
@@ -495,7 +981,13 @@ export async function getManufacturers(): Promise<
 
       iems (
         id,
+
         reviews (
+          id,
+          published
+        ),
+
+        impressions (
           id,
           published
         )
@@ -506,56 +998,126 @@ export async function getManufacturers(): Promise<
     throw error
   }
 
-  const rows = (data ?? []) as unknown as {
-    id: number
-    name: string
-    slug: string
+  const rows =
+    (data ??
+      []) as unknown as {
+      id: number
+      name: string
+      slug: string
 
-    iems:
-      | {
-          id: number
-          reviews:
-            | {
-                id: number
-                published: boolean
-              }[]
-            | null
-        }[]
-      | null
-  }[]
+      iems:
+        | {
+            id: number
+
+            reviews:
+              | {
+                  id: number
+                  published: boolean
+                }[]
+              | null
+
+            impressions:
+              | {
+                  id: number
+                  published: boolean
+                }[]
+              | null
+          }[]
+        | null
+    }[]
 
   return rows
     .map((manufacturer) => {
-      const iems = manufacturer.iems ?? []
+      const iems =
+        manufacturer.iems ??
+        []
 
-      const reviewedIems = iems.filter((iem) =>
-        (iem.reviews ?? []).some(
-          (review) => review.published,
-        ),
-      )
+      const coveredIems =
+        iems.filter(
+          (iem) => {
+            const hasReview =
+              (
+                iem.reviews ??
+                []
+              ).some(
+                (review) =>
+                  review.published,
+              )
 
-      const reviewCount = reviewedIems.reduce(
-        (total, iem) =>
-          total +
-          (iem.reviews ?? []).filter(
-            (review) => review.published,
-          ).length,
-        0,
-      )
+            const hasImpression =
+              (
+                iem.impressions ??
+                []
+              ).some(
+                (impression) =>
+                  impression.published,
+              )
+
+            return (
+              hasReview ||
+              hasImpression
+            )
+          },
+        )
+
+      const reviewCount =
+        coveredIems.reduce(
+          (total, iem) =>
+            total +
+            (
+              iem.reviews ??
+              []
+            ).filter(
+              (review) =>
+                review.published,
+            ).length,
+          0,
+        )
+
+      const impressionCount =
+        coveredIems.reduce(
+          (total, iem) =>
+            total +
+            (
+              iem.impressions ??
+              []
+            ).filter(
+              (impression) =>
+                impression.published,
+            ).length,
+          0,
+        )
 
       return {
-        id: Number(manufacturer.id),
-        name: manufacturer.name,
-        slug: manufacturer.slug,
-        iemCount: reviewedIems.length,
+        id: Number(
+          manufacturer.id,
+        ),
+        name:
+          manufacturer.name,
+        slug:
+          manufacturer.slug,
+
+        iemCount:
+          coveredIems.length,
+
         reviewCount,
+
+        impressionCount,
+
+        coverageCount:
+          reviewCount +
+          impressionCount,
       }
     })
     .filter(
       (manufacturer) =>
-        manufacturer.reviewCount > 0,
+        manufacturer.coverageCount >
+        0,
     )
-    .sort((first, second) =>
-      first.name.localeCompare(second.name),
+    .sort(
+      (first, second) =>
+        first.name.localeCompare(
+          second.name,
+        ),
     )
 }

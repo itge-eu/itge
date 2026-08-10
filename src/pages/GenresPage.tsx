@@ -2,28 +2,36 @@ import {
   useEffect,
   useState,
 } from "react"
+
 import { Link } from "react-router"
+
 import {
   getGenreDirectory,
   type GenreSummary,
 } from "../lib/genres"
+
 import usePageMetadata from "../hooks/usePageMetadata"
 
 function GenresPage() {
-  const [genres, setGenres] = useState<
-    GenreSummary[]
-  >([])
+  const [genres, setGenres] =
+    useState<
+      GenreSummary[]
+    >([])
 
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] =
+    useState(true)
 
-  const [error, setError] = useState<
-    string | null
-  >(null)
-  
+  const [error, setError] =
+    useState<string | null>(
+      null,
+    )
+
   usePageMetadata({
-    title: "Genres | ITGE",
+    title:
+      "Genres | ITGE",
+
     description:
-      "Explore ITGE IEM reviews by music genre.",
+      "Explore ITGE IEM reviews and listening impressions by music genre.",
   })
 
   useEffect(() => {
@@ -31,7 +39,8 @@ function GenresPage() {
 
     async function loadGenres() {
       try {
-        const result = await getGenreDirectory()
+        const result =
+          await getGenreDirectory()
 
         if (!cancelled) {
           setGenres(result)
@@ -73,10 +82,13 @@ function GenresPage() {
     return (
       <PageMessage>
         <p className="text-xl font-semibold text-[var(--foreground)]">
-          Unable to load genres
+          Unable to load
+          genres
         </p>
 
-        <p className="mt-3">{error}</p>
+        <p className="mt-3">
+          {error}
+        </p>
       </PageMessage>
     )
   }
@@ -94,69 +106,102 @@ function GenresPage() {
           </h1>
 
           <p className="mt-5 max-w-2xl text-lg leading-8 text-[var(--muted)]">
-            Explore reviews through the genres used
-            by ITGE reviewers when evaluating IEMs.
+            Explore reviews and
+            listening impressions
+            through the genres used
+            by ITGE contributors
+            when evaluating IEMs.
           </p>
 
           <p className="mt-4 text-sm text-[var(--muted)]">
             {genres.length}{" "}
-            {genres.length === 1
+            {genres.length ===
+            1
               ? "genre"
               : "genres"}
           </p>
         </header>
 
-        {genres.length === 0 ? (
+        {genres.length ===
+        0 ? (
           <div className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
-            No genres with published reviews are
+            No genres with
+            published coverage are
             available yet.
           </div>
         ) : (
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {genres.map((genre) => (
-              <Link
-                key={genre.id}
-                to={`/genres/${genre.slug}`}
-                className="group rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
-              >
-                <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
-                  Genre
-                </p>
+            {genres.map(
+              (genre) => (
+                <Link
+                  key={
+                    genre.id
+                  }
+                  to={`/genres/${genre.slug}`}
+                  className="group rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
+                >
+                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
+                    Genre
+                  </p>
 
-                <h2 className="mt-2 text-2xl font-semibold tracking-tight transition group-hover:text-[var(--accent)]">
-                  {genre.name}
-                </h2>
-
-                <div className="mt-6 grid grid-cols-3 gap-4 border-t border-[var(--border)] pt-5">
-                  <Metric
-                    value={genre.reviewCount}
-                    label={
-                      genre.reviewCount === 1
-                        ? "review"
-                        : "reviews"
+                  <h2 className="mt-2 text-2xl font-semibold tracking-tight transition group-hover:text-[var(--accent)]">
+                    {
+                      genre.name
                     }
-                  />
+                  </h2>
 
-                  <Metric
-                    value={genre.iemCount}
-                    label={
-                      genre.iemCount === 1
-                        ? "IEM"
-                        : "IEMs"
-                    }
-                  />
+                  <div className="mt-6 grid grid-cols-2 gap-4 border-t border-[var(--border)] pt-5 sm:grid-cols-4">
+                    <Metric
+                      value={
+                        genre.reviewCount
+                      }
+                      label={
+                        genre.reviewCount ===
+                        1
+                          ? "review"
+                          : "reviews"
+                      }
+                    />
 
-                  <Metric
-                    value={genre.reviewerCount}
-                    label={
-                      genre.reviewerCount === 1
-                        ? "reviewer"
-                        : "reviewers"
-                    }
-                  />
-                </div>
-              </Link>
-            ))}
+                    <Metric
+                      value={
+                        genre.impressionCount
+                      }
+                      label={
+                        genre.impressionCount ===
+                        1
+                          ? "impression"
+                          : "impressions"
+                      }
+                    />
+
+                    <Metric
+                      value={
+                        genre.iemCount
+                      }
+                      label={
+                        genre.iemCount ===
+                        1
+                          ? "IEM"
+                          : "IEMs"
+                      }
+                    />
+
+                    <Metric
+                      value={
+                        genre.contributorCount
+                      }
+                      label={
+                        genre.contributorCount ===
+                        1
+                          ? "contributor"
+                          : "contributors"
+                      }
+                    />
+                  </div>
+                </Link>
+              ),
+            )}
           </div>
         )}
       </div>
@@ -172,12 +217,12 @@ function Metric({
   label: string
 }) {
   return (
-    <div>
+    <div className="min-w-0">
       <p className="font-semibold">
         {value}
       </p>
 
-      <p className="mt-1 text-xs text-[var(--muted)]">
+      <p className="mt-1 text-xs leading-4 text-[var(--muted)]">
         {label}
       </p>
     </div>
@@ -187,7 +232,8 @@ function Metric({
 function PageMessage({
   children,
 }: {
-  children: React.ReactNode
+  children:
+    React.ReactNode
 }) {
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-20 text-[var(--foreground)]">

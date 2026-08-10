@@ -2,13 +2,19 @@ import {
   useEffect,
   useState,
 } from "react"
-import { Link, useParams } from "react-router"
+
+import {
+  Link,
+  useParams,
+} from "react-router"
 
 import Breadcrumbs from "../components/navigation/Breadcrumbs"
 import ReviewGrid from "../components/reviews/ReviewGrid"
+import ImpressionCard from "../components/impressions/ImpressionCard"
 import ReviewerAvatar from "../components/reviewers/ReviewerAvatar"
-import usePageMetadata from "../hooks/usePageMetadata"
 import PageState from "../components/layout/PageState"
+
+import usePageMetadata from "../hooks/usePageMetadata"
 
 import {
   getArtistBySlug,
@@ -16,23 +22,31 @@ import {
 } from "../lib/artists"
 
 function ArtistPage() {
-  const { slug } = useParams<{ slug: string }>()
+  const { slug } =
+    useParams<{
+      slug: string
+    }>()
 
   const [artist, setArtist] =
-    useState<ArtistProfile | null>(null)
+    useState<ArtistProfile | null>(
+      null,
+    )
 
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] =
+    useState(true)
 
-  const [error, setError] = useState<
-    string | null
-  >(null)
+  const [error, setError] =
+    useState<string | null>(
+      null,
+    )
 
   usePageMetadata({
     title: artist
       ? `${artist.name} | ITGE`
       : "Artist | ITGE",
+
     description: artist
-      ? `Explore IEM reviews that feature ${artist.name} as a listening reference.`
+      ? `Explore IEM reviews and listening impressions that feature ${artist.name} as a listening reference.`
       : "Explore artists used as listening references by ITGE reviewers.",
   })
 
@@ -41,7 +55,9 @@ function ArtistPage() {
 
     async function loadArtist() {
       if (!slug) {
-        setError("No artist was specified.")
+        setError(
+          "No artist was specified.",
+        )
         setLoading(false)
         return
       }
@@ -51,7 +67,9 @@ function ArtistPage() {
 
       try {
         const result =
-          await getArtistBySlug(slug)
+          await getArtistBySlug(
+            slug,
+          )
 
         if (!cancelled) {
           setArtist(result)
@@ -124,14 +142,16 @@ function ArtistPage() {
               to: "/artists",
             },
             {
-              label: artist.name,
+              label:
+                artist.name,
             },
           ]}
         />
 
         <header className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 sm:p-10">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
-            {artist.artistType ?? "Artist"}
+            {artist.artistType ??
+              "Artist"}
           </p>
 
           <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-6xl">
@@ -142,7 +162,9 @@ function ArtistPage() {
             artist.musicbrainzId) && (
             <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-[var(--muted)]">
               {artist.country && (
-                <span>{artist.country}</span>
+                <span>
+                  {artist.country}
+                </span>
               )}
 
               {artist.musicbrainzId && (
@@ -152,16 +174,22 @@ function ArtistPage() {
                   rel="noreferrer"
                   className="font-medium text-[var(--accent)] transition hover:opacity-75"
                 >
-                  View on MusicBrainz ↗
+                  View on
+                  MusicBrainz ↗
                 </a>
               )}
             </div>
           )}
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard
-              label="Published reviews"
+              label="Reviews"
               value={artist.reviewCount.toString()}
+            />
+
+            <StatCard
+              label="Impressions"
+              value={artist.impressionCount.toString()}
             />
 
             <StatCard
@@ -170,117 +198,212 @@ function ArtistPage() {
             />
 
             <StatCard
-              label="Reviewers"
-              value={artist.reviewerCount.toString()}
+              label="Contributors"
+              value={artist.contributorCount.toString()}
             />
           </div>
         </header>
 
         <section className="mt-14">
           <SectionHeader
-            eyebrow="Listening references"
+            eyebrow="Full reviews"
             title={`Reviews featuring ${artist.name}`}
             description={
-              artist.reviews.length === 0
+              artist.reviews.length ===
+              0
                 ? "No published reviews are associated with this artist yet."
                 : `${artist.reviews.length} ${
-                    artist.reviews.length === 1
+                    artist.reviews
+                      .length === 1
                       ? "published review references"
                       : "published reviews reference"
                   } ${artist.name}.`
             }
           />
 
-          {artist.reviews.length === 0 ? (
+          {artist.reviews.length ===
+          0 ? (
             <EmptyPanel>
-              No published reviews are associated
-              with this artist yet.
+              No published reviews
+              are associated with
+              this artist yet.
             </EmptyPanel>
           ) : (
             <div className="mt-8">
-              <ReviewGrid reviews={artist.reviews} />
+              <ReviewGrid
+                reviews={
+                  artist.reviews
+                }
+              />
             </div>
           )}
         </section>
 
-        {artist.iems.length > 0 && (
+        <section className="mt-14 border-t border-[var(--border)] pt-14">
+          <SectionHeader
+            eyebrow="Listening notes"
+            title={`Impressions featuring ${artist.name}`}
+            description={
+              artist.impressions
+                .length === 0
+                ? "No published impressions are associated with this artist yet."
+                : `${artist.impressions.length} ${
+                    artist.impressions
+                      .length === 1
+                      ? "published impression references"
+                      : "published impressions reference"
+                  } ${artist.name}.`
+            }
+          />
+
+          {artist.impressions
+            .length === 0 ? (
+            <EmptyPanel>
+              No published
+              impressions are
+              associated with this
+              artist yet.
+            </EmptyPanel>
+          ) : (
+            <div className="mt-8 grid gap-6 lg:grid-cols-2">
+              {artist.impressions.map(
+                (
+                  impression,
+                ) => (
+                  <ImpressionCard
+                    key={
+                      impression.id
+                    }
+                    impression={
+                      impression
+                    }
+                  />
+                ),
+              )}
+            </div>
+          )}
+        </section>
+
+        {artist.iems.length >
+          0 && (
           <section className="mt-14">
             <SectionHeader
               eyebrow="IEM coverage"
-              title={`IEMs reviewed with ${artist.name}`}
+              title={`IEMs heard with ${artist.name}`}
               description={`${artist.iems.length} ${
-                artist.iems.length === 1
+                artist.iems.length ===
+                1
                   ? "IEM has"
                   : "IEMs have"
-              } been evaluated in reviews referencing ${artist.name}.`}
+              } published coverage referencing ${artist.name}.`}
             />
 
             <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {artist.iems.map((iem) => (
-                <Link
-                  key={iem.id}
-                  to={`/iems/${iem.slug}`}
-                  className="group rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
-                >
-                  <p className="text-sm uppercase tracking-[0.16em] text-[var(--accent)]">
-                    {iem.manufacturerName}
-                  </p>
+              {artist.iems.map(
+                (iem) => (
+                  <Link
+                    key={iem.id}
+                    to={`/iems/${iem.slug}`}
+                    className="group rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
+                  >
+                    <p className="text-sm uppercase tracking-[0.16em] text-[var(--accent)]">
+                      {
+                        iem.manufacturerName
+                      }
+                    </p>
 
-                  <h3 className="mt-2 text-2xl font-semibold tracking-tight transition group-hover:text-[var(--accent)]">
-                    {iem.model}
-                  </h3>
+                    <h3 className="mt-2 text-2xl font-semibold tracking-tight transition group-hover:text-[var(--accent)]">
+                      {iem.model}
+                    </h3>
 
-                  <p className="mt-5 text-sm text-[var(--muted)]">
-                    {iem.reviewCount}{" "}
-                    {iem.reviewCount === 1
-                      ? "review"
-                      : "reviews"}{" "}
-                    referencing {artist.name}
-                  </p>
-                </Link>
-              ))}
+                    <div className="mt-5 flex flex-wrap gap-x-4 gap-y-1 text-sm text-[var(--muted)]">
+                      <span>
+                        {
+                          iem.reviewCount
+                        }{" "}
+                        {iem.reviewCount ===
+                        1
+                          ? "review"
+                          : "reviews"}
+                      </span>
+
+                      <span>
+                        {
+                          iem.impressionCount
+                        }{" "}
+                        {iem.impressionCount ===
+                        1
+                          ? "impression"
+                          : "impressions"}
+                      </span>
+                    </div>
+                  </Link>
+                ),
+              )}
             </div>
           </section>
         )}
 
-        {artist.reviewers.length > 0 && (
+        {artist.reviewers.length >
+          0 && (
           <section className="mt-14">
             <SectionHeader
               eyebrow="Community"
-              title={`Reviewers listening with ${artist.name}`}
-              description={`${artist.reviewers.length} ${
-                artist.reviewers.length === 1
-                  ? "reviewer has"
-                  : "reviewers have"
-              } referenced ${artist.name} in published reviews.`}
+              title={`Contributors listening with ${artist.name}`}
+              description={`${artist.contributorCount} ${
+                artist.contributorCount ===
+                1
+                  ? "person has"
+                  : "people have"
+              } referenced ${artist.name} in published ITGE coverage.`}
             />
 
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {artist.reviewers.map(
-                (reviewer) => (
+                (
+                  reviewer,
+                ) => (
                   <Link
-                    key={reviewer.id}
+                    key={
+                      reviewer.id
+                    }
                     to={`/reviewers/${reviewer.slug}`}
                     className="group flex items-center gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 transition hover:-translate-y-0.5 hover:border-[var(--accent)]"
                   >
                     <ReviewerAvatar
-                      name={reviewer.name}
-                      slug={reviewer.slug}
+                      name={
+                        reviewer.name
+                      }
+                      slug={
+                        reviewer.slug
+                      }
                       size="md"
                       shape="circle"
                     />
 
                     <div className="min-w-0">
                       <p className="truncate font-semibold transition group-hover:text-[var(--accent)]">
-                        {reviewer.name}
+                        {
+                          reviewer.name
+                        }
                       </p>
 
                       <p className="mt-1 text-sm text-[var(--muted)]">
-                        {reviewer.reviewCount}{" "}
-                        {reviewer.reviewCount === 1
+                        {
+                          reviewer.reviewCount
+                        }{" "}
+                        {reviewer.reviewCount ===
+                        1
                           ? "review"
-                          : "reviews"}{" "}
-                        referencing {artist.name}
+                          : "reviews"}
+                        {" · "}
+                        {
+                          reviewer.impressionCount
+                        }{" "}
+                        {reviewer.impressionCount ===
+                        1
+                          ? "impression"
+                          : "impressions"}
                       </p>
                     </div>
                   </Link>

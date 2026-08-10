@@ -3,26 +3,37 @@ import {
   useState,
 } from "react"
 import { Link } from "react-router"
+
 import {
   getManufacturers,
   type ManufacturerDirectoryItem,
 } from "../lib/manufacturers"
+
 import usePageMetadata from "../hooks/usePageMetadata"
 
 function ManufacturersPage() {
-  const [manufacturers, setManufacturers] =
-    useState<ManufacturerDirectoryItem[]>([])
+  const [
+    manufacturers,
+    setManufacturers,
+  ] =
+    useState<
+      ManufacturerDirectoryItem[]
+    >([])
 
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] =
+    useState(true)
 
-  const [error, setError] = useState<
-    string | null
-  >(null)
+  const [error, setError] =
+    useState<string | null>(
+      null,
+    )
 
   usePageMetadata({
-    title: "Manufacturers | ITGE",
+    title:
+      "Manufacturers | ITGE",
+
     description:
-      "Browse IEM manufacturers covered by IEM Tour Group Europe.",
+      "Browse IEM manufacturers covered by IEM Tour Group Europe through reviews and listening impressions.",
   })
 
   useEffect(() => {
@@ -34,7 +45,9 @@ function ManufacturersPage() {
           await getManufacturers()
 
         if (!cancelled) {
-          setManufacturers(result)
+          setManufacturers(
+            result,
+          )
         }
       } catch (loadError) {
         console.error(
@@ -73,10 +86,13 @@ function ManufacturersPage() {
     return (
       <PageMessage>
         <p className="text-xl font-semibold text-[var(--foreground)]">
-          Unable to load manufacturers
+          Unable to load
+          manufacturers
         </p>
 
-        <p className="mt-3">{error}</p>
+        <p className="mt-3">
+          {error}
+        </p>
       </PageMessage>
     )
   }
@@ -94,29 +110,39 @@ function ManufacturersPage() {
           </h1>
 
           <p className="mt-5 max-w-2xl text-lg leading-8 text-[var(--muted)]">
-            Explore manufacturers represented
-            across the ITGE review library.
+            Explore manufacturers
+            represented across the
+            ITGE library through full
+            reviews and short-form
+            listening impressions.
           </p>
 
           <p className="mt-4 text-sm text-[var(--muted)]">
             {manufacturers.length}{" "}
-            {manufacturers.length === 1
+            {manufacturers.length ===
+            1
               ? "manufacturer"
               : "manufacturers"}
           </p>
         </header>
 
-        {manufacturers.length === 0 ? (
+        {manufacturers.length ===
+        0 ? (
           <div className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
-            No manufacturers with published
-            reviews are available yet.
+            No manufacturers with
+            published coverage are
+            available yet.
           </div>
         ) : (
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {manufacturers.map(
-              (manufacturer) => (
+              (
+                manufacturer,
+              ) => (
                 <Link
-                  key={manufacturer.id}
+                  key={
+                    manufacturer.id
+                  }
                   to={`/manufacturers/${manufacturer.slug}`}
                   className="group rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
                 >
@@ -125,24 +151,29 @@ function ManufacturersPage() {
                   </p>
 
                   <h2 className="mt-2 text-2xl font-semibold tracking-tight transition group-hover:text-[var(--accent)]">
-                    {manufacturer.name}
+                    {
+                      manufacturer.name
+                    }
                   </h2>
 
-                  <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 border-t border-[var(--border)] pt-5 text-sm text-[var(--muted)]">
-                    <span>
-                      {manufacturer.iemCount}{" "}
-                      {manufacturer.iemCount === 1
-                        ? "IEM"
-                        : "IEMs"}
-                    </span>
+                  <div className="mt-6 grid grid-cols-3 gap-3 border-t border-[var(--border)] pt-5">
+                    <Metric
+                      value={manufacturer.iemCount}
+                      singular="IEM"
+                      plural="IEMs"
+                    />
 
-                    <span>
-                      {manufacturer.reviewCount}{" "}
-                      {manufacturer.reviewCount ===
-                      1
-                        ? "review"
-                        : "reviews"}
-                    </span>
+                    <Metric
+                      value={manufacturer.reviewCount}
+                      singular="review"
+                      plural="reviews"
+                    />
+
+                    <Metric
+                      value={manufacturer.impressionCount}
+                      singular="impression"
+                      plural="impressions"
+                    />
                   </div>
                 </Link>
               ),
@@ -151,6 +182,30 @@ function ManufacturersPage() {
         )}
       </div>
     </main>
+  )
+}
+
+function Metric({
+  value,
+  singular,
+  plural,
+}: {
+  value: number
+  singular: string
+  plural: string
+}) {
+  return (
+    <div>
+      <p className="text-xl font-semibold text-[var(--foreground)]">
+        {value}
+      </p>
+
+      <p className="mt-1 text-xs leading-4 text-[var(--muted)]">
+        {value === 1
+          ? singular
+          : plural}
+      </p>
+    </div>
   )
 }
 
