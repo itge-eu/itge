@@ -22,6 +22,8 @@ import GenrePage from "./pages/GenrePage"
 import NotFoundPage from "./pages/NotFoundPage"
 import ImpressionsPage from "./pages/ImpressionsPage"
 import ImpressionPage from "./pages/ImpressionPage"
+import ImportImpressionPage from "./pages/ImportImpressionPage"
+import AdminEditImpressionPage from "./pages/AdminEditImpressionPage"
 
 function App() {
   return (
@@ -52,8 +54,12 @@ function App() {
 		<Route path="/genres/:slug" element={<GenrePage />} />
 
         <Route path="/admin/import" element={<ImportReviewPage />} />
+		<Route path="/admin/import-impression" element={<ImportImpressionPage />} />
+		
         <Route path="/admin/reviews" element={<AdminReviewsPage />} />
+		
         <Route path="/admin/reviews/:id/edit" element={<AdminEditReviewPage />} />
+		<Route path="/admin/impressions/:id/edit" element={<AdminEditImpressionPage />} />
 		
 		<Route path="*" element={<NotFoundPage />} />
       </Route>
