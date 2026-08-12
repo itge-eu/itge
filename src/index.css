@@ -136,6 +136,91 @@ a {
   border-radius: 1rem;
 }
 
+.review-content img.smilie,
+.review-content img[data-shortname] {
+  display: inline-block;
+  width: auto;
+  max-width: 1.4em;
+  height: 1.4em;
+  margin: 0 0.15em;
+  border-radius: 0;
+  vertical-align: -0.2em;
+}
+
+.review-content img[width="16"],
+.review-content img[width="18"],
+.review-content img[width="20"],
+.review-content img[width="24"],
+.review-content img[width="28"],
+.review-content img[width="32"],
+.review-content img[width="36"],
+.review-content img[width="40"],
+.review-content img[width="48"],
+.review-content img[width="50"],
+.review-content img[width="60"],
+.review-content img[width="64"] {
+  display: inline-block;
+  width: auto;
+  max-width: 2.2em;
+  height: 2.2em;
+  margin: 0 0.12em;
+  border-radius: 0.25rem;
+  vertical-align: middle;
+}
+
+/* Inline score graphics such as themattyb's vinyl ratings */
+.review-content
+  .bbImageWrapper:has(
+    > img[style*="width: 100px"],
+    > img[style*="width: 55px"]
+  ) {
+  display: inline-block;
+  width: auto;
+  margin: 0 0.15rem;
+  vertical-align: middle;
+}
+
+/* Full vinyl */
+.review-content
+  .bbImageWrapper:has(> img[style*="width: 100px"])
+  > img {
+  display: inline-block;
+  width: 2.2em !important;
+  max-width: 2.2em;
+  height: 2.2em;
+  margin: 0;
+  border-radius: 0.2rem;
+  vertical-align: middle;
+}
+
+/* Half vinyl */
+.review-content
+  .bbImageWrapper:has(> img[style*="width: 55px"])
+  > img {
+  display: inline-block;
+  width: 1.2em !important;
+  max-width: 1.2em;
+  height: 2.2em;
+  margin: 0;
+  border-radius: 0.2rem;
+  vertical-align: middle;
+}
+
+/* Remove Head-Fi line breaks between consecutive vinyl score images */
+.review-content
+  .bbImageWrapper:has(
+    > img[style*="width: 100px"],
+    > img[style*="width: 55px"]
+  )
+  + br:has(
+    + .bbImageWrapper:has(
+      > img[style*="width: 100px"],
+      > img[style*="width: 55px"]
+    )
+  ) {
+  display: none;
+}
+
 .review-content blockquote {
   margin: 1.5rem 0;
   border-left: 3px solid var(--accent);
