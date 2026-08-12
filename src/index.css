@@ -128,6 +128,9 @@ a {
   text-decoration: underline;
 }
 
+/*
+ * Normal review images
+ */
 .review-content img {
   display: block;
   max-width: 100%;
@@ -136,6 +139,12 @@ a {
   border-radius: 1rem;
 }
 
+/*
+ * Head-Fi smileys / emoji.
+ *
+ * Keep these inline with surrounding text instead
+ * of rendering them as full review images.
+ */
 .review-content img.smilie,
 .review-content img[data-shortname] {
   display: inline-block;
@@ -147,6 +156,12 @@ a {
   vertical-align: -0.2em;
 }
 
+/*
+ * Other small inline graphics.
+ *
+ * Head-Fi sometimes uses normal <img> elements
+ * without the smilie class for small graphics.
+ */
 .review-content img[width="16"],
 .review-content img[width="18"],
 .review-content img[width="20"],
@@ -168,11 +183,29 @@ a {
   vertical-align: middle;
 }
 
-/* Inline score graphics such as themattyb's vinyl ratings */
+/*
+ * Inline score graphics such as themattyb's
+ * vinyl ratings.
+ *
+ * Two variants have appeared in Head-Fi posts:
+ *
+ * Newer:
+ *   full vinyl -> style="width: 100px"
+ *   half vinyl -> style="width: 55px"
+ *
+ * Older:
+ *   full vinyl -> width="145" height="145"
+ *   half vinyl -> width="79" height="147"
+ *
+ * Treat all of these as inline score graphics
+ * rather than normal review photographs.
+ */
 .review-content
   .bbImageWrapper:has(
     > img[style*="width: 100px"],
-    > img[style*="width: 55px"]
+    > img[style*="width: 55px"],
+    > img[width="145"][height="145"],
+    > img[width="79"][height="147"]
   ) {
   display: inline-block;
   width: auto;
@@ -180,9 +213,14 @@ a {
   vertical-align: middle;
 }
 
-/* Full vinyl */
+/*
+ * Full vinyl
+ */
 .review-content
-  .bbImageWrapper:has(> img[style*="width: 100px"])
+  .bbImageWrapper:has(
+    > img[style*="width: 100px"],
+    > img[width="145"][height="145"]
+  )
   > img {
   display: inline-block;
   width: 2.2em !important;
@@ -193,9 +231,14 @@ a {
   vertical-align: middle;
 }
 
-/* Half vinyl */
+/*
+ * Half vinyl
+ */
 .review-content
-  .bbImageWrapper:has(> img[style*="width: 55px"])
+  .bbImageWrapper:has(
+    > img[style*="width: 55px"],
+    > img[width="79"][height="147"]
+  )
   > img {
   display: inline-block;
   width: 1.2em !important;
@@ -206,16 +249,25 @@ a {
   vertical-align: middle;
 }
 
-/* Remove Head-Fi line breaks between consecutive vinyl score images */
+/*
+ * Head-Fi inserts <br> elements between images.
+ * Normally that's correct for photographs, but
+ * vinyl score graphics need to remain together
+ * on one line.
+ */
 .review-content
   .bbImageWrapper:has(
     > img[style*="width: 100px"],
-    > img[style*="width: 55px"]
+    > img[style*="width: 55px"],
+    > img[width="145"][height="145"],
+    > img[width="79"][height="147"]
   )
   + br:has(
     + .bbImageWrapper:has(
       > img[style*="width: 100px"],
-      > img[style*="width: 55px"]
+      > img[style*="width: 55px"],
+      > img[width="145"][height="145"],
+      > img[width="79"][height="147"]
     )
   ) {
   display: none;
