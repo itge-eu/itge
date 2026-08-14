@@ -4,6 +4,8 @@ import {
 } from "react"
 import { Link } from "react-router"
 
+import ManufacturerLogo from "../components/manufacturers/ManufacturerLogo"
+
 import {
   getManufacturers,
   type ManufacturerDirectoryItem,
@@ -144,19 +146,36 @@ function ManufacturersPage() {
                     manufacturer.id
                   }
                   to={`/manufacturers/${manufacturer.slug}`}
-                  className="group rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
+                  className="group flex min-h-[220px] flex-col rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
                 >
-                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
-                    Manufacturer
-                  </p>
+                  <div className="flex min-h-24 items-start justify-between gap-6">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
+                        Manufacturer
+                      </p>
 
-                  <h2 className="mt-2 text-2xl font-semibold tracking-tight transition group-hover:text-[var(--accent)]">
-                    {
-                      manufacturer.name
-                    }
-                  </h2>
+                      <h2 className="mt-2 break-words text-2xl font-semibold tracking-tight transition group-hover:text-[var(--accent)]">
+                        {
+                          manufacturer.name
+                        }
+                      </h2>
+                    </div>
 
-                  <div className="mt-6 grid grid-cols-3 gap-3 border-t border-[var(--border)] pt-5">
+                    <div className="flex min-h-16 min-w-0 flex-1 items-center justify-end">
+                      <ManufacturerLogo
+                        name={
+                          manufacturer.name
+                        }
+                        slug={
+                          manufacturer.slug
+                        }
+                        size="card"
+                        className="max-h-16 max-w-full"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-auto grid grid-cols-3 gap-3 border-t border-[var(--border)] pt-5">
                     <Metric
                       value={manufacturer.iemCount}
                       singular="IEM"

@@ -12,6 +12,7 @@ import IemCard from "../components/iems/IemCard"
 import ReviewGrid from "../components/reviews/ReviewGrid"
 import ImpressionCard from "../components/impressions/ImpressionCard"
 import ReviewerAvatar from "../components/reviewers/ReviewerAvatar"
+import ManufacturerLogo from "../components/manufacturers/ManufacturerLogo"
 import Breadcrumbs from "../components/navigation/Breadcrumbs"
 import PageState from "../components/layout/PageState"
 
@@ -165,7 +166,7 @@ function ManufacturerPage() {
         />
 
         <header className="overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)]">
-          <div className="grid lg:grid-cols-[minmax(0,1fr)_26rem]">
+          <div className="grid lg:grid-cols-[minmax(0,1fr)_28rem]">
             <div className="p-8 sm:p-10">
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
                 Manufacturer
@@ -239,21 +240,19 @@ function ManufacturerPage() {
               </div>
             </div>
 
-            {manufacturer.heroImageUrl ? (
-              <img
-                src={
-                  manufacturer.heroImageUrl
+            {/* Manufacturer logo hero */}
+            <div className="flex min-h-72 items-center justify-center border-t border-[var(--border)] bg-[var(--background)] p-10 sm:p-12 lg:min-h-0 lg:border-l lg:border-t-0 lg:p-14">
+              <ManufacturerLogo
+                name={
+                  manufacturer.name
                 }
-                alt={`${manufacturer.name} IEM`}
-                className="aspect-[16/10] h-full w-full object-cover lg:aspect-auto"
+                slug={
+                  manufacturer.slug
+                }
+                size="hero"
+                eager
               />
-            ) : (
-              <div className="flex min-h-64 items-center justify-center border-t border-[var(--border)] bg-[var(--surface-soft)] p-8 text-center text-[var(--muted)] lg:border-l lg:border-t-0">
-                No manufacturer
-                image is available
-                yet.
-              </div>
-            )}
+            </div>
           </div>
         </header>
 
