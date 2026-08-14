@@ -176,14 +176,6 @@ function Navbar() {
           </Link>
 
           <Link
-            to="/impressions"
-            onClick={closeDesktopExplore}
-            className="transition hover:text-[var(--foreground)]"
-          >
-            Impressions
-          </Link>
-
-          <Link
             to="/iems"
             onClick={closeDesktopExplore}
             className="transition hover:text-[var(--foreground)]"
@@ -240,6 +232,15 @@ function Navbar() {
             {desktopExploreOpen && (
               <div className="absolute left-1/2 top-full w-52 -translate-x-1/2 pt-2">
                 <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-2 shadow-xl">
+                  <ExploreLink
+                    to="/impressions"
+                    title="Impressions"
+                    description="Browse IEM impressions"
+                    onClick={
+                      closeDesktopExplore
+                    }
+                  />
+
                   <ExploreLink
                     to="/artists"
                     title="Artists"
@@ -364,13 +365,6 @@ function Navbar() {
             </MobileLink>
 
             <MobileLink
-              to="/impressions"
-              onClick={closeMobileMenu}
-            >
-              Impressions
-            </MobileLink>
-
-            <MobileLink
               to="/iems"
               onClick={closeMobileMenu}
             >
@@ -412,6 +406,15 @@ function Navbar() {
 
               {mobileExploreOpen && (
                 <div className="ml-4 mt-1 flex flex-col gap-1 border-l border-[var(--border)] pl-3">
+                  <MobileExploreLink
+                    to="/impressions"
+                    onClick={
+                      closeMobileMenu
+                    }
+                  >
+                    Impressions
+                  </MobileExploreLink>
+
                   <MobileExploreLink
                     to="/artists"
                     onClick={
