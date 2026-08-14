@@ -19,6 +19,11 @@ function HomePage() {
   ] = useState<FeaturedReview[]>([])
 
   const [
+    latestReviews,
+    setLatestReviews,
+  ] = useState<FeaturedReview[]>([])
+
+  const [
     reviewsLoading,
     setReviewsLoading,
   ] = useState(true)
@@ -27,11 +32,6 @@ function HomePage() {
     reviewsError,
     setReviewsError,
   ] = useState<string | null>(null)
-
-  const [
-    latestReviews,
-    setLatestReviews,
-  ] = useState<FeaturedReview[]>([])
 
   useEffect(() => {
     let cancelled = false
@@ -49,12 +49,10 @@ function HomePage() {
 
         if (!cancelled) {
           setFeaturedReviews(
-            featured.slice(0, 3),
+            featured.slice(0, 4),
           )
 
-          setLatestReviews(
-            latest,
-          )
+          setLatestReviews(latest)
         }
       } catch (error) {
         console.error(
@@ -84,113 +82,165 @@ function HomePage() {
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] transition-colors duration-200">
       <main>
-        {/* HERO + FEATURED */}
-        <section
-          id="featured"
-          className="relative overflow-hidden border-b border-[var(--border)]"
-        >
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(193,151,69,0.12),transparent_38%)] dark:bg-[radial-gradient(circle_at_top_right,rgba(193,151,69,0.10),transparent_38%)]" />
+        {/* INTRO + FEATURED */}
+        <section className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(193,151,69,0.13),transparent_40%)] dark:bg-[radial-gradient(circle_at_top_right,rgba(193,151,69,0.10),transparent_40%)]" />
 
-          <div className="relative mx-auto max-w-7xl px-6 pb-16 pt-16 lg:px-8 lg:pb-20 lg:pt-20">
-            <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-3xl">
+          <div className="relative mx-auto max-w-7xl px-6 pb-12 pt-14 lg:px-8 lg:pb-14 lg:pt-16">
+            <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+              {/* INTRO */}
+              <div className="max-w-2xl">
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[var(--accent)]">
-                  Reviews built around real listening
+                  IEM Tour Group Europe
                 </p>
 
                 <h1 className="mt-5 text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
-                  Find the IEM that fits
-                  your music.
+                  Independent listening.
+                  Real community.
                 </h1>
 
-                <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--muted)]">
-                  Independent reviews
-                  from experienced
-                  listeners, connected
-                  to the music used to
-                  evaluate them.
+                <p className="mt-6 max-w-xl text-lg leading-8 text-[var(--muted)]">
+                  ITGE brings together experienced
+                  listeners across Europe to review
+                  and share impressions of in-ear
+                  monitors through organised product
+                  tours.
+                </p>
+
+                <p className="mt-4 max-w-xl leading-7 text-[var(--muted)]">
+                  Our reviews connect what we hear
+                  with the artists, genres and music
+                  actually used to evaluate each IEM.
+                </p>
+
+                <div className="mt-8 flex flex-wrap gap-3">
+                  <Link
+                    to="/reviews"
+                    className="rounded-full bg-[var(--accent)] px-6 py-3 text-sm font-semibold text-[var(--accent-foreground)] transition hover:bg-[var(--accent-hover)]"
+                  >
+                    Browse reviews
+                  </Link>
+
+                  <Link
+                    to="/discover"
+                    className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-6 py-3 text-sm font-semibold transition hover:border-[var(--accent)]"
+                  >
+                    Discover
+                  </Link>
+                </div>
+              </div>
+
+              {/* FEATURED */}
+              <div>
+                <div className="mb-4 flex items-end justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
+                      ITGE picks
+                    </p>
+
+                    <h2 className="mt-1 text-2xl font-semibold tracking-tight">
+                      Featured
+                    </h2>
+                  </div>
+
+                  <Link
+                    to="/reviews"
+                    className="text-sm font-medium text-[var(--accent)] transition hover:opacity-75"
+                  >
+                    All reviews →
+                  </Link>
+                </div>
+
+                {reviewsLoading ? (
+                  <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
+                    Loading featured content…
+                  </div>
+                ) : reviewsError ? (
+                  <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
+                    <p className="font-medium">
+                      Unable to load featured content
+                    </p>
+
+                    <p className="mt-2 text-sm text-[var(--muted)]">
+                      {reviewsError}
+                    </p>
+                  </div>
+                ) : featuredReviews.length === 0 ? (
+                  <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
+                    No featured content has been
+                    selected yet.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                    {featuredReviews.map(
+                      (review) => (
+                        <FeaturedTile
+                          key={review.id}
+                          review={review}
+                        />
+                      ),
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* FIND YOUR IEM */}
+        <section className="border-t border-[var(--border)] bg-[var(--surface-soft)] px-6 py-12 lg:px-8 lg:py-14">
+          <div className="mx-auto max-w-7xl">
+            <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-3xl">
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
+                  Explore differently
+                </p>
+
+                <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+                  Find the IEM that fits your music.
+                </h2>
+
+                <p className="mt-4 max-w-2xl text-lg leading-8 text-[var(--muted)]">
+                  Browse reviews by the artists,
+                  genres, reviewers, manufacturers
+                  and IEMs that matter to you.
                 </p>
               </div>
 
-              <div className="flex shrink-0 flex-wrap gap-3">
-                <Link
-                  to="/reviews"
-                  className="rounded-full bg-[var(--accent)] px-6 py-3 text-sm font-semibold text-[var(--accent-foreground)] transition hover:bg-[var(--accent-hover)]"
-                >
-                  Browse reviews
-                </Link>
-
-                <Link
-                  to="/discover"
-                  className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-6 py-3 text-sm font-semibold transition hover:border-[var(--accent)]"
-                >
-                  Discover
-                </Link>
+              <div className="flex flex-wrap gap-2 lg:max-w-md lg:justify-end">
+                {[
+                  "Artists",
+                  "Genres",
+                  "IEMs",
+                  "Manufacturers",
+                  "Reviewers",
+                ].map((item) => (
+                  <span
+                    key={item}
+                    className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm text-[var(--muted)]"
+                  >
+                    {item}
+                  </span>
+                ))}
               </div>
             </div>
 
-            <div className="mt-12 flex items-end justify-between gap-6">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
-                  ITGE picks
-                </p>
-
-                <h2 className="mt-2 text-2xl font-semibold tracking-tight">
-                  Featured
-                </h2>
-              </div>
-
+            <div className="mt-8">
               <Link
-                to="/reviews"
-                className="hidden text-sm font-medium text-[var(--accent)] transition hover:opacity-75 sm:block"
+                to="/discover"
+                className="inline-flex items-center rounded-full bg-[var(--accent)] px-6 py-3 text-sm font-semibold text-[var(--accent-foreground)] transition hover:bg-[var(--accent-hover)]"
               >
-                Explore reviews →
+                Start discovering →
               </Link>
             </div>
-
-            {reviewsLoading && (
-              <div className="mt-7 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
-                Loading featured content…
-              </div>
-            )}
-
-            {reviewsError && (
-              <div className="mt-7 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
-                <p className="font-medium">
-                  Unable to load featured content
-                </p>
-
-                <p className="mt-2 text-sm text-[var(--muted)]">
-                  {reviewsError}
-                </p>
-              </div>
-            )}
-
-            {!reviewsLoading &&
-              !reviewsError &&
-              featuredReviews.length ===
-                0 && (
-                <div className="mt-7 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
-                  No featured content has been
-                  selected yet.
-                </div>
-              )}
-
-            {!reviewsLoading &&
-              !reviewsError &&
-              featuredReviews.length >
-                0 && (
-                <FeaturedCarousel
-                  reviews={
-                    featuredReviews
-                  }
-                />
-              )}
           </div>
         </section>
 
         {/* LATEST REVIEWS */}
-        <section className="border-t border-[var(--border)] bg-[var(--background)] px-6 py-20 lg:px-8">
+        <section
+          id="reviews"
+          className="border-t border-[var(--border)] bg-[var(--background)] px-6 py-20 lg:px-8"
+        >
           <div className="mx-auto max-w-7xl">
             <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
               <div>
@@ -213,18 +263,13 @@ function HomePage() {
 
             {!reviewsLoading &&
               !reviewsError &&
-              latestReviews.length >
-                0 && (
+              latestReviews.length > 0 && (
                 <div className="mt-10 grid gap-6 lg:grid-cols-3">
                   {latestReviews.map(
                     (review) => (
                       <ReviewCard
-                        key={
-                          review.id
-                        }
-                        review={
-                          review
-                        }
+                        key={review.id}
+                        review={review}
                         variant="home"
                       />
                     ),
@@ -246,19 +291,14 @@ function HomePage() {
               </p>
 
               <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-                Join the community
-                or send an IEM on
+                Join the community or send an IEM on
                 tour.
               </h2>
 
               <p className="mt-5 text-lg leading-8 text-[var(--muted)]">
-                ITGE connects
-                experienced
-                listeners, tour
-                organisers and
-                manufacturers
-                through structured
-                European review
+                ITGE connects experienced listeners,
+                tour organisers and manufacturers
+                through structured European review
                 tours.
               </p>
             </div>
@@ -270,19 +310,14 @@ function HomePage() {
                 </div>
 
                 <h3 className="mt-4 text-3xl font-semibold tracking-tight">
-                  Become an ITGE
-                  reviewer
+                  Become an ITGE reviewer
                 </h3>
 
                 <p className="mt-5 max-w-xl leading-7 text-[var(--muted)]">
-                  Join our European
-                  tour community,
-                  listen to new and
-                  established in-ear
-                  monitors, and share
-                  thoughtful reviews
-                  based on real-world
-                  listening.
+                  Join our European tour community,
+                  listen to new and established in-ear
+                  monitors, and share thoughtful reviews
+                  based on real-world listening.
                 </p>
 
                 <div className="mt-6 flex flex-wrap gap-2">
@@ -290,18 +325,14 @@ function HomePage() {
                     "European tours",
                     "Independent reviews",
                     "Shared experience",
-                  ].map(
-                    (item) => (
-                      <span
-                        key={
-                          item
-                        }
-                        className="rounded-full bg-[var(--surface-soft)] px-3 py-1.5 text-xs text-[var(--muted)]"
-                      >
-                        {item}
-                      </span>
-                    ),
-                  )}
+                  ].map((item) => (
+                    <span
+                      key={item}
+                      className="rounded-full bg-[var(--surface-soft)] px-3 py-1.5 text-xs text-[var(--muted)]"
+                    >
+                      {item}
+                    </span>
+                  ))}
                 </div>
 
                 <Link
@@ -318,20 +349,14 @@ function HomePage() {
                 </div>
 
                 <h3 className="mt-4 text-3xl font-semibold tracking-tight">
-                  Let Europe hear your
-                  IEM
+                  Let Europe hear your IEM
                 </h3>
 
                 <p className="mt-5 max-w-xl leading-7 text-[var(--muted)]">
-                  Put your product
-                  into the hands of
-                  experienced
-                  reviewers across
-                  Europe through an
-                  organised tour with
-                  independent,
-                  long-form listening
-                  impressions.
+                  Put your product into the hands of
+                  experienced reviewers across Europe
+                  through an organised tour with
+                  independent listening coverage.
                 </p>
 
                 <div className="mt-6 flex flex-wrap gap-2">
@@ -339,18 +364,14 @@ function HomePage() {
                     "Multiple reviewers",
                     "European reach",
                     "Structured feedback",
-                  ].map(
-                    (item) => (
-                      <span
-                        key={
-                          item
-                        }
-                        className="rounded-full bg-[var(--surface-soft)] px-3 py-1.5 text-xs text-[var(--muted)]"
-                      >
-                        {item}
-                      </span>
-                    ),
-                  )}
+                  ].map((item) => (
+                    <span
+                      key={item}
+                      className="rounded-full bg-[var(--surface-soft)] px-3 py-1.5 text-xs text-[var(--muted)]"
+                    >
+                      {item}
+                    </span>
+                  ))}
                 </div>
 
                 <Link
@@ -376,31 +397,24 @@ function HomePage() {
               </p>
 
               <h2 className="mt-3 max-w-xl text-3xl font-semibold tracking-tight">
-                Reviews connected to
-                the music used to
+                Reviews connected to the music used to
                 evaluate them.
               </h2>
             </div>
 
             <div className="space-y-5 text-lg leading-8 text-[var(--muted)]">
               <p>
-                Most review sites tell
-                you what a product
-                sounds like. ITGE also
-                records which artists,
-                genres and sonic
-                qualities informed
-                that opinion.
+                Most review sites tell you what a
+                product sounds like. ITGE also records
+                which artists, genres and sonic
+                qualities informed that opinion.
               </p>
 
               <p>
-                That makes it possible
-                to browse reviews
-                through your own
-                listening habits
-                rather than relying
-                on a single score or
-                ranking.
+                That makes it possible to browse
+                reviews through your own listening
+                habits rather than relying on a single
+                score or ranking.
               </p>
             </div>
           </div>
@@ -410,190 +424,53 @@ function HomePage() {
   )
 }
 
-function FeaturedCarousel({
-  reviews,
+function FeaturedTile({
+  review,
 }: {
-  reviews: FeaturedReview[]
+  review: FeaturedReview
 }) {
-  const [
-    activeIndex,
-    setActiveIndex,
-  ] = useState(0)
-
-  const activeReview =
-    reviews[activeIndex] ??
-    reviews[0]
-
-  const goPrevious = () => {
-    setActiveIndex(
-      (current) =>
-        current === 0
-          ? reviews.length - 1
-          : current - 1,
-    )
-  }
-
-  const goNext = () => {
-    setActiveIndex(
-      (current) =>
-        current ===
-        reviews.length - 1
-          ? 0
-          : current + 1,
-    )
-  }
-
-  if (!activeReview) {
-    return null
-  }
-
   return (
-    <div className="mt-7">
-      <article className="group relative min-h-[28rem] overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] shadow-sm sm:min-h-[34rem] lg:min-h-[38rem]">
-        <Link
-          to={`/reviews/${activeReview.slug}`}
-          aria-label={`Read ${activeReview.brand} ${activeReview.model} review`}
-          className="absolute inset-0 z-10 rounded-3xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-inset"
+    <Link
+      to={`/reviews/${review.slug}`}
+      className="group relative aspect-[4/3] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] transition hover:-translate-y-0.5 hover:border-[var(--accent)] sm:rounded-3xl"
+    >
+      {review.heroImageUrl ? (
+        <img
+          src={review.heroImageUrl}
+          alt={`${review.brand} ${review.model}`}
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.035]"
         />
-
-        {activeReview.heroImageUrl ? (
-          <img
-            key={
-              activeReview.heroImageUrl
-            }
-            src={
-              activeReview.heroImageUrl
-            }
-            alt={`${activeReview.brand} ${activeReview.model}`}
-            className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.015]"
-          />
-        ) : (
-          <div className="absolute inset-0 bg-[var(--surface-soft)]" />
-        )}
-
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-black/5" />
-
-        <div className="pointer-events-none relative z-20 flex min-h-[28rem] flex-col justify-end p-6 text-white sm:min-h-[34rem] sm:p-8 lg:min-h-[38rem] lg:p-10">
-          <div className="max-w-3xl">
-            <span className="inline-flex rounded-full border border-white/25 bg-black/25 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] backdrop-blur-sm">
-              Review
-            </span>
-
-            <p className="mt-5 text-xs font-semibold uppercase tracking-[0.2em] text-white/70 sm:text-sm">
-              {
-                activeReview.brand
-              }
-            </p>
-
-            <h3 className="mt-2 text-3xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
-              {
-                activeReview.model
-              }
-            </h3>
-
-            {activeReview.summary && (
-              <p className="mt-4 max-w-2xl line-clamp-2 text-sm leading-6 text-white/80 sm:text-lg sm:leading-7">
-                {
-                  activeReview.summary
-                }
-              </p>
-            )}
-
-            <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm sm:text-base">
-              <span>
-                By{" "}
-                <strong>
-                  {
-                    activeReview.reviewer
-                  }
-                </strong>
-              </span>
-
-              <span className="font-semibold">
-                {activeReview.rating.toFixed(
-                  1,
-                )}
-                /5
-              </span>
-
-              <span className="font-semibold text-white">
-                Read review →
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {reviews.length > 1 && (
-          <>
-            <button
-              type="button"
-              onClick={(
-                event,
-              ) => {
-                event.preventDefault()
-                event.stopPropagation()
-                goPrevious()
-              }}
-              aria-label="Previous featured item"
-              className="absolute left-4 top-1/2 z-30 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/35 text-2xl text-white backdrop-blur-md transition hover:bg-black/55 sm:left-6"
-            >
-              ‹
-            </button>
-
-            <button
-              type="button"
-              onClick={(
-                event,
-              ) => {
-                event.preventDefault()
-                event.stopPropagation()
-                goNext()
-              }}
-              aria-label="Next featured item"
-              className="absolute right-4 top-1/2 z-30 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/35 text-2xl text-white backdrop-blur-md transition hover:bg-black/55 sm:right-6"
-            >
-              ›
-            </button>
-          </>
-        )}
-      </article>
-
-      {reviews.length > 1 && (
-        <div className="mt-5 flex items-center justify-center gap-2">
-          {reviews.map(
-            (
-              review,
-              index,
-            ) => (
-              <button
-                key={review.id}
-                type="button"
-                onClick={() =>
-                  setActiveIndex(
-                    index,
-                  )
-                }
-                aria-label={`Show featured item ${
-                  index + 1
-                }`}
-                aria-current={
-                  activeIndex ===
-                  index
-                    ? "true"
-                    : undefined
-                }
-                className={`h-2.5 rounded-full transition-all ${
-                  activeIndex ===
-                  index
-                    ? "w-8 bg-[var(--accent)]"
-                    : "w-2.5 bg-[var(--border)] hover:bg-[var(--muted)]"
-                }`}
-              />
-            ),
-          )}
-        </div>
+      ) : (
+        <div className="absolute inset-0 bg-[var(--surface-soft)]" />
       )}
-    </div>
+
+      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
+
+      <div className="relative flex h-full flex-col justify-end p-3 text-white sm:p-5">
+        <div className="mb-auto flex items-start justify-between gap-2">
+          <span className="rounded-full border border-white/25 bg-black/30 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.13em] backdrop-blur-sm sm:px-2.5 sm:text-[10px]">
+            Review
+          </span>
+
+          <span className="rounded-full bg-black/35 px-2 py-1 text-[10px] font-semibold backdrop-blur-sm sm:text-xs">
+            {review.rating.toFixed(1)}/5
+          </span>
+        </div>
+
+        <p className="hidden text-[10px] font-semibold uppercase tracking-[0.15em] text-white/70 sm:block">
+          {review.brand}
+        </p>
+
+        <h3 className="mt-1 line-clamp-2 text-base font-semibold leading-tight sm:text-xl">
+          {review.model}
+        </h3>
+
+        <p className="mt-1 truncate text-[10px] text-white/75 sm:mt-2 sm:text-xs">
+          {review.reviewer}
+        </p>
+      </div>
+    </Link>
   )
 }
 
