@@ -445,30 +445,22 @@ function FeaturedTile({
         <div className="absolute inset-0 bg-[var(--surface-soft)]" />
       )}
 
-      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/5 to-transparent" />
 
       <div className="relative flex h-full flex-col justify-end p-3 text-white sm:p-5">
-        <div className="mb-auto flex items-start justify-between gap-2">
+        <div className="mb-auto">
           <span className="rounded-full border border-white/25 bg-black/30 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.13em] backdrop-blur-sm sm:px-2.5 sm:text-[10px]">
             Review
           </span>
-
-          <span className="rounded-full bg-black/35 px-2 py-1 text-[10px] font-semibold backdrop-blur-sm sm:text-xs">
-            {review.rating.toFixed(1)}/5
-          </span>
         </div>
 
-        <p className="hidden text-[10px] font-semibold uppercase tracking-[0.15em] text-white/70 sm:block">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70 sm:text-xs">
           {review.brand}
         </p>
 
         <h3 className="mt-1 line-clamp-2 text-base font-semibold leading-tight sm:text-xl">
           {review.model}
         </h3>
-
-        <p className="mt-1 truncate text-[10px] text-white/75 sm:mt-2 sm:text-xs">
-          {review.reviewer}
-        </p>
       </div>
     </Link>
   )
