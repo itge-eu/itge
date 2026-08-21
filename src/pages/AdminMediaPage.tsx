@@ -190,13 +190,6 @@ function AdminMediaPage() {
                 manufacturers (
                   name
                 )
-              ),
-
-              impression_images (
-                id,
-                sort_order,
-                public_url,
-                alt_text
               )
             `)
             .order(
@@ -210,6 +203,36 @@ function AdminMediaPage() {
           impressionError
         ) {
           throw impressionError
+        }
+
+        const {
+          data:
+            impressionImageRows,
+          error:
+            impressionImageError,
+        } =
+          await supabase
+            .from(
+              "impression_images",
+            )
+            .select(`
+              id,
+              impression_id,
+              sort_order,
+              public_url,
+              alt_text
+            `)
+            .order(
+              "sort_order",
+              {
+                ascending: true,
+              },
+            )
+
+        if (
+          impressionImageError
+        ) {
+          throw impressionImageError
         }
 
         const reviewItems:
@@ -357,19 +380,31 @@ function AdminMediaPage() {
                   .join(" ")
 
               const images =
-                [
-                  ...(
-                    row.impression_images ??
-                    []
-                  ),
-                ].sort(
-                  (
-                    first,
-                    second,
-                  ) =>
-                    first.sort_order -
-                    second.sort_order,
+                (
+                  impressionImageRows ??
+                  []
                 )
+                  .filter(
+                    (image) =>
+                      Number(
+                        image.impression_id,
+                      ) ===
+                      Number(
+                        row.id,
+                      ),
+                  )
+                  .sort(
+                    (
+                      first,
+                      second,
+                    ) =>
+                      Number(
+                        first.sort_order,
+                      ) -
+                      Number(
+                        second.sort_order,
+                      ),
+                  )
 
               return {
                 type:
@@ -474,31 +509,17 @@ function AdminMediaPage() {
         ? "reviews"
         : "impressions"
 
-    const payload =
-      item.type ===
-      "review"
-        ? {
-            hero_image_url:
-              image.public_url,
+    const payload = {
+      hero_image_url:
+        image.public_url,
 
-            hero_image_confirmed:
-              true,
+      hero_image_confirmed:
+        true,
 
-            updated_at:
-              new Date()
-                .toISOString(),
-          }
-        : {
-            hero_image_url:
-              image.public_url,
-
-            hero_image_confirmed:
-              true,
-
-            updated_at:
-              new Date()
-                .toISOString(),
-          }
+      updated_at:
+        new Date()
+          .toISOString(),
+    }
 
     const {
       error:
