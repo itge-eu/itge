@@ -352,8 +352,14 @@ function prepareReviewHtml(
   if (heroImageUrl) {
     const firstImage =
       document.querySelector<HTMLImageElement>("img")
-
-    if (firstImage) {
+  
+    const firstImageUrl =
+      firstImage?.getAttribute("src") ?? null
+  
+    if (
+      firstImage &&
+      firstImageUrl === heroImageUrl
+    ) {
       removeImageWrapper(firstImage)
     }
   }

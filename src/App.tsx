@@ -6,6 +6,7 @@ import RequireAdmin from "./components/admin/RequireAdmin"
 
 import AdminLoginPage from "./pages/AdminLoginPage"
 import AdminPage from "./pages/AdminPage"
+import AdminMediaPage from "./pages/AdminMediaPage"
 
 import ImportReviewPage from "./pages/ImportReviewPage"
 import AdminEditReviewPage from "./pages/AdminEditReviewPage"
@@ -66,6 +67,7 @@ function App() {
 
         <Route element={<RequireAdmin />}>
           <Route path="/admin" element={<AdminPage />} />
+		  <Route path="/admin/media" element={<AdminMediaPage />} />
           <Route path="/admin/reviews" element={<AdminReviewsPage />} />
           <Route path="/admin/reviews/:id/edit" element={<AdminEditReviewPage />} />
           <Route path="/admin/impressions" element={<AdminImpressionsPage />} />

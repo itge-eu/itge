@@ -144,6 +144,13 @@ function AdminPage() {
               to="/admin/impressions"
               action="Manage impressions"
             />
+			
+			<AdminCard
+			  title="Hero images"
+			  description="Review imported images and choose the hero image for reviews and impressions."
+			  to="/admin/media"
+			  action="Manage hero images"
+			/>
           </div>
         </section>
 
