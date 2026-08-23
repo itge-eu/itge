@@ -44,11 +44,11 @@ function ManufacturerPage() {
   usePageMetadata({
     title: manufacturer
       ? `${manufacturer.name} | ITGE`
-      : "Manufacturer | ITGE",
+      : "Brand | ITGE",
 
     description: manufacturer
       ? `Explore ${manufacturer.name} IEMs, reviews and listening impressions at ITGE.`
-      : "Explore IEM manufacturers covered by ITGE.",
+      : "Explore IEM brands covered by ITGE.",
   })
 
   useEffect(() => {
@@ -57,7 +57,7 @@ function ManufacturerPage() {
     async function loadManufacturer() {
       if (!slug) {
         setError(
-          "No manufacturer was specified.",
+          "No brand was specified.",
         )
         setLoading(false)
         return
@@ -79,13 +79,13 @@ function ManufacturerPage() {
         }
       } catch (loadError) {
         console.error(
-          "Could not load manufacturer:",
+          "Could not load brand:",
           loadError,
         )
 
         if (!cancelled) {
           setError(
-            "The manufacturer page could not be loaded.",
+            "The brand page could not be loaded.",
           )
         }
       } finally {
@@ -118,8 +118,8 @@ function ManufacturerPage() {
   if (loading) {
     return (
       <PageState
-        eyebrow="Manufacturer"
-        title="Loading manufacturer…"
+        eyebrow="Brand"
+        title="Loading brand…"
       />
     )
   }
@@ -127,11 +127,11 @@ function ManufacturerPage() {
   if (error) {
     return (
       <PageState
-        eyebrow="Manufacturer"
-        title="Unable to load manufacturer"
+        eyebrow="Brand"
+        title="Unable to load brand"
         message={error}
-        backTo="/manufacturers"
-        backLabel="Back to manufacturers"
+        backTo="/brands"
+        backLabel="Back to brands"
       />
     )
   }
@@ -140,10 +140,10 @@ function ManufacturerPage() {
     return (
       <PageState
         eyebrow="404"
-        title="Manufacturer not found"
-        message="The manufacturer you were looking for doesn’t exist or is no longer available."
-        backTo="/manufacturers"
-        backLabel="Back to manufacturers"
+        title="Brand not found"
+        message="The brand you were looking for doesn’t exist or is no longer available."
+        backTo="/brands"
+        backLabel="Back to brands"
       />
     )
   }
@@ -155,8 +155,8 @@ function ManufacturerPage() {
           items={[
             {
               label:
-                "Manufacturers",
-              to: "/manufacturers",
+                "Brands",
+              to: "/brands",
             },
             {
               label:
@@ -169,7 +169,7 @@ function ManufacturerPage() {
           <div className="grid lg:grid-cols-[minmax(0,1fr)_28rem]">
             <div className="p-8 sm:p-10">
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
-                Manufacturer
+                Brand
               </p>
 
               <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-6xl">
@@ -197,7 +197,7 @@ function ManufacturerPage() {
                   rel="noreferrer"
                   className="mt-6 inline-flex items-center gap-2 font-semibold text-[var(--accent)] transition hover:opacity-75"
                 >
-                  Visit manufacturer
+                  Visit brand
                   website
                   <span aria-hidden="true">
                     ↗
@@ -282,7 +282,7 @@ function ManufacturerPage() {
             .length === 0 ? (
             <EmptyPanel>
               No covered IEMs from
-              this manufacturer are
+              this brand are
               available yet.
             </EmptyPanel>
           ) : (

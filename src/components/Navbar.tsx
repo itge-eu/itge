@@ -39,8 +39,18 @@ function Navbar() {
   ] = useState(false)
 
   const [
+    mobileAboutOpen,
+    setMobileAboutOpen,
+  ] = useState(false)
+
+  const [
     desktopExploreOpen,
     setDesktopExploreOpen,
+  ] = useState(false)
+
+  const [
+    desktopAboutOpen,
+    setDesktopAboutOpen,
   ] = useState(false)
 
   const location = useLocation()
@@ -66,8 +76,13 @@ function Navbar() {
   useEffect(() => {
     setMobileMenuOpen(false)
     setMobileExploreOpen(false)
+    setMobileAboutOpen(false)
     setDesktopExploreOpen(false)
-  }, [location.pathname])
+    setDesktopAboutOpen(false)
+  }, [
+    location.pathname,
+    location.hash,
+  ])
 
   useEffect(() => {
     const handleEscape = (
@@ -79,7 +94,9 @@ function Navbar() {
 
       setMobileMenuOpen(false)
       setMobileExploreOpen(false)
+      setMobileAboutOpen(false)
       setDesktopExploreOpen(false)
+      setDesktopAboutOpen(false)
     }
 
     window.addEventListener(
@@ -106,10 +123,12 @@ function Navbar() {
   const closeMobileMenu = () => {
     setMobileMenuOpen(false)
     setMobileExploreOpen(false)
+    setMobileAboutOpen(false)
   }
 
-  const closeDesktopExplore = () => {
+  const closeDesktopMenus = () => {
     setDesktopExploreOpen(false)
+    setDesktopAboutOpen(false)
   }
 
   return (
@@ -121,7 +140,7 @@ function Navbar() {
           aria-label="IEM Tour Group Europe homepage"
           onClick={() => {
             closeMobileMenu()
-            closeDesktopExplore()
+            closeDesktopMenus()
           }}
         >
           <span className="flex items-center dark:hidden">
@@ -161,7 +180,7 @@ function Navbar() {
         >
           <Link
             to="/discover"
-            onClick={closeDesktopExplore}
+            onClick={closeDesktopMenus}
             className="rounded-xl px-4 py-3 font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
           >
             Discover
@@ -169,7 +188,7 @@ function Navbar() {
 
           <Link
             to="/reviews"
-            onClick={closeDesktopExplore}
+            onClick={closeDesktopMenus}
             className="transition hover:text-[var(--foreground)]"
           >
             Reviews
@@ -177,39 +196,42 @@ function Navbar() {
 
           <Link
             to="/iems"
-            onClick={closeDesktopExplore}
+            onClick={closeDesktopMenus}
             className="transition hover:text-[var(--foreground)]"
           >
             IEMs
           </Link>
 
           <Link
-            to="/reviewers"
-            onClick={closeDesktopExplore}
+            to="/brands"
+            onClick={closeDesktopMenus}
             className="transition hover:text-[var(--foreground)]"
           >
-            Reviewers
+            Brands
           </Link>
 
           <div
             className="relative"
-            onMouseEnter={() =>
+            onMouseEnter={() => {
               setDesktopExploreOpen(true)
-            }
+              setDesktopAboutOpen(false)
+            }}
             onMouseLeave={() =>
               setDesktopExploreOpen(false)
             }
           >
             <button
               type="button"
-              onClick={() =>
+              onClick={() => {
                 setDesktopExploreOpen(
                   (current) => !current,
                 )
-              }
-              onFocus={() =>
+                setDesktopAboutOpen(false)
+              }}
+              onFocus={() => {
                 setDesktopExploreOpen(true)
-              }
+                setDesktopAboutOpen(false)
+              }}
               className="flex items-center gap-1.5 py-3 transition hover:text-[var(--foreground)]"
               aria-haspopup="true"
               aria-expanded={
@@ -232,39 +254,30 @@ function Navbar() {
             {desktopExploreOpen && (
               <div className="absolute left-1/2 top-full w-52 -translate-x-1/2 pt-2">
                 <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-2 shadow-xl">
-                  <ExploreLink
+                  <DropdownLink
                     to="/impressions"
                     title="Impressions"
                     description="Browse IEM impressions"
                     onClick={
-                      closeDesktopExplore
+                      closeDesktopMenus
                     }
                   />
 
-                  <ExploreLink
+                  <DropdownLink
                     to="/artists"
                     title="Artists"
                     description="Browse listening references"
                     onClick={
-                      closeDesktopExplore
+                      closeDesktopMenus
                     }
                   />
 
-                  <ExploreLink
+                  <DropdownLink
                     to="/genres"
                     title="Genres"
                     description="Explore reviews by genre"
                     onClick={
-                      closeDesktopExplore
-                    }
-                  />
-
-                  <ExploreLink
-                    to="/manufacturers"
-                    title="Manufacturers"
-                    description="Browse IEM makers"
-                    onClick={
-                      closeDesktopExplore
+                      closeDesktopMenus
                     }
                   />
                 </div>
@@ -272,21 +285,89 @@ function Navbar() {
             )}
           </div>
 
-          <Link
-            to="/#join"
-            onClick={closeDesktopExplore}
-            className="transition hover:text-[var(--foreground)]"
+          <div
+            className="relative"
+            onMouseEnter={() => {
+              setDesktopAboutOpen(true)
+              setDesktopExploreOpen(false)
+            }}
+            onMouseLeave={() =>
+              setDesktopAboutOpen(false)
+            }
           >
-            Join
-          </Link>
+            <button
+              type="button"
+              onClick={() => {
+                setDesktopAboutOpen(
+                  (current) => !current,
+                )
+                setDesktopExploreOpen(false)
+              }}
+              onFocus={() => {
+                setDesktopAboutOpen(true)
+                setDesktopExploreOpen(false)
+              }}
+              className="flex items-center gap-1.5 py-3 transition hover:text-[var(--foreground)]"
+              aria-haspopup="true"
+              aria-expanded={
+                desktopAboutOpen
+              }
+            >
+              About
 
-          <Link
-            to="/#about"
-            onClick={closeDesktopExplore}
-            className="transition hover:text-[var(--foreground)]"
-          >
-            About
-          </Link>
+              <span
+                className={`transition-transform duration-200 ${
+                  desktopAboutOpen
+                    ? "rotate-180"
+                    : ""
+                }`}
+              >
+                <ChevronDownIcon />
+              </span>
+            </button>
+
+            {desktopAboutOpen && (
+              <div className="absolute left-1/2 top-full w-60 -translate-x-1/2 pt-2">
+                <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-2 shadow-xl">
+                  <DropdownLink
+                    to="/#about"
+                    title="About us"
+                    description="Learn more about ITGE"
+                    onClick={
+                      closeDesktopMenus
+                    }
+                  />
+
+                  <DropdownLink
+                    to="/reviewers"
+                    title="Reviewers"
+                    description="Meet the ITGE reviewers"
+                    onClick={
+                      closeDesktopMenus
+                    }
+                  />
+
+                  <DropdownLink
+                    to="/#join"
+                    title="Join ITGE"
+                    description="Become part of our tour group"
+                    onClick={
+                      closeDesktopMenus
+                    }
+                  />
+
+                  <DropdownLink
+                    to="/#join"
+                    title="For brands"
+                    description="Send an IEM on tour with ITGE"
+                    onClick={
+                      closeDesktopMenus
+                    }
+                  />
+                </div>
+              </div>
+            )}
+          </div>
         </nav>
 
         <div className="flex items-center gap-3">
@@ -312,7 +393,7 @@ function Navbar() {
 
           <Link
             to="/reviews"
-            onClick={closeDesktopExplore}
+            onClick={closeDesktopMenus}
             className="hidden rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[var(--accent-foreground)] transition hover:bg-[var(--accent-hover)] sm:inline-flex"
           >
             Browse reviews
@@ -372,20 +453,21 @@ function Navbar() {
             </MobileLink>
 
             <MobileLink
-              to="/reviewers"
+              to="/brands"
               onClick={closeMobileMenu}
             >
-              Reviewers
+              Brands
             </MobileLink>
 
             <div>
               <button
                 type="button"
-                onClick={() =>
+                onClick={() => {
                   setMobileExploreOpen(
                     (current) => !current,
                   )
-                }
+                  setMobileAboutOpen(false)
+                }}
                 className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
                 aria-expanded={
                   mobileExploreOpen
@@ -406,58 +488,103 @@ function Navbar() {
 
               {mobileExploreOpen && (
                 <div className="ml-4 mt-1 flex flex-col gap-1 border-l border-[var(--border)] pl-3">
-                  <MobileExploreLink
+                  <MobileDropdownLink
                     to="/impressions"
                     onClick={
                       closeMobileMenu
                     }
                   >
                     Impressions
-                  </MobileExploreLink>
+                  </MobileDropdownLink>
 
-                  <MobileExploreLink
+                  <MobileDropdownLink
                     to="/artists"
                     onClick={
                       closeMobileMenu
                     }
                   >
                     Artists
-                  </MobileExploreLink>
+                  </MobileDropdownLink>
 
-                  <MobileExploreLink
+                  <MobileDropdownLink
                     to="/genres"
                     onClick={
                       closeMobileMenu
                     }
                   >
                     Genres
-                  </MobileExploreLink>
-
-                  <MobileExploreLink
-                    to="/manufacturers"
-                    onClick={
-                      closeMobileMenu
-                    }
-                  >
-                    Manufacturers
-                  </MobileExploreLink>
+                  </MobileDropdownLink>
                 </div>
               )}
             </div>
 
-            <MobileLink
-              to="/#join"
-              onClick={closeMobileMenu}
-            >
-              Join
-            </MobileLink>
+            <div>
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileAboutOpen(
+                    (current) => !current,
+                  )
+                  setMobileExploreOpen(false)
+                }}
+                className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
+                aria-expanded={
+                  mobileAboutOpen
+                }
+              >
+                About
 
-            <MobileLink
-              to="/#about"
-              onClick={closeMobileMenu}
-            >
-              About
-            </MobileLink>
+                <span
+                  className={`transition-transform duration-200 ${
+                    mobileAboutOpen
+                      ? "rotate-180"
+                      : ""
+                  }`}
+                >
+                  <ChevronDownIcon />
+                </span>
+              </button>
+
+              {mobileAboutOpen && (
+                <div className="ml-4 mt-1 flex flex-col gap-1 border-l border-[var(--border)] pl-3">
+                  <MobileDropdownLink
+                    to="/#about"
+                    onClick={
+                      closeMobileMenu
+                    }
+                  >
+                    About us
+                  </MobileDropdownLink>
+
+                  <MobileDropdownLink
+                    to="/reviewers"
+                    onClick={
+                      closeMobileMenu
+                    }
+                  >
+                    Reviewers
+                  </MobileDropdownLink>
+
+                  <MobileDropdownLink
+                    to="/#join"
+                    onClick={
+                      closeMobileMenu
+                    }
+                  >
+                    Join ITGE
+                  </MobileDropdownLink>
+
+                  <MobileDropdownLink
+                    to="/#join"
+                    onClick={
+                      closeMobileMenu
+                    }
+                  >
+                    For brands
+                  </MobileDropdownLink>
+                </div>
+              )}
+            </div>
 
             <Link
               to="/reviews"
@@ -473,7 +600,7 @@ function Navbar() {
   )
 }
 
-function ExploreLink({
+function DropdownLink({
   to,
   title,
   description,
@@ -521,7 +648,7 @@ function MobileLink({
   )
 }
 
-function MobileExploreLink({
+function MobileDropdownLink({
   to,
   onClick,
   children,

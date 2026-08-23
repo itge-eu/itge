@@ -32,10 +32,10 @@ function ManufacturersPage() {
 
   usePageMetadata({
     title:
-      "Manufacturers | ITGE",
+      "Brands | ITGE",
 
     description:
-      "Browse IEM manufacturers covered by IEM Tour Group Europe through reviews and listening impressions.",
+      "Browse IEM brands covered by IEM Tour Group Europe through reviews and listening impressions.",
   })
 
   useEffect(() => {
@@ -53,13 +53,13 @@ function ManufacturersPage() {
         }
       } catch (loadError) {
         console.error(
-          "Could not load manufacturers:",
+          "Could not load brands:",
           loadError,
         )
 
         if (!cancelled) {
           setError(
-            "The manufacturers could not be loaded.",
+            "The brands could not be loaded.",
           )
         }
       } finally {
@@ -79,7 +79,7 @@ function ManufacturersPage() {
   if (loading) {
     return (
       <PageMessage>
-        Loading manufacturers…
+        Loading brands…
       </PageMessage>
     )
   }
@@ -89,7 +89,7 @@ function ManufacturersPage() {
       <PageMessage>
         <p className="text-xl font-semibold text-[var(--foreground)]">
           Unable to load
-          manufacturers
+          brands
         </p>
 
         <p className="mt-3">
@@ -108,11 +108,11 @@ function ManufacturersPage() {
           </p>
 
           <h1 className="mt-3 text-4xl font-semibold tracking-tight sm:text-6xl">
-            Manufacturers
+            Brands
           </h1>
 
           <p className="mt-5 max-w-2xl text-lg leading-8 text-[var(--muted)]">
-            Explore manufacturers
+            Explore brands
             represented across the
             ITGE library through full
             reviews and short-form
@@ -123,15 +123,15 @@ function ManufacturersPage() {
             {manufacturers.length}{" "}
             {manufacturers.length ===
             1
-              ? "manufacturer"
-              : "manufacturers"}
+              ? "brand"
+              : "brands"}
           </p>
         </header>
 
         {manufacturers.length ===
         0 ? (
           <div className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
-            No manufacturers with
+            No brands with
             published coverage are
             available yet.
           </div>
@@ -145,13 +145,13 @@ function ManufacturersPage() {
                   key={
                     manufacturer.id
                   }
-                  to={`/manufacturers/${manufacturer.slug}`}
+                  to={`/brands/${manufacturer.slug}`}
                   className="group flex min-h-[220px] flex-col rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
                 >
                   <div className="flex min-h-24 items-start justify-between gap-6">
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
-                        Manufacturer
+                        Brand
                       </p>
 
                       <h2 className="mt-2 break-words text-2xl font-semibold tracking-tight transition group-hover:text-[var(--accent)]">

@@ -9,7 +9,7 @@ type IemCardProps = {
 function IemCard({ iem }: IemCardProps) {
   const iemUrl = `/iems/${iem.slug}`
   const manufacturerUrl =
-    `/manufacturers/${iem.manufacturer.slug}`
+    `/brands/${iem.manufacturer.slug}`
 
   return (
     <article className="group overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] transition hover:-translate-y-1 hover:border-[var(--accent)]">
