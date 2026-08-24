@@ -179,35 +179,11 @@ function Navbar() {
           className="hidden items-center gap-6 text-sm text-[var(--muted)] md:flex"
         >
           <Link
-            to="/discover"
-            onClick={closeDesktopMenus}
-            className="rounded-xl px-4 py-3 font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
-          >
-            Discover
-          </Link>
-
-          <Link
             to="/reviews"
             onClick={closeDesktopMenus}
-            className="transition hover:text-[var(--foreground)]"
+            className="rounded-xl bg-[var(--accent)] px-4 py-3 font-semibold text-[var(--accent-foreground)] transition hover:bg-[var(--accent-hover)]"
           >
             Reviews
-          </Link>
-
-          <Link
-            to="/iems"
-            onClick={closeDesktopMenus}
-            className="transition hover:text-[var(--foreground)]"
-          >
-            IEMs
-          </Link>
-
-          <Link
-            to="/brands"
-            onClick={closeDesktopMenus}
-            className="transition hover:text-[var(--foreground)]"
-          >
-            Brands
           </Link>
 
           <div
@@ -254,6 +230,24 @@ function Navbar() {
             {desktopExploreOpen && (
               <div className="absolute left-1/2 top-full w-52 -translate-x-1/2 pt-2">
                 <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-2 shadow-xl">
+                  <DropdownLink
+                    to="/iems"
+                    title="IEM's"
+                    description="Browse IEM's"
+                    onClick={
+                      closeDesktopMenus
+                    }
+                  />
+
+                  <DropdownLink
+                    to="/brands"
+                    title="Brands"
+                    description="Browse brands"
+                    onClick={
+                      closeDesktopMenus
+                    }
+                  />
+
                   <DropdownLink
                     to="/artists"
                     title="Artists"
@@ -414,33 +408,13 @@ function Navbar() {
           className="border-t border-[var(--border)] bg-[var(--background)] px-6 py-5 md:hidden"
         >
           <div className="mx-auto flex max-w-7xl flex-col gap-2">
-            <MobileLink
-              to="/discover"
-              onClick={closeMobileMenu}
-            >
-              Discover
-            </MobileLink>
-
-            <MobileLink
+            <Link
               to="/reviews"
               onClick={closeMobileMenu}
+              className="rounded-xl bg-[var(--accent)] px-4 py-3 font-semibold text-[var(--accent-foreground)] transition hover:bg-[var(--accent-hover)]"
             >
               Reviews
-            </MobileLink>
-
-            <MobileLink
-              to="/iems"
-              onClick={closeMobileMenu}
-            >
-              IEMs
-            </MobileLink>
-
-            <MobileLink
-              to="/brands"
-              onClick={closeMobileMenu}
-            >
-              Brands
-            </MobileLink>
+            </Link>
 
             <div>
               <button
@@ -471,6 +445,24 @@ function Navbar() {
 
               {mobileExploreOpen && (
                 <div className="ml-4 mt-1 flex flex-col gap-1 border-l border-[var(--border)] pl-3">
+                  <MobileDropdownLink
+                    to="/iems"
+                    onClick={
+                      closeMobileMenu
+                    }
+                  >
+                    IEM's
+                  </MobileDropdownLink>
+
+                  <MobileDropdownLink
+                    to="/brands"
+                    onClick={
+                      closeMobileMenu
+                    }
+                  >
+                    Brands
+                  </MobileDropdownLink>
+
                   <MobileDropdownLink
                     to="/artists"
                     onClick={
@@ -591,26 +583,6 @@ function DropdownLink({
       <p className="mt-0.5 text-xs leading-5 text-[var(--muted)]">
         {description}
       </p>
-    </Link>
-  )
-}
-
-function MobileLink({
-  to,
-  onClick,
-  children,
-}: {
-  to: string
-  onClick: () => void
-  children: React.ReactNode
-}) {
-  return (
-    <Link
-      to={to}
-      onClick={onClick}
-      className="rounded-xl px-4 py-3 font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
-    >
-      {children}
     </Link>
   )
 }

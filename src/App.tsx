@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router"
+import { Navigate, Route, Routes } from "react-router"
 
 import Layout from "./components/Layout"
 
@@ -17,7 +17,7 @@ import AdminEditImpressionPage from "./pages/AdminEditImpressionPage"
 import AdminImpressionsPage from "./pages/AdminImpressionsPage"
 
 import HomePage from "./pages/HomePage"
-import ReviewsPage from "./pages/ReviewsPage"
+// import ReviewsPage from "./pages/ReviewsPage"
 import ReviewPage from "./pages/ReviewPage"
 import ReviewersPage from "./pages/ReviewersPage"
 import ReviewerPage from "./pages/ReviewerPage"
@@ -40,9 +40,9 @@ function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<HomePage />} />
-		<Route path="/discover" element={<DiscoverPage />} />
+		<Route path="/discover" element={<Navigate to="/reviews" replace />} />
 
-        <Route path="/reviews" element={<ReviewsPage />} />
+        <Route path="/reviews" element={<DiscoverPage />} />
         <Route path="/reviews/:slug" element={<ReviewPage />} />
 		
 		<Route path="/impressions" element={<ImpressionsPage />} />

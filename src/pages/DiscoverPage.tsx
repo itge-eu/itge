@@ -28,6 +28,12 @@ import type {
 
 import usePageMetadata from "../hooks/usePageMetadata"
 
+type SortOption =
+  | "newest"
+  | "oldest"
+  | "iem"
+  | "reviewer"
+
 function DiscoverPage() {
   const [
     discoveryItems,
@@ -55,6 +61,14 @@ function DiscoverPage() {
       "all",
     )
 
+  const [
+    sortOption,
+    setSortOption,
+  ] =
+    useState<SortOption>(
+      "newest",
+    )
+
   const [loading, setLoading] =
     useState(true)
 
@@ -70,10 +84,10 @@ function DiscoverPage() {
 
   usePageMetadata({
     title:
-      "Discover | ITGE",
+      "Reviews | ITGE",
 
     description:
-      "Discover IEM reviews and listening impressions by product, reviewer, manufacturer, artist and genre.",
+      "Browse ITGE IEM reviews and listening impressions by IEM, brand, reviewer, artist and genre.",
   })
 
   useEffect(() => {
@@ -94,7 +108,7 @@ function DiscoverPage() {
         }
       } catch (loadError) {
         console.error(
-          "Could not load Discover data:",
+          "Could not load review data:",
           loadError,
         )
 
@@ -104,7 +118,7 @@ function DiscoverPage() {
           )
 
           setError(
-            "The Discover data could not be loaded.",
+            "The review data could not be loaded.",
           )
         }
       } finally {
@@ -144,6 +158,25 @@ function DiscoverPage() {
       discoveryItems,
       selectedFilters,
       contentType,
+    ])
+
+  const sortedItems =
+    useMemo(() => {
+      return [
+        ...discoveryState
+          .matchingItems,
+      ].sort(
+        (first, second) =>
+          compareDiscoveryItems(
+            first,
+            second,
+            sortOption,
+          ),
+      )
+    }, [
+      discoveryState
+        .matchingItems,
+      sortOption,
     ])
 
   const searchSuggestions =
@@ -228,23 +261,21 @@ function DiscoverPage() {
       <div className="mx-auto max-w-7xl">
         <header className="mb-10 max-w-3xl">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
-            Explore ITGE
+            Reviews & impressions
           </p>
 
           <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
-            Discover coverage
-            through what matters
-            to you.
+            Find the reviews that
+            matter to you.
           </h1>
 
           <p className="mt-5 text-lg leading-8 text-[var(--muted)]">
-            Search directly or
-            combine IEM,
-            manufacturer, artist,
-            genre and contributor
-            filters across full
-            reviews and listening
-            impressions.
+            Browse all ITGE reviews
+            and listening impressions,
+            or combine IEM, brand,
+            artist, genre and reviewer
+            filters to find exactly
+            what you're looking for.
           </p>
         </header>
 
@@ -295,10 +326,8 @@ function DiscoverPage() {
           <span className="text-sm text-[var(--muted)]">
             {loading
               ? "Loading..."
-              : `${discoveryState.matchingItems.length} ${
-                  discoveryState
-                    .matchingItems
-                    .length === 1
+              : `${sortedItems.length} ${
+                  sortedItems.length === 1
                     ? "result"
                     : "results"
                 }`}
@@ -378,10 +407,7 @@ function DiscoverPage() {
           </aside>
 
           <DiscoveryResults
-            items={
-              discoveryState
-                .matchingItems
-            }
+            items={sortedItems}
             contentType={
               contentType
             }
@@ -389,6 +415,12 @@ function DiscoverPage() {
             error={error}
             hasFilters={
               hasFilters
+            }
+            sortOption={
+              sortOption
+            }
+            onSortChange={
+              setSortOption
             }
           />
         </div>
@@ -468,6 +500,93 @@ function ContentTypeSelector({
       </div>
     </div>
   )
+}
+
+function compareDiscoveryItems(
+  first: DiscoveryItem,
+  second: DiscoveryItem,
+  sortOption: SortOption,
+): number {
+  switch (sortOption) {
+    case "oldest":
+      return (
+        getTimestamp(first) -
+        getTimestamp(second)
+      )
+
+    case "iem":
+      return getIemName(
+        first,
+      ).localeCompare(
+        getIemName(second),
+        undefined,
+        {
+          sensitivity: "base",
+        },
+      )
+
+    case "reviewer":
+      return getReviewerName(
+        first,
+      ).localeCompare(
+        getReviewerName(second),
+        undefined,
+        {
+          sensitivity: "base",
+        },
+      )
+
+    case "newest":
+    default:
+      return (
+        getTimestamp(second) -
+        getTimestamp(first)
+      )
+  }
+}
+
+function getTimestamp(
+  item: DiscoveryItem,
+): number {
+  const value =
+    item.type === "review"
+      ? item.review.publishedAt
+      : item.impression.publishedAt
+
+  if (!value) {
+    return 0
+  }
+
+  const timestamp =
+    new Date(value).getTime()
+
+  return Number.isNaN(
+    timestamp,
+  )
+    ? 0
+    : timestamp
+}
+
+function getIemName(
+  item: DiscoveryItem,
+): string {
+  if (
+    item.type === "review"
+  ) {
+    return `${item.review.brand} ${item.review.model}`
+  }
+
+  return `${item.impression.iem.manufacturer.name} ${item.impression.iem.model}`
+}
+
+function getReviewerName(
+  item: DiscoveryItem,
+): string {
+  return item.type ===
+    "review"
+    ? item.review.reviewer
+    : item.impression
+        .reviewer.name
 }
 
 function FilterIcon() {

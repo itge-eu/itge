@@ -11,6 +11,12 @@ import type {
   DiscoveryItem,
 } from "../../types/discovery"
 
+type SortOption =
+  | "newest"
+  | "oldest"
+  | "iem"
+  | "reviewer"
+
 type DiscoveryResultsProps = {
   items: DiscoveryItem[]
 
@@ -20,6 +26,12 @@ type DiscoveryResultsProps = {
   loading: boolean
   error: string | null
   hasFilters: boolean
+
+  sortOption: SortOption
+
+  onSortChange: (
+    value: SortOption,
+  ) => void
 }
 
 const ITEMS_PER_PAGE = 12
@@ -30,6 +42,8 @@ function DiscoveryResults({
   loading,
   error,
   hasFilters,
+  sortOption,
+  onSortChange,
 }: DiscoveryResultsProps) {
   const [
     visibleCount,
@@ -82,15 +96,58 @@ function DiscoveryResults({
 
         {!loading &&
           !error &&
-          items.length >
-            ITEMS_PER_PAGE && (
-            <span className="text-sm text-[var(--muted)]">
-              Showing{" "}
-              {
-                visibleItems.length
-              }{" "}
-              of {items.length}
-            </span>
+          items.length > 0 && (
+            <div className="flex flex-wrap items-center gap-4">
+              {items.length >
+                ITEMS_PER_PAGE && (
+                <span className="text-sm text-[var(--muted)]">
+                  Showing{" "}
+                  {
+                    visibleItems.length
+                  }{" "}
+                  of {items.length}
+                </span>
+              )}
+
+              <div className="flex items-center gap-3">
+                <label
+                  htmlFor="discovery-sort"
+                  className="text-sm text-[var(--muted)]"
+                >
+                  Sort by
+                </label>
+
+                <select
+                  id="discovery-sort"
+                  value={sortOption}
+                  onChange={(
+                    event,
+                  ) =>
+                    onSortChange(
+                      event.target
+                        .value as SortOption,
+                    )
+                  }
+                  className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
+                >
+                  <option value="newest">
+                    Newest first
+                  </option>
+
+                  <option value="oldest">
+                    Oldest first
+                  </option>
+
+                  <option value="iem">
+                    IEM A–Z
+                  </option>
+
+                  <option value="reviewer">
+                    Reviewer A–Z
+                  </option>
+                </select>
+              </div>
+            </div>
           )}
       </div>
 
