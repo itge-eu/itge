@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useMemo,
   useState,
 } from "react"
 
@@ -17,6 +18,12 @@ function GenresPage() {
     useState<
       GenreSummary[]
     >([])
+
+  const [
+    searchQuery,
+    setSearchQuery,
+  ] =
+    useState("")
 
   const [loading, setLoading] =
     useState(true)
@@ -70,6 +77,30 @@ function GenresPage() {
     }
   }, [])
 
+  const filteredGenres =
+    useMemo(() => {
+      const normalizedSearch =
+        searchQuery
+          .trim()
+          .toLocaleLowerCase()
+
+      if (!normalizedSearch) {
+        return genres
+      }
+
+      return genres.filter(
+        (genre) =>
+          genre.name
+            .toLocaleLowerCase()
+            .includes(
+              normalizedSearch,
+            ),
+      )
+    }, [
+      genres,
+      searchQuery,
+    ])
+
   if (loading) {
     return (
       <PageMessage>
@@ -122,6 +153,51 @@ function GenresPage() {
           </p>
         </header>
 
+        {genres.length > 0 && (
+          <section className="mt-8">
+            <label
+              htmlFor="genre-search"
+              className="block text-sm font-semibold text-[var(--muted)]"
+            >
+              Search genres
+            </label>
+
+            <div className="relative mt-3 max-w-xl">
+              <SearchIcon />
+
+              <input
+                id="genre-search"
+                type="search"
+                value={
+                  searchQuery
+                }
+                onChange={(
+                  event,
+                ) =>
+                  setSearchQuery(
+                    event.target
+                      .value,
+                  )
+                }
+                placeholder="Search by genre…"
+                className="w-full rounded-2xl border border-[var(--border)] bg-[var(--surface)] py-3.5 pl-11 pr-4 text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--accent)]"
+              />
+            </div>
+
+            {searchQuery.trim() && (
+              <p className="mt-3 text-sm text-[var(--muted)]">
+                {
+                  filteredGenres.length
+                }{" "}
+                {filteredGenres.length ===
+                1
+                  ? "matching genre"
+                  : "matching genres"}
+              </p>
+            )}
+          </section>
+        )}
+
         {genres.length ===
         0 ? (
           <div className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
@@ -129,9 +205,25 @@ function GenresPage() {
             published coverage are
             available yet.
           </div>
+        ) : filteredGenres.length ===
+          0 ? (
+          <div className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
+            <p className="font-semibold">
+              No matching genres
+            </p>
+
+            <p className="mt-2 text-sm text-[var(--muted)]">
+              No genres match
+              {" "}
+              <span className="font-medium text-[var(--foreground)]">
+                “{searchQuery.trim()}”
+              </span>
+              .
+            </p>
+          </div>
         ) : (
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {genres.map(
+            {filteredGenres.map(
               (genre) => (
                 <Link
                   key={
@@ -226,6 +318,29 @@ function Metric({
         {label}
       </p>
     </div>
+  )
+}
+
+function SearchIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted)]"
+    >
+      <circle
+        cx="11"
+        cy="11"
+        r="7"
+      />
+
+      <path d="m20 20-3.5-3.5" />
+    </svg>
   )
 }
 
