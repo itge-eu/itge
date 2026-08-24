@@ -230,7 +230,7 @@ function Navbar() {
                 desktopExploreOpen
               }
             >
-              Explore
+              Tags
 
               <span
                 className={`transition-transform duration-200 ${
@@ -249,7 +249,7 @@ function Navbar() {
                   <DropdownLink
                     to="/artists"
                     title="Artists"
-                    description="Browse listening references"
+                    description="Browse artist references"
                     onClick={
                       closeDesktopMenus
                     }
@@ -444,7 +444,7 @@ function Navbar() {
                   mobileExploreOpen
                 }
               >
-                Explore
+                Tags
 
                 <span
                   className={`transition-transform duration-200 ${
