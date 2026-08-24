@@ -77,6 +77,7 @@ type DiscoveryReviewRow = {
   rating: number
   title: string
   summary: string
+  body: string | null
   hero_image_url: string | null
   published_at: string | null
 
@@ -314,32 +315,36 @@ function mapDiscoveryReview(
       slug: row.slug,
       rating:
         Number(row.rating),
-
+    
       title: row.title,
       summary: row.summary,
-
+      body: row.body,
+    
       brand:
         entities.manufacturer
           .name,
-
+    
       manufacturerSlug:
         entities.manufacturer
           .slug,
-
+    
       model:
         entities.iem.model,
-
+    
       iemSlug:
         entities.iem.slug,
-
+    
       reviewer:
         entities.reviewer.name,
-
+    
       reviewerSlug:
         entities.reviewer.slug,
-
+    
       heroImageUrl:
         row.hero_image_url,
+    
+      publishedAt:
+        row.published_at,
     },
 
     iem:
@@ -479,6 +484,7 @@ export async function getDiscoveryItems(): Promise<
         rating,
         title,
         summary,
+		body,
         hero_image_url,
         published_at,
 

@@ -19,6 +19,7 @@ export type FeaturedReview = {
   rating: number
   title: string
   summary: string
+  body?: string | null
   brand: string
   manufacturerSlug: string
   model: string
@@ -176,6 +177,7 @@ function mapReview(row: ReviewRow): FeaturedReview {
     rating: Number(row.rating),
     title: row.title,
     summary: row.summary,
+    body: row.body ?? null,
     reviewer: reviewer.name,
     reviewerSlug: reviewer.slug,
     model: iem.model,
@@ -457,6 +459,7 @@ export async function getAllReviews(
       rating,
       title,
       summary,
+      body,
       hero_image_url,
 	  published_at,
       reviewers (
