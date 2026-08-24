@@ -343,8 +343,8 @@ function DiscoverPage() {
         )}
 
         <div className="grid items-start gap-10 lg:grid-cols-[18rem_minmax(0,1fr)] xl:grid-cols-[20rem_minmax(0,1fr)]">
-          <aside className="hidden lg:block">
-            <div className="sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-5">
+          <aside className="hidden self-start lg:sticky lg:top-6 lg:block">
+            <div className="max-h-[calc(100vh-3rem)] overflow-y-auto rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-5">
               {loading ? (
                 <p className="text-sm text-[var(--muted)]">
                   Loading
