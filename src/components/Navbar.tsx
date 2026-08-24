@@ -186,6 +186,22 @@ function Navbar() {
             Reviews
           </Link>
 
+          <Link
+            to="/iems"
+            onClick={closeDesktopMenus}
+            className="transition hover:text-[var(--foreground)]"
+          >
+            IEM's
+          </Link>
+
+          <Link
+            to="/brands"
+            onClick={closeDesktopMenus}
+            className="transition hover:text-[var(--foreground)]"
+          >
+            Brands
+          </Link>
+
           <div
             className="relative"
             onMouseEnter={() => {
@@ -230,24 +246,6 @@ function Navbar() {
             {desktopExploreOpen && (
               <div className="absolute left-1/2 top-full w-52 -translate-x-1/2 pt-2">
                 <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-2 shadow-xl">
-                  <DropdownLink
-                    to="/iems"
-                    title="IEM's"
-                    description="Browse IEM's"
-                    onClick={
-                      closeDesktopMenus
-                    }
-                  />
-
-                  <DropdownLink
-                    to="/brands"
-                    title="Brands"
-                    description="Browse brands"
-                    onClick={
-                      closeDesktopMenus
-                    }
-                  />
-
                   <DropdownLink
                     to="/artists"
                     title="Artists"
@@ -416,6 +414,22 @@ function Navbar() {
               Reviews
             </Link>
 
+            <MobileLink
+              to="/iems"
+              onClick={closeMobileMenu}
+              className="rounded-xl bg-[var(--accent)] px-4 py-3 font-semibold text-[var(--accent-foreground)] transition hover:bg-[var(--accent-hover)]"
+            >
+              IEM's
+            </MobileLink>
+
+            <MobileLink
+              to="/brands"
+              onClick={closeMobileMenu}
+              className="rounded-xl bg-[var(--accent)] px-4 py-3 font-semibold text-[var(--accent-foreground)] transition hover:bg-[var(--accent-hover)]"
+            >
+              Brands
+            </MobileLink>
+
             <div>
               <button
                 type="button"
@@ -445,24 +459,6 @@ function Navbar() {
 
               {mobileExploreOpen && (
                 <div className="ml-4 mt-1 flex flex-col gap-1 border-l border-[var(--border)] pl-3">
-                  <MobileDropdownLink
-                    to="/iems"
-                    onClick={
-                      closeMobileMenu
-                    }
-                  >
-                    IEM's
-                  </MobileDropdownLink>
-
-                  <MobileDropdownLink
-                    to="/brands"
-                    onClick={
-                      closeMobileMenu
-                    }
-                  >
-                    Brands
-                  </MobileDropdownLink>
-
                   <MobileDropdownLink
                     to="/artists"
                     onClick={
@@ -583,6 +579,31 @@ function DropdownLink({
       <p className="mt-0.5 text-xs leading-5 text-[var(--muted)]">
         {description}
       </p>
+    </Link>
+  )
+}
+
+function MobileLink({
+  to,
+  onClick,
+  children,
+  className = "",
+}: {
+  to: string
+  onClick: () => void
+  children: React.ReactNode
+  className?: string
+}) {
+  return (
+    <Link
+      to={to}
+      onClick={onClick}
+      className={
+        className ||
+        "rounded-xl px-4 py-3 font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
+      }
+    >
+      {children}
     </Link>
   )
 }
