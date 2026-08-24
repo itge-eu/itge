@@ -367,7 +367,7 @@ function ArtistPage() {
                     key={
                       reviewer.id
                     }
-                    to={`/reviewers/${reviewer.slug}`}
+                    to={`/members/${reviewer.slug}`}
                     className="group flex items-center gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 transition hover:-translate-y-0.5 hover:border-[var(--accent)]"
                   >
                     <ReviewerAvatar

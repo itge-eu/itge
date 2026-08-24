@@ -18,7 +18,7 @@ function ImpressionCard({
     `/iems/${impression.iem.slug}`
 
   const reviewerUrl =
-    `/reviewers/${impression.reviewer.slug}`
+    `/members/${impression.reviewer.slug}`
 
   const manufacturerUrl =
     `/brands/${impression.iem.manufacturer.slug}`

@@ -42,8 +42,8 @@ function App() {
         <Route path="/" element={<HomePage />} />
 		<Route path="/discover" element={<Navigate to="/reviews" replace />} />
 
-        <Route path="/reviews" element={<DiscoverPage />} />
-        <Route path="/reviews/:slug" element={<ReviewPage />} />
+    <Route path="/reviews" element={<DiscoverPage />} />
+    <Route path="/reviews/:slug" element={<ReviewPage />} />
 		
 		<Route path="/impressions" element={<ImpressionsPage />} />
 		<Route path="/impressions/:slug" element={<ImpressionPage />} />
@@ -57,8 +57,8 @@ function App() {
 		<Route path="/brands" element={<ManufacturersPage />} />
 		<Route path="/brands/:slug" element={<ManufacturerPage />} />
 		
-        <Route path="/reviewers" element={<ReviewersPage />} />
-        <Route path="/reviewers/:slug" element={<ReviewerPage />} />
+    <Route path="/members" element={<ReviewersPage />} />
+    <Route path="/members/:slug" element={<ReviewerPage />} />
 		
 		<Route path="/artists" element={<ArtistsPage />} />
 		<Route path="/artists/:slug" element={<ArtistPage />} />

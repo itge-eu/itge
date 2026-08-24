@@ -213,7 +213,7 @@ function HomePage() {
                   "Genres",
                   "IEMs",
                   "Brands",
-                  "Reviewers",
+                  "Members",
                 ].map((item) => (
                   <span
                     key={item}

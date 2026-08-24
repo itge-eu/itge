@@ -19,8 +19,8 @@ type ReviewSearchProps = {
 
 const TYPE_LABELS: Record<SearchSuggestionType, string> = {
   iem: "IEM",
-  manufacturer: "Manufacturer",
-  reviewer: "Reviewer",
+  manufacturer: "Brand",
+  reviewer: "Member",
   artist: "Artist",
   genre: "Genre",
 }
@@ -535,7 +535,7 @@ function getPluralTypeLabel(
     case "manufacturer":
       return "Brands"
     case "reviewer":
-      return "Reviewers"
+      return "Members"
     case "artist":
       return "Artists"
     case "genre":

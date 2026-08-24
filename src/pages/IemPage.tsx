@@ -320,8 +320,8 @@ function IemPage() {
               description={`${iem.reviewers.length} ${
                 iem.reviewers
                   .length === 1
-                  ? "reviewer has"
-                  : "reviewers have"
+                  ? "member has"
+                  : "members have"
               } published ${totalReviewerReviews} ${
                 totalReviewerReviews ===
                 1
@@ -337,7 +337,7 @@ function IemPage() {
                     key={
                       reviewer.slug
                     }
-                    to={`/reviewers/${reviewer.slug}`}
+                    to={`/members/${reviewer.slug}`}
                     className="group flex items-center gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 transition hover:-translate-y-0.5 hover:border-[var(--accent)]"
                   >
                     <ReviewerAvatar

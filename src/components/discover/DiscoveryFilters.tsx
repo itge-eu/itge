@@ -53,7 +53,7 @@ const FILTER_GROUPS: {
   },
   {
     type: "reviewer",
-    title: "Contributors",
+    title: "Members",
   },
 ]
 

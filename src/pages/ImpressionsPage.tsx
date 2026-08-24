@@ -167,7 +167,7 @@ function ImpressionsPage() {
                       event.target.value,
                     )
                   }
-                  placeholder="Search by IEM, manufacturer, reviewer or title…"
+                  placeholder="Search by IEM, manufacturer, member or title…"
                   className="w-full rounded-2xl border border-[var(--border)] bg-[var(--surface)] py-3.5 pl-12 pr-4 text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/15"
                 />
               </div>
@@ -211,7 +211,7 @@ function ImpressionsPage() {
 
             <p className="mt-2 text-sm text-[var(--muted)]">
               Try another IEM, manufacturer,
-              reviewer or title.
+              member or title.
             </p>
           </div>
         ) : (

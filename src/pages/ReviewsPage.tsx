@@ -455,7 +455,7 @@ function ReviewsPage() {
               </option>
 
               <option value="reviewer">
-                Reviewer A–Z
+                Member A–Z
               </option>
             </select>
           </div>

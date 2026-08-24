@@ -34,11 +34,11 @@ function ReviewerPage() {
   usePageMetadata({
     title: reviewer
       ? `${reviewer.name} | ITGE`
-      : "Reviewer | ITGE",
+      : "Member | ITGE",
 
     description: reviewer
       ? `Explore IEM reviews and listening impressions by ${reviewer.name} at ITGE.`
-      : "Meet the reviewers behind ITGE.",
+      : "Meet the members behind ITGE.",
   })
 
   useEffect(() => {
@@ -46,7 +46,7 @@ function ReviewerPage() {
 
     async function loadReviewer() {
       if (!slug) {
-        setError("No reviewer was specified.")
+        setError("No member was specified.")
         setLoading(false)
         return
       }
@@ -66,7 +66,7 @@ function ReviewerPage() {
 
         if (!cancelled) {
           setError(
-            "The reviewer could not be loaded.",
+            "The member could not be loaded.",
           )
         }
       } finally {
@@ -106,8 +106,8 @@ function ReviewerPage() {
   if (loading) {
     return (
       <PageState
-        eyebrow="Reviewer"
-        title="Loading reviewer…"
+        eyebrow="Member"
+        title="Loading member…"
       />
     )
   }
@@ -115,11 +115,11 @@ function ReviewerPage() {
   if (error) {
     return (
       <PageState
-        eyebrow="Reviewer"
-        title="Unable to load reviewer"
+        eyebrow="Member"
+        title="Unable to load member"
         message={error}
-        backTo="/reviewers"
-        backLabel="Back to reviewers"
+        backTo="/members"
+        backLabel="Back to members"
       />
     )
   }
@@ -128,9 +128,9 @@ function ReviewerPage() {
     return (
       <PageState
         eyebrow="404"
-        title="Reviewer not found"
-        message="The reviewer you were looking for doesn’t exist or is no longer available."
-        backTo="/reviewers"
+        title="Member not found"
+        message="The member you were looking for doesn’t exist or is no longer available."
+        backTo="/members"
         backLabel="Back to reviewers"
       />
     )
@@ -142,8 +142,8 @@ function ReviewerPage() {
         <Breadcrumbs
           items={[
             {
-              label: "Reviewers",
-              to: "/reviewers",
+              label: "Members",
+              to: "/members",
             },
             {
               label: reviewer.name,
@@ -170,8 +170,8 @@ function ReviewerPage() {
             <div className="flex-1">
               <p className="text-sm uppercase tracking-[0.2em] text-[var(--accent)]">
                 {reviewer.active
-                  ? "ITGE reviewer"
-                  : "Former ITGE reviewer"}
+                  ? "ITGE member"
+                  : "Former ITGE member"}
               </p>
 
               <h1 className="mt-3 text-4xl font-semibold tracking-tight sm:text-6xl">
@@ -261,13 +261,13 @@ function ReviewerPage() {
 
             <p className="mt-2 text-[var(--muted)]">
               Every published full review from this
-              reviewer.
+              member.
             </p>
           </div>
 
           {reviewer.reviews.length === 0 ? (
             <div className="mt-8 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
-              This reviewer has no published reviews
+              This member has no published reviews
               yet.
             </div>
           ) : (
@@ -291,13 +291,13 @@ function ReviewerPage() {
 
             <p className="mt-2 max-w-2xl text-[var(--muted)]">
               Short-form listening impressions published
-              by this reviewer.
+              by this member.
             </p>
           </div>
 
           {reviewer.impressions.length === 0 ? (
             <div className="mt-8 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
-              This reviewer has no published impressions
+              This member has no published impressions
               yet.
             </div>
           ) : (

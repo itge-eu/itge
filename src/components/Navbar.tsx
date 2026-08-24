@@ -187,6 +187,14 @@ function Navbar() {
           </Link>
 
           <Link
+            to="/members"
+            onClick={closeDesktopMenus}
+            className="transition hover:text-[var(--foreground)]"
+          >
+            Members
+          </Link>
+
+          <Link
             to="/iems"
             onClick={closeDesktopMenus}
             className="transition hover:text-[var(--foreground)]"
@@ -322,15 +330,6 @@ function Navbar() {
                   />
 
                   <DropdownLink
-                    to="/reviewers"
-                    title="Reviewers"
-                    description="Meet the ITGE reviewers"
-                    onClick={
-                      closeDesktopMenus
-                    }
-                  />
-
-                  <DropdownLink
                     to="/#join"
                     title="Join ITGE"
                     description="Become part of our tour group"
@@ -413,6 +412,14 @@ function Navbar() {
             >
               Reviews
             </Link>
+
+            <MobileLink
+              to="/members"
+              onClick={closeMobileMenu}
+              className="rounded-xl bg-[var(--accent)] px-4 py-3 font-semibold text-[var(--accent-foreground)] transition hover:bg-[var(--accent-hover)]"
+            >
+              Members
+            </MobileLink>
 
             <MobileLink
               to="/iems"
@@ -516,15 +523,6 @@ function Navbar() {
                     }
                   >
                     About us
-                  </MobileDropdownLink>
-
-                  <MobileDropdownLink
-                    to="/reviewers"
-                    onClick={
-                      closeMobileMenu
-                    }
-                  >
-                    Reviewers
                   </MobileDropdownLink>
 
                   <MobileDropdownLink

@@ -64,8 +64,8 @@ function IemCard({ iem }: IemCardProps) {
           <Metric
             label={
               iem.reviewerCount === 1
-                ? "Reviewer"
-                : "Reviewers"
+                ? "Member"
+                : "Members"
             }
             value={iem.reviewerCount.toString()}
           />

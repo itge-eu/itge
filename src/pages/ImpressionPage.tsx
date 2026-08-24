@@ -165,7 +165,7 @@ function ImpressionPage() {
               )}
 
               <Link
-                to={`/reviewers/${impression.reviewer.slug}`}
+                to={`/members/${impression.reviewer.slug}`}
                 className="mt-6 inline-flex items-center gap-3 rounded-xl transition hover:opacity-80"
               >
                 <ReviewerAvatar

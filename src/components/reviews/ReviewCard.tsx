@@ -15,7 +15,7 @@ function ReviewCard({
     `/iems/${review.iemSlug}`
 
   const reviewerUrl =
-    `/reviewers/${review.reviewerSlug}`
+    `/members/${review.reviewerSlug}`
 
   const reviewUrl =
     `/reviews/${review.slug}`

@@ -317,7 +317,7 @@ async function handleSaveDraft() {
   );
 
   if (!selectedReviewer || !selectedIem) {
-    setError("The selected reviewer or IEM could not be found.");
+    setError("The selected member or IEM could not be found.");
     return;
   }
 
@@ -566,7 +566,7 @@ async function handleSaveDraft() {
                   htmlFor="reviewer"
                   className="block text-sm font-semibold"
                 >
-                  ITGE reviewer
+                  ITGE member
                 </label>
                 <select
                   id="reviewer"
@@ -763,7 +763,7 @@ async function handleSaveDraft() {
 
               {!selectedReviewerId && (
                 <span className="text-sm text-[var(--muted)]">
-                  Select a reviewer before saving.
+                  Select a member before saving.
                 </span>
               )}
 

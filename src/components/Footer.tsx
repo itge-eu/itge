@@ -49,7 +49,7 @@ function Footer() {
             </Link>
 
             <Link
-              to="/reviewers"
+              to="/members"
               className="text-[var(--muted)] transition hover:text-[var(--accent)]"
             >
               Reviewers

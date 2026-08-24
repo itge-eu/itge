@@ -189,7 +189,7 @@ function ReviewPage() {
               )}
 
               <Link
-                to={`/reviewers/${review.reviewerSlug}`}
+                to={`/members/${review.reviewerSlug}`}
                 className="mt-5 inline-flex items-center gap-3 rounded-xl transition hover:opacity-80"
               >
                 <ReviewerAvatar

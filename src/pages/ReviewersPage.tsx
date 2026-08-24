@@ -31,9 +31,9 @@ function ReviewersPage() {
   )
 
   usePageMetadata({
-    title: "Reviewers | ITGE",
+    title: "Members | ITGE",
     description:
-      "Meet the reviewers behind IEM Tour Group Europe and explore their reviews and listening impressions.",
+      "Meet the members of IEM Tour Group Europe and explore their reviews and listening impressions.",
   })
 
   useEffect(() => {
@@ -52,13 +52,13 @@ function ReviewersPage() {
         }
       } catch (loadError) {
         console.error(
-          "Could not load reviewers:",
+          "Could not load members:",
           loadError,
         )
 
         if (!cancelled) {
           setError(
-            "The reviewers could not be loaded.",
+            "The members could not be loaded.",
           )
         }
       } finally {
@@ -84,19 +84,19 @@ function ReviewersPage() {
           </p>
 
           <h1 className="mt-4 text-5xl font-semibold">
-            Reviewers
+            Members
           </h1>
 
           <p className="mt-4 max-w-2xl text-lg leading-8 text-[var(--muted)]">
-            Meet the reviewers behind the ITGE review
-            library and short-form listening
-            impressions.
+            Meet the members of ITGE sharing reviews,
+            listening impressions and their experiences
+            with IEMs touring across Europe.
           </p>
         </header>
 
         {loading ? (
           <p className="text-[var(--muted)]">
-            Loading reviewers…
+            Loading members…
           </p>
         ) : error ? (
           <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-5 py-4">
@@ -104,7 +104,7 @@ function ReviewersPage() {
           </div>
         ) : reviewers.length === 0 ? (
           <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
-            No reviewers are available yet.
+            No members are available yet.
           </div>
         ) : (
           <>
@@ -115,12 +115,12 @@ function ReviewersPage() {
                 </p>
 
                 <h2 className="mt-2 text-3xl font-semibold tracking-tight">
-                  Active reviewers
+                  Active members
                 </h2>
 
                 <p className="mt-2 text-[var(--muted)]">
-                  Reviewers currently participating in
-                  ITGE.
+                  Members currently participating in
+                  IEM Tour Group Europe.
                 </p>
               </div>
 
@@ -144,14 +144,13 @@ function ReviewersPage() {
                   </p>
 
                   <h2 className="mt-2 text-3xl font-semibold tracking-tight">
-                    Former reviewers
+                    Former members
                   </h2>
 
                   <p className="mt-2 max-w-2xl text-[var(--muted)]">
-                    Previous members of the ITGE
-                    reviewer community. Their reviews
-                    and impressions remain part of our
-                    library.
+                    Previous members of ITGE. Their
+                    reviews and listening impressions
+                    remain part of our library.
                   </p>
                 </div>
 
@@ -184,7 +183,7 @@ function ReviewerCard({
 }) {
   return (
     <Link
-      to={`/reviewers/${reviewer.slug}`}
+      to={`/members/${reviewer.slug}`}
       className={`group rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 transition hover:-translate-y-1 hover:border-[var(--accent)] ${
         former ? "opacity-80" : ""
       }`}
@@ -225,7 +224,7 @@ function ReviewerCard({
 
           {former && (
             <p className="mt-2 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
-              Former reviewer
+              Former member
             </p>
           )}
         </div>
