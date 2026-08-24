@@ -202,7 +202,7 @@ function HomePage() {
 
                 <p className="mt-4 max-w-2xl text-lg leading-8 text-[var(--muted)]">
                   Browse reviews by the artists,
-                  genres, reviewers, manufacturers
+                  genres, reviewers, brands
                   and IEMs that matter to you.
                 </p>
               </div>
@@ -212,7 +212,7 @@ function HomePage() {
                   "Artists",
                   "Genres",
                   "IEMs",
-                  "Manufacturers",
+                  "Brands",
                   "Reviewers",
                 ].map((item) => (
                   <span
@@ -297,7 +297,7 @@ function HomePage() {
 
               <p className="mt-5 text-lg leading-8 text-[var(--muted)]">
                 ITGE connects experienced listeners,
-                tour organisers and manufacturers
+                tour organisers and brands
                 through structured European review
                 tours.
               </p>
@@ -345,7 +345,7 @@ function HomePage() {
 
               <article className="group flex min-h-80 flex-col rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[var(--accent)] dark:shadow-none">
                 <div className="text-sm font-medium uppercase tracking-[0.18em] text-[var(--accent)]">
-                  For manufacturers
+                  For brands
                 </div>
 
                 <h3 className="mt-4 text-3xl font-semibold tracking-tight">

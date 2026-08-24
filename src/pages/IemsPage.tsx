@@ -296,7 +296,7 @@ function IemsPage() {
               />
 
               <SummaryCard
-                label="Manufacturers"
+                label="Brands"
                 value={manufacturerCount.toString()}
               />
 

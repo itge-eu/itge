@@ -26,6 +26,7 @@ export type FeaturedReview = {
   reviewer: string
   reviewerSlug: string
   heroImageUrl: string | null
+  publishedAt?: string | null
 }
 
 export type FullReview = FeaturedReview & {
@@ -84,6 +85,7 @@ type ReviewRow = {
   pros?: string | null
   cons?: string | null
   hero_image_url: string | null
+  published_at: string | null
   reviewers:
     | {
         name: string
@@ -181,6 +183,7 @@ function mapReview(row: ReviewRow): FeaturedReview {
     brand: manufacturer.name,
 	manufacturerSlug: manufacturer.slug,
     heroImageUrl: row.hero_image_url,
+	publishedAt: row.published_at,
   }
 }
 
@@ -237,6 +240,7 @@ export async function getFeaturedReviews(): Promise<
       title,
       summary,
       hero_image_url,
+	  published_at,
       reviewers (
         name,
         slug
@@ -275,6 +279,7 @@ export async function getLatestReviews(
       title,
       summary,
       hero_image_url,
+	  published_at,
       reviewers (
         name,
         slug
@@ -453,6 +458,7 @@ export async function getAllReviews(
       title,
       summary,
       hero_image_url,
+	  published_at,
       reviewers (
         name,
         slug
@@ -532,6 +538,7 @@ export async function getReviewBySlug(
       cons,
       body,
       hero_image_url,
+	  published_at,
       reviewers (
         name,
         slug

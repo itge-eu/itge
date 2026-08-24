@@ -255,15 +255,6 @@ function Navbar() {
               <div className="absolute left-1/2 top-full w-52 -translate-x-1/2 pt-2">
                 <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-2 shadow-xl">
                   <DropdownLink
-                    to="/impressions"
-                    title="Impressions"
-                    description="Browse IEM impressions"
-                    onClick={
-                      closeDesktopMenus
-                    }
-                  />
-
-                  <DropdownLink
                     to="/artists"
                     title="Artists"
                     description="Browse listening references"
@@ -391,14 +382,6 @@ function Navbar() {
               : <MoonIcon />}
           </button>
 
-          <Link
-            to="/reviews"
-            onClick={closeDesktopMenus}
-            className="hidden rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[var(--accent-foreground)] transition hover:bg-[var(--accent-hover)] sm:inline-flex"
-          >
-            Browse reviews
-          </Link>
-
           <button
             type="button"
             onClick={() =>
@@ -489,15 +472,6 @@ function Navbar() {
               {mobileExploreOpen && (
                 <div className="ml-4 mt-1 flex flex-col gap-1 border-l border-[var(--border)] pl-3">
                   <MobileDropdownLink
-                    to="/impressions"
-                    onClick={
-                      closeMobileMenu
-                    }
-                  >
-                    Impressions
-                  </MobileDropdownLink>
-
-                  <MobileDropdownLink
                     to="/artists"
                     onClick={
                       closeMobileMenu
@@ -586,13 +560,6 @@ function Navbar() {
               )}
             </div>
 
-            <Link
-              to="/reviews"
-              onClick={closeMobileMenu}
-              className="mt-3 rounded-full bg-[var(--accent)] px-5 py-3 text-center font-semibold text-[var(--accent-foreground)] transition hover:bg-[var(--accent-hover)]"
-            >
-              Browse reviews
-            </Link>
           </div>
         </nav>
       )}

@@ -123,34 +123,8 @@ function ManufacturersPage() {
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <header>
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
-            Directory
-          </p>
-
-          <h1 className="mt-3 text-4xl font-semibold tracking-tight sm:text-6xl">
-            Brands
-          </h1>
-
-          <p className="mt-5 max-w-2xl text-lg leading-8 text-[var(--muted)]">
-            Explore brands
-            represented across the
-            ITGE library through full
-            reviews and short-form
-            listening impressions.
-          </p>
-
-          <p className="mt-4 text-sm text-[var(--muted)]">
-            {manufacturers.length}{" "}
-            {manufacturers.length ===
-            1
-              ? "brand"
-              : "brands"}
-          </p>
-        </header>
-
         {stores.length > 0 && (
-          <section className="mt-14">
+          <section>
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
                 Supporting ITGE

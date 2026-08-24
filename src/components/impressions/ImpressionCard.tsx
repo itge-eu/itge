@@ -21,7 +21,7 @@ function ImpressionCard({
     `/reviewers/${impression.reviewer.slug}`
 
   const manufacturerUrl =
-    `/manufacturers/${impression.iem.manufacturer.slug}`
+    `/brands/${impression.iem.manufacturer.slug}`
 
   const excerpt =
     impression.summary?.trim() ||

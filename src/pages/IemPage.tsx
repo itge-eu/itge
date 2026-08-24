@@ -184,7 +184,7 @@ function IemPage() {
               label:
                 iem.manufacturer
                   .name,
-              to: `/manufacturers/${iem.manufacturer.slug}`,
+              to: `/brands/${iem.manufacturer.slug}`,
             },
             {
               label: iem.model,
@@ -196,7 +196,7 @@ function IemPage() {
           <div className="grid lg:grid-cols-[minmax(0,1fr)_24rem]">
             <div className="p-8 sm:p-10">
               <Link
-                to={`/manufacturers/${iem.manufacturer.slug}`}
+                to={`/brands/${iem.manufacturer.slug}`}
                 className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)] transition hover:opacity-70"
               >
                 {

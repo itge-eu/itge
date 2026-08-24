@@ -353,7 +353,7 @@ function ReviewSearch({
             }
           }}
           onKeyDown={handleKeyDown}
-          placeholder="Search IEMs, manufacturers, artists, genres or reviewers..."
+          placeholder="Search IEMs, brands, artists, genres or reviewers..."
           autoComplete="off"
           spellCheck={false}
           aria-autocomplete="list"
@@ -533,7 +533,7 @@ function getPluralTypeLabel(
     case "iem":
       return "IEMs"
     case "manufacturer":
-      return "Manufacturers"
+      return "Brands"
     case "reviewer":
       return "Reviewers"
     case "artist":

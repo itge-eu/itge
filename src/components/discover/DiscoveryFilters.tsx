@@ -41,7 +41,7 @@ const FILTER_GROUPS: {
   },
   {
     type: "manufacturer",
-    title: "Manufacturers",
+    title: "Brands",
   },
   {
     type: "artist",

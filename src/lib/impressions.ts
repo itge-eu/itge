@@ -245,6 +245,26 @@ function mapGenres(
   })
 }
 
+export type ImpressionFilters = {
+  artistSlug?: string
+  genreSlug?: string
+  iemName?: string
+  manufacturerName?: string
+  reviewerName?: string
+}
+
+export type ImpressionsResult = {
+  impressions: ImpressionSummary[]
+}
+
+function normalizeValue(
+  value: string,
+): string {
+  return value
+    .trim()
+    .toLocaleLowerCase()
+}
+
 export async function getAllImpressions(): Promise<
   ImpressionSummary[]
 > {
@@ -290,6 +310,301 @@ export async function getAllImpressions(): Promise<
     (data ?? []) as unknown as ImpressionRow[]
 
   return rows.map(mapImpression)
+}
+
+export async function getFilteredAllImpressions(
+  filters: ImpressionFilters = {},
+): Promise<ImpressionsResult> {
+  const artistSlug =
+    filters.artistSlug?.trim() || null
+
+  const genreSlug =
+    filters.genreSlug?.trim() || null
+
+  const iemName =
+    filters.iemName?.trim() || null
+
+  const manufacturerName =
+    filters.manufacturerName?.trim() || null
+
+  const reviewerName =
+    filters.reviewerName?.trim() || null
+
+  let artistImpressionIds:
+    | number[]
+    | null = null
+
+  let genreImpressionIds:
+    | number[]
+    | null = null
+
+  if (artistSlug) {
+    const {
+      data: artistData,
+      error: artistError,
+    } =
+      await supabase
+        .from("artists")
+        .select("id")
+        .eq(
+          "slug",
+          artistSlug,
+        )
+        .maybeSingle()
+
+    if (artistError) {
+      throw artistError
+    }
+
+    if (!artistData) {
+      return {
+        impressions: [],
+      }
+    }
+
+    const {
+      data: relationData,
+      error: relationError,
+    } =
+      await supabase
+        .from(
+          "impression_artists",
+        )
+        .select(
+          "impression_id",
+        )
+        .eq(
+          "artist_id",
+          artistData.id,
+        )
+
+    if (relationError) {
+      throw relationError
+    }
+
+    artistImpressionIds =
+      (
+        relationData ?? []
+      ).map(
+        (relation) =>
+          Number(
+            relation.impression_id,
+          ),
+      )
+  }
+
+  if (genreSlug) {
+    const {
+      data: genreData,
+      error: genreError,
+    } =
+      await supabase
+        .from("genres")
+        .select("id")
+        .eq(
+          "slug",
+          genreSlug,
+        )
+        .maybeSingle()
+
+    if (genreError) {
+      throw genreError
+    }
+
+    if (!genreData) {
+      return {
+        impressions: [],
+      }
+    }
+
+    const {
+      data: relationData,
+      error: relationError,
+    } =
+      await supabase
+        .from(
+          "impression_genres",
+        )
+        .select(
+          "impression_id",
+        )
+        .eq(
+          "genre_id",
+          genreData.id,
+        )
+
+    if (relationError) {
+      throw relationError
+    }
+
+    genreImpressionIds =
+      (
+        relationData ?? []
+      ).map(
+        (relation) =>
+          Number(
+            relation.impression_id,
+          ),
+      )
+  }
+
+  let impressionIds:
+    | number[]
+    | null = null
+
+  if (
+    artistImpressionIds &&
+    genreImpressionIds
+  ) {
+    const genreIdSet =
+      new Set(
+        genreImpressionIds,
+      )
+
+    impressionIds =
+      artistImpressionIds.filter(
+        (impressionId) =>
+          genreIdSet.has(
+            impressionId,
+          ),
+      )
+  } else if (
+    artistImpressionIds
+  ) {
+    impressionIds =
+      artistImpressionIds
+  } else if (
+    genreImpressionIds
+  ) {
+    impressionIds =
+      genreImpressionIds
+  }
+
+  if (
+    impressionIds &&
+    impressionIds.length === 0
+  ) {
+    return {
+      impressions: [],
+    }
+  }
+
+  let query =
+    supabase
+      .from("impressions")
+      .select(`
+        id,
+        slug,
+        title,
+        summary,
+        body,
+        hero_image_url,
+        published_at,
+
+        reviewers (
+          id,
+          name,
+          slug
+        ),
+
+        iems (
+          id,
+          model,
+          slug,
+
+          manufacturers (
+            id,
+            name,
+            slug
+          )
+        )
+      `)
+      .eq(
+        "published",
+        true,
+      )
+      .order(
+        "published_at",
+        {
+          ascending: false,
+        },
+      )
+
+  if (impressionIds) {
+    query =
+      query.in(
+        "id",
+        impressionIds,
+      )
+  }
+
+  const {
+    data,
+    error,
+  } = await query
+
+  if (error) {
+    throw error
+  }
+
+  const rows =
+    (
+      data ?? []
+    ) as unknown as ImpressionRow[]
+
+  const mappedImpressions =
+    rows.map(
+      mapImpression,
+    )
+
+  const impressions =
+    mappedImpressions.filter(
+      (impression) => {
+        if (
+          iemName &&
+          normalizeValue(
+            impression.iem.model,
+          ) !==
+            normalizeValue(
+              iemName,
+            )
+        ) {
+          return false
+        }
+
+        if (
+          manufacturerName &&
+          normalizeValue(
+            impression.iem
+              .manufacturer.name,
+          ) !==
+            normalizeValue(
+              manufacturerName,
+            )
+        ) {
+          return false
+        }
+
+        if (
+          reviewerName &&
+          normalizeValue(
+            impression.reviewer
+              .name,
+          ) !==
+            normalizeValue(
+              reviewerName,
+            )
+        ) {
+          return false
+        }
+
+        return true
+      },
+    )
+
+  return {
+    impressions,
+  }
 }
 
 export async function getImpressionBySlug(

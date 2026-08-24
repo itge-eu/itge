@@ -136,7 +136,7 @@ function ReviewPage() {
         />
         <header className="border-b border-[var(--border)] pb-12">
           <Link
-            to={`/manufacturers/${review.manufacturerSlug}`}
+            to={`/brands/${review.manufacturerSlug}`}
             className="inline-block text-sm uppercase tracking-[0.2em] text-[var(--accent)] transition hover:opacity-70"
           >
             {review.brand}

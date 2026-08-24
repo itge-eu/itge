@@ -49,7 +49,7 @@ function ReviewCard({
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
                 <Link
-                  to={`/manufacturers/${review.manufacturerSlug}`}
+                  to={`/brands/${review.manufacturerSlug}`}
                   className="pointer-events-auto relative z-20 text-sm uppercase tracking-widest text-[var(--accent)] transition hover:opacity-70"
                 >
                   {review.brand}
@@ -106,7 +106,7 @@ function ReviewCard({
   
           <div className="min-w-0 flex-1">
             <Link
-              to={`/manufacturers/${review.manufacturerSlug}`}
+              to={`/brands/${review.manufacturerSlug}`}
               className="pointer-events-auto relative z-20 text-sm uppercase tracking-widest text-[var(--accent)] transition hover:opacity-70"
             >
               {review.brand}

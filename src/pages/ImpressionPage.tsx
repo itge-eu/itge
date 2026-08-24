@@ -141,7 +141,7 @@ function ImpressionPage() {
           </p>
 
           <Link
-            to={`/manufacturers/${impression.iem.manufacturer.slug}`}
+            to={`/brands/${impression.iem.manufacturer.slug}`}
             className="mt-4 inline-block text-sm uppercase tracking-[0.18em] text-[var(--accent)] transition hover:opacity-70"
           >
             {impression.iem.manufacturer.name}
