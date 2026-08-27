@@ -345,7 +345,7 @@ function HomePage() {
                 className="text-sm font-medium text-[var(--accent)] transition hover:opacity-75"
               >
                 Browse all
-                coverage →
+                reviews →
               </Link>
             </div>
           </div>
