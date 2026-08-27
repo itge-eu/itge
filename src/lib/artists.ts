@@ -39,8 +39,8 @@ export type ArtistIemSummary = {
   model: string
   slug: string
 
-  manufacturerName: string
-  manufacturerSlug: string
+  brandName: string
+  brandSlug: string
 
   reviewCount: number
   impressionCount: number
@@ -124,7 +124,7 @@ type ArtistDetailReviewRow = {
         model: string
         slug: string
 
-        manufacturers:
+        brands:
           | {
               id: number
               name: string
@@ -142,7 +142,7 @@ type ArtistDetailReviewRow = {
         model: string
         slug: string
 
-        manufacturers:
+        brands:
           | {
               id: number
               name: string
@@ -186,7 +186,7 @@ type ArtistDetailImpressionRow = {
         model: string
         slug: string
 
-        manufacturers:
+        brands:
           | {
               id: number
               name: string
@@ -204,7 +204,7 @@ type ArtistDetailImpressionRow = {
         model: string
         slug: string
 
-        manufacturers:
+        brands:
           | {
               id: number
               name: string
@@ -243,15 +243,15 @@ function mapArtistReview(
       row.iems,
     )
 
-  const manufacturer =
+  const brand =
     getSingleRelation(
-      iem?.manufacturers,
+      iem?.brands,
     )
 
   if (
     !reviewer ||
     !iem ||
-    !manufacturer
+    !brand
   ) {
     throw new Error(
       `Review ${row.id} has incomplete artist data`,
@@ -265,9 +265,9 @@ function mapArtistReview(
     title: row.title,
     summary: row.summary,
 
-    brand: manufacturer.name,
-    manufacturerSlug:
-      manufacturer.slug,
+    brand: brand.name,
+    brandSlug:
+      brand.slug,
 
     model: iem.model,
     iemSlug: iem.slug,
@@ -294,15 +294,15 @@ function mapArtistImpression(
       row.iems,
     )
 
-  const manufacturer =
+  const brand =
     getSingleRelation(
-      iem?.manufacturers,
+      iem?.brands,
     )
 
   if (
     !reviewer ||
     !iem ||
-    !manufacturer
+    !brand
   ) {
     throw new Error(
       `Impression ${row.id} has incomplete artist data`,
@@ -333,14 +333,14 @@ function mapArtistImpression(
       model: iem.model,
       slug: iem.slug,
 
-      manufacturer: {
+      brand: {
         id: Number(
-          manufacturer.id,
+          brand.id,
         ),
         name:
-          manufacturer.name,
+          brand.name,
         slug:
-          manufacturer.slug,
+          brand.slug,
       },
     },
   }
@@ -774,7 +774,7 @@ export async function getArtistBySlug(
               model,
               slug,
 
-              manufacturers (
+              brands (
                 id,
                 name,
                 slug
@@ -824,7 +824,7 @@ export async function getArtistBySlug(
               model,
               slug,
 
-              manufacturers (
+              brands (
                 id,
                 name,
                 slug
@@ -901,15 +901,15 @@ export async function getArtistBySlug(
         row.iems,
       )
 
-    const manufacturer =
+    const brand =
       getSingleRelation(
-        iem?.manufacturers,
+        iem?.brands,
       )
 
     if (
       !reviewer ||
       !iem ||
-      !manufacturer
+      !brand
     ) {
       return
     }
@@ -933,11 +933,11 @@ export async function getArtistBySlug(
           model: iem.model,
           slug: iem.slug,
 
-          manufacturerName:
-            manufacturer.name,
+          brandName:
+            brand.name,
 
-          manufacturerSlug:
-            manufacturer.slug,
+          brandSlug:
+            brand.slug,
 
           reviewCount: 1,
           impressionCount: 0,
@@ -989,15 +989,15 @@ export async function getArtistBySlug(
         row.iems,
       )
 
-    const manufacturer =
+    const brand =
       getSingleRelation(
-        iem?.manufacturers,
+        iem?.brands,
       )
 
     if (
       !reviewer ||
       !iem ||
-      !manufacturer
+      !brand
     ) {
       return
     }
@@ -1022,11 +1022,11 @@ export async function getArtistBySlug(
           model: iem.model,
           slug: iem.slug,
 
-          manufacturerName:
-            manufacturer.name,
+          brandName:
+            brand.name,
 
-          manufacturerSlug:
-            manufacturer.slug,
+          brandSlug:
+            brand.slug,
 
           reviewCount: 0,
           impressionCount: 1,

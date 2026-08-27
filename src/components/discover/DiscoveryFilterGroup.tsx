@@ -178,7 +178,7 @@ function FilterTypeIcon({
         </svg>
       )
 
-    case "manufacturer":
+    case "brand":
       return (
         <svg {...commonProps}>
           <path d="M3 21h18" />

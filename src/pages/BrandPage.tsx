@@ -12,26 +12,26 @@ import IemCard from "../components/iems/IemCard"
 import ReviewGrid from "../components/reviews/ReviewGrid"
 import ImpressionCard from "../components/impressions/ImpressionCard"
 import ReviewerAvatar from "../components/reviewers/ReviewerAvatar"
-import ManufacturerLogo from "../components/manufacturers/ManufacturerLogo"
+import BrandLogo from "../components/brands/BrandLogo"
 import Breadcrumbs from "../components/navigation/Breadcrumbs"
 import PageState from "../components/layout/PageState"
 
 import {
-  getManufacturerBySlug,
-  type ManufacturerProfile,
-} from "../lib/manufacturers"
+  getBrandBySlug,
+  type BrandProfile,
+} from "../lib/brands"
 
 import usePageMetadata from "../hooks/usePageMetadata"
 
-function ManufacturerPage() {
+function BrandPage() {
   const { slug } =
     useParams<{ slug: string }>()
 
   const [
-    manufacturer,
-    setManufacturer,
+    brand,
+    setBrand,
   ] =
-    useState<ManufacturerProfile | null>(
+    useState<BrandProfile | null>(
       null,
     )
 
@@ -42,19 +42,19 @@ function ManufacturerPage() {
     useState<string | null>(null)
 
   usePageMetadata({
-    title: manufacturer
-      ? `${manufacturer.name} | ITGE`
+    title: brand
+      ? `${brand.name} | ITGE`
       : "Brand | ITGE",
 
-    description: manufacturer
-      ? `Explore ${manufacturer.name} IEMs, reviews and listening impressions at ITGE.`
+    description: brand
+      ? `Explore ${brand.name} IEMs, reviews and listening impressions at ITGE.`
       : "Explore IEM brands covered by ITGE.",
   })
 
   useEffect(() => {
     let cancelled = false
 
-    async function loadManufacturer() {
+    async function loadBrand() {
       if (!slug) {
         setError(
           "No brand was specified.",
@@ -68,12 +68,12 @@ function ManufacturerPage() {
 
       try {
         const result =
-          await getManufacturerBySlug(
+          await getBrandBySlug(
             slug,
           )
 
         if (!cancelled) {
-          setManufacturer(
+          setBrand(
             result,
           )
         }
@@ -95,7 +95,7 @@ function ManufacturerPage() {
       }
     }
 
-    void loadManufacturer()
+    void loadBrand()
 
     return () => {
       cancelled = true
@@ -105,14 +105,14 @@ function ManufacturerPage() {
   const totalIemCoverage =
     useMemo(
       () =>
-        manufacturer?.iems.reduce(
+        brand?.iems.reduce(
           (total, iem) =>
             total +
             (iem.coverageCount ??
               iem.reviewCount),
           0,
         ) ?? 0,
-      [manufacturer],
+      [brand],
     )
 
   if (loading) {
@@ -136,7 +136,7 @@ function ManufacturerPage() {
     )
   }
 
-  if (!manufacturer) {
+  if (!brand) {
     return (
       <PageState
         eyebrow="404"
@@ -160,7 +160,7 @@ function ManufacturerPage() {
             },
             {
               label:
-                manufacturer.name,
+                brand.name,
             },
           ]}
         />
@@ -173,12 +173,12 @@ function ManufacturerPage() {
               </p>
 
               <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-6xl">
-                {manufacturer.name}
+                {brand.name}
               </h1>
 
               <p className="mt-5 max-w-2xl text-lg leading-8 text-[var(--muted)]">
                 Explore{" "}
-                {manufacturer.name}{" "}
+                {brand.name}{" "}
                 IEMs represented in
                 the ITGE library,
                 together with full
@@ -188,10 +188,10 @@ function ManufacturerPage() {
                 them.
               </p>
 
-              {manufacturer.website && (
+              {brand.website && (
                 <a
                   href={
-                    manufacturer.website
+                    brand.website
                   }
                   target="_blank"
                   rel="noreferrer"
@@ -208,31 +208,31 @@ function ManufacturerPage() {
               <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
                 <StatCard
                   label="IEMs"
-                  value={manufacturer.iems.length.toString()}
+                  value={brand.iems.length.toString()}
                 />
 
                 <StatCard
                   label="Reviews"
-                  value={manufacturer.reviewCount.toString()}
+                  value={brand.reviewCount.toString()}
                 />
 
                 <StatCard
                   label="Impressions"
-                  value={manufacturer.impressionCount.toString()}
+                  value={brand.impressionCount.toString()}
                 />
 
                 <StatCard
                   label="Contributors"
-                  value={manufacturer.contributorCount.toString()}
+                  value={brand.contributorCount.toString()}
                 />
 
                 <StatCard
                   label="Avg. review"
                   value={
-                    manufacturer.averageRating ==
+                    brand.averageRating ==
                     null
                       ? "—"
-                      : `${manufacturer.averageRating.toFixed(
+                      : `${brand.averageRating.toFixed(
                           1,
                         )}/5`
                   }
@@ -240,14 +240,14 @@ function ManufacturerPage() {
               </div>
             </div>
 
-            {/* Manufacturer logo hero */}
+            {/* Brand logo hero */}
             <div className="flex min-h-72 items-center justify-center border-t border-[var(--border)] bg-[var(--background)] p-10 sm:p-12 lg:min-h-0 lg:border-l lg:border-t-0 lg:p-14">
-              <ManufacturerLogo
+              <BrandLogo
                 name={
-                  manufacturer.name
+                  brand.name
                 }
                 slug={
-                  manufacturer.slug
+                  brand.slug
                 }
                 size="hero"
                 eager
@@ -259,13 +259,13 @@ function ManufacturerPage() {
         <section className="mt-14">
           <SectionHeader
             eyebrow="Product coverage"
-            title={`${manufacturer.name} IEMs`}
+            title={`${brand.name} IEMs`}
             description={
-              manufacturer.iems
+              brand.iems
                 .length === 0
                 ? "No IEMs with published coverage are available yet."
-                : `${manufacturer.iems.length} ${
-                    manufacturer.iems
+                : `${brand.iems.length} ${
+                    brand.iems
                       .length === 1
                       ? "IEM is"
                       : "IEMs are"
@@ -278,7 +278,7 @@ function ManufacturerPage() {
             }
           />
 
-          {manufacturer.iems
+          {brand.iems
             .length === 0 ? (
             <EmptyPanel>
               No covered IEMs from
@@ -287,7 +287,7 @@ function ManufacturerPage() {
             </EmptyPanel>
           ) : (
             <div className="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-              {manufacturer.iems.map(
+              {brand.iems.map(
                 (iem) => (
                   <IemCard
                     key={iem.id}
@@ -299,22 +299,22 @@ function ManufacturerPage() {
           )}
         </section>
 
-        {manufacturer.contributors
+        {brand.contributors
           .length > 0 && (
           <section className="mt-14">
             <SectionHeader
               eyebrow="Community"
               title="Contributors"
-              description={`${manufacturer.contributorCount} ${
-                manufacturer.contributorCount ===
+              description={`${brand.contributorCount} ${
+                brand.contributorCount ===
                 1
                   ? "person has"
                   : "people have"
-              } published coverage of ${manufacturer.name}.`}
+              } published coverage of ${brand.name}.`}
             />
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {manufacturer.contributors.map(
+              {brand.contributors.map(
                 (
                   contributor,
                 ) => (
@@ -371,16 +371,16 @@ function ManufacturerPage() {
         <section className="mt-14">
           <SectionHeader
             eyebrow="Full reviews"
-            title={`Recent ${manufacturer.name} reviews`}
+            title={`Recent ${brand.name} reviews`}
             description={
-              manufacturer.latestReviews
+              brand.latestReviews
                 .length === 0
                 ? "No published reviews are available yet."
-                : `The latest published ITGE reviews covering ${manufacturer.name} IEMs.`
+                : `The latest published ITGE reviews covering ${brand.name} IEMs.`
             }
           />
 
-          {manufacturer.latestReviews
+          {brand.latestReviews
             .length === 0 ? (
             <EmptyPanel>
               No published reviews
@@ -390,7 +390,7 @@ function ManufacturerPage() {
             <div className="mt-8">
               <ReviewGrid
                 reviews={
-                  manufacturer.latestReviews
+                  brand.latestReviews
                 }
               />
             </div>
@@ -400,16 +400,16 @@ function ManufacturerPage() {
         <section className="mt-14 border-t border-[var(--border)] pt-14">
           <SectionHeader
             eyebrow="Listening notes"
-            title={`Recent ${manufacturer.name} impressions`}
+            title={`Recent ${brand.name} impressions`}
             description={
-              manufacturer.latestImpressions
+              brand.latestImpressions
                 .length === 0
                 ? "No published impressions are available yet."
-                : `The latest short-form listening impressions covering ${manufacturer.name} IEMs.`
+                : `The latest short-form listening impressions covering ${brand.name} IEMs.`
             }
           />
 
-          {manufacturer.latestImpressions
+          {brand.latestImpressions
             .length === 0 ? (
             <EmptyPanel>
               No published
@@ -418,7 +418,7 @@ function ManufacturerPage() {
             </EmptyPanel>
           ) : (
             <div className="mt-8 grid gap-6 lg:grid-cols-2">
-              {manufacturer.latestImpressions.map(
+              {brand.latestImpressions.map(
                 (
                   impression,
                 ) => (
@@ -498,4 +498,4 @@ function EmptyPanel({
   )
 }
 
-export default ManufacturerPage
+export default BrandPage

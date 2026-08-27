@@ -161,7 +161,7 @@ function AdminEditReviewPage() {
           ),
           iems (
             model,
-            manufacturers (
+            brands (
               name
             )
           )
@@ -311,21 +311,21 @@ function AdminEditReviewPage() {
         ? data.iems[0]
         : data.iems;
       
-      const manufacturerRelation = Array.isArray(iemRelation?.manufacturers)
-        ? iemRelation.manufacturers[0]
-        : iemRelation?.manufacturers;
+      const brandRelation = Array.isArray(iemRelation?.brands)
+        ? iemRelation.brands[0]
+        : iemRelation?.brands;
       
       const reviewerRelation = Array.isArray(data.reviewers)
         ? data.reviewers[0]
         : data.reviewers;
       
-      const manufacturerName =
-        manufacturerRelation?.name?.trim() ?? "";
+      const brandName =
+        brandRelation?.name?.trim() ?? "";
       
       const modelName =
         iemRelation?.model?.trim() ?? "";
       
-      const iemName = [manufacturerName, modelName]
+      const iemName = [brandName, modelName]
         .filter(Boolean)
         .join(" ");
         

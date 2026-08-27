@@ -8,16 +8,16 @@ export const MANUFACTURER_LOGO_EXTENSIONS = [
   "svg",
 ] as const
 
-export type ManufacturerLogoExtension =
+export type BrandLogoExtension =
   (typeof MANUFACTURER_LOGO_EXTENSIONS)[number]
 
-export function getManufacturerLogoUrl(
+export function getBrandLogoUrl(
   slug: string,
-  extension: ManufacturerLogoExtension,
+  extension: BrandLogoExtension,
 ) {
   const { data } =
     supabase.storage
-      .from("manufacturer-avatars")
+      .from("brand-avatars")
       .getPublicUrl(
         `avatars/${slug}.${extension}`,
       )

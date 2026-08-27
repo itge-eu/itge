@@ -12,7 +12,7 @@ import type {
   IemDirectoryItem,
 } from "./iems"
 
-export type ManufacturerContributor = {
+export type BrandContributor = {
   name: string
   slug: string
   reviewCount: number
@@ -20,7 +20,7 @@ export type ManufacturerContributor = {
   coverageCount: number
 }
 
-export type ManufacturerProfile = {
+export type BrandProfile = {
   id: number
   name: string
   slug: string
@@ -34,14 +34,14 @@ export type ManufacturerProfile = {
   coverageCount: number
   contributorCount: number
 
-  contributors: ManufacturerContributor[]
+  contributors: BrandContributor[]
   iems: IemDirectoryItem[]
 
   latestReviews: FeaturedReview[]
   latestImpressions: ImpressionSummary[]
 }
 
-export type ManufacturerDirectoryItem = {
+export type BrandDirectoryItem = {
   id: number
   name: string
   slug: string
@@ -52,14 +52,14 @@ export type ManufacturerDirectoryItem = {
   coverageCount: number
 }
 
-type ManufacturerRow = {
+type BrandRow = {
   id: number
   name: string
   slug: string
   website: string | null
 }
 
-type ManufacturerReviewRow = {
+type BrandReviewRow = {
   id: number
   slug: string
   rating: number
@@ -85,7 +85,7 @@ type ManufacturerReviewRow = {
         model: string
         slug: string
 
-        manufacturers:
+        brands:
           | {
               id: number
               name: string
@@ -103,7 +103,7 @@ type ManufacturerReviewRow = {
         model: string
         slug: string
 
-        manufacturers:
+        brands:
           | {
               id: number
               name: string
@@ -119,7 +119,7 @@ type ManufacturerReviewRow = {
     | null
 }
 
-type ManufacturerImpressionRow = {
+type BrandImpressionRow = {
   id: number
   slug: string
   title: string
@@ -148,7 +148,7 @@ type ManufacturerImpressionRow = {
         model: string
         slug: string
 
-        manufacturers:
+        brands:
           | {
               id: number
               name: string
@@ -166,7 +166,7 @@ type ManufacturerImpressionRow = {
         model: string
         slug: string
 
-        manufacturers:
+        brands:
           | {
               id: number
               name: string
@@ -208,7 +208,7 @@ function timestampValue(
 }
 
 function mapFeaturedReview(
-  row: ManufacturerReviewRow,
+  row: BrandReviewRow,
 ): FeaturedReview {
   const reviewer =
     getSingleRelation(
@@ -220,18 +220,18 @@ function mapFeaturedReview(
       row.iems,
     )
 
-  const manufacturer =
+  const brand =
     getSingleRelation(
-      iem?.manufacturers,
+      iem?.brands,
     )
 
   if (
     !reviewer ||
     !iem ||
-    !manufacturer
+    !brand
   ) {
     throw new Error(
-      `Review ${row.id} has incomplete manufacturer page data`,
+      `Review ${row.id} has incomplete brand page data`,
     )
   }
 
@@ -242,9 +242,9 @@ function mapFeaturedReview(
     title: row.title,
     summary: row.summary,
 
-    brand: manufacturer.name,
-    manufacturerSlug:
-      manufacturer.slug,
+    brand: brand.name,
+    brandSlug:
+      brand.slug,
 
     model: iem.model,
     iemSlug: iem.slug,
@@ -259,7 +259,7 @@ function mapFeaturedReview(
 }
 
 function mapImpression(
-  row: ManufacturerImpressionRow,
+  row: BrandImpressionRow,
 ): ImpressionSummary {
   const reviewer =
     getSingleRelation(
@@ -271,18 +271,18 @@ function mapImpression(
       row.iems,
     )
 
-  const manufacturer =
+  const brand =
     getSingleRelation(
-      iem?.manufacturers,
+      iem?.brands,
     )
 
   if (
     !reviewer ||
     !iem ||
-    !manufacturer
+    !brand
   ) {
     throw new Error(
-      `Impression ${row.id} has incomplete manufacturer page data`,
+      `Impression ${row.id} has incomplete brand page data`,
     )
   }
 
@@ -308,23 +308,23 @@ function mapImpression(
       model: iem.model,
       slug: iem.slug,
     
-      manufacturer: {
-        id: Number(manufacturer.id),
-        name: manufacturer.name,
-        slug: manufacturer.slug,
+      brand: {
+        id: Number(brand.id),
+        name: brand.name,
+        slug: brand.slug,
       },
     },
   }
 }
 
 function collectContributors(
-  reviewRows: ManufacturerReviewRow[],
-  impressionRows: ManufacturerImpressionRow[],
-): ManufacturerContributor[] {
+  reviewRows: BrandReviewRow[],
+  impressionRows: BrandImpressionRow[],
+): BrandContributor[] {
   const contributors =
     new Map<
       string,
-      ManufacturerContributor
+      BrandContributor
     >()
 
   reviewRows.forEach((row) => {
@@ -418,22 +418,22 @@ function collectContributors(
 }
 
 function collectIems(
-  reviewRows: ManufacturerReviewRow[],
-  impressionRows: ManufacturerImpressionRow[],
+  reviewRows: BrandReviewRow[],
+  impressionRows: BrandImpressionRow[],
 ): IemDirectoryItem[] {
   type CollectedIem = {
     id: number
     model: string
     slug: string
 
-    manufacturer: {
+    brand: {
       id: number
       name: string
       slug: string
     }
 
-    reviews: ManufacturerReviewRow[]
-    impressions: ManufacturerImpressionRow[]
+    reviews: BrandReviewRow[]
+    impressions: BrandImpressionRow[]
   }
 
   const iems =
@@ -447,7 +447,7 @@ function collectIems(
       id: number
       model: string
       slug: string
-      manufacturers:
+      brands:
         | {
             id: number
             name: string
@@ -461,12 +461,12 @@ function collectIems(
         | null
     },
   ): CollectedIem | null {
-    const manufacturer =
+    const brand =
       getSingleRelation(
-        iem.manufacturers,
+        iem.brands,
       )
 
-    if (!manufacturer) {
+    if (!brand) {
       return null
     }
 
@@ -486,14 +486,14 @@ function collectIems(
         model: iem.model,
         slug: iem.slug,
 
-        manufacturer: {
+        brand: {
           id: Number(
-            manufacturer.id,
+            brand.id,
           ),
           name:
-            manufacturer.name,
+            brand.name,
           slug:
-            manufacturer.slug,
+            brand.slug,
         },
 
         reviews: [],
@@ -662,8 +662,8 @@ function collectIems(
         model: iem.model,
         slug: iem.slug,
 
-        manufacturer:
-          iem.manufacturer,
+        brand:
+          iem.brand,
 
         heroImageUrl,
 
@@ -738,9 +738,9 @@ function calculateAverageRating(
   )
 }
 
-export async function getManufacturerBySlug(
+export async function getBrandBySlug(
   slug: string,
-): Promise<ManufacturerProfile | null> {
+): Promise<BrandProfile | null> {
   const normalizedSlug =
     slug.trim()
 
@@ -749,10 +749,10 @@ export async function getManufacturerBySlug(
   }
 
   const {
-    data: manufacturerData,
-    error: manufacturerError,
+    data: brandData,
+    error: brandError,
   } = await supabase
-    .from("manufacturers")
+    .from("brands")
     .select(`
       id,
       name,
@@ -765,16 +765,16 @@ export async function getManufacturerBySlug(
     )
     .maybeSingle()
 
-  if (manufacturerError) {
-    throw manufacturerError
+  if (brandError) {
+    throw brandError
   }
 
-  if (!manufacturerData) {
+  if (!brandData) {
     return null
   }
 
-  const manufacturer =
-    manufacturerData as ManufacturerRow
+  const brand =
+    brandData as BrandRow
 
   const [
     reviewsResult,
@@ -803,7 +803,7 @@ export async function getManufacturerBySlug(
           model,
           slug,
 
-          manufacturers!inner (
+          brands!inner (
             id,
             name,
             slug
@@ -811,9 +811,9 @@ export async function getManufacturerBySlug(
         )
       `)
       .eq(
-        "iems.manufacturer_id",
+        "iems.brand_id",
         Number(
-          manufacturer.id,
+          brand.id,
         ),
       )
       .eq(
@@ -850,7 +850,7 @@ export async function getManufacturerBySlug(
           model,
           slug,
 
-          manufacturers!inner (
+          brands!inner (
             id,
             name,
             slug
@@ -858,9 +858,9 @@ export async function getManufacturerBySlug(
         )
       `)
       .eq(
-        "iems.manufacturer_id",
+        "iems.brand_id",
         Number(
-          manufacturer.id,
+          brand.id,
         ),
       )
       .eq(
@@ -885,11 +885,11 @@ export async function getManufacturerBySlug(
 
   const reviewRows =
     (reviewsResult.data ??
-      []) as unknown as ManufacturerReviewRow[]
+      []) as unknown as BrandReviewRow[]
 
   const impressionRows =
     (impressionsResult.data ??
-      []) as unknown as ManufacturerImpressionRow[]
+      []) as unknown as BrandImpressionRow[]
 
   const reviews =
     reviewRows.map(
@@ -928,12 +928,12 @@ export async function getManufacturerBySlug(
 
   return {
     id: Number(
-      manufacturer.id,
+      brand.id,
     ),
-    name: manufacturer.name,
-    slug: manufacturer.slug,
+    name: brand.name,
+    slug: brand.slug,
     website:
-      manufacturer.website,
+      brand.website,
 
     heroImageUrl,
 
@@ -966,14 +966,14 @@ export async function getManufacturerBySlug(
   }
 }
 
-export async function getManufacturers(): Promise<
-  ManufacturerDirectoryItem[]
+export async function getBrands(): Promise<
+  BrandDirectoryItem[]
 > {
   const {
     data,
     error,
   } = await supabase
-    .from("manufacturers")
+    .from("brands")
     .select(`
       id,
       name,
@@ -1027,9 +1027,9 @@ export async function getManufacturers(): Promise<
     }[]
 
   return rows
-    .map((manufacturer) => {
+    .map((brand) => {
       const iems =
-        manufacturer.iems ??
+        brand.iems ??
         []
 
       const coveredIems =
@@ -1090,12 +1090,12 @@ export async function getManufacturers(): Promise<
 
       return {
         id: Number(
-          manufacturer.id,
+          brand.id,
         ),
         name:
-          manufacturer.name,
+          brand.name,
         slug:
-          manufacturer.slug,
+          brand.slug,
 
         iemCount:
           coveredIems.length,
@@ -1110,8 +1110,8 @@ export async function getManufacturers(): Promise<
       }
     })
     .filter(
-      (manufacturer) =>
-        manufacturer.coverageCount >
+      (brand) =>
+        brand.coverageCount >
         0,
     )
     .sort(

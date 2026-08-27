@@ -43,7 +43,7 @@ type ReviewRow = {
         model: string
         slug: string
 
-        manufacturers:
+        brands:
           | {
               name: string
               slug: string
@@ -58,7 +58,7 @@ type ReviewRow = {
         model: string
         slug: string
 
-        manufacturers:
+        brands:
           | {
               name: string
               slug: string
@@ -87,11 +87,11 @@ function mapReview(
 ): FeaturedReview {
   const iem = getSingleRelation(row.iems)
 
-  const manufacturer = getSingleRelation(
-    iem?.manufacturers,
+  const brand = getSingleRelation(
+    iem?.brands,
   )
 
-  if (!iem || !manufacturer) {
+  if (!iem || !brand) {
     throw new Error(
       `Review ${row.id} has incomplete data.`,
     )
@@ -103,8 +103,8 @@ function mapReview(
     rating: Number(row.rating),
     title: row.title,
     summary: row.summary,
-    brand: manufacturer.name,
-    manufacturerSlug: manufacturer.slug,
+    brand: brand.name,
+    brandSlug: brand.slug,
     model: iem.model,
     iemSlug: iem.slug,
     reviewer: "",
@@ -293,7 +293,7 @@ export async function getReviewerBySlug(
         model,
         slug,
 
-        manufacturers (
+        brands (
           name,
           slug
         )

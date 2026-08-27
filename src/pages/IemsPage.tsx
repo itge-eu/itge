@@ -101,7 +101,7 @@ function IemsPage() {
           ? iems.filter(
               (iem) => {
                 const searchableText =
-                  `${iem.manufacturer.name} ${iem.model}`
+                  `${iem.brand.name} ${iem.model}`
                     .toLocaleLowerCase()
 
                 return searchableText.includes(
@@ -167,8 +167,8 @@ function IemsPage() {
             sort ===
             "alphabetical"
           ) {
-            return `${first.manufacturer.name} ${first.model}`.localeCompare(
-              `${second.manufacturer.name} ${second.model}`,
+            return `${first.brand.name} ${first.model}`.localeCompare(
+              `${second.brand.name} ${second.model}`,
             )
           }
 
@@ -207,8 +207,8 @@ function IemsPage() {
             return ratingDifference
           }
 
-          return `${first.manufacturer.name} ${first.model}`.localeCompare(
-            `${second.manufacturer.name} ${second.model}`,
+          return `${first.brand.name} ${first.model}`.localeCompare(
+            `${second.brand.name} ${second.model}`,
           )
         },
       )
@@ -218,14 +218,14 @@ function IemsPage() {
       sort,
     ])
 
-  const manufacturerCount =
+  const brandCount =
     useMemo(
       () =>
         new Set(
           iems.map(
             (iem) =>
               iem
-                .manufacturer
+                .brand
                 .id,
           ),
         ).size,
@@ -278,7 +278,7 @@ function IemsPage() {
             Browse every IEM
             represented in the ITGE
             library. Search by model
-            or manufacturer, then open
+            or brand, then open
             an IEM to explore its full
             reviews, listening
             impressions, contributors
@@ -297,7 +297,7 @@ function IemsPage() {
 
               <SummaryCard
                 label="Brands"
-                value={manufacturerCount.toString()}
+                value={brandCount.toString()}
               />
 
               <SummaryCard
@@ -336,7 +336,7 @@ function IemsPage() {
                         .value,
                     )
                   }
-                  placeholder="Search by IEM or manufacturer…"
+                  placeholder="Search by IEM or brand…"
                   className="w-full rounded-2xl border border-[var(--border)] bg-[var(--background)] py-3 pl-11 pr-4 text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--accent)]"
                 />
               </div>
@@ -468,7 +468,7 @@ function IemDirectoryCard({
             src={
               iem.heroImageUrl
             }
-            alt={`${iem.manufacturer.name} ${iem.model}`}
+            alt={`${iem.brand.name} ${iem.model}`}
             loading="lazy"
             className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.025]"
           />
@@ -482,7 +482,7 @@ function IemDirectoryCard({
       <div className="p-6">
         <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
           {
-            iem.manufacturer
+            iem.brand
               .name
           }
         </p>

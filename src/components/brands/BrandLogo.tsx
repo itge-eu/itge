@@ -4,24 +4,24 @@ import {
 } from "react"
 
 import {
-  getManufacturerLogoUrl,
+  getBrandLogoUrl,
   MANUFACTURER_LOGO_EXTENSIONS,
-} from "../../lib/manufacturerLogos"
+} from "../../lib/brandLogos"
 
-type ManufacturerLogoSize =
+type BrandLogoSize =
   | "card"
   | "hero"
 
-type ManufacturerLogoProps = {
+type BrandLogoProps = {
   name: string
   slug: string
-  size?: ManufacturerLogoSize
+  size?: BrandLogoSize
   className?: string
   eager?: boolean
 }
 
 const SIZE_CLASSES: Record<
-  ManufacturerLogoSize,
+  BrandLogoSize,
   string
 > = {
   card:
@@ -36,13 +36,13 @@ const SIZE_CLASSES: Record<
     "h-full w-full max-h-full max-w-full",
 }
 
-function ManufacturerLogo({
+function BrandLogo({
   name,
   slug,
   size = "card",
   className = "",
   eager = false,
-}: ManufacturerLogoProps) {
+}: BrandLogoProps) {
   const [
     extensionIndex,
     setExtensionIndex,
@@ -63,7 +63,7 @@ function ManufacturerLogo({
 
   return (
     <img
-      src={getManufacturerLogoUrl(
+      src={getBrandLogoUrl(
         slug,
         extension,
       )}
@@ -85,4 +85,4 @@ function ManufacturerLogo({
   )
 }
 
-export default ManufacturerLogo
+export default BrandLogo

@@ -32,7 +32,7 @@ function ImpressionPage() {
       : "Impression | ITGE",
 
     description: impression
-      ? `Listening impression of the ${impression.iem.manufacturer.name} ${impression.iem.model} by ${impression.reviewer.name}.`
+      ? `Listening impression of the ${impression.iem.brand.name} ${impression.iem.model} by ${impression.reviewer.name}.`
       : "Short-form IEM listening impressions from ITGE reviewers.",
   })
 
@@ -141,10 +141,10 @@ function ImpressionPage() {
           </p>
 
           <Link
-            to={`/brands/${impression.iem.manufacturer.slug}`}
+            to={`/brands/${impression.iem.brand.slug}`}
             className="mt-4 inline-block text-sm uppercase tracking-[0.18em] text-[var(--accent)] transition hover:opacity-70"
           >
-            {impression.iem.manufacturer.name}
+            {impression.iem.brand.name}
           </Link>
 
           <div className="mt-3 flex flex-col justify-between gap-6 sm:flex-row sm:items-start">

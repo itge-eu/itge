@@ -105,8 +105,8 @@ export type GenreIemSummary = {
   model: string
   slug: string
 
-  manufacturerName: string
-  manufacturerSlug: string
+  brandName: string
+  brandSlug: string
 
   reviewCount: number
   impressionCount: number
@@ -185,7 +185,7 @@ type GenreDetailReviewRow = {
         model: string
         slug: string
 
-        manufacturers:
+        brands:
           | {
               id: number
               name: string
@@ -203,7 +203,7 @@ type GenreDetailReviewRow = {
         model: string
         slug: string
 
-        manufacturers:
+        brands:
           | {
               id: number
               name: string
@@ -247,7 +247,7 @@ type GenreDetailImpressionRow = {
         model: string
         slug: string
 
-        manufacturers:
+        brands:
           | {
               id: number
               name: string
@@ -265,7 +265,7 @@ type GenreDetailImpressionRow = {
         model: string
         slug: string
 
-        manufacturers:
+        brands:
           | {
               id: number
               name: string
@@ -308,15 +308,15 @@ function mapGenreReview(
       row.iems,
     )
 
-  const manufacturer =
+  const brand =
     getSingleRelation(
-      iem?.manufacturers,
+      iem?.brands,
     )
 
   if (
     !reviewer ||
     !iem ||
-    !manufacturer
+    !brand
   ) {
     throw new Error(
       `Review ${row.id} has incomplete genre data`,
@@ -331,10 +331,10 @@ function mapGenreReview(
     summary: row.summary,
 
     brand:
-      manufacturer.name,
+      brand.name,
 
-    manufacturerSlug:
-      manufacturer.slug,
+    brandSlug:
+      brand.slug,
 
     model: iem.model,
     iemSlug: iem.slug,
@@ -363,15 +363,15 @@ function mapGenreImpression(
       row.iems,
     )
 
-  const manufacturer =
+  const brand =
     getSingleRelation(
-      iem?.manufacturers,
+      iem?.brands,
     )
 
   if (
     !reviewer ||
     !iem ||
-    !manufacturer
+    !brand
   ) {
     throw new Error(
       `Impression ${row.id} has incomplete genre data`,
@@ -404,14 +404,14 @@ function mapGenreImpression(
       model: iem.model,
       slug: iem.slug,
 
-      manufacturer: {
+      brand: {
         id: Number(
-          manufacturer.id,
+          brand.id,
         ),
         name:
-          manufacturer.name,
+          brand.name,
         slug:
-          manufacturer.slug,
+          brand.slug,
       },
     },
   }
@@ -849,7 +849,7 @@ export async function getGenreBySlug(
               model,
               slug,
 
-              manufacturers (
+              brands (
                 id,
                 name,
                 slug
@@ -900,7 +900,7 @@ export async function getGenreBySlug(
               model,
               slug,
 
-              manufacturers (
+              brands (
                 id,
                 name,
                 slug
@@ -979,15 +979,15 @@ export async function getGenreBySlug(
         row.iems,
       )
 
-    const manufacturer =
+    const brand =
       getSingleRelation(
-        iem?.manufacturers,
+        iem?.brands,
       )
 
     if (
       !reviewer ||
       !iem ||
-      !manufacturer
+      !brand
     ) {
       return
     }
@@ -1012,11 +1012,11 @@ export async function getGenreBySlug(
           model: iem.model,
           slug: iem.slug,
 
-          manufacturerName:
-            manufacturer.name,
+          brandName:
+            brand.name,
 
-          manufacturerSlug:
-            manufacturer.slug,
+          brandSlug:
+            brand.slug,
 
           reviewCount: 1,
           impressionCount: 0,
@@ -1072,15 +1072,15 @@ export async function getGenreBySlug(
         row.iems,
       )
 
-    const manufacturer =
+    const brand =
       getSingleRelation(
-        iem?.manufacturers,
+        iem?.brands,
       )
 
     if (
       !reviewer ||
       !iem ||
-      !manufacturer
+      !brand
     ) {
       return
     }
@@ -1105,11 +1105,11 @@ export async function getGenreBySlug(
           model: iem.model,
           slug: iem.slug,
 
-          manufacturerName:
-            manufacturer.name,
+          brandName:
+            brand.name,
 
-          manufacturerSlug:
-            manufacturer.slug,
+          brandSlug:
+            brand.slug,
 
           reviewCount: 0,
           impressionCount: 1,

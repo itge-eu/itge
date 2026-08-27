@@ -40,7 +40,7 @@ const FILTER_GROUPS: {
     title: "IEMs",
   },
   {
-    type: "manufacturer",
+    type: "brand",
     title: "Brands",
   },
   {

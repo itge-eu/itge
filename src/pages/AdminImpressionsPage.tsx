@@ -41,7 +41,7 @@ type AdminImpression = {
     | {
         model: string
 
-        manufacturers:
+        brands:
           | {
               name: string
             }
@@ -53,7 +53,7 @@ type AdminImpression = {
     | {
         model: string
 
-        manufacturers:
+        brands:
           | {
               name: string
             }
@@ -195,7 +195,7 @@ function AdminImpressionsPage() {
             iems (
               model,
 
-              manufacturers (
+              brands (
                 name
               )
             )
@@ -379,9 +379,9 @@ function AdminImpressionsPage() {
               impression.iems,
             )
 
-          const manufacturer =
+          const brand =
             getSingleRelation(
-              iem?.manufacturers,
+              iem?.brands,
             )
 
           const searchable =
@@ -393,7 +393,7 @@ function AdminImpressionsPage() {
 
               reviewer?.name,
 
-              manufacturer?.name,
+              brand?.name,
 
               iem?.model,
             ]
@@ -724,13 +724,13 @@ function AdminImpressionsPage() {
                           impression.iems,
                         )
 
-                      const manufacturer =
+                      const brand =
                         getSingleRelation(
-                          iem?.manufacturers,
+                          iem?.brands,
                         )
 
-                      const manufacturerName =
-                        manufacturer
+                      const brandName =
+                        brand
                           ?.name ??
                         ""
 
@@ -740,7 +740,7 @@ function AdminImpressionsPage() {
 
                       const fullIemName =
                         [
-                          manufacturerName,
+                          brandName,
                           modelName,
                         ]
                           .filter(

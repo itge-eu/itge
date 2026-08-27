@@ -16,7 +16,7 @@ type AdminReview = {
   } | null;
   iems: {
     model: string;
-    manufacturers: {
+    brands: {
       name: string;
     } | null;
   } | null;
@@ -59,7 +59,7 @@ function AdminReviewsPage() {
           ),
           iems (
             model,
-            manufacturers (
+            brands (
               name
             )
           )
@@ -200,12 +200,12 @@ function AdminReviewsPage() {
 
             <div className="divide-y divide-[var(--border)]">
               {reviews.map((review) => {
-                const manufacturerName =
-                  review.iems?.manufacturers?.name ?? "";
+                const brandName =
+                  review.iems?.brands?.name ?? "";
 
                 const modelName = review.iems?.model ?? "Unknown IEM";
 
-                const fullIemName = [manufacturerName, modelName]
+                const fullIemName = [brandName, modelName]
                   .filter(Boolean)
                   .join(" ");
 

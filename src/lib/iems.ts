@@ -22,7 +22,7 @@ export type IemDirectoryItem = {
   model: string
   slug: string
 
-  manufacturer: {
+  brand: {
     id: number
     name: string
     slug: string
@@ -38,9 +38,9 @@ export type IemDirectoryItem = {
   /*
    * Impression-aware directory fields.
    *
-   * Optional temporarily because manufacturers.ts
+   * Optional temporarily because brands.ts
    * still constructs the older review-only shape.
-   * We'll make these required again when manufacturer
+   * We'll make these required again when brand
    * integration is updated next.
    */
   impressionCount?: number
@@ -54,7 +54,7 @@ export type IemProfile = {
   model: string
   slug: string
 
-  manufacturer: {
+  brand: {
     id: number
     name: string
     slug: string
@@ -85,7 +85,7 @@ type IemRow = {
   launch_price: string | number | null
   launch_currency: string | null
 
-  manufacturers:
+  brands:
     | {
         id: number
         name: string
@@ -135,7 +135,7 @@ type IemDirectoryRow = {
   model: string
   slug: string
 
-  manufacturers:
+  brands:
     | {
         id: number
         name: string
@@ -213,7 +213,7 @@ type IemReviewRow = {
         model: string
         slug: string
 
-        manufacturers:
+        brands:
           | {
               name: string
               slug: string
@@ -228,7 +228,7 @@ type IemReviewRow = {
         model: string
         slug: string
 
-        manufacturers:
+        brands:
           | {
               name: string
               slug: string
@@ -269,15 +269,15 @@ function mapFeaturedReview(
   const iem =
     getSingleRelation(row.iems)
 
-  const manufacturer =
+  const brand =
     getSingleRelation(
-      iem?.manufacturers,
+      iem?.brands,
     )
 
   if (
     !reviewer ||
     !iem ||
-    !manufacturer
+    !brand
   ) {
     throw new Error(
       `Review ${row.id} has incomplete IEM page data`,
@@ -291,9 +291,9 @@ function mapFeaturedReview(
     title: row.title,
     summary: row.summary,
 
-    brand: manufacturer.name,
-    manufacturerSlug:
-      manufacturer.slug,
+    brand: brand.name,
+    brandSlug:
+      brand.slug,
 
     model: iem.model,
     iemSlug: iem.slug,
@@ -526,7 +526,7 @@ export async function getIemBySlug(
       launch_price,
       launch_currency,
 
-      manufacturers (
+      brands (
         id,
         name,
         slug
@@ -549,14 +549,14 @@ export async function getIemBySlug(
   const iem =
     iemData as unknown as IemRow
 
-  const manufacturer =
+  const brand =
     getSingleRelation(
-      iem.manufacturers,
+      iem.brands,
     )
 
-  if (!manufacturer) {
+  if (!brand) {
     throw new Error(
-      `IEM ${iem.id} has no associated manufacturer`,
+      `IEM ${iem.id} has no associated brand`,
     )
   }
 
@@ -582,7 +582,7 @@ export async function getIemBySlug(
         model,
         slug,
 
-        manufacturers (
+        brands (
           name,
           slug
         )
@@ -656,12 +656,12 @@ export async function getIemBySlug(
     model: iem.model,
     slug: iem.slug,
 
-    manufacturer: {
+    brand: {
       id: Number(
-        manufacturer.id,
+        brand.id,
       ),
-      name: manufacturer.name,
-      slug: manufacturer.slug,
+      name: brand.name,
+      slug: brand.slug,
     },
 
     releaseYear:
@@ -720,7 +720,7 @@ export async function getIems(): Promise<
       model,
       slug,
 
-      manufacturers (
+      brands (
         id,
         name,
         slug
@@ -766,12 +766,12 @@ export async function getIems(): Promise<
 
   return rows.flatMap(
     (row) => {
-      const manufacturer =
+      const brand =
         getSingleRelation(
-          row.manufacturers,
+          row.brands,
         )
 
-      if (!manufacturer) {
+      if (!brand) {
         return []
       }
 
@@ -919,14 +919,14 @@ export async function getIems(): Promise<
           model: row.model,
           slug: row.slug,
 
-          manufacturer: {
+          brand: {
             id: Number(
-              manufacturer.id,
+              brand.id,
             ),
             name:
-              manufacturer.name,
+              brand.name,
             slug:
-              manufacturer.slug,
+              brand.slug,
           },
 
           heroImageUrl,

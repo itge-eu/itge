@@ -4,13 +4,13 @@ import {
 } from "react"
 import { Link } from "react-router"
 
-import ManufacturerLogo from "../components/manufacturers/ManufacturerLogo"
+import BrandLogo from "../components/brands/BrandLogo"
 import StoreLogo from "../components/stores/StoreLogo"
 
 import {
-  getManufacturers,
-  type ManufacturerDirectoryItem,
-} from "../lib/manufacturers"
+  getBrands,
+  type BrandDirectoryItem,
+} from "../lib/brands"
 
 import {
   getSupportingStores,
@@ -19,13 +19,13 @@ import {
 
 import usePageMetadata from "../hooks/usePageMetadata"
 
-function ManufacturersPage() {
+function BrandsPage() {
   const [
-    manufacturers,
-    setManufacturers,
+    brands,
+    setBrands,
   ] =
     useState<
-      ManufacturerDirectoryItem[]
+      BrandDirectoryItem[]
     >([])
 
   const [
@@ -56,17 +56,17 @@ function ManufacturersPage() {
     async function loadPage() {
       try {
         const [
-          manufacturerResult,
+          brandResult,
           storeResult,
         ] =
           await Promise.all([
-            getManufacturers(),
+            getBrands(),
             getSupportingStores(),
           ])
 
         if (!cancelled) {
-          setManufacturers(
-            manufacturerResult,
+          setBrands(
+            brandResult,
           )
 
           setStores(
@@ -244,7 +244,7 @@ function ManufacturersPage() {
             </div>
           )}
 
-          {manufacturers.length ===
+          {brands.length ===
           0 ? (
             <div className="mt-8 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
               No brands with
@@ -253,15 +253,15 @@ function ManufacturersPage() {
             </div>
           ) : (
             <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {manufacturers.map(
+              {brands.map(
                 (
-                  manufacturer,
+                  brand,
                 ) => (
                   <Link
                     key={
-                      manufacturer.id
+                      brand.id
                     }
-                    to={`/brands/${manufacturer.slug}`}
+                    to={`/brands/${brand.slug}`}
                     className="group flex min-h-[220px] flex-col rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
                   >
                     <div className="flex min-h-24 items-start justify-between gap-6">
@@ -272,18 +272,18 @@ function ManufacturersPage() {
 
                         <h2 className="mt-2 break-words text-2xl font-semibold tracking-tight transition group-hover:text-[var(--accent)]">
                           {
-                            manufacturer.name
+                            brand.name
                           }
                         </h2>
                       </div>
 
                       <div className="flex min-h-16 min-w-0 flex-1 items-center justify-end">
-                        <ManufacturerLogo
+                        <BrandLogo
                           name={
-                            manufacturer.name
+                            brand.name
                           }
                           slug={
-                            manufacturer.slug
+                            brand.slug
                           }
                           size="card"
                           className="max-h-16 max-w-full"
@@ -293,19 +293,19 @@ function ManufacturersPage() {
 
                     <div className="mt-auto grid grid-cols-3 gap-3 border-t border-[var(--border)] pt-5">
                       <Metric
-                        value={manufacturer.iemCount}
+                        value={brand.iemCount}
                         singular="IEM"
                         plural="IEMs"
                       />
 
                       <Metric
-                        value={manufacturer.reviewCount}
+                        value={brand.reviewCount}
                         singular="review"
                         plural="reviews"
                       />
 
                       <Metric
-                        value={manufacturer.impressionCount}
+                        value={brand.impressionCount}
                         singular="impression"
                         plural="impressions"
                       />
@@ -378,4 +378,4 @@ function PageMessage({
   )
 }
 
-export default ManufacturersPage
+export default BrandsPage

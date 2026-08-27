@@ -38,7 +38,7 @@ type IemOption = {
   id: string;
   model: string;
   slug: string;
-  manufacturers: {
+  brands: {
     name: string;
   } | null;
 };
@@ -74,10 +74,10 @@ function slugify(value: string) {
 }
 
 function getIemLabel(iem: IemOption) {
-  const manufacturerName = iem.manufacturers?.name?.trim();
+  const brandName = iem.brands?.name?.trim();
 
-  return manufacturerName
-    ? `${manufacturerName} ${iem.model}`
+  return brandName
+    ? `${brandName} ${iem.model}`
     : iem.model;
 }
 
@@ -175,7 +175,7 @@ const selectedIem = useMemo(
         id,
         model,
         slug,
-        manufacturers (
+        brands (
           name
         )
       `,
@@ -321,10 +321,10 @@ async function handleSaveDraft() {
     return;
   }
 
-  const manufacturerName =
-    selectedIem.manufacturers?.name?.trim() ?? "";
+  const brandName =
+    selectedIem.brands?.name?.trim() ?? "";
   
-  const fullIemName = [manufacturerName, selectedIem.model]
+  const fullIemName = [brandName, selectedIem.model]
     .filter(Boolean)
     .join(" ");
   
@@ -603,7 +603,7 @@ async function handleSaveDraft() {
                   type="text"
                   value={iemSearch}
                   autoComplete="off"
-                  placeholder="Search by manufacturer or model"
+                  placeholder="Search by brand or model"
                   onFocus={() => setIemPickerOpen(true)}
                   onChange={(event) => {
                     setIemSearch(event.target.value);

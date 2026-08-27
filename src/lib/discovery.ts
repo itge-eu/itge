@@ -51,7 +51,7 @@ type RelatedIem = {
   model: string
   slug: string
 
-  manufacturers:
+  brands:
     | {
         id: number
         name: string
@@ -131,7 +131,7 @@ type DiscoveryImpressionRow = {
 const FILTER_TYPES: SearchSuggestionType[] =
   [
     "iem",
-    "manufacturer",
+    "brand",
     "artist",
     "genre",
     "reviewer",
@@ -234,30 +234,30 @@ function buildCommonEntities(
       iemRelation,
     )
 
-  const manufacturer =
+  const brand =
     getSingleRelation(
-      iem?.manufacturers,
+      iem?.brands,
     )
 
   if (
     !reviewer ||
     !iem ||
-    !manufacturer
+    !brand
   ) {
     throw new Error(
       `${itemLabel} has incomplete discovery data`,
     )
   }
 
-  const manufacturerEntity: DiscoveryEntity =
+  const brandEntity: DiscoveryEntity =
     {
       id: Number(
-        manufacturer.id,
+        brand.id,
       ),
       name:
-        manufacturer.name,
+        brand.name,
       slug:
-        manufacturer.slug,
+        brand.slug,
     }
 
   const iemEntity: DiscoveryIem =
@@ -266,13 +266,13 @@ function buildCommonEntities(
       name: iem.model,
       slug: iem.slug,
 
-      manufacturerId:
+      brandId:
         Number(
-          manufacturer.id,
+          brand.id,
         ),
 
-      manufacturerName:
-        manufacturer.name,
+      brandName:
+        brand.name,
     }
 
   const reviewerEntity: DiscoveryEntity =
@@ -287,8 +287,8 @@ function buildCommonEntities(
   return {
     reviewer,
     iem,
-    manufacturer,
-    manufacturerEntity,
+    brand,
+    brandEntity,
     iemEntity,
     reviewerEntity,
   }
@@ -321,11 +321,11 @@ function mapDiscoveryReview(
       body: row.body,
     
       brand:
-        entities.manufacturer
+        entities.brand
           .name,
     
-      manufacturerSlug:
-        entities.manufacturer
+      brandSlug:
+        entities.brand
           .slug,
     
       model:
@@ -350,8 +350,8 @@ function mapDiscoveryReview(
     iem:
       entities.iemEntity,
 
-    manufacturer:
-      entities.manufacturerEntity,
+    brand:
+      entities.brandEntity,
 
     reviewer:
       entities.reviewerEntity,
@@ -416,16 +416,16 @@ function mapDiscoveryImpression(
         slug:
           entities.iem.slug,
 
-        manufacturer: {
+        brand: {
           id: Number(
-            entities.manufacturer
+            entities.brand
               .id,
           ),
           name:
-            entities.manufacturer
+            entities.brand
               .name,
           slug:
-            entities.manufacturer
+            entities.brand
               .slug,
         },
       },
@@ -434,8 +434,8 @@ function mapDiscoveryImpression(
     iem:
       entities.iemEntity,
 
-    manufacturer:
-      entities.manufacturerEntity,
+    brand:
+      entities.brandEntity,
 
     reviewer:
       entities.reviewerEntity,
@@ -499,7 +499,7 @@ export async function getDiscoveryItems(): Promise<
           model,
           slug,
 
-          manufacturers (
+          brands (
             id,
             name,
             slug
@@ -549,7 +549,7 @@ export async function getDiscoveryItems(): Promise<
           model,
           slug,
 
-          manufacturers (
+          brands (
             id,
             name,
             slug
@@ -646,11 +646,11 @@ export function buildDiscoveryState(
       "iem",
     ),
 
-    manufacturer:
+    brand:
       buildSuggestionsForType(
         itemsForContentType,
         selectedFilters,
-        "manufacturer",
+        "brand",
       ),
 
     reviewer:
@@ -756,9 +756,9 @@ function itemMatchesFilter(
         selected.id
       )
 
-    case "manufacturer":
+    case "brand":
       return (
-        item.manufacturer.id ===
+        item.brand.id ===
         selected.id
       )
 
@@ -844,9 +844,9 @@ function collectSuggestions(
 
           subtitle:
             type === "iem" &&
-            "manufacturerName" in
+            "brandName" in
               entity
-              ? entity.manufacturerName
+              ? entity.brandName
               : undefined,
 
           reviewCount: 1,
@@ -878,9 +878,9 @@ function getEntitiesForType(
     case "iem":
       return [item.iem]
 
-    case "manufacturer":
+    case "brand":
       return [
-        item.manufacturer,
+        item.brand,
       ]
 
     case "reviewer":

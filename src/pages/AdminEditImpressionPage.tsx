@@ -331,7 +331,7 @@ function AdminEditImpressionPage() {
             iems (
               model,
 
-              manufacturers (
+              brands (
                 name
               )
             )
@@ -634,14 +634,14 @@ function AdminEditImpressionPage() {
           ? data.iems[0]
           : data.iems
 
-      const manufacturerRelation =
+      const brandRelation =
         Array.isArray(
-          iemRelation?.manufacturers,
+          iemRelation?.brands,
         )
           ? iemRelation
-              ?.manufacturers[0]
+              ?.brands[0]
           : iemRelation
-              ?.manufacturers
+              ?.brands
 
       const reviewerRelation =
         Array.isArray(
@@ -650,8 +650,8 @@ function AdminEditImpressionPage() {
           ? data.reviewers[0]
           : data.reviewers
 
-      const manufacturerName =
-        manufacturerRelation
+      const brandName =
+        brandRelation
           ?.name?.trim() ??
         ""
 
@@ -662,7 +662,7 @@ function AdminEditImpressionPage() {
 
       const iemName =
         [
-          manufacturerName,
+          brandName,
           modelName,
         ]
           .filter(Boolean)

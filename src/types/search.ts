@@ -1,6 +1,6 @@
 export type SearchSuggestionType =
   | "iem"
-  | "manufacturer"
+  | "brand"
   | "reviewer"
   | "artist"
   | "genre"

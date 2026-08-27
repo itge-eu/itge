@@ -14,8 +14,8 @@ type NamedRow = {
 type IemRow = {
   id: number
   model: string
-  manufacturer_id: number | null
-  manufacturers:
+  brand_id: number | null
+  brands:
     | {
         id: number
         name: string
@@ -103,7 +103,7 @@ export async function getSearchSuggestions(): Promise<
   const [
     reviewsResult,
     iemsResult,
-    manufacturersResult,
+    brandsResult,
     reviewersResult,
     artistsResult,
     genresResult,
@@ -122,8 +122,8 @@ export async function getSearchSuggestions(): Promise<
       .select(`
         id,
         model,
-        manufacturer_id,
-        manufacturers (
+        brand_id,
+        brands (
           id,
           name
         )
@@ -131,7 +131,7 @@ export async function getSearchSuggestions(): Promise<
       .order("model", { ascending: true }),
 
     supabase
-      .from("manufacturers")
+      .from("brands")
       .select(`
         id,
         name
@@ -169,7 +169,7 @@ export async function getSearchSuggestions(): Promise<
   const firstError =
     reviewsResult.error ||
     iemsResult.error ||
-    manufacturersResult.error ||
+    brandsResult.error ||
     reviewersResult.error ||
     artistsResult.error ||
     genresResult.error
@@ -196,7 +196,7 @@ export async function getSearchSuggestions(): Promise<
   const iemRows =
     (iemsResult.data ?? []) as unknown as IemRow[]
 
-  const manufacturerCounts = new Map<number, number>()
+  const brandCounts = new Map<number, number>()
 
   iemRows.forEach((iem) => {
     const reviewCount = iemCounts.get(Number(iem.id)) ?? 0
@@ -205,17 +205,17 @@ export async function getSearchSuggestions(): Promise<
       return
     }
 
-    const manufacturer = getSingleRelation(
-      iem.manufacturers,
+    const brand = getSingleRelation(
+      iem.brands,
     )
 
-    const manufacturerId =
-      iem.manufacturer_id ?? manufacturer?.id
+    const brandId =
+      iem.brand_id ?? brand?.id
 
-    if (manufacturerId !== null && manufacturerId !== undefined) {
-      manufacturerCounts.set(
-        Number(manufacturerId),
-        (manufacturerCounts.get(Number(manufacturerId)) ?? 0) +
+    if (brandId !== null && brandId !== undefined) {
+      brandCounts.set(
+        Number(brandId),
+        (brandCounts.get(Number(brandId)) ?? 0) +
           reviewCount,
       )
     }
@@ -278,8 +278,8 @@ export async function getSearchSuggestions(): Promise<
         return []
       }
 
-      const manufacturer = getSingleRelation(
-        row.manufacturers,
+      const brand = getSingleRelation(
+        row.brands,
       )
 
       return [
@@ -288,17 +288,17 @@ export async function getSearchSuggestions(): Promise<
           type: "iem",
           name: row.model,
           slug: slugify(row.model),
-          subtitle: manufacturer?.name,
+          subtitle: brand?.name,
           reviewCount,
         },
       ]
     },
   )
 
-  const manufacturerSuggestions = mapNamedRows(
-    (manufacturersResult.data ?? []) as NamedRow[],
-    "manufacturer",
-    manufacturerCounts,
+  const brandSuggestions = mapNamedRows(
+    (brandsResult.data ?? []) as NamedRow[],
+    "brand",
+    brandCounts,
   )
 
   const reviewerSuggestions = mapNamedRows(
@@ -321,7 +321,7 @@ export async function getSearchSuggestions(): Promise<
 
   return [
     ...iemSuggestions,
-    ...manufacturerSuggestions,
+    ...brandSuggestions,
     ...reviewerSuggestions,
     ...artistSuggestions,
     ...genreSuggestions,

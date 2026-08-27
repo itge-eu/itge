@@ -187,7 +187,7 @@ function DiscoverPage() {
 
         ...discoveryState
           .suggestions
-          .manufacturer,
+          .brand,
 
         ...discoveryState
           .suggestions.artist,
@@ -576,7 +576,7 @@ function getIemName(
     return `${item.review.brand} ${item.review.model}`
   }
 
-  return `${item.impression.iem.manufacturer.name} ${item.impression.iem.model}`
+  return `${item.impression.iem.brand.name} ${item.impression.iem.model}`
 }
 
 function getReviewerName(

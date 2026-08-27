@@ -215,7 +215,7 @@ export function buildLatestCoverageItems(
 
           brand:
             impression.iem
-              .manufacturer
+              .brand
               .name,
 
           model:

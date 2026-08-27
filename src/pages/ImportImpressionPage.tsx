@@ -73,7 +73,7 @@ type IemOption = {
   model: string
   slug: string
 
-  manufacturers:
+  brands:
     | {
         name: string
       }
@@ -178,12 +178,12 @@ function slugify(
     )
 }
 
-function getManufacturerName(
+function getBrandName(
   iem: IemOption,
 ) {
   return (
     getSingleRelation(
-      iem.manufacturers,
+      iem.brands,
     )?.name?.trim() ?? ""
   )
 }
@@ -191,11 +191,11 @@ function getManufacturerName(
 function getIemLabel(
   iem: IemOption,
 ) {
-  const manufacturerName =
-    getManufacturerName(iem)
+  const brandName =
+    getBrandName(iem)
 
   return [
-    manufacturerName,
+    brandName,
     iem.model,
   ]
     .filter(Boolean)
@@ -469,7 +469,7 @@ function ImportImpressionPage() {
           model,
           slug,
 
-          manufacturers (
+          brands (
             name
           )
         `)
@@ -689,14 +689,14 @@ function ImportImpressionPage() {
       return
     }
 
-    const manufacturerName =
-      getManufacturerName(
+    const brandName =
+      getBrandName(
         selectedIem,
       )
 
     const fullIemName =
       [
-        manufacturerName,
+        brandName,
         selectedIem.model,
       ]
         .filter(Boolean)
@@ -1189,7 +1189,7 @@ function ImportImpressionPage() {
                     iemSearch
                   }
                   autoComplete="off"
-                  placeholder="Search by manufacturer or model"
+                  placeholder="Search by brand or model"
                   onFocus={() =>
                     setIemPickerOpen(
                       true,

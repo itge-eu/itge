@@ -25,8 +25,8 @@ import ReviewerPage from "./pages/ReviewerPage"
 import DiscoverPage from "./pages/DiscoverPage"
 import IemPage from "./pages/IemPage"
 import IemsPage from "./pages/IemsPage"
-import ManufacturerPage from "./pages/ManufacturerPage"
-import ManufacturersPage from "./pages/ManufacturersPage"
+import BrandPage from "./pages/BrandPage"
+import BrandsPage from "./pages/BrandsPage"
 import ArtistsPage from "./pages/ArtistsPage"
 import ArtistPage from "./pages/ArtistPage"
 import GenresPage from "./pages/GenresPage"
@@ -51,11 +51,11 @@ function App() {
 		<Route path="/iems" element={<IemsPage />} />
 		<Route path="/iems/:slug" element={<IemPage />} />
 		
-		<Route path="/manufacturers" element={<ManufacturersPage />} />
-		<Route path="/manufacturers/:slug" element={<ManufacturerPage />} />
+		<Route path="/brands" element={<BrandsPage />} />
+		<Route path="/brands/:slug" element={<BrandPage />} />
 		
-		<Route path="/brands" element={<ManufacturersPage />} />
-		<Route path="/brands/:slug" element={<ManufacturerPage />} />
+		<Route path="/brands" element={<BrandsPage />} />
+		<Route path="/brands/:slug" element={<BrandPage />} />
 		
     <Route path="/members" element={<ReviewersPage />} />
     <Route path="/members/:slug" element={<ReviewerPage />} />

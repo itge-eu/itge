@@ -92,9 +92,9 @@ function ReviewsPage() {
   const iemName =
     searchParams.get("iem")
 
-  const manufacturerName =
+  const brandName =
     searchParams.get(
-      "manufacturer",
+      "brand",
     )
 
   const reviewerName =
@@ -131,8 +131,8 @@ function ReviewsPage() {
               iemName ??
               undefined,
 
-            manufacturerName:
-              manufacturerName ??
+            brandName:
+              brandName ??
               undefined,
 
             reviewerName:
@@ -153,8 +153,8 @@ function ReviewsPage() {
               iemName ??
               undefined,
           
-            manufacturerName:
-              manufacturerName ??
+            brandName:
+              brandName ??
               undefined,
           
             reviewerName:
@@ -214,7 +214,7 @@ function ReviewsPage() {
     artistSlug,
     genreSlug,
     iemName,
-    manufacturerName,
+    brandName,
     reviewerName,
   ])
 
@@ -222,7 +222,7 @@ function ReviewsPage() {
     artistSlug ||
       genreSlug ||
       iemName ||
-      manufacturerName ||
+      brandName ||
       reviewerName,
   )
 
@@ -238,13 +238,13 @@ function ReviewsPage() {
     additionalFilterType = "iem"
     additionalFilterName = iemName
   } else if (
-    manufacturerName
+    brandName
   ) {
     additionalFilterType =
-      "manufacturer"
+      "brand"
 
     additionalFilterName =
-      manufacturerName
+      brandName
   } else if (reviewerName) {
     additionalFilterType =
       "reviewer"
@@ -334,9 +334,9 @@ function ReviewsPage() {
         )
         break
 
-      case "manufacturer":
+      case "brand":
         params.set(
-          "manufacturer",
+          "brand",
           suggestion.name,
         )
         break
@@ -621,7 +621,7 @@ function getIemName(
     return `${item.review.brand} ${item.review.model}`
   }
 
-  return `${item.impression.iem.manufacturer.name} ${item.impression.iem.model}`
+  return `${item.impression.iem.brand.name} ${item.impression.iem.model}`
 }
 
 function getReviewerName(

@@ -38,11 +38,11 @@ function IemPage() {
 
   usePageMetadata({
     title: iem
-      ? `${iem.manufacturer.name} ${iem.model} | ITGE`
+      ? `${iem.brand.name} ${iem.model} | ITGE`
       : "IEM | ITGE",
 
     description: iem
-      ? `Reviews, listening impressions, specifications and coverage for the ${iem.manufacturer.name} ${iem.model}.`
+      ? `Reviews, listening impressions, specifications and coverage for the ${iem.brand.name} ${iem.model}.`
       : "Explore IEM reviews, impressions and coverage from ITGE.",
   })
 
@@ -182,9 +182,9 @@ function IemPage() {
             },
             {
               label:
-                iem.manufacturer
+                iem.brand
                   .name,
-              to: `/brands/${iem.manufacturer.slug}`,
+              to: `/brands/${iem.brand.slug}`,
             },
             {
               label: iem.model,
@@ -196,12 +196,12 @@ function IemPage() {
           <div className="grid lg:grid-cols-[minmax(0,1fr)_24rem]">
             <div className="p-8 sm:p-10">
               <Link
-                to={`/brands/${iem.manufacturer.slug}`}
+                to={`/brands/${iem.brand.slug}`}
                 className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)] transition hover:opacity-70"
               >
                 {
                   iem
-                    .manufacturer
+                    .brand
                     .name
                 }
               </Link>
@@ -217,7 +217,7 @@ function IemPage() {
                 for the{" "}
                 {
                   iem
-                    .manufacturer
+                    .brand
                     .name
                 }{" "}
                 {iem.model}.
@@ -299,7 +299,7 @@ function IemPage() {
                 src={
                   iem.heroImageUrl
                 }
-                alt={`${iem.manufacturer.name} ${iem.model}`}
+                alt={`${iem.brand.name} ${iem.model}`}
                 className="aspect-[16/10] h-full w-full object-cover lg:aspect-auto"
               />
             ) : (
@@ -438,7 +438,7 @@ function IemPage() {
               iem.reviews.length ===
               0
                 ? "No published reviews are available yet."
-                : `Read every published ITGE review of the ${iem.manufacturer.name} ${iem.model}.`
+                : `Read every published ITGE review of the ${iem.brand.name} ${iem.model}.`
             }
           />
 
@@ -468,7 +468,7 @@ function IemPage() {
               iem.impressions
                 .length === 0
                 ? "No published impressions are available yet."
-                : `Read short-form listening impressions of the ${iem.manufacturer.name} ${iem.model}.`
+                : `Read short-form listening impressions of the ${iem.brand.name} ${iem.model}.`
             }
           />
 

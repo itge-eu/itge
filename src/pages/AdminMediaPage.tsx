@@ -140,7 +140,7 @@ function AdminMediaPage() {
               iems (
                 model,
 
-                manufacturers (
+                brands (
                   name
                 )
               ),
@@ -187,7 +187,7 @@ function AdminMediaPage() {
               iems (
                 model,
 
-                manufacturers (
+                brands (
                   name
                 )
               )
@@ -252,15 +252,15 @@ function AdminMediaPage() {
                   row.iems,
                 )
 
-              const manufacturer =
+              const brand =
                 getSingleRelation(
                   iem
-                    ?.manufacturers,
+                    ?.brands,
                 )
 
               const iemName =
                 [
-                  manufacturer
+                  brand
                     ?.name,
                   iem?.model,
                 ]
@@ -362,15 +362,15 @@ function AdminMediaPage() {
                   row.iems,
                 )
 
-              const manufacturer =
+              const brand =
                 getSingleRelation(
                   iem
-                    ?.manufacturers,
+                    ?.brands,
                 )
 
               const iemName =
                 [
-                  manufacturer
+                  brand
                     ?.name,
                   iem?.model,
                 ]

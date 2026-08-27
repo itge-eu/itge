@@ -20,8 +20,8 @@ function ReviewCard({
   const reviewUrl =
     `/reviews/${review.slug}`
 
-  const manufacturerUrl =
-    `/brands/${review.manufacturerSlug}`
+  const brandUrl =
+    `/brands/${review.brandSlug}`
 
   const excerpt =
     review.body
@@ -63,7 +63,7 @@ function ReviewCard({
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
                 <Link
-                  to={manufacturerUrl}
+                  to={brandUrl}
                   className="pointer-events-auto relative z-20 text-sm uppercase tracking-widest text-[var(--accent)] transition hover:opacity-70"
                 >
                   {review.brand}
@@ -122,7 +122,7 @@ function ReviewCard({
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
                 <Link
-                  to={manufacturerUrl}
+                  to={brandUrl}
                   className="pointer-events-auto relative z-20 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--accent)] transition hover:opacity-70"
                 >
                   {review.brand}

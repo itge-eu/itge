@@ -20,7 +20,7 @@ export type ImpressionSummary = {
     model: string
     slug: string
 
-    manufacturer: {
+    brand: {
       id: number
       name: string
       slug: string
@@ -77,7 +77,7 @@ type ImpressionRow = {
         model: string
         slug: string
 
-        manufacturers:
+        brands:
           | {
               id: number
               name: string
@@ -95,7 +95,7 @@ type ImpressionRow = {
         model: string
         slug: string
 
-        manufacturers:
+        brands:
           | {
               id: number
               name: string
@@ -166,11 +166,11 @@ function mapImpression(
 ): ImpressionSummary {
   const reviewer = getSingleRelation(row.reviewers)
   const iem = getSingleRelation(row.iems)
-  const manufacturer = getSingleRelation(
-    iem?.manufacturers,
+  const brand = getSingleRelation(
+    iem?.brands,
   )
 
-  if (!reviewer || !iem || !manufacturer) {
+  if (!reviewer || !iem || !brand) {
     throw new Error(
       `Impression ${row.id} has incomplete related data`,
     )
@@ -196,10 +196,10 @@ function mapImpression(
       model: iem.model,
       slug: iem.slug,
 
-      manufacturer: {
-        id: Number(manufacturer.id),
-        name: manufacturer.name,
-        slug: manufacturer.slug,
+      brand: {
+        id: Number(brand.id),
+        name: brand.name,
+        slug: brand.slug,
       },
     },
   }
@@ -249,7 +249,7 @@ export type ImpressionFilters = {
   artistSlug?: string
   genreSlug?: string
   iemName?: string
-  manufacturerName?: string
+  brandName?: string
   reviewerName?: string
 }
 
@@ -290,7 +290,7 @@ export async function getAllImpressions(): Promise<
         model,
         slug,
 
-        manufacturers (
+        brands (
           id,
           name,
           slug
@@ -324,8 +324,8 @@ export async function getFilteredAllImpressions(
   const iemName =
     filters.iemName?.trim() || null
 
-  const manufacturerName =
-    filters.manufacturerName?.trim() || null
+  const brandName =
+    filters.brandName?.trim() || null
 
   const reviewerName =
     filters.reviewerName?.trim() || null
@@ -512,7 +512,7 @@ export async function getFilteredAllImpressions(
           model,
           slug,
 
-          manufacturers (
+          brands (
             id,
             name,
             slug
@@ -573,13 +573,13 @@ export async function getFilteredAllImpressions(
         }
 
         if (
-          manufacturerName &&
+          brandName &&
           normalizeValue(
             impression.iem
-              .manufacturer.name,
+              .brand.name,
           ) !==
             normalizeValue(
-              manufacturerName,
+              brandName,
             )
         ) {
           return false
@@ -641,7 +641,7 @@ export async function getImpressionBySlug(
         model,
         slug,
 
-        manufacturers (
+        brands (
           id,
           name,
           slug
@@ -722,7 +722,7 @@ async function getFilteredImpressions(
         model,
         slug,
 
-        manufacturers (
+        brands (
           id,
           name,
           slug

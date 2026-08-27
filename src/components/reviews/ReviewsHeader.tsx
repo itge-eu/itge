@@ -39,7 +39,7 @@ function ReviewsHeader({
           `Published ITGE reviews of ${additionalFilterName}.`
         break
 
-      case "manufacturer":
+      case "brand":
         heading = `${additionalFilterName} reviews`
         description =
           `Published ITGE reviews of IEMs by ${additionalFilterName}.`

@@ -8,21 +8,21 @@ type IemCardProps = {
 
 function IemCard({ iem }: IemCardProps) {
   const iemUrl = `/iems/${iem.slug}`
-  const manufacturerUrl =
-    `/brands/${iem.manufacturer.slug}`
+  const brandUrl =
+    `/brands/${iem.brand.slug}`
 
   return (
     <article className="group overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] transition hover:-translate-y-1 hover:border-[var(--accent)]">
       <Link
         to={iemUrl}
-        aria-label={`View ${iem.manufacturer.name} ${iem.model}`}
+        aria-label={`View ${iem.brand.name} ${iem.model}`}
         className="block"
       >
         {iem.heroImageUrl ? (
           <div className="aspect-[16/10] overflow-hidden bg-[var(--surface-soft)]">
             <img
               src={iem.heroImageUrl}
-              alt={`${iem.manufacturer.name} ${iem.model}`}
+              alt={`${iem.brand.name} ${iem.model}`}
               loading="lazy"
               className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.025]"
             />
@@ -36,10 +36,10 @@ function IemCard({ iem }: IemCardProps) {
 
       <div className="p-6">
         <Link
-          to={manufacturerUrl}
+          to={brandUrl}
           className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--accent)] transition hover:opacity-70"
         >
-          {iem.manufacturer.name}
+          {iem.brand.name}
         </Link>
 
         <h2 className="mt-2 text-2xl font-semibold tracking-tight">

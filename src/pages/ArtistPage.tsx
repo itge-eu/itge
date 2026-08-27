@@ -308,7 +308,7 @@ function ArtistPage() {
                   >
                     <p className="text-sm uppercase tracking-[0.16em] text-[var(--accent)]">
                       {
-                        iem.manufacturerName
+                        iem.brandName
                       }
                     </p>
 
