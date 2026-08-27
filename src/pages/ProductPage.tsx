@@ -3,6 +3,7 @@ import {
   useMemo,
   useState,
 } from "react"
+
 import {
   Link,
   useParams,
@@ -16,6 +17,7 @@ import PageState from "../components/layout/PageState"
 
 import {
   getProductBySlug,
+  getProductTypeLabel,
   type ProductProfile,
 } from "../lib/products"
 
@@ -23,27 +25,47 @@ import usePageMetadata from "../hooks/usePageMetadata"
 
 function ProductPage() {
   const { slug } =
-    useParams<{ slug: string }>()
+    useParams<{
+      slug: string
+    }>()
 
-  const [product, setProduct] =
+  const [
+    product,
+    setProduct,
+  ] =
     useState<ProductProfile | null>(
       null,
     )
 
-  const [loading, setLoading] =
+  const [
+    loading,
+    setLoading,
+  ] =
     useState(true)
 
-  const [error, setError] =
-    useState<string | null>(null)
+  const [
+    error,
+    setError,
+  ] =
+    useState<string | null>(
+      null,
+    )
+
+  const productTypeLabel =
+    product
+      ? getProductTypeLabel(
+          product.productType,
+        )
+      : "Gear"
 
   usePageMetadata({
     title: product
       ? `${product.brand.name} ${product.model} | ITGE`
-      : "IEM | ITGE",
+      : "Gear | ITGE",
 
     description: product
       ? `Reviews, listening impressions, specifications and coverage for the ${product.brand.name} ${product.model}.`
-      : "Explore IEM reviews, impressions and coverage from ITGE.",
+      : "Explore gear reviews, impressions and coverage from ITGE.",
   })
 
   useEffect(() => {
@@ -52,8 +74,9 @@ function ProductPage() {
     async function loadProduct() {
       if (!slug) {
         setError(
-          "No IEM was specified.",
+          "No product was specified.",
         )
+
         setLoading(false)
         return
       }
@@ -72,13 +95,13 @@ function ProductPage() {
         }
       } catch (loadError) {
         console.error(
-          "Could not load IEM:",
+          "Could not load product:",
           loadError,
         )
 
         if (!cancelled) {
           setError(
-            "The IEM page could not be loaded.",
+            "The gear page could not be loaded.",
           )
         }
       } finally {
@@ -141,8 +164,8 @@ function ProductPage() {
   if (loading) {
     return (
       <PageState
-        eyebrow="IEM"
-        title="Loading IEM…"
+        eyebrow="Gear"
+        title="Loading product…"
       />
     )
   }
@@ -150,11 +173,11 @@ function ProductPage() {
   if (error) {
     return (
       <PageState
-        eyebrow="IEM"
-        title="Unable to load IEM"
+        eyebrow="Gear"
+        title="Unable to load product"
         message={error}
-        backTo="/products"
-        backLabel="Back to IEMs"
+        backTo="/gear"
+        backLabel="Back to gear"
       />
     )
   }
@@ -163,10 +186,10 @@ function ProductPage() {
     return (
       <PageState
         eyebrow="404"
-        title="IEM not found"
-        message="The IEM you were looking for doesn’t exist or is no longer available."
-        backTo="/products"
-        backLabel="Back to IEMs"
+        title="Product not found"
+        message="The product you were looking for doesn’t exist or is no longer available."
+        backTo="/gear"
+        backLabel="Back to gear"
       />
     )
   }
@@ -177,8 +200,8 @@ function ProductPage() {
         <Breadcrumbs
           items={[
             {
-              label: "IEMs",
-              to: "/products",
+              label: "Gear",
+              to: "/gear",
             },
             {
               label:
@@ -187,7 +210,8 @@ function ProductPage() {
               to: `/brands/${product.brand.slug}`,
             },
             {
-              label: product.model,
+              label:
+                product.model,
             },
           ]}
         />
@@ -195,16 +219,23 @@ function ProductPage() {
         <header className="overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)]">
           <div className="grid lg:grid-cols-[minmax(0,1fr)_24rem]">
             <div className="p-8 sm:p-10">
-              <Link
-                to={`/brands/${product.brand.slug}`}
-                className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)] transition hover:opacity-70"
-              >
-                {
-                  product
-                    .brand
-                    .name
-                }
-              </Link>
+              <div className="flex flex-wrap items-center gap-3">
+                <Link
+                  to={`/brands/${product.brand.slug}`}
+                  className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)] transition hover:opacity-70"
+                >
+                  {
+                    product.brand
+                      .name
+                  }
+                </Link>
+
+                <span className="rounded-full border border-[var(--border)] bg-[var(--background)] px-3 py-1 text-xs font-semibold text-[var(--muted)]">
+                  {
+                    productTypeLabel
+                  }
+                </span>
+              </div>
 
               <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-6xl">
                 {product.model}
@@ -212,26 +243,32 @@ function ProductPage() {
 
               <p className="mt-5 max-w-2xl text-lg leading-8 text-[var(--muted)]">
                 Community reviews,
-                listening impressions
-                and music references
+                listening
+                impressions and
+                music references
                 for the{" "}
                 {
-                  product
-                    .brand
+                  product.brand
                     .name
                 }{" "}
-                {product.model}.
+                {
+                  product.model
+                }.
               </p>
 
               <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <StatCard
                   label="Published reviews"
-                  value={product.reviews.length.toString()}
+                  value={
+                    product.reviews.length.toString()
+                  }
                 />
 
                 <StatCard
                   label="Published impressions"
-                  value={product.impressions.length.toString()}
+                  value={
+                    product.impressions.length.toString()
+                  }
                 />
 
                 <StatCard
@@ -248,7 +285,9 @@ function ProductPage() {
 
                 <StatCard
                   label="Contributors"
-                  value={contributorCount.toString()}
+                  value={
+                    contributorCount.toString()
+                  }
                 />
               </div>
 
@@ -275,7 +314,9 @@ function ProductPage() {
                       null && (
                       <ProductDetail
                         label="Released"
-                        value={product.releaseYear.toString()}
+                        value={
+                          product.releaseYear.toString()
+                        }
                       />
                     )}
 
@@ -304,7 +345,7 @@ function ProductPage() {
               />
             ) : (
               <div className="flex min-h-64 items-center justify-center border-t border-[var(--border)] bg-[var(--surface-soft)] p-8 text-center text-[var(--muted)] lg:border-l lg:border-t-0">
-                No IEM image is
+                No product image is
                 available yet.
               </div>
             )}
@@ -327,7 +368,7 @@ function ProductPage() {
                 1
                   ? "review"
                   : "reviews"
-              } of this IEM.`}
+              } of this ${productTypeLabel.toLowerCase()}.`}
             />
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -446,9 +487,10 @@ function ProductPage() {
             {product.reviews.length ===
             0 ? (
               <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
-                This IEM does not
-                have any published
-                reviews yet.
+                This product does
+                not have any
+                published reviews
+                yet.
               </div>
             ) : (
               <ReviewGrid
@@ -476,8 +518,9 @@ function ProductPage() {
             {product.impressions
               .length === 0 ? (
               <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
-                This IEM does not
-                have any published
+                This product does
+                not have any
+                published
                 impressions yet.
               </div>
             ) : (
@@ -609,7 +652,8 @@ function TagPanel({
 }: {
   eyebrow: string
   title: string
-  children: React.ReactNode
+  children:
+    React.ReactNode
 }) {
   return (
     <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">

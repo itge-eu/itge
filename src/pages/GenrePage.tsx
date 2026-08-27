@@ -288,7 +288,7 @@ function GenrePage() {
                 (product) => (
                   <Link
                     key={product.id}
-                    to={`/products/${product.slug}`}
+                    to={`/gear/${product.slug}`}
                     className="group rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
                   >
                     <p className="text-sm uppercase tracking-[0.16em] text-[var(--accent)]">

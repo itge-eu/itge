@@ -3,11 +3,16 @@ import {
   useMemo,
   useState,
 } from "react"
-import { Link } from "react-router"
+
+import {
+  Link,
+} from "react-router"
 
 import {
   getProducts,
+  getProductTypeLabel,
   type ProductDirectoryItem,
+  type ProductType,
 } from "../lib/products"
 
 import usePageMetadata from "../hooks/usePageMetadata"
@@ -18,8 +23,33 @@ type ProductSort =
   | "recent"
   | "alphabetical"
 
+const PRODUCT_TYPES: {
+  value: ProductType
+  label: string
+}[] = [
+  {
+    value: "iem",
+    label: "IEMs",
+  },
+  {
+    value: "headphone",
+    label: "Headphones",
+  },
+  {
+    value: "source",
+    label: "Source gear",
+  },
+  {
+    value: "cable_accessory",
+    label: "Cables & accessories",
+  },
+]
+
 function ProductsPage() {
-  const [products, setProducts] =
+  const [
+    products,
+    setProducts,
+  ] =
     useState<
       ProductDirectoryItem[]
     >([])
@@ -27,7 +57,16 @@ function ProductsPage() {
   const [
     searchQuery,
     setSearchQuery,
-  ] = useState("")
+  ] =
+    useState("")
+
+  const [
+    selectedTypes,
+    setSelectedTypes,
+  ] =
+    useState<
+      ProductType[]
+    >([])
 
   const [sort, setSort] =
     useState<ProductSort>(
@@ -43,9 +82,11 @@ function ProductsPage() {
     >(null)
 
   usePageMetadata({
-    title: "IEMs | ITGE",
+    title:
+      "Gear | ITGE",
+
     description:
-      "Browse IEMs covered by IEM Tour Group Europe through full reviews and listening impressions.",
+      "Browse IEMs, headphones, source gear and accessories covered by IEM Tour Group Europe.",
   })
 
   useEffect(() => {
@@ -64,7 +105,7 @@ function ProductsPage() {
         }
       } catch (loadError) {
         console.error(
-          "Could not load IEM directory:",
+          "Could not load gear directory:",
           loadError,
         )
 
@@ -72,7 +113,7 @@ function ProductsPage() {
           setProducts([])
 
           setError(
-            "The IEM directory could not be loaded.",
+            "The gear directory could not be loaded.",
           )
         }
       } finally {
@@ -89,6 +130,30 @@ function ProductsPage() {
     }
   }, [])
 
+  const typeCounts =
+    useMemo(() => {
+      const counts:
+        Record<
+          ProductType,
+          number
+        > = {
+          iem: 0,
+          headphone: 0,
+          source: 0,
+          cable_accessory: 0,
+        }
+
+      products.forEach(
+        (product) => {
+          counts[
+            product.productType
+          ] += 1
+        },
+      )
+
+      return counts
+    }, [products])
+
   const visibleProducts =
     useMemo(() => {
       const normalizedQuery =
@@ -97,19 +162,40 @@ function ProductsPage() {
           .toLocaleLowerCase()
 
       const filtered =
-        normalizedQuery
-          ? products.filter(
-              (product) => {
-                const searchableText =
-                  `${product.brand.name} ${product.model}`
-                    .toLocaleLowerCase()
+        products.filter(
+          (product) => {
+            if (
+              selectedTypes.length >
+                0 &&
+              !selectedTypes.includes(
+                product.productType,
+              )
+            ) {
+              return false
+            }
 
-                return searchableText.includes(
-                  normalizedQuery,
-                )
-              },
+            if (
+              !normalizedQuery
+            ) {
+              return true
+            }
+
+            const searchableText =
+              [
+                product.brand.name,
+                product.model,
+                getProductTypeLabel(
+                  product.productType,
+                ),
+              ]
+                .join(" ")
+                .toLocaleLowerCase()
+
+            return searchableText.includes(
+              normalizedQuery,
             )
-          : [...products]
+          },
+        )
 
       return filtered.sort(
         (
@@ -134,8 +220,10 @@ function ProductsPage() {
             }
 
             return (
-              (second.coverageCount ?? 0) -
-              (first.coverageCount ?? 0)
+              (second.coverageCount ??
+                0) -
+              (first.coverageCount ??
+                0)
             )
           }
 
@@ -145,22 +233,29 @@ function ProductsPage() {
             const firstLatest =
               first.latestActivityAt ??
               first.latestReviewAt
-          
+
             const secondLatest =
               second.latestActivityAt ??
               second.latestReviewAt
-          
+
             const firstTime =
               firstLatest
-                ? new Date(firstLatest).getTime()
+                ? new Date(
+                    firstLatest,
+                  ).getTime()
                 : 0
-          
+
             const secondTime =
               secondLatest
-                ? new Date(secondLatest).getTime()
+                ? new Date(
+                    secondLatest,
+                  ).getTime()
                 : 0
-          
-            return secondTime - firstTime
+
+            return (
+              secondTime -
+              firstTime
+            )
           }
 
           if (
@@ -173,8 +268,10 @@ function ProductsPage() {
           }
 
           const coverageDifference =
-            (second.coverageCount ?? 0) -
-            (first.coverageCount ?? 0)
+            (second.coverageCount ??
+              0) -
+            (first.coverageCount ??
+              0)
 
           if (
             coverageDifference !==
@@ -184,8 +281,10 @@ function ProductsPage() {
           }
 
           const contributorDifference =
-            (second.contributorCount ?? 0) -
-            (first.contributorCount ?? 0)
+            (second.contributorCount ??
+              0) -
+            (first.contributorCount ??
+              0)
 
           if (
             contributorDifference !==
@@ -215,6 +314,7 @@ function ProductsPage() {
     }, [
       products,
       searchQuery,
+      selectedTypes,
       sort,
     ])
 
@@ -256,10 +356,40 @@ function ProductsPage() {
             product,
           ) =>
             total +
-            (product.impressionCount ?? 0),
+            (product.impressionCount ??
+              0),
           0,
         ),
       [products],
+    )
+
+  function toggleType(
+    type: ProductType,
+  ) {
+    setSelectedTypes(
+      (current) =>
+        current.includes(type)
+          ? current.filter(
+              (item) =>
+                item !== type,
+            )
+          : [
+              ...current,
+              type,
+            ],
+    )
+  }
+
+  function clearFilters() {
+    setSelectedTypes([])
+    setSearchQuery("")
+  }
+
+  const hasFilters =
+    selectedTypes.length >
+      0 ||
+    Boolean(
+      searchQuery.trim(),
     )
 
   return (
@@ -271,52 +401,104 @@ function ProductsPage() {
           </p>
 
           <h1 className="mt-4 text-5xl font-semibold tracking-tight sm:text-6xl">
-            IEMs
+            Gear
           </h1>
 
           <p className="mt-5 text-lg leading-8 text-[var(--muted)]">
-            Browse every IEM
-            represented in the ITGE
-            library. Search by model
-            or brand, then open
-            an IEM to explore its full
-            reviews, listening
-            impressions, contributors
-            and music references.
+            Explore all gear
+            represented in the
+            ITGE library, from
+            IEMs and headphones
+            to source gear and
+            accessories. Search by
+            product or brand, or
+            filter by gear type.
           </p>
         </header>
 
         {!loading &&
           !error &&
-          products.length > 0 && (
+          products.length >
+            0 && (
             <section className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <SummaryCard
-                label="IEMs represented"
-                value={products.length.toString()}
+                label="Gear represented"
+                value={
+                  products.length.toString()
+                }
               />
 
               <SummaryCard
                 label="Brands"
-                value={brandCount.toString()}
+                value={
+                  brandCount.toString()
+                }
               />
 
               <SummaryCard
                 label="Published reviews"
-                value={totalReviewCount.toString()}
+                value={
+                  totalReviewCount.toString()
+                }
               />
 
               <SummaryCard
                 label="Published impressions"
-                value={totalImpressionCount.toString()}
+                value={
+                  totalImpressionCount.toString()
+                }
               />
             </section>
           )}
 
         <section className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6">
-          <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_15rem]">
+          <div>
+            <p className="text-sm font-semibold">
+              Gear type
+            </p>
+
+            <p className="mt-1 text-sm text-[var(--muted)]">
+              Select multiple
+              types, or leave all
+              unselected to show
+              everything.
+            </p>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              {PRODUCT_TYPES.map(
+                (type) => (
+                  <TypeFilterButton
+                    key={
+                      type.value
+                    }
+                    label={
+                      type.label
+                    }
+                    count={
+                      typeCounts[
+                        type.value
+                      ]
+                    }
+                    active={
+                      selectedTypes.includes(
+                        type.value,
+                      )
+                    }
+                    onClick={() =>
+                      toggleType(
+                        type.value,
+                      )
+                    }
+                  />
+                ),
+              )}
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-4 border-t border-[var(--border)] pt-6 md:grid-cols-[minmax(0,1fr)_15rem]">
             <label className="block">
               <span className="sr-only">
-                Search IEMs
+                Search gear
               </span>
 
               <div className="relative">
@@ -336,7 +518,7 @@ function ProductsPage() {
                         .value,
                     )
                   }
-                  placeholder="Search by IEM or brand…"
+                  placeholder="Search by product or brand…"
                   className="w-full rounded-2xl border border-[var(--border)] bg-[var(--background)] py-3 pl-11 pr-4 text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--accent)]"
                 />
               </div>
@@ -344,7 +526,7 @@ function ProductsPage() {
 
             <label className="block">
               <span className="sr-only">
-                Sort IEMs
+                Sort gear
               </span>
 
               <select
@@ -381,41 +563,41 @@ function ProductsPage() {
           </div>
         </section>
 
-        <div className="mt-8 flex items-center justify-between gap-4">
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
           <p className="text-sm text-[var(--muted)]">
             {loading
-              ? "Loading IEMs…"
+              ? "Loading gear…"
               : `${visibleProducts.length} ${
                   visibleProducts.length ===
                   1
-                    ? "IEM"
-                    : "IEMs"
+                    ? "product"
+                    : "products"
                 }`}
           </p>
 
-          {searchQuery && (
+          {hasFilters && (
             <button
               type="button"
-              onClick={() =>
-                setSearchQuery(
-                  "",
-                )
+              onClick={
+                clearFilters
               }
               className="text-sm font-semibold text-[var(--accent)] transition hover:opacity-75"
             >
-              Clear search
+              Clear filters
             </button>
           )}
         </div>
 
         {loading ? (
           <DirectoryMessage>
-            Loading IEM directory…
+            Loading gear
+            directory…
           </DirectoryMessage>
         ) : error ? (
           <DirectoryMessage>
             <p className="font-semibold text-[var(--foreground)]">
-              Unable to load IEMs
+              Unable to load
+              gear
             </p>
 
             <p className="mt-2">
@@ -425,23 +607,28 @@ function ProductsPage() {
         ) : products.length ===
           0 ? (
           <DirectoryMessage>
-            No IEMs with published
-            reviews or impressions
-            are available yet.
+            No gear with
+            published reviews or
+            impressions is
+            available yet.
           </DirectoryMessage>
         ) : visibleProducts.length ===
           0 ? (
           <DirectoryMessage>
-            No IEMs match “
-            {searchQuery.trim()}”.
+            No gear matches the
+            current filters.
           </DirectoryMessage>
         ) : (
           <section className="mt-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {visibleProducts.map(
               (product) => (
                 <ProductDirectoryCard
-                  key={product.id}
-                  product={product}
+                  key={
+                    product.id
+                  }
+                  product={
+                    product
+                  }
                 />
               ),
             )}
@@ -455,29 +642,38 @@ function ProductsPage() {
 function ProductDirectoryCard({
   product,
 }: {
-  product: ProductDirectoryItem
+  product:
+    ProductDirectoryItem
 }) {
   return (
     <Link
-      to={`/products/${product.slug}`}
+      to={`/gear/${product.slug}`}
       className="group overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] transition hover:-translate-y-1 hover:border-[var(--accent)]"
     >
-      {product.heroImageUrl ? (
-        <div className="aspect-[16/10] overflow-hidden bg-[var(--surface-soft)]">
-          <img
-            src={
-              product.heroImageUrl
-            }
-            alt={`${product.brand.name} ${product.model}`}
-            loading="lazy"
-            className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.025]"
-          />
-        </div>
-      ) : (
-        <div className="flex aspect-[16/10] items-center justify-center bg-[var(--surface-soft)] px-6 text-center text-sm text-[var(--muted)]">
-          No image available
-        </div>
-      )}
+      <div className="relative">
+        {product.heroImageUrl ? (
+          <div className="aspect-[16/10] overflow-hidden bg-[var(--surface-soft)]">
+            <img
+              src={
+                product.heroImageUrl
+              }
+              alt={`${product.brand.name} ${product.model}`}
+              loading="lazy"
+              className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.025]"
+            />
+          </div>
+        ) : (
+          <div className="flex aspect-[16/10] items-center justify-center bg-[var(--surface-soft)] px-6 text-center text-sm text-[var(--muted)]">
+            No image available
+          </div>
+        )}
+
+        <span className="absolute left-4 top-4 rounded-full border border-white/25 bg-black/55 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+          {getProductTypeLabel(
+            product.productType,
+          )}
+        </span>
+      </div>
 
       <div className="p-6">
         <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
@@ -499,16 +695,22 @@ function ProductDirectoryCard({
                 ? "Review"
                 : "Reviews"
             }
-            value={product.reviewCount.toString()}
+            value={
+              product.reviewCount.toString()
+            }
           />
 
           <Metric
             label={
-              (product.impressionCount ?? 0) === 1
+              (product.impressionCount ??
+                0) === 1
                 ? "Impression"
                 : "Impressions"
             }
-            value={(product.impressionCount ?? 0).toString()}
+            value={(
+              product.impressionCount ??
+              0
+            ).toString()}
           />
 
           <Metric
@@ -520,12 +722,10 @@ function ProductDirectoryCard({
                 ? "Contributor"
                 : "Contributors"
             }
-            value={
-              (
-                product.contributorCount ??
-                product.reviewerCount
-              ).toString()
-            }
+            value={(
+              product.contributorCount ??
+              product.reviewerCount
+            ).toString()}
           />
 
           <Metric
@@ -542,6 +742,47 @@ function ProductDirectoryCard({
         </div>
       </div>
     </Link>
+  )
+}
+
+function TypeFilterButton({
+  label,
+  count,
+  active,
+  onClick,
+}: {
+  label: string
+  count: number
+  active: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={
+        onClick
+      }
+      aria-pressed={
+        active
+      }
+      className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
+        active
+          ? "bg-[var(--accent)] text-[var(--accent-foreground)]"
+          : "border border-[var(--border)] bg-[var(--background)] hover:border-[var(--accent)]"
+      }`}
+    >
+      {label}
+
+      <span
+        className={`ml-2 ${
+          active
+            ? "opacity-75"
+            : "text-[var(--muted)]"
+        }`}
+      >
+        {count}
+      </span>
+    </button>
   )
 }
 
@@ -588,7 +829,8 @@ function SummaryCard({
 function DirectoryMessage({
   children,
 }: {
-  children: React.ReactNode
+  children:
+    React.ReactNode
 }) {
   return (
     <div className="mt-6 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">

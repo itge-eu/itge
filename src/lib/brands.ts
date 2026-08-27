@@ -10,6 +10,7 @@ import type {
 
 import type {
   ProductDirectoryItem,
+  ProductType,
 } from "./products"
 
 export type BrandContributor = {
@@ -84,6 +85,7 @@ type BrandReviewRow = {
         id: number
         model: string
         slug: string
+        product_type: ProductType | null
 
         brands:
           | {
@@ -102,6 +104,7 @@ type BrandReviewRow = {
         id: number
         model: string
         slug: string
+        product_type: ProductType | null
 
         brands:
           | {
@@ -147,6 +150,7 @@ type BrandImpressionRow = {
         id: number
         model: string
         slug: string
+        product_type: ProductType | null
 
         brands:
           | {
@@ -165,6 +169,7 @@ type BrandImpressionRow = {
         id: number
         model: string
         slug: string
+        product_type: ProductType | null
 
         brands:
           | {
@@ -190,6 +195,15 @@ function getSingleRelation<T>(
   }
 
   return relation ?? null
+}
+
+function normalizeProductType(
+  value:
+    | ProductType
+    | null
+    | undefined,
+): ProductType {
+  return value ?? "iem"
 }
 
 function timestampValue(
@@ -291,9 +305,11 @@ function mapImpression(
     slug: row.slug,
     title: row.title,
     summary: row.summary,
-	body: row.body,
+    body: row.body,
+
     heroImageUrl:
       row.hero_image_url,
+
     publishedAt:
       row.published_at,
 
@@ -302,12 +318,12 @@ function mapImpression(
       name: reviewer.name,
       slug: reviewer.slug,
     },
-    
+
     product: {
       id: Number(product.id),
       model: product.model,
       slug: product.slug,
-    
+
       brand: {
         id: Number(brand.id),
         name: brand.name,
@@ -425,6 +441,7 @@ function collectProducts(
     id: number
     model: string
     slug: string
+    productType: ProductType
 
     brand: {
       id: number
@@ -447,6 +464,10 @@ function collectProducts(
       id: number
       model: string
       slug: string
+      product_type:
+        | ProductType
+        | null
+
       brands:
         | {
             id: number
@@ -486,12 +507,19 @@ function collectProducts(
         model: product.model,
         slug: product.slug,
 
+        productType:
+          normalizeProductType(
+            product.product_type,
+          ),
+
         brand: {
           id: Number(
             brand.id,
           ),
+
           name:
             brand.name,
+
           slug:
             brand.slug,
         },
@@ -500,7 +528,10 @@ function collectProducts(
         impressions: [],
       }
 
-    products.set(id, created)
+    products.set(
+      id,
+      created,
+    )
 
     return created
   }
@@ -515,7 +546,9 @@ function collectProducts(
       return
     }
 
-    ensureProduct(product)?.reviews.push(
+    ensureProduct(
+      product,
+    )?.reviews.push(
       row,
     )
   })
@@ -662,6 +695,9 @@ function collectProducts(
         model: product.model,
         slug: product.slug,
 
+        productType:
+          product.productType,
+
         brand:
           product.brand,
 
@@ -788,12 +824,12 @@ export async function getBrandBySlug(
         rating,
         title,
         summary,
-		body,
+        body,
         hero_image_url,
         published_at,
 
         reviewers (
-		  id,
+          id,
           name,
           slug
         ),
@@ -802,6 +838,7 @@ export async function getBrandBySlug(
           id,
           model,
           slug,
+          product_type,
 
           brands!inner (
             id,
@@ -834,13 +871,13 @@ export async function getBrandBySlug(
         slug,
         title,
         summary,
-		body,
+        body,
         hero_image_url,
         published_at,
         source_url,
 
         reviewers (
-		  id,
+          id,
           name,
           slug
         ),
@@ -849,6 +886,7 @@ export async function getBrandBySlug(
           id,
           model,
           slug,
+          product_type,
 
           brands!inner (
             id,
@@ -875,11 +913,15 @@ export async function getBrandBySlug(
       ),
   ])
 
-  if (reviewsResult.error) {
+  if (
+    reviewsResult.error
+  ) {
     throw reviewsResult.error
   }
 
-  if (impressionsResult.error) {
+  if (
+    impressionsResult.error
+  ) {
     throw impressionsResult.error
   }
 
@@ -930,8 +972,13 @@ export async function getBrandBySlug(
     id: Number(
       brand.id,
     ),
-    name: brand.name,
-    slug: brand.slug,
+
+    name:
+      brand.name,
+
+    slug:
+      brand.slug,
+
     website:
       brand.website,
 
@@ -959,10 +1006,16 @@ export async function getBrandBySlug(
     products,
 
     latestReviews:
-      reviews.slice(0, 6),
+      reviews.slice(
+        0,
+        6,
+      ),
 
     latestImpressions:
-      impressions.slice(0, 6),
+      impressions.slice(
+        0,
+        6,
+      ),
   }
 }
 
@@ -1080,7 +1133,7 @@ export async function getBrands(): Promise<
             total +
             (
               product.impressions ??
-              []
+                []
             ).filter(
               (impression) =>
                 impression.published,
@@ -1092,8 +1145,10 @@ export async function getBrands(): Promise<
         id: Number(
           brand.id,
         ),
+
         name:
           brand.name,
+
         slug:
           brand.slug,
 

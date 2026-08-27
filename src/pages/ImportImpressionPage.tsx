@@ -9,11 +9,18 @@ import type {
 
 import {
   Link,
+  useNavigate,
 } from "react-router"
 
 import {
   supabase,
 } from "../lib/supabase"
+
+type ProductType =
+  | "iem"
+  | "headphone"
+  | "source"
+  | "cable_accessory"
 
 type HeadFiImage = {
   url: string
@@ -73,6 +80,10 @@ type ProductOption = {
   model: string
   slug: string
 
+  product_type:
+    | ProductType
+    | null
+
   brands:
     | {
         name: string
@@ -81,11 +92,6 @@ type ProductOption = {
         name: string
       }[]
     | null
-}
-
-type SavedImpression = {
-  id: number
-  slug: string
 }
 
 function getSingleRelation<T>(
@@ -202,6 +208,28 @@ function getProductLabel(
     .join(" ")
 }
 
+function getProductTypeLabel(
+  type:
+    | ProductType
+    | null
+    | undefined,
+) {
+  switch (type) {
+    case "headphone":
+      return "Headphone"
+
+    case "source":
+      return "Source gear"
+
+    case "cable_accessory":
+      return "Cable / accessory"
+
+    case "iem":
+    default:
+      return "IEM"
+  }
+}
+
 function buildSummary(
   bodyText:
     | string
@@ -233,6 +261,9 @@ function buildSummary(
 }
 
 function ImportImpressionPage() {
+  const navigate =
+    useNavigate()
+
   const [
     rawJson,
     setRawJson,
@@ -284,6 +315,14 @@ function ImportImpressionPage() {
     useState("")
 
   const [
+    selectedProductType,
+    setSelectedProductType,
+  ] =
+    useState<ProductType>(
+      "iem",
+    )
+
+  const [
     productSearch,
     setProductSearch,
   ] =
@@ -312,14 +351,6 @@ function ImportImpressionPage() {
     setError,
   ] =
     useState<string | null>(
-      null,
-    )
-
-  const [
-    savedImpression,
-    setSavedImpression,
-  ] =
-    useState<SavedImpression | null>(
       null,
     )
 
@@ -365,6 +396,9 @@ function ImportImpressionPage() {
               ),
               product.model,
               product.slug,
+              getProductTypeLabel(
+                product.product_type,
+              ),
             ]
               .join(" ")
               .toLowerCase()
@@ -468,6 +502,7 @@ function ImportImpressionPage() {
           id,
           model,
           slug,
+          product_type,
 
           brands (
             name
@@ -497,13 +532,19 @@ function ImportImpressionPage() {
     setExistingImpression(
       null,
     )
-    setSavedImpression(
-      null,
-    )
+
     setSelectedReviewerId(
       "",
     )
-    setSelectedProductId("")
+
+    setSelectedProductId(
+      "",
+    )
+
+    setSelectedProductType(
+      "iem",
+    )
+
     setProductSearch("")
     setProductPickerOpen(false)
 
@@ -598,9 +639,9 @@ function ImportImpressionPage() {
 
       /*
        * Forum posts do not expose a
-       * reliable structured IEM ID,
-       * so we deliberately select
-       * this manually.
+       * reliable structured product ID,
+       * so the product is selected
+       * manually.
        */
       setProductPickerOpen(
         true,
@@ -648,7 +689,7 @@ function ImportImpressionPage() {
 
     if (!selectedReviewerId) {
       setError(
-        "Select an ITGE contributor.",
+        "Select an ITGE member.",
       )
 
       return
@@ -656,7 +697,7 @@ function ImportImpressionPage() {
 
     if (!selectedProductId) {
       setError(
-        "Select an ITGE IEM.",
+        "Select an ITGE product.",
       )
 
       return
@@ -683,7 +724,7 @@ function ImportImpressionPage() {
       !selectedProduct
     ) {
       setError(
-        "The selected contributor or IEM could not be found.",
+        "The selected member or product could not be found.",
       )
 
       return
@@ -705,12 +746,6 @@ function ImportImpressionPage() {
     const title =
       `${fullProductName} impression`
 
-    /*
-     * Include source post ID so the
-     * same contributor can have more
-     * than one impression of an IEM
-     * without slug collisions.
-     */
     const slug =
       slugify(
         `${fullProductName}-${selectedReviewer.name}-${importData.postId}`,
@@ -718,11 +753,37 @@ function ImportImpressionPage() {
 
     setSaving(true)
     setError(null)
-    setSavedImpression(
-      null,
-    )
 
     try {
+      /*
+       * Keep the selected product's
+       * classification up to date.
+       */
+      const {
+        error:
+          productUpdateError,
+      } =
+        await supabase
+          .from("products")
+          .update({
+            product_type:
+              selectedProductType,
+          })
+          .eq(
+            "id",
+            Number(
+              selectedProductId,
+            ),
+          )
+
+      if (
+        productUpdateError
+      ) {
+        throw new Error(
+          `The product type could not be saved: ${productUpdateError.message}`,
+        )
+      }
+
       const {
         data:
           insertedImpression,
@@ -751,23 +812,9 @@ function ImportImpressionPage() {
             summary:
               suggestedSummary,
 
-            /*
-             * Keep original Head-Fi
-             * HTML in the draft.
-             *
-             * Its image URLs will be
-             * localised later from the
-             * admin impression editor.
-             */
             body:
               importData.bodyHtml,
 
-            /*
-             * Temporary hero preview.
-             * This remains a Head-Fi URL
-             * until images are deliberately
-             * copied from the editor.
-             */
             hero_image_url:
               importData.images[0]
                 ?.url ?? null,
@@ -787,14 +834,6 @@ function ImportImpressionPage() {
             source_post_id:
               importData.postId,
 
-            /*
-             * Preserve everything the
-             * bookmarklet discovered.
-             *
-             * The editor needs this for
-             * pending images and media/
-             * artist suggestions later.
-             */
             import_data: {
               sourceType:
                 importData.sourceType,
@@ -846,15 +885,9 @@ function ImportImpressionPage() {
         throw insertError
       }
 
-      setSavedImpression({
-        id:
-          Number(
-            insertedImpression.id,
-          ),
-
-        slug:
-          insertedImpression.slug,
-      })
+      navigate(
+        `/admin/impressions/${insertedImpression.id}/edit`,
+      )
     } catch (saveError) {
       console.error(
         "Saving impression failed:",
@@ -875,9 +908,11 @@ function ImportImpressionPage() {
   function handleClear() {
     setRawJson("")
     setImportData(null)
+
     setExistingImpression(
       null,
     )
+
     setReviewers([])
     setProducts([])
 
@@ -889,13 +924,14 @@ function ImportImpressionPage() {
       "",
     )
 
-    setProductSearch("")
-    setProductPickerOpen(
-      false,
+    setSelectedProductType(
+      "iem",
     )
 
-    setSavedImpression(
-      null,
+    setProductSearch("")
+
+    setProductPickerOpen(
+      false,
     )
 
     setError(null)
@@ -1016,7 +1052,7 @@ function ImportImpressionPage() {
                 <p className="mt-2 text-[var(--muted)]">
                   By{" "}
                   {importData.author ??
-                    "unknown contributor"}
+                    "unknown member"}
                 </p>
               </div>
 
@@ -1045,15 +1081,13 @@ function ImportImpressionPage() {
                     : "draft"}
                 </p>
 
-                {existingImpression.published && (
-                  <Link
-                    to={`/impressions/${existingImpression.slug}`}
-                    className="mt-3 inline-block text-[var(--accent)] underline"
-                  >
-                    Open existing
-                    public impression
-                  </Link>
-                )}
+                <Link
+                  to={`/admin/impressions/${existingImpression.id}/edit`}
+                  className="mt-3 inline-block text-[var(--accent)] underline"
+                >
+                  Edit existing
+                  impression
+                </Link>
               </div>
             )}
 
@@ -1121,7 +1155,7 @@ function ImportImpressionPage() {
                   htmlFor="impression-reviewer"
                   className="block text-sm font-semibold"
                 >
-                  ITGE contributor
+                  ITGE member
                 </label>
 
                 <select
@@ -1140,7 +1174,7 @@ function ImportImpressionPage() {
                   className="mt-3 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3"
                 >
                   <option value="">
-                    Select contributor
+                    Select member
                   </option>
 
                   {reviewers.map(
@@ -1174,147 +1208,211 @@ function ImportImpressionPage() {
                 )}
               </div>
 
-              <div className="relative">
-                <label
-                  htmlFor="impression-product-search"
-                  className="block text-sm font-semibold"
-                >
-                  ITGE IEM
-                </label>
+              <div>
+                <div className="relative">
+                  <label
+                    htmlFor="impression-product-search"
+                    className="block text-sm font-semibold"
+                  >
+                    ITGE product
+                  </label>
 
-                <input
-                  id="impression-product-search"
-                  type="text"
-                  value={
-                    productSearch
-                  }
-                  autoComplete="off"
-                  placeholder="Search by brand or model"
-                  onFocus={() =>
-                    setProductPickerOpen(
-                      true,
-                    )
-                  }
-                  onChange={(
-                    event,
-                  ) => {
-                    setProductSearch(
-                      event.target
-                        .value,
-                    )
-
-                    setSelectedProductId(
-                      "",
-                    )
-
-                    setProductPickerOpen(
-                      true,
-                    )
-                  }}
-                  className="mt-3 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 outline-none transition focus:border-[var(--accent)]"
-                />
-
-                {productPickerOpen &&
-                  !selectedProduct && (
-                  <div className="absolute z-20 mt-2 max-h-72 w-full overflow-y-auto rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2 shadow-xl">
-                    {filteredProducts.length >
-                    0 ? (
-                      filteredProducts.map(
-                        (
-                          product,
-                        ) => (
-                          <button
-                            key={
-                              product.id
-                            }
-                            type="button"
-                            onClick={() => {
-                              setSelectedProductId(
-                                String(
-                                  product.id,
-                                ),
-                              )
-
-                              setProductSearch(
-                                getProductLabel(
-                                  product,
-                                ),
-                              )
-
-                              setProductPickerOpen(
-                                false,
-                              )
-                            }}
-                            className="block w-full rounded-lg px-3 py-3 text-left transition hover:bg-[var(--surface-soft)]"
-                          >
-                            <span className="block font-medium">
-                              {getProductLabel(
-                                product,
-                              )}
-                            </span>
-
-                            <span className="mt-1 block text-xs text-[var(--muted)]">
-                              {
-                                product.slug
-                              }
-                            </span>
-                          </button>
-                        ),
+                  <input
+                    id="impression-product-search"
+                    type="text"
+                    value={
+                      productSearch
+                    }
+                    autoComplete="off"
+                    placeholder="Search by brand or model"
+                    onFocus={() =>
+                      setProductPickerOpen(
+                        true,
                       )
-                    ) : (
-                      <div className="px-3 py-4">
-                        <p className="font-medium">
-                          No matching
-                          IEM found.
+                    }
+                    onChange={(
+                      event,
+                    ) => {
+                      setProductSearch(
+                        event.target
+                          .value,
+                      )
+
+                      setSelectedProductId(
+                        "",
+                      )
+
+                      setSelectedProductType(
+                        "iem",
+                      )
+
+                      setProductPickerOpen(
+                        true,
+                      )
+                    }}
+                    className="mt-3 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 outline-none transition focus:border-[var(--accent)]"
+                  />
+
+                  {productPickerOpen &&
+                    !selectedProduct && (
+                    <div className="absolute z-20 mt-2 max-h-72 w-full overflow-y-auto rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2 shadow-xl">
+                      {filteredProducts.length >
+                      0 ? (
+                        filteredProducts.map(
+                          (
+                            product,
+                          ) => (
+                            <button
+                              key={
+                                product.id
+                              }
+                              type="button"
+                              onClick={() => {
+                                setSelectedProductId(
+                                  String(
+                                    product.id,
+                                  ),
+                                )
+
+                                setProductSearch(
+                                  getProductLabel(
+                                    product,
+                                  ),
+                                )
+
+                                setSelectedProductType(
+                                  product.product_type ??
+                                    "iem",
+                                )
+
+                                setProductPickerOpen(
+                                  false,
+                                )
+                              }}
+                              className="block w-full rounded-lg px-3 py-3 text-left transition hover:bg-[var(--surface-soft)]"
+                            >
+                              <span className="block font-medium">
+                                {getProductLabel(
+                                  product,
+                                )}
+                              </span>
+
+                              <span className="mt-1 block text-xs text-[var(--muted)]">
+                                {
+                                  getProductTypeLabel(
+                                    product.product_type,
+                                  )
+                                }
+                                {" · "}
+                                {
+                                  product.slug
+                                }
+                              </span>
+                            </button>
+                          ),
+                        )
+                      ) : (
+                        <div className="px-3 py-4">
+                          <p className="font-medium">
+                            No matching
+                            product found.
+                          </p>
+
+                          <p className="mt-1 text-sm text-[var(--muted)]">
+                            Check the
+                            spelling or
+                            create the
+                            product before
+                            importing
+                            this
+                            impression.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {selectedProduct && (
+                    <div className="mt-3 flex items-center justify-between gap-4 rounded-xl border border-[var(--accent)] bg-[var(--accent)]/10 px-4 py-3">
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.14em] text-[var(--muted)]">
+                          Selected product
                         </p>
 
-                        <p className="mt-1 text-sm text-[var(--muted)]">
-                          Check the
-                          spelling or
-                          create the
-                          IEM before
-                          importing
-                          this
-                          impression.
+                        <p className="mt-1 font-semibold">
+                          {getProductLabel(
+                            selectedProduct,
+                          )}
                         </p>
                       </div>
-                    )}
-                  </div>
-                )}
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedProductId(
+                            "",
+                          )
+
+                          setSelectedProductType(
+                            "iem",
+                          )
+
+                          setProductSearch(
+                            "",
+                          )
+
+                          setProductPickerOpen(
+                            true,
+                          )
+                        }}
+                        className="text-sm font-medium text-[var(--accent)]"
+                      >
+                        Change
+                      </button>
+                    </div>
+                  )}
+                </div>
 
                 {selectedProduct && (
-                  <div className="mt-3 flex items-center justify-between gap-4 rounded-xl border border-[var(--accent)] bg-[var(--accent)]/10 px-4 py-3">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.14em] text-[var(--muted)]">
-                        Selected IEM
-                      </p>
-
-                      <p className="mt-1 font-semibold">
-                        {getProductLabel(
-                          selectedProduct,
-                        )}
-                      </p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedProductId(
-                          "",
-                        )
-
-                        setProductSearch(
-                          "",
-                        )
-
-                        setProductPickerOpen(
-                          true,
-                        )
-                      }}
-                      className="text-sm font-medium text-[var(--accent)]"
+                  <div className="mt-5">
+                    <label
+                      htmlFor="impression-product-type"
+                      className="block text-sm font-semibold"
                     >
-                      Change
-                    </button>
+                      Product type
+                    </label>
+
+                    <select
+                      id="impression-product-type"
+                      value={
+                        selectedProductType
+                      }
+                      onChange={(
+                        event,
+                      ) =>
+                        setSelectedProductType(
+                          event.target
+                            .value as ProductType,
+                        )
+                      }
+                      className="mt-3 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3"
+                    >
+                      <option value="iem">
+                        IEM
+                      </option>
+
+                      <option value="headphone">
+                        Headphone
+                      </option>
+
+                      <option value="source">
+                        Source gear
+                      </option>
+
+                      <option value="cable_accessory">
+                        Cable / accessory
+                      </option>
+                    </select>
                   </div>
                 )}
               </div>
@@ -1571,78 +1669,37 @@ function ImportImpressionPage() {
                 />
               )}
 
-              {savedImpression ? (
-                <div className="w-full rounded-xl border border-green-500/40 bg-green-500/10 px-4 py-4">
-                  <p className="font-semibold">
-                    Impression draft
-                    saved successfully.
-                  </p>
+              <button
+                type="button"
+                onClick={() =>
+                  void handleSaveDraft()
+                }
+                disabled={
+                  saving ||
+                  Boolean(
+                    existingImpression,
+                  ) ||
+                  !selectedReviewerId ||
+                  !selectedProductId
+                }
+                className="rounded-xl bg-[var(--accent)] px-5 py-3 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {saving
+                  ? "Saving…"
+                  : "Save impression draft"}
+              </button>
 
-                  <p className="mt-2 text-sm">
-                    ID{" "}
-                    {
-                      savedImpression.id
-                    }
-                    {" · "}
-                    {
-                      savedImpression.slug
-                    }
-                  </p>
-				  
-				  <Link
-                    to={`/admin/impressions/${savedImpression.id}/edit`}
-                    className="mt-4 inline-flex rounded-xl bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
-                  >
-                    Edit impression
-                  </Link>
-
-                  <p className="mt-2 text-sm text-[var(--muted)]">
-                    The complete
-                    bookmarklet data,
-                    including inline
-                    images,
-                    attachments and
-                    media references,
-                    has been retained
-                    with the draft.
-                  </p>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() =>
-                    void handleSaveDraft()
-                  }
-                  disabled={
-                    saving ||
-                    Boolean(
-                      existingImpression,
-                    ) ||
-                    !selectedReviewerId ||
-                    !selectedProductId
-                  }
-                  className="rounded-xl bg-[var(--accent)] px-5 py-3 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {saving
-                    ? "Saving…"
-                    : "Save impression draft"}
-                </button>
-              )}
-
-              {!selectedReviewerId &&
-                !savedImpression && (
+              {!selectedReviewerId && (
                 <span className="text-sm text-[var(--muted)]">
-                  Select a
-                  contributor before
-                  saving.
+                  Select a member
+                  before saving.
                 </span>
               )}
 
               {selectedReviewerId &&
-                !selectedProductId &&
-                !savedImpression && (
+                !selectedProductId && (
                 <span className="text-sm text-[var(--muted)]">
-                  Select an IEM
+                  Select a product
                   before saving.
                 </span>
               )}
@@ -1681,7 +1738,7 @@ function ErrorBox({
   message: string
 }) {
   return (
-    <div className="mt-5 w-full rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm">
+    <div className="w-full rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm">
       {message}
     </div>
   )

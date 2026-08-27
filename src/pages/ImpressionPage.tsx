@@ -127,7 +127,7 @@ function ImpressionPage() {
             },
             {
               label: impression.product.model,
-              to: `/products/${impression.product.slug}`,
+              to: `/gear/${impression.product.slug}`,
             },
             {
               label: `${impression.reviewer.name} impression`,
@@ -151,7 +151,7 @@ function ImpressionPage() {
             <div className="min-w-0">
               <h1 className="text-4xl font-semibold tracking-tight sm:text-6xl">
                 <Link
-                  to={`/products/${impression.product.slug}`}
+                  to={`/gear/${impression.product.slug}`}
                   className="transition hover:text-[var(--accent)]"
                 >
                   {impression.product.model}

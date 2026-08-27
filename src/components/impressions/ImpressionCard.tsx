@@ -15,7 +15,7 @@ function ImpressionCard({
     `/impressions/${impression.slug}`
 
   const productUrl =
-    `/products/${impression.product.slug}`
+    `/g/${impression.product.slug}`
 
   const reviewerUrl =
     `/members/${impression.reviewer.slug}`

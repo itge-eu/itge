@@ -12,7 +12,7 @@ function ReviewCard({
   variant = "default",
 }: ReviewCardProps) {
   const productUrl =
-    `/products/${review.productSlug}`
+    `/ge/${review.productSlug}`
 
   const reviewerUrl =
     `/members/${review.reviewerSlug}`

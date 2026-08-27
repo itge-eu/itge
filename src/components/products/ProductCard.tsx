@@ -7,7 +7,7 @@ type ProductCardProps = {
 }
 
 function ProductCard({ product }: ProductCardProps) {
-  const productUrl = `/products/${product.slug}`
+  const productUrl = `/gear/${product.slug}`
   const brandUrl =
     `/brands/${product.brand.slug}`
 

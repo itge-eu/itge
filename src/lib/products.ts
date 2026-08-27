@@ -11,6 +11,12 @@ import {
   type ImpressionSummary,
 } from "./impressions"
 
+export type ProductType =
+  | "iem"
+  | "headphone"
+  | "source"
+  | "cable_accessory"
+
 export type ProductReviewer = {
   name: string
   slug: string
@@ -21,6 +27,7 @@ export type ProductDirectoryItem = {
   id: number
   model: string
   slug: string
+  productType: ProductType
 
   brand: {
     id: number
@@ -35,14 +42,6 @@ export type ProductDirectoryItem = {
   averageRating: number | null
   latestReviewAt: string | null
 
-  /*
-   * Impression-aware directory fields.
-   *
-   * Optional temporarily because brands.ts
-   * still constructs the older review-only shape.
-   * We'll make these required again when brand
-   * integration is updated next.
-   */
   impressionCount?: number
   coverageCount?: number
   contributorCount?: number
@@ -53,6 +52,7 @@ export type ProductProfile = {
   id: number
   model: string
   slug: string
+  productType: ProductType
 
   brand: {
     id: number
@@ -79,6 +79,7 @@ type ProductRow = {
   id: number
   model: string
   slug: string
+  product_type: ProductType | null
 
   release_year: number | null
   driver_configuration: string | null
@@ -134,6 +135,7 @@ type ProductDirectoryRow = {
   id: number
   model: string
   slug: string
+  product_type: ProductType | null
 
   brands:
     | {
@@ -260,6 +262,31 @@ function getSingleRelation<T>(
   return relation ?? null
 }
 
+export function getProductTypeLabel(
+  type: ProductType,
+): string {
+  switch (type) {
+    case "headphone":
+      return "Headphone"
+
+    case "source":
+      return "Source gear"
+
+    case "cable_accessory":
+      return "Cable / accessory"
+
+    case "iem":
+    default:
+      return "IEM"
+  }
+}
+
+function normalizeProductType(
+  value: ProductType | null | undefined,
+): ProductType {
+  return value ?? "iem"
+}
+
 function mapFeaturedReview(
   row: ProductReviewRow,
 ): FeaturedReview {
@@ -280,7 +307,7 @@ function mapFeaturedReview(
     !brand
   ) {
     throw new Error(
-      `Review ${row.id} has incomplete IEM page data`,
+      `Review ${row.id} has incomplete product page data`,
     )
   }
 
@@ -521,6 +548,7 @@ export async function getProductBySlug(
       id,
       model,
       slug,
+      product_type,
       release_year,
       driver_configuration,
       launch_price,
@@ -556,7 +584,7 @@ export async function getProductBySlug(
 
   if (!brand) {
     throw new Error(
-      `IEM ${product.id} has no associated brand`,
+      `Product ${product.id} has no associated brand`,
     )
   }
 
@@ -656,6 +684,11 @@ export async function getProductBySlug(
     model: product.model,
     slug: product.slug,
 
+    productType:
+      normalizeProductType(
+        product.product_type,
+      ),
+
     brand: {
       id: Number(
         brand.id,
@@ -719,6 +752,7 @@ export async function getProducts(): Promise<
       id,
       model,
       slug,
+      product_type,
 
       brands (
         id,
@@ -802,9 +836,9 @@ export async function getProducts(): Promise<
       )
 
       /*
-       * Directory should only contain
-       * IEMs represented by actual
-       * published ITGE content.
+       * Gear directory only contains
+       * products represented by actual
+       * published ITGE coverage.
        */
       if (
         reviews.length === 0 &&
@@ -918,6 +952,11 @@ export async function getProducts(): Promise<
 
           model: row.model,
           slug: row.slug,
+
+          productType:
+            normalizeProductType(
+              row.product_type,
+            ),
 
           brand: {
             id: Number(
