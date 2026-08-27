@@ -22,6 +22,9 @@ import LatestCoverageCarousel, {
   type LatestCoverageItem,
 } from "../components/home/LatestCoverageCarousel"
 
+import TakePartSection from "../components/home/TakePartSection"
+import AboutTeaser from "../components/home/AboutTeaser"
+
 function HomePage() {
   const [
     featuredReviews,
@@ -194,6 +197,7 @@ function HomePage() {
 
           <div className="relative mx-auto max-w-7xl px-6 pb-12 pt-14 lg:px-8 lg:pb-14 lg:pt-16">
             <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+              {/* INTRO */}
               <div className="max-w-2xl">
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[var(--accent)]">
                   IEM Tour Group
@@ -239,6 +243,7 @@ function HomePage() {
                 </div>
               </div>
 
+              {/* FEATURED */}
               <div>
                 <div className="mb-4 flex items-end justify-between gap-4">
                   <div>
@@ -345,7 +350,7 @@ function HomePage() {
                 className="text-sm font-medium text-[var(--accent)] transition hover:opacity-75"
               >
                 Browse all
-                reviews →
+                coverage →
               </Link>
             </div>
           </div>
@@ -374,180 +379,9 @@ function HomePage() {
           )}
         </section>
 
-        {/* JOIN */}
-        <section
-          id="join"
-          className="border-t border-[var(--border)] bg-[var(--background)] px-6 py-20 lg:px-8"
-        >
-          <div className="mx-auto max-w-7xl">
-            <div className="mb-10 max-w-2xl">
-              <p className="text-sm uppercase tracking-[0.2em] text-[var(--accent)]">
-                Take part
-              </p>
+        <TakePartSection />
 
-              <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-                Join the community
-                or send an IEM on
-                tour.
-              </h2>
-
-              <p className="mt-5 text-lg leading-8 text-[var(--muted)]">
-                ITGE connects
-                experienced
-                listeners, tour
-                organisers and
-                brands through
-                structured European
-                review tours.
-              </p>
-            </div>
-
-            <div className="grid gap-6 lg:grid-cols-2">
-              <article className="group flex min-h-80 flex-col rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[var(--accent)] dark:shadow-none">
-                <div className="text-sm font-medium uppercase tracking-[0.18em] text-[var(--accent)]">
-                  For listeners
-                </div>
-
-                <h3 className="mt-4 text-3xl font-semibold tracking-tight">
-                  Become an ITGE
-                  reviewer
-                </h3>
-
-                <p className="mt-5 max-w-xl leading-7 text-[var(--muted)]">
-                  Join our European
-                  tour community,
-                  listen to new and
-                  established
-                  in-ear monitors,
-                  and share
-                  thoughtful
-                  reviews based on
-                  real-world
-                  listening.
-                </p>
-
-                <div className="mt-6 flex flex-wrap gap-2">
-                  {[
-                    "European tours",
-                    "Independent reviews",
-                    "Shared experience",
-                  ].map(
-                    (item) => (
-                      <span
-                        key={
-                          item
-                        }
-                        className="rounded-full bg-[var(--surface-soft)] px-3 py-1.5 text-xs text-[var(--muted)]"
-                      >
-                        {item}
-                      </span>
-                    ),
-                  )}
-                </div>
-
-                <Link
-                  to="/join"
-                  className="mt-auto inline-flex items-center pt-10 text-sm font-semibold text-[var(--accent)] transition group-hover:opacity-75"
-                >
-                  Join ITGE →
-                </Link>
-              </article>
-
-              <article className="group flex min-h-80 flex-col rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[var(--accent)] dark:shadow-none">
-                <div className="text-sm font-medium uppercase tracking-[0.18em] text-[var(--accent)]">
-                  For brands
-                </div>
-
-                <h3 className="mt-4 text-3xl font-semibold tracking-tight">
-                  Let Europe hear
-                  your IEM
-                </h3>
-
-                <p className="mt-5 max-w-xl leading-7 text-[var(--muted)]">
-                  Put your product
-                  into the hands of
-                  experienced
-                  reviewers across
-                  Europe through an
-                  organised tour
-                  with independent
-                  listening
-                  coverage.
-                </p>
-
-                <div className="mt-6 flex flex-wrap gap-2">
-                  {[
-                    "Multiple reviewers",
-                    "European reach",
-                    "Structured feedback",
-                  ].map(
-                    (item) => (
-                      <span
-                        key={
-                          item
-                        }
-                        className="rounded-full bg-[var(--surface-soft)] px-3 py-1.5 text-xs text-[var(--muted)]"
-                      >
-                        {item}
-                      </span>
-                    ),
-                  )}
-                </div>
-
-                <Link
-                  to="/join"
-                  className="mt-auto inline-flex items-center pt-10 text-sm font-semibold text-[var(--accent)] transition group-hover:opacity-75"
-                >
-                  Propose a tour →
-                </Link>
-              </article>
-            </div>
-          </div>
-        </section>
-
-        {/* ABOUT */}
-        <section
-          id="about"
-          className="border-t border-[var(--border)] bg-[var(--surface-soft)] px-6 py-20 lg:px-8"
-        >
-          <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-2">
-            <div>
-              <p className="text-sm uppercase tracking-[0.2em] text-[var(--accent)]">
-                Built differently
-              </p>
-
-              <h2 className="mt-3 max-w-xl text-3xl font-semibold tracking-tight">
-                Reviews connected
-                to the music used
-                to evaluate them.
-              </h2>
-            </div>
-
-            <div className="space-y-5 text-lg leading-8 text-[var(--muted)]">
-              <p>
-                Most review sites
-                tell you what a
-                product sounds
-                like. ITGE also
-                records which
-                artists, genres and
-                sonic qualities
-                informed that
-                opinion.
-              </p>
-
-              <p>
-                That makes it
-                possible to browse
-                reviews through
-                your own listening
-                habits rather than
-                relying on a single
-                score or ranking.
-              </p>
-            </div>
-          </div>
-        </section>
+        <AboutTeaser />
       </main>
     </div>
   )
