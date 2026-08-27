@@ -338,7 +338,7 @@ a {
 .coverage-carousel-track {
   animation:
     coverage-carousel-scroll
-    55s
+    70s
     linear
     infinite;
 }
