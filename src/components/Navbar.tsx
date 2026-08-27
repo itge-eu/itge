@@ -416,7 +416,7 @@ function Navbar() {
             <MobileLink
               to="/members"
               onClick={closeMobileMenu}
-              className="rounded-xl bg-[var(--accent)] px-4 py-3 font-semibold text-[var(--accent-foreground)] transition hover:bg-[var(--accent-hover)]"
+              className="rounded-xl px-4 py-3 hover:text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
             >
               Members
             </MobileLink>
@@ -424,7 +424,7 @@ function Navbar() {
             <MobileLink
               to="/iems"
               onClick={closeMobileMenu}
-              className="rounded-xl bg-[var(--accent)] px-4 py-3 font-semibold text-[var(--accent-foreground)] transition hover:bg-[var(--accent-hover)]"
+              className="rounded-xl px-4 py-3 hover:text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
             >
               IEM's
             </MobileLink>
@@ -432,7 +432,7 @@ function Navbar() {
             <MobileLink
               to="/brands"
               onClick={closeMobileMenu}
-              className="rounded-xl bg-[var(--accent)] px-4 py-3 font-semibold text-[var(--accent-foreground)] transition hover:bg-[var(--accent-hover)]"
+              className="rounded-xl px-4 py-3 hover:text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
             >
               Brands
             </MobileLink>

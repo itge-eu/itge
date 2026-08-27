@@ -304,3 +304,55 @@ a {
   padding: 0 1.25rem 1.25rem;
   line-height: 1.75;
 }
+
+@keyframes coverage-carousel-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(calc(-50% - 0.625rem));
+  }
+}
+
+.coverage-carousel {
+  position: relative;
+
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 4%,
+    black 96%,
+    transparent
+  );
+
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 4%,
+    black 96%,
+    transparent
+  );
+}
+
+.coverage-carousel-track {
+  animation:
+    coverage-carousel-scroll
+    55s
+    linear
+    infinite;
+}
+
+.coverage-carousel:hover .coverage-carousel-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coverage-carousel {
+    overflow-x: auto;
+  }
+
+  .coverage-carousel-track {
+    animation: none;
+  }
+}
