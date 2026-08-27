@@ -1,5 +1,5 @@
 export type SearchSuggestionType =
-  | "iem"
+  | "product"
   | "brand"
   | "reviewer"
   | "artist"

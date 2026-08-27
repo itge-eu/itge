@@ -14,7 +14,7 @@ type AdminReview = {
   reviewers: {
     name: string;
   } | null;
-  iems: {
+  products: {
     model: string;
     brands: {
       name: string;
@@ -57,7 +57,7 @@ function AdminReviewsPage() {
           reviewers (
             name
           ),
-          iems (
+          products (
             model,
             brands (
               name
@@ -201,11 +201,11 @@ function AdminReviewsPage() {
             <div className="divide-y divide-[var(--border)]">
               {reviews.map((review) => {
                 const brandName =
-                  review.iems?.brands?.name ?? "";
+                  review.products?.brands?.name ?? "";
 
-                const modelName = review.iems?.model ?? "Unknown IEM";
+                const modelName = review.products?.model ?? "Unknown IEM";
 
-                const fullIemName = [brandName, modelName]
+                const fullProductName = [brandName, modelName]
                   .filter(Boolean)
                   .join(" ");
 
@@ -240,11 +240,11 @@ function AdminReviewsPage() {
                       </div>
 
                       <h2 className="mt-3 truncate text-xl font-semibold">
-                        {review.title || fullIemName}
+                        {review.title || fullProductName}
                       </h2>
 
                       <p className="mt-2 text-sm text-[var(--muted)]">
-                        {fullIemName}
+                        {fullProductName}
                         {review.reviewers?.name
                           ? ` · ${review.reviewers.name}`
                           : ""}

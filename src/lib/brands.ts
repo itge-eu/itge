@@ -9,8 +9,8 @@ import type {
 } from "./impressions"
 
 import type {
-  IemDirectoryItem,
-} from "./iems"
+  ProductDirectoryItem,
+} from "./products"
 
 export type BrandContributor = {
   name: string
@@ -35,7 +35,7 @@ export type BrandProfile = {
   contributorCount: number
 
   contributors: BrandContributor[]
-  iems: IemDirectoryItem[]
+  products: ProductDirectoryItem[]
 
   latestReviews: FeaturedReview[]
   latestImpressions: ImpressionSummary[]
@@ -46,7 +46,7 @@ export type BrandDirectoryItem = {
   name: string
   slug: string
 
-  iemCount: number
+  productCount: number
   reviewCount: number
   impressionCount: number
   coverageCount: number
@@ -79,7 +79,7 @@ type BrandReviewRow = {
       }[]
     | null
 
-  iems:
+  products:
     | {
         id: number
         model: string
@@ -142,7 +142,7 @@ type BrandImpressionRow = {
       }[]
     | null
 
-  iems:
+  products:
     | {
         id: number
         model: string
@@ -215,19 +215,19 @@ function mapFeaturedReview(
       row.reviewers,
     )
 
-  const iem =
+  const product =
     getSingleRelation(
-      row.iems,
+      row.products,
     )
 
   const brand =
     getSingleRelation(
-      iem?.brands,
+      product?.brands,
     )
 
   if (
     !reviewer ||
-    !iem ||
+    !product ||
     !brand
   ) {
     throw new Error(
@@ -246,8 +246,8 @@ function mapFeaturedReview(
     brandSlug:
       brand.slug,
 
-    model: iem.model,
-    iemSlug: iem.slug,
+    model: product.model,
+    productSlug: product.slug,
 
     reviewer: reviewer.name,
     reviewerSlug:
@@ -266,19 +266,19 @@ function mapImpression(
       row.reviewers,
     )
 
-  const iem =
+  const product =
     getSingleRelation(
-      row.iems,
+      row.products,
     )
 
   const brand =
     getSingleRelation(
-      iem?.brands,
+      product?.brands,
     )
 
   if (
     !reviewer ||
-    !iem ||
+    !product ||
     !brand
   ) {
     throw new Error(
@@ -303,10 +303,10 @@ function mapImpression(
       slug: reviewer.slug,
     },
     
-    iem: {
-      id: Number(iem.id),
-      model: iem.model,
-      slug: iem.slug,
+    product: {
+      id: Number(product.id),
+      model: product.model,
+      slug: product.slug,
     
       brand: {
         id: Number(brand.id),
@@ -417,11 +417,11 @@ function collectContributors(
   )
 }
 
-function collectIems(
+function collectProducts(
   reviewRows: BrandReviewRow[],
   impressionRows: BrandImpressionRow[],
-): IemDirectoryItem[] {
-  type CollectedIem = {
+): ProductDirectoryItem[] {
+  type CollectedProduct = {
     id: number
     model: string
     slug: string
@@ -436,14 +436,14 @@ function collectIems(
     impressions: BrandImpressionRow[]
   }
 
-  const iems =
+  const products =
     new Map<
       number,
-      CollectedIem
+      CollectedProduct
     >()
 
-  function ensureIem(
-    iem: {
+  function ensureProduct(
+    product: {
       id: number
       model: string
       slug: string
@@ -460,10 +460,10 @@ function collectIems(
           }[]
         | null
     },
-  ): CollectedIem | null {
+  ): CollectedProduct | null {
     const brand =
       getSingleRelation(
-        iem.brands,
+        product.brands,
       )
 
     if (!brand) {
@@ -471,20 +471,20 @@ function collectIems(
     }
 
     const id =
-      Number(iem.id)
+      Number(product.id)
 
     const existing =
-      iems.get(id)
+      products.get(id)
 
     if (existing) {
       return existing
     }
 
-    const created: CollectedIem =
+    const created: CollectedProduct =
       {
         id,
-        model: iem.model,
-        slug: iem.slug,
+        model: product.model,
+        slug: product.slug,
 
         brand: {
           id: Number(
@@ -500,39 +500,39 @@ function collectIems(
         impressions: [],
       }
 
-    iems.set(id, created)
+    products.set(id, created)
 
     return created
   }
 
   reviewRows.forEach((row) => {
-    const iem =
+    const product =
       getSingleRelation(
-        row.iems,
+        row.products,
       )
 
-    if (!iem) {
+    if (!product) {
       return
     }
 
-    ensureIem(iem)?.reviews.push(
+    ensureProduct(product)?.reviews.push(
       row,
     )
   })
 
   impressionRows.forEach(
     (row) => {
-      const iem =
+      const product =
         getSingleRelation(
-          row.iems,
+          row.products,
         )
 
-      if (!iem) {
+      if (!product) {
         return
       }
 
-      ensureIem(
-        iem,
+      ensureProduct(
+        product,
       )?.impressions.push(
         row,
       )
@@ -540,11 +540,11 @@ function collectIems(
   )
 
   return Array.from(
-    iems.values(),
+    products.values(),
   )
-    .map((iem) => {
+    .map((product) => {
       const sortedReviews = [
-        ...iem.reviews,
+        ...product.reviews,
       ].sort(
         (first, second) =>
           timestampValue(
@@ -556,7 +556,7 @@ function collectIems(
       )
 
       const sortedImpressions = [
-        ...iem.impressions,
+        ...product.impressions,
       ].sort(
         (first, second) =>
           timestampValue(
@@ -658,12 +658,12 @@ function collectIems(
         null
 
       return {
-        id: iem.id,
-        model: iem.model,
-        slug: iem.slug,
+        id: product.id,
+        model: product.model,
+        slug: product.slug,
 
         brand:
-          iem.brand,
+          product.brand,
 
         heroImageUrl,
 
@@ -798,7 +798,7 @@ export async function getBrandBySlug(
           slug
         ),
 
-        iems!inner (
+        products!inner (
           id,
           model,
           slug,
@@ -811,7 +811,7 @@ export async function getBrandBySlug(
         )
       `)
       .eq(
-        "iems.brand_id",
+        "products.brand_id",
         Number(
           brand.id,
         ),
@@ -845,7 +845,7 @@ export async function getBrandBySlug(
           slug
         ),
 
-        iems!inner (
+        products!inner (
           id,
           model,
           slug,
@@ -858,7 +858,7 @@ export async function getBrandBySlug(
         )
       `)
       .eq(
-        "iems.brand_id",
+        "products.brand_id",
         Number(
           brand.id,
         ),
@@ -907,8 +907,8 @@ export async function getBrandBySlug(
       impressionRows,
     )
 
-  const iems =
-    collectIems(
+  const products =
+    collectProducts(
       reviewRows,
       impressionRows,
     )
@@ -956,7 +956,7 @@ export async function getBrandBySlug(
       contributors.length,
 
     contributors,
-    iems,
+    products,
 
     latestReviews:
       reviews.slice(0, 6),
@@ -979,7 +979,7 @@ export async function getBrands(): Promise<
       name,
       slug,
 
-      iems (
+      products (
         id,
 
         reviews (
@@ -1005,7 +1005,7 @@ export async function getBrands(): Promise<
       name: string
       slug: string
 
-      iems:
+      products:
         | {
             id: number
 
@@ -1028,16 +1028,16 @@ export async function getBrands(): Promise<
 
   return rows
     .map((brand) => {
-      const iems =
-        brand.iems ??
+      const products =
+        brand.products ??
         []
 
-      const coveredIems =
-        iems.filter(
-          (iem) => {
+      const coveredProducts =
+        products.filter(
+          (product) => {
             const hasReview =
               (
-                iem.reviews ??
+                product.reviews ??
                 []
               ).some(
                 (review) =>
@@ -1046,7 +1046,7 @@ export async function getBrands(): Promise<
 
             const hasImpression =
               (
-                iem.impressions ??
+                product.impressions ??
                 []
               ).some(
                 (impression) =>
@@ -1061,11 +1061,11 @@ export async function getBrands(): Promise<
         )
 
       const reviewCount =
-        coveredIems.reduce(
-          (total, iem) =>
+        coveredProducts.reduce(
+          (total, product) =>
             total +
             (
-              iem.reviews ??
+              product.reviews ??
               []
             ).filter(
               (review) =>
@@ -1075,11 +1075,11 @@ export async function getBrands(): Promise<
         )
 
       const impressionCount =
-        coveredIems.reduce(
-          (total, iem) =>
+        coveredProducts.reduce(
+          (total, product) =>
             total +
             (
-              iem.impressions ??
+              product.impressions ??
               []
             ).filter(
               (impression) =>
@@ -1097,8 +1097,8 @@ export async function getBrands(): Promise<
         slug:
           brand.slug,
 
-        iemCount:
-          coveredIems.length,
+        productCount:
+          coveredProducts.length,
 
         reviewCount,
 

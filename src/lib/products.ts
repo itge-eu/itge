@@ -7,17 +7,17 @@ import type {
 } from "./reviews"
 
 import {
-  getImpressionsByIemId,
+  getImpressionsByProductId,
   type ImpressionSummary,
 } from "./impressions"
 
-export type IemReviewer = {
+export type ProductReviewer = {
   name: string
   slug: string
   reviewCount: number
 }
 
-export type IemDirectoryItem = {
+export type ProductDirectoryItem = {
   id: number
   model: string
   slug: string
@@ -49,7 +49,7 @@ export type IemDirectoryItem = {
   latestActivityAt?: string | null
 }
 
-export type IemProfile = {
+export type ProductProfile = {
   id: number
   model: string
   slug: string
@@ -68,14 +68,14 @@ export type IemProfile = {
   averageRating: number | null
   heroImageUrl: string | null
 
-  reviewers: IemReviewer[]
+  reviewers: ProductReviewer[]
   artists: ReviewArtist[]
   genres: ReviewGenre[]
   reviews: FeaturedReview[]
   impressions: ImpressionSummary[]
 }
 
-type IemRow = {
+type ProductRow = {
   id: number
   model: string
   slug: string
@@ -99,7 +99,7 @@ type IemRow = {
     | null
 }
 
-type IemDirectoryReviewRow = {
+type ProductDirectoryReviewRow = {
   id: number
   rating: number
   hero_image_url: string | null
@@ -115,7 +115,7 @@ type IemDirectoryReviewRow = {
     | null
 }
 
-type IemDirectoryImpressionRow = {
+type ProductDirectoryImpressionRow = {
   id: number
   hero_image_url: string | null
   published_at: string | null
@@ -130,7 +130,7 @@ type IemDirectoryImpressionRow = {
     | null
 }
 
-type IemDirectoryRow = {
+type ProductDirectoryRow = {
   id: number
   model: string
   slug: string
@@ -149,11 +149,11 @@ type IemDirectoryRow = {
     | null
 
   reviews:
-    | IemDirectoryReviewRow[]
+    | ProductDirectoryReviewRow[]
     | null
 
   impressions:
-    | IemDirectoryImpressionRow[]
+    | ProductDirectoryImpressionRow[]
     | null
 }
 
@@ -189,7 +189,7 @@ type ReviewGenreRelationRow = {
     | null
 }
 
-type IemReviewRow = {
+type ProductReviewRow = {
   id: number
   slug: string
   rating: number
@@ -208,7 +208,7 @@ type IemReviewRow = {
       }[]
     | null
 
-  iems:
+  products:
     | {
         model: string
         slug: string
@@ -261,22 +261,22 @@ function getSingleRelation<T>(
 }
 
 function mapFeaturedReview(
-  row: IemReviewRow,
+  row: ProductReviewRow,
 ): FeaturedReview {
   const reviewer =
     getSingleRelation(row.reviewers)
 
-  const iem =
-    getSingleRelation(row.iems)
+  const product =
+    getSingleRelation(row.products)
 
   const brand =
     getSingleRelation(
-      iem?.brands,
+      product?.brands,
     )
 
   if (
     !reviewer ||
-    !iem ||
+    !product ||
     !brand
   ) {
     throw new Error(
@@ -295,8 +295,8 @@ function mapFeaturedReview(
     brandSlug:
       brand.slug,
 
-    model: iem.model,
-    iemSlug: iem.slug,
+    model: product.model,
+    productSlug: product.slug,
 
     reviewer: reviewer.name,
     reviewerSlug: reviewer.slug,
@@ -307,10 +307,10 @@ function mapFeaturedReview(
 }
 
 function collectReviewers(
-  rows: IemReviewRow[],
-): IemReviewer[] {
+  rows: ProductReviewRow[],
+): ProductReviewer[] {
   const reviewers =
-    new Map<string, IemReviewer>()
+    new Map<string, ProductReviewer>()
 
   rows.forEach((row) => {
     const reviewer =
@@ -364,7 +364,7 @@ function collectReviewers(
 }
 
 function collectArtists(
-  rows: IemReviewRow[],
+  rows: ProductReviewRow[],
 ): ReviewArtist[] {
   const artists =
     new Map<
@@ -416,7 +416,7 @@ function collectArtists(
 }
 
 function collectGenres(
-  rows: IemReviewRow[],
+  rows: ProductReviewRow[],
 ): ReviewGenre[] {
   const genres =
     new Map<
@@ -502,9 +502,9 @@ function timestampValue(
     : time
 }
 
-export async function getIemBySlug(
+export async function getProductBySlug(
   slug: string,
-): Promise<IemProfile | null> {
+): Promise<ProductProfile | null> {
   const normalizedSlug =
     slug.trim()
 
@@ -513,10 +513,10 @@ export async function getIemBySlug(
   }
 
   const {
-    data: iemData,
-    error: iemError,
+    data: productData,
+    error: productError,
   } = await supabase
-    .from("iems")
+    .from("products")
     .select(`
       id,
       model,
@@ -538,25 +538,25 @@ export async function getIemBySlug(
     )
     .maybeSingle()
 
-  if (iemError) {
-    throw iemError
+  if (productError) {
+    throw productError
   }
 
-  if (!iemData) {
+  if (!productData) {
     return null
   }
 
-  const iem =
-    iemData as unknown as IemRow
+  const product =
+    productData as unknown as ProductRow
 
   const brand =
     getSingleRelation(
-      iem.brands,
+      product.brands,
     )
 
   if (!brand) {
     throw new Error(
-      `IEM ${iem.id} has no associated brand`,
+      `IEM ${product.id} has no associated brand`,
     )
   }
 
@@ -578,7 +578,7 @@ export async function getIemBySlug(
         slug
       ),
 
-      iems (
+      products (
         model,
         slug,
 
@@ -606,8 +606,8 @@ export async function getIemBySlug(
       )
     `)
     .eq(
-      "iem_id",
-      Number(iem.id),
+      "product_id",
+      Number(product.id),
     )
     .eq(
       "published",
@@ -626,7 +626,7 @@ export async function getIemBySlug(
 
   const rows =
     (reviewData ??
-      []) as unknown as IemReviewRow[]
+      []) as unknown as ProductReviewRow[]
 
   const reviews =
     rows.map(
@@ -634,8 +634,8 @@ export async function getIemBySlug(
     )
 
   const impressions =
-    await getImpressionsByIemId(
-      Number(iem.id),
+    await getImpressionsByProductId(
+      Number(product.id),
     )
 
   const heroImageUrl =
@@ -652,9 +652,9 @@ export async function getIemBySlug(
     null
 
   return {
-    id: Number(iem.id),
-    model: iem.model,
-    slug: iem.slug,
+    id: Number(product.id),
+    model: product.model,
+    slug: product.slug,
 
     brand: {
       id: Number(
@@ -665,26 +665,26 @@ export async function getIemBySlug(
     },
 
     releaseYear:
-      iem.release_year ==
+      product.release_year ==
       null
         ? null
         : Number(
-            iem.release_year,
+            product.release_year,
           ),
 
     driverConfiguration:
-      iem.driver_configuration,
+      product.driver_configuration,
 
     launchPrice:
-      iem.launch_price ==
+      product.launch_price ==
       null
         ? null
         : Number(
-            iem.launch_price,
+            product.launch_price,
           ),
 
     launchCurrency:
-      iem.launch_currency,
+      product.launch_currency,
 
     averageRating:
       calculateAverageRating(
@@ -707,14 +707,14 @@ export async function getIemBySlug(
   }
 }
 
-export async function getIems(): Promise<
-  IemDirectoryItem[]
+export async function getProducts(): Promise<
+  ProductDirectoryItem[]
 > {
   const {
     data,
     error,
   } = await supabase
-    .from("iems")
+    .from("products")
     .select(`
       id,
       model,
@@ -762,7 +762,7 @@ export async function getIems(): Promise<
 
   const rows =
     (data ??
-      []) as unknown as IemDirectoryRow[]
+      []) as unknown as ProductDirectoryRow[]
 
   return rows.flatMap(
     (row) => {

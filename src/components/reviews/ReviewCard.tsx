@@ -11,8 +11,8 @@ function ReviewCard({
   review,
   variant = "default",
 }: ReviewCardProps) {
-  const iemUrl =
-    `/iems/${review.iemSlug}`
+  const productUrl =
+    `/products/${review.productSlug}`
 
   const reviewerUrl =
     `/members/${review.reviewerSlug}`
@@ -71,7 +71,7 @@ function ReviewCard({
 
                 <h2 className="mt-1 text-2xl font-semibold">
                   <Link
-                    to={iemUrl}
+                    to={productUrl}
                     className="pointer-events-auto relative z-20 transition hover:text-[var(--accent)]"
                   >
                     {review.model}
@@ -130,7 +130,7 @@ function ReviewCard({
 
                 <h2 className="mt-1 text-xl font-semibold tracking-tight">
                   <Link
-                    to={iemUrl}
+                    to={productUrl}
                     className="pointer-events-auto relative z-20 transition hover:text-[var(--accent)]"
                   >
                     {review.model}

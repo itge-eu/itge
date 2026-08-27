@@ -14,14 +14,14 @@ function ImpressionCard({
   const impressionUrl =
     `/impressions/${impression.slug}`
 
-  const iemUrl =
-    `/iems/${impression.iem.slug}`
+  const productUrl =
+    `/products/${impression.product.slug}`
 
   const reviewerUrl =
     `/members/${impression.reviewer.slug}`
 
   const brandUrl =
-    `/brands/${impression.iem.brand.slug}`
+    `/brands/${impression.product.brand.slug}`
 
   const excerpt =
     impression.summary?.trim() ||
@@ -36,7 +36,7 @@ function ImpressionCard({
     <article className="group relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] transition duration-200 hover:-translate-y-0.5 hover:border-[var(--accent)] hover:shadow-md focus-within:border-[var(--accent)]">
       <Link
         to={impressionUrl}
-        aria-label={`Read impression of ${impression.iem.brand.name} ${impression.iem.model} by ${impression.reviewer.name}`}
+        aria-label={`Read impression of ${impression.product.brand.name} ${impression.product.model} by ${impression.reviewer.name}`}
         className="absolute inset-0 z-0 rounded-3xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]"
       />
 
@@ -47,7 +47,7 @@ function ImpressionCard({
           >
             <img
               src={impression.heroImageUrl}
-              alt={`${impression.iem.brand.name} ${impression.iem.model}`}
+              alt={`${impression.product.brand.name} ${impression.product.model}`}
               loading="lazy"
               className="aspect-[16/9] h-full w-full object-cover transition duration-300 group-hover:scale-[1.025] sm:aspect-square"
             />
@@ -61,15 +61,15 @@ function ImpressionCard({
                 to={brandUrl}
                 className="pointer-events-auto relative z-20 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--accent)] transition hover:opacity-70"
               >
-                {impression.iem.brand.name}
+                {impression.product.brand.name}
               </Link>
 
               <h2 className="mt-1 text-xl font-semibold tracking-tight">
                 <Link
-                  to={iemUrl}
+                  to={productUrl}
                   className="pointer-events-auto relative z-20 transition hover:text-[var(--accent)]"
                 >
-                  {impression.iem.model}
+                  {impression.product.model}
                 </Link>
               </h2>
             </div>

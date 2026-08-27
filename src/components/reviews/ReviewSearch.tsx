@@ -18,7 +18,7 @@ type ReviewSearchProps = {
 }
 
 const TYPE_LABELS: Record<SearchSuggestionType, string> = {
-  iem: "IEM",
+  product: "IEM",
   brand: "Brand",
   reviewer: "Member",
   artist: "Artist",
@@ -27,7 +27,7 @@ const TYPE_LABELS: Record<SearchSuggestionType, string> = {
 
 const TYPE_ORDER: SearchSuggestionType[] = [
   "brand",
-  "iem",
+  "product",
   "reviewer",
   "artist",
   "genre",
@@ -213,7 +213,7 @@ function ReviewSearch({
       SearchSuggestion[]
     > = {
       brand: [],
-      iem: [],
+      product: [],
       reviewer: [],
       artist: [],
       genre: [],
@@ -530,7 +530,7 @@ function getPluralTypeLabel(
   type: SearchSuggestionType,
 ): string {
   switch (type) {
-    case "iem":
+    case "product":
       return "IEMs"
     case "brand":
       return "Brands"
@@ -663,7 +663,7 @@ function SearchTypeIcon({
     : "h-4 w-4"
 
   switch (type) {
-    case "iem":
+    case "product":
       return (
         <svg
           aria-hidden="true"

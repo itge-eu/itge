@@ -8,7 +8,7 @@ import {
   useParams,
 } from "react-router"
 
-import IemCard from "../components/iems/IemCard"
+import ProductCard from "../components/products/ProductCard"
 import ReviewGrid from "../components/reviews/ReviewGrid"
 import ImpressionCard from "../components/impressions/ImpressionCard"
 import ReviewerAvatar from "../components/reviewers/ReviewerAvatar"
@@ -102,14 +102,14 @@ function BrandPage() {
     }
   }, [slug])
 
-  const totalIemCoverage =
+  const totalProductCoverage =
     useMemo(
       () =>
-        brand?.iems.reduce(
-          (total, iem) =>
+        brand?.products.reduce(
+          (total, product) =>
             total +
-            (iem.coverageCount ??
-              iem.reviewCount),
+            (product.coverageCount ??
+              product.reviewCount),
           0,
         ) ?? 0,
       [brand],
@@ -208,7 +208,7 @@ function BrandPage() {
               <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
                 <StatCard
                   label="IEMs"
-                  value={brand.iems.length.toString()}
+                  value={brand.products.length.toString()}
                 />
 
                 <StatCard
@@ -261,16 +261,16 @@ function BrandPage() {
             eyebrow="Product coverage"
             title={`${brand.name} IEMs`}
             description={
-              brand.iems
+              brand.products
                 .length === 0
                 ? "No IEMs with published coverage are available yet."
-                : `${brand.iems.length} ${
-                    brand.iems
+                : `${brand.products.length} ${
+                    brand.products
                       .length === 1
                       ? "IEM is"
                       : "IEMs are"
-                  } represented by ${totalIemCoverage} ${
-                    totalIemCoverage ===
+                  } represented by ${totalProductCoverage} ${
+                    totalProductCoverage ===
                     1
                       ? "published piece"
                       : "published pieces"
@@ -278,7 +278,7 @@ function BrandPage() {
             }
           />
 
-          {brand.iems
+          {brand.products
             .length === 0 ? (
             <EmptyPanel>
               No covered IEMs from
@@ -287,11 +287,11 @@ function BrandPage() {
             </EmptyPanel>
           ) : (
             <div className="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-              {brand.iems.map(
-                (iem) => (
-                  <IemCard
-                    key={iem.id}
-                    iem={iem}
+              {brand.products.map(
+                (product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
                   />
                 ),
               )}

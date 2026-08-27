@@ -15,18 +15,18 @@ import Breadcrumbs from "../components/navigation/Breadcrumbs"
 import PageState from "../components/layout/PageState"
 
 import {
-  getIemBySlug,
-  type IemProfile,
-} from "../lib/iems"
+  getProductBySlug,
+  type ProductProfile,
+} from "../lib/products"
 
 import usePageMetadata from "../hooks/usePageMetadata"
 
-function IemPage() {
+function ProductPage() {
   const { slug } =
     useParams<{ slug: string }>()
 
-  const [iem, setIem] =
-    useState<IemProfile | null>(
+  const [product, setProduct] =
+    useState<ProductProfile | null>(
       null,
     )
 
@@ -37,19 +37,19 @@ function IemPage() {
     useState<string | null>(null)
 
   usePageMetadata({
-    title: iem
-      ? `${iem.brand.name} ${iem.model} | ITGE`
+    title: product
+      ? `${product.brand.name} ${product.model} | ITGE`
       : "IEM | ITGE",
 
-    description: iem
-      ? `Reviews, listening impressions, specifications and coverage for the ${iem.brand.name} ${iem.model}.`
+    description: product
+      ? `Reviews, listening impressions, specifications and coverage for the ${product.brand.name} ${product.model}.`
       : "Explore IEM reviews, impressions and coverage from ITGE.",
   })
 
   useEffect(() => {
     let cancelled = false
 
-    async function loadIem() {
+    async function loadProduct() {
       if (!slug) {
         setError(
           "No IEM was specified.",
@@ -63,12 +63,12 @@ function IemPage() {
 
       try {
         const result =
-          await getIemBySlug(
+          await getProductBySlug(
             slug,
           )
 
         if (!cancelled) {
-          setIem(result)
+          setProduct(result)
         }
       } catch (loadError) {
         console.error(
@@ -88,7 +88,7 @@ function IemPage() {
       }
     }
 
-    void loadIem()
+    void loadProduct()
 
     return () => {
       cancelled = true
@@ -98,7 +98,7 @@ function IemPage() {
   const totalReviewerReviews =
     useMemo(
       () =>
-        iem?.reviewers.reduce(
+        product?.reviewers.reduce(
           (
             total,
             reviewer,
@@ -107,19 +107,19 @@ function IemPage() {
             reviewer.reviewCount,
           0,
         ) ?? 0,
-      [iem],
+      [product],
     )
 
   const contributorCount =
     useMemo(() => {
-      if (!iem) {
+      if (!product) {
         return 0
       }
 
       const contributorSlugs =
         new Set<string>()
 
-      iem.reviewers.forEach(
+      product.reviewers.forEach(
         (reviewer) => {
           contributorSlugs.add(
             reviewer.slug,
@@ -127,7 +127,7 @@ function IemPage() {
         },
       )
 
-      iem.impressions.forEach(
+      product.impressions.forEach(
         (impression) => {
           contributorSlugs.add(
             impression.reviewer.slug,
@@ -136,7 +136,7 @@ function IemPage() {
       )
 
       return contributorSlugs.size
-    }, [iem])
+    }, [product])
 
   if (loading) {
     return (
@@ -153,19 +153,19 @@ function IemPage() {
         eyebrow="IEM"
         title="Unable to load IEM"
         message={error}
-        backTo="/iems"
+        backTo="/products"
         backLabel="Back to IEMs"
       />
     )
   }
 
-  if (!iem) {
+  if (!product) {
     return (
       <PageState
         eyebrow="404"
         title="IEM not found"
         message="The IEM you were looking for doesn’t exist or is no longer available."
-        backTo="/iems"
+        backTo="/products"
         backLabel="Back to IEMs"
       />
     )
@@ -178,16 +178,16 @@ function IemPage() {
           items={[
             {
               label: "IEMs",
-              to: "/iems",
+              to: "/products",
             },
             {
               label:
-                iem.brand
+                product.brand
                   .name,
-              to: `/brands/${iem.brand.slug}`,
+              to: `/brands/${product.brand.slug}`,
             },
             {
-              label: iem.model,
+              label: product.model,
             },
           ]}
         />
@@ -196,18 +196,18 @@ function IemPage() {
           <div className="grid lg:grid-cols-[minmax(0,1fr)_24rem]">
             <div className="p-8 sm:p-10">
               <Link
-                to={`/brands/${iem.brand.slug}`}
+                to={`/brands/${product.brand.slug}`}
                 className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)] transition hover:opacity-70"
               >
                 {
-                  iem
+                  product
                     .brand
                     .name
                 }
               </Link>
 
               <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-6xl">
-                {iem.model}
+                {product.model}
               </h1>
 
               <p className="mt-5 max-w-2xl text-lg leading-8 text-[var(--muted)]">
@@ -216,31 +216,31 @@ function IemPage() {
                 and music references
                 for the{" "}
                 {
-                  iem
+                  product
                     .brand
                     .name
                 }{" "}
-                {iem.model}.
+                {product.model}.
               </p>
 
               <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <StatCard
                   label="Published reviews"
-                  value={iem.reviews.length.toString()}
+                  value={product.reviews.length.toString()}
                 />
 
                 <StatCard
                   label="Published impressions"
-                  value={iem.impressions.length.toString()}
+                  value={product.impressions.length.toString()}
                 />
 
                 <StatCard
                   label="Average review rating"
                   value={
-                    iem.averageRating ==
+                    product.averageRating ==
                     null
                       ? "—"
-                      : `${iem.averageRating.toFixed(
+                      : `${product.averageRating.toFixed(
                           1,
                         )}/5`
                   }
@@ -252,9 +252,9 @@ function IemPage() {
                 />
               </div>
 
-              {(iem.driverConfiguration ||
-                iem.releaseYear ||
-                iem.launchPrice !=
+              {(product.driverConfiguration ||
+                product.releaseYear ||
+                product.launchPrice !=
                   null) && (
                 <div className="mt-6 border-t border-[var(--border)] pt-6">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
@@ -262,30 +262,30 @@ function IemPage() {
                   </p>
 
                   <div className="mt-4 grid gap-5 sm:grid-cols-3">
-                    {iem.driverConfiguration && (
+                    {product.driverConfiguration && (
                       <ProductDetail
                         label="Driver configuration"
                         value={
-                          iem.driverConfiguration
+                          product.driverConfiguration
                         }
                       />
                     )}
 
-                    {iem.releaseYear !=
+                    {product.releaseYear !=
                       null && (
                       <ProductDetail
                         label="Released"
-                        value={iem.releaseYear.toString()}
+                        value={product.releaseYear.toString()}
                       />
                     )}
 
-                    {iem.launchPrice !=
+                    {product.launchPrice !=
                       null && (
                       <ProductDetail
                         label="Launch price"
                         value={formatLaunchPrice(
-                          iem.launchPrice,
-                          iem.launchCurrency,
+                          product.launchPrice,
+                          product.launchCurrency,
                         )}
                       />
                     )}
@@ -294,12 +294,12 @@ function IemPage() {
               )}
             </div>
 
-            {iem.heroImageUrl ? (
+            {product.heroImageUrl ? (
               <img
                 src={
-                  iem.heroImageUrl
+                  product.heroImageUrl
                 }
-                alt={`${iem.brand.name} ${iem.model}`}
+                alt={`${product.brand.name} ${product.model}`}
                 className="aspect-[16/10] h-full w-full object-cover lg:aspect-auto"
               />
             ) : (
@@ -311,14 +311,14 @@ function IemPage() {
           </div>
         </header>
 
-        {iem.reviewers.length >
+        {product.reviewers.length >
           0 && (
           <section className="mt-12">
             <SectionHeader
               eyebrow="Full reviews"
               title="Reviewed by"
-              description={`${iem.reviewers.length} ${
-                iem.reviewers
+              description={`${product.reviewers.length} ${
+                product.reviewers
                   .length === 1
                   ? "member has"
                   : "members have"
@@ -331,7 +331,7 @@ function IemPage() {
             />
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {iem.reviewers.map(
+              {product.reviewers.map(
                 (reviewer) => (
                   <Link
                     key={
@@ -375,18 +375,18 @@ function IemPage() {
           </section>
         )}
 
-        {(iem.artists.length >
+        {(product.artists.length >
           0 ||
-          iem.genres.length >
+          product.genres.length >
             0) && (
           <section className="mt-12 grid gap-8 lg:grid-cols-2">
-            {iem.artists.length >
+            {product.artists.length >
               0 && (
               <TagPanel
                 eyebrow="Listening references"
                 title="Artists mentioned"
               >
-                {iem.artists.map(
+                {product.artists.map(
                   (artist) => (
                     <Link
                       key={
@@ -404,13 +404,13 @@ function IemPage() {
               </TagPanel>
             )}
 
-            {iem.genres.length >
+            {product.genres.length >
               0 && (
               <TagPanel
                 eyebrow="Music coverage"
                 title="Genres represented"
               >
-                {iem.genres.map(
+                {product.genres.map(
                   (genre) => (
                     <Link
                       key={
@@ -433,17 +433,17 @@ function IemPage() {
         <section className="mt-14">
           <SectionHeader
             eyebrow="Review library"
-            title={`Reviews of ${iem.model}`}
+            title={`Reviews of ${product.model}`}
             description={
-              iem.reviews.length ===
+              product.reviews.length ===
               0
                 ? "No published reviews are available yet."
-                : `Read every published ITGE review of the ${iem.brand.name} ${iem.model}.`
+                : `Read every published ITGE review of the ${product.brand.name} ${product.model}.`
             }
           />
 
           <div className="mt-8">
-            {iem.reviews.length ===
+            {product.reviews.length ===
             0 ? (
               <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
                 This IEM does not
@@ -453,7 +453,7 @@ function IemPage() {
             ) : (
               <ReviewGrid
                 reviews={
-                  iem.reviews
+                  product.reviews
                 }
               />
             )}
@@ -463,17 +463,17 @@ function IemPage() {
         <section className="mt-14 border-t border-[var(--border)] pt-14">
           <SectionHeader
             eyebrow="Listening notes"
-            title={`Impressions of ${iem.model}`}
+            title={`Impressions of ${product.model}`}
             description={
-              iem.impressions
+              product.impressions
                 .length === 0
                 ? "No published impressions are available yet."
-                : `Read short-form listening impressions of the ${iem.brand.name} ${iem.model}.`
+                : `Read short-form listening impressions of the ${product.brand.name} ${product.model}.`
             }
           />
 
           <div className="mt-8">
-            {iem.impressions
+            {product.impressions
               .length === 0 ? (
               <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
                 This IEM does not
@@ -482,7 +482,7 @@ function IemPage() {
               </div>
             ) : (
               <div className="grid gap-6 lg:grid-cols-2">
-                {iem.impressions.map(
+                {product.impressions.map(
                   (
                     impression,
                   ) => (
@@ -628,4 +628,4 @@ function TagPanel({
   )
 }
 
-export default IemPage
+export default ProductPage

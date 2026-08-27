@@ -20,7 +20,7 @@ export type ArtistSummary = {
   impressionCount: number
   coverageCount: number
 
-  iemCount: number
+  productCount: number
 
   /*
    * Reviewers with at least one full review
@@ -34,7 +34,7 @@ export type ArtistSummary = {
   contributorCount: number
 }
 
-export type ArtistIemSummary = {
+export type ArtistProductSummary = {
   id: number
   model: string
   slug: string
@@ -62,7 +62,7 @@ export type ArtistProfile =
     reviews: FeaturedReview[]
     impressions: ImpressionSummary[]
 
-    iems: ArtistIemSummary[]
+    products: ArtistProductSummary[]
     reviewers: ArtistReviewerSummary[]
   }
 
@@ -87,13 +87,13 @@ type ImpressionArtistRelationRow = {
 
 type PublishedReviewRow = {
   id: number
-  iem_id: number | null
+  product_id: number | null
   reviewer_id: number | null
 }
 
 type PublishedImpressionRow = {
   id: number
-  iem_id: number | null
+  product_id: number | null
   reviewer_id: number | null
 }
 
@@ -118,7 +118,7 @@ type ArtistDetailReviewRow = {
       }[]
     | null
 
-  iems:
+  products:
     | {
         id: number
         model: string
@@ -180,7 +180,7 @@ type ArtistDetailImpressionRow = {
       }[]
     | null
 
-  iems:
+  products:
     | {
         id: number
         model: string
@@ -238,19 +238,19 @@ function mapArtistReview(
       row.reviewers,
     )
 
-  const iem =
+  const product =
     getSingleRelation(
-      row.iems,
+      row.products,
     )
 
   const brand =
     getSingleRelation(
-      iem?.brands,
+      product?.brands,
     )
 
   if (
     !reviewer ||
-    !iem ||
+    !product ||
     !brand
   ) {
     throw new Error(
@@ -269,8 +269,8 @@ function mapArtistReview(
     brandSlug:
       brand.slug,
 
-    model: iem.model,
-    iemSlug: iem.slug,
+    model: product.model,
+    productSlug: product.slug,
 
     reviewer: reviewer.name,
     reviewerSlug:
@@ -289,19 +289,19 @@ function mapArtistImpression(
       row.reviewers,
     )
 
-  const iem =
+  const product =
     getSingleRelation(
-      row.iems,
+      row.products,
     )
 
   const brand =
     getSingleRelation(
-      iem?.brands,
+      product?.brands,
     )
 
   if (
     !reviewer ||
-    !iem ||
+    !product ||
     !brand
   ) {
     throw new Error(
@@ -328,10 +328,10 @@ function mapArtistImpression(
       slug: reviewer.slug,
     },
 
-    iem: {
-      id: Number(iem.id),
-      model: iem.model,
-      slug: iem.slug,
+    product: {
+      id: Number(product.id),
+      model: product.model,
+      slug: product.slug,
 
       brand: {
         id: Number(
@@ -391,7 +391,7 @@ export async function getArtists(): Promise<
       .from("reviews")
       .select(`
         id,
-        iem_id,
+        product_id,
         reviewer_id
       `)
       .eq(
@@ -403,7 +403,7 @@ export async function getArtists(): Promise<
       .from("impressions")
       .select(`
         id,
-        iem_id,
+        product_id,
         reviewer_id
       `)
       .eq(
@@ -515,7 +515,7 @@ export async function getArtists(): Promise<
         }
       }
 
-      const iemIds =
+      const productIds =
         new Set<number>()
 
       const reviewReviewerIds =
@@ -543,11 +543,11 @@ export async function getArtists(): Promise<
         reviewCount += 1
 
         if (
-          review.iem_id != null
+          review.product_id != null
         ) {
-          iemIds.add(
+          productIds.add(
             Number(
-              review.iem_id,
+              review.product_id,
             ),
           )
         }
@@ -587,12 +587,12 @@ export async function getArtists(): Promise<
         impressionCount += 1
 
         if (
-          impression.iem_id !=
+          impression.product_id !=
           null
         ) {
-          iemIds.add(
+          productIds.add(
             Number(
-              impression.iem_id,
+              impression.product_id,
             ),
           )
         }
@@ -633,8 +633,8 @@ export async function getArtists(): Promise<
           reviewCount +
           impressionCount,
 
-        iemCount:
-          iemIds.size,
+        productCount:
+          productIds.size,
 
         reviewerCount:
           reviewReviewerIds.size,
@@ -769,7 +769,7 @@ export async function getArtistBySlug(
               slug
             ),
 
-            iems (
+            products (
               id,
               model,
               slug,
@@ -819,7 +819,7 @@ export async function getArtistBySlug(
               slug
             ),
 
-            iems (
+            products (
               id,
               model,
               slug,
@@ -876,10 +876,10 @@ export async function getArtistBySlug(
       mapArtistImpression,
     )
 
-  const iemMap =
+  const productMap =
     new Map<
       number,
-      ArtistIemSummary
+      ArtistProductSummary
     >()
 
   const reviewerMap =
@@ -896,42 +896,42 @@ export async function getArtistBySlug(
         row.reviewers,
       )
 
-    const iem =
+    const product =
       getSingleRelation(
-        row.iems,
+        row.products,
       )
 
     const brand =
       getSingleRelation(
-        iem?.brands,
+        product?.brands,
       )
 
     if (
       !reviewer ||
-      !iem ||
+      !product ||
       !brand
     ) {
       return
     }
 
-    const iemId =
-      Number(iem.id)
+    const productId =
+      Number(product.id)
 
-    const existingIem =
-      iemMap.get(iemId)
+    const existingProduct =
+      productMap.get(productId)
 
-    if (existingIem) {
-      existingIem.reviewCount +=
+    if (existingProduct) {
+      existingProduct.reviewCount +=
         1
-      existingIem.coverageCount +=
+      existingProduct.coverageCount +=
         1
     } else {
-      iemMap.set(
-        iemId,
+      productMap.set(
+        productId,
         {
-          id: iemId,
-          model: iem.model,
-          slug: iem.slug,
+          id: productId,
+          model: product.model,
+          slug: product.slug,
 
           brandName:
             brand.name,
@@ -984,43 +984,43 @@ export async function getArtistBySlug(
         row.reviewers,
       )
 
-    const iem =
+    const product =
       getSingleRelation(
-        row.iems,
+        row.products,
       )
 
     const brand =
       getSingleRelation(
-        iem?.brands,
+        product?.brands,
       )
 
     if (
       !reviewer ||
-      !iem ||
+      !product ||
       !brand
     ) {
       return
     }
 
-    const iemId =
-      Number(iem.id)
+    const productId =
+      Number(product.id)
 
-    const existingIem =
-      iemMap.get(iemId)
+    const existingProduct =
+      productMap.get(productId)
 
-    if (existingIem) {
-      existingIem.impressionCount +=
+    if (existingProduct) {
+      existingProduct.impressionCount +=
         1
 
-      existingIem.coverageCount +=
+      existingProduct.coverageCount +=
         1
     } else {
-      iemMap.set(
-        iemId,
+      productMap.set(
+        productId,
         {
-          id: iemId,
-          model: iem.model,
-          slug: iem.slug,
+          id: productId,
+          model: product.model,
+          slug: product.slug,
 
           brandName:
             brand.name,
@@ -1073,9 +1073,9 @@ export async function getArtistBySlug(
     addImpressionCoverage,
   )
 
-  const iems =
+  const products =
     Array.from(
-      iemMap.values(),
+      productMap.values(),
     ).sort(
       (first, second) =>
         second.coverageCount -
@@ -1127,8 +1127,8 @@ export async function getArtistBySlug(
       mappedReviews.length +
       mappedImpressions.length,
 
-    iemCount:
-      iems.length,
+    productCount:
+      products.length,
 
     reviewerCount:
       fullReviewReviewerCount,
@@ -1142,7 +1142,7 @@ export async function getArtistBySlug(
     impressions:
       mappedImpressions,
 
-    iems,
+    products,
     reviewers,
   }
 }

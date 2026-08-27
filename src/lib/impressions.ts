@@ -15,7 +15,7 @@ export type ImpressionSummary = {
     slug: string
   }
 
-  iem: {
+  product: {
     id: number
     model: string
     slug: string
@@ -71,7 +71,7 @@ type ImpressionRow = {
       }[]
     | null
 
-  iems:
+  products:
     | {
         id: number
         model: string
@@ -165,12 +165,12 @@ function mapImpression(
   row: ImpressionRow,
 ): ImpressionSummary {
   const reviewer = getSingleRelation(row.reviewers)
-  const iem = getSingleRelation(row.iems)
+  const product = getSingleRelation(row.products)
   const brand = getSingleRelation(
-    iem?.brands,
+    product?.brands,
   )
 
-  if (!reviewer || !iem || !brand) {
+  if (!reviewer || !product || !brand) {
     throw new Error(
       `Impression ${row.id} has incomplete related data`,
     )
@@ -191,10 +191,10 @@ function mapImpression(
       slug: reviewer.slug,
     },
 
-    iem: {
-      id: Number(iem.id),
-      model: iem.model,
-      slug: iem.slug,
+    product: {
+      id: Number(product.id),
+      model: product.model,
+      slug: product.slug,
 
       brand: {
         id: Number(brand.id),
@@ -248,7 +248,7 @@ function mapGenres(
 export type ImpressionFilters = {
   artistSlug?: string
   genreSlug?: string
-  iemName?: string
+  productName?: string
   brandName?: string
   reviewerName?: string
 }
@@ -285,7 +285,7 @@ export async function getAllImpressions(): Promise<
         slug
       ),
 
-      iems (
+      products (
         id,
         model,
         slug,
@@ -321,8 +321,8 @@ export async function getFilteredAllImpressions(
   const genreSlug =
     filters.genreSlug?.trim() || null
 
-  const iemName =
-    filters.iemName?.trim() || null
+  const productName =
+    filters.productName?.trim() || null
 
   const brandName =
     filters.brandName?.trim() || null
@@ -507,7 +507,7 @@ export async function getFilteredAllImpressions(
           slug
         ),
 
-        iems (
+        products (
           id,
           model,
           slug,
@@ -561,12 +561,12 @@ export async function getFilteredAllImpressions(
     mappedImpressions.filter(
       (impression) => {
         if (
-          iemName &&
+          productName &&
           normalizeValue(
-            impression.iem.model,
+            impression.product.model,
           ) !==
             normalizeValue(
-              iemName,
+              productName,
             )
         ) {
           return false
@@ -575,7 +575,7 @@ export async function getFilteredAllImpressions(
         if (
           brandName &&
           normalizeValue(
-            impression.iem
+            impression.product
               .brand.name,
           ) !==
             normalizeValue(
@@ -636,7 +636,7 @@ export async function getImpressionBySlug(
         slug
       ),
 
-      iems (
+      products (
         id,
         model,
         slug,
@@ -697,7 +697,7 @@ export async function getImpressionBySlug(
 }
 
 async function getFilteredImpressions(
-  column: "reviewer_id" | "iem_id",
+  column: "reviewer_id" | "product_id",
   id: number,
 ): Promise<ImpressionSummary[]> {
   const { data, error } = await supabase
@@ -717,7 +717,7 @@ async function getFilteredImpressions(
         slug
       ),
 
-      iems (
+      products (
         id,
         model,
         slug,
@@ -754,11 +754,11 @@ export async function getImpressionsByReviewerId(
   )
 }
 
-export async function getImpressionsByIemId(
-  iemId: number,
+export async function getImpressionsByProductId(
+  productId: number,
 ): Promise<ImpressionSummary[]> {
   return getFilteredImpressions(
-    "iem_id",
-    iemId,
+    "product_id",
+    productId,
   )
 }

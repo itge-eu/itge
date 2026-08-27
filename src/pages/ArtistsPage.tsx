@@ -287,10 +287,10 @@ function ArtistsPage() {
 
                     <Metric
                       value={
-                        artist.iemCount
+                        artist.productCount
                       }
                       label={
-                        artist.iemCount ===
+                        artist.productCount ===
                         1
                           ? "IEM"
                           : "IEMs"

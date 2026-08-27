@@ -14,7 +14,7 @@ import type {
 type SortOption =
   | "newest"
   | "oldest"
-  | "iem"
+  | "product"
   | "reviewer"
 
 type DiscoveryResultsProps = {
@@ -138,7 +138,7 @@ function DiscoveryResults({
                     Oldest first
                   </option>
 
-                  <option value="iem">
+                  <option value="product">
                     IEM A–Z
                   </option>
 

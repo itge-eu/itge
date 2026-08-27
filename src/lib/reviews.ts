@@ -23,7 +23,7 @@ export type FeaturedReview = {
   brand: string
   brandSlug: string
   model: string
-  iemSlug: string
+  productSlug: string
   reviewer: string
   reviewerSlug: string
   heroImageUrl: string | null
@@ -97,7 +97,7 @@ type ReviewRow = {
         slug: string
       }[]
     | null
-  iems:
+  products:
     | {
         model: string
 		slug: string
@@ -155,14 +155,14 @@ function normalizeValue(value: string): string {
 
 function mapReview(row: ReviewRow): FeaturedReview {
   const reviewer = getSingleRelation(row.reviewers)
-  const iem = getSingleRelation(row.iems)
+  const product = getSingleRelation(row.products)
   const brand = getSingleRelation(
-    iem?.brands,
+    product?.brands,
   )
 
   if (
     !reviewer ||
-    !iem ||
+    !product ||
     !brand ||
     !brand.slug
   ) {
@@ -180,8 +180,8 @@ function mapReview(row: ReviewRow): FeaturedReview {
     body: row.body ?? null,
     reviewer: reviewer.name,
     reviewerSlug: reviewer.slug,
-    model: iem.model,
-	iemSlug: iem.slug,
+    model: product.model,
+	productSlug: product.slug,
     brand: brand.name,
 	brandSlug: brand.slug,
     heroImageUrl: row.hero_image_url,
@@ -247,7 +247,7 @@ export async function getFeaturedReviews(): Promise<
         name,
         slug
       ),
-      iems (
+      products (
         model,
 		slug,
         brands (
@@ -286,7 +286,7 @@ export async function getLatestReviews(
         name,
         slug
       ),
-      iems (
+      products (
         model,
         slug,
         brands (
@@ -314,7 +314,7 @@ export async function getLatestReviews(
 export type ReviewFilters = {
   artistSlug?: string
   genreSlug?: string
-  iemName?: string
+  productName?: string
   brandName?: string
   reviewerName?: string
 }
@@ -332,8 +332,8 @@ export async function getAllReviews(
     filters.artistSlug?.trim() || null
   const genreSlug =
     filters.genreSlug?.trim() || null
-  const iemName =
-    filters.iemName?.trim() || null
+  const productName =
+    filters.productName?.trim() || null
   const brandName =
     filters.brandName?.trim() || null
   const reviewerName =
@@ -466,7 +466,7 @@ export async function getAllReviews(
         name,
         slug
       ),
-      iems (
+      products (
         model,
 		slug,
         brands (
@@ -493,9 +493,9 @@ export async function getAllReviews(
 
   const reviews = mappedReviews.filter((review) => {
     if (
-      iemName &&
+      productName &&
       normalizeValue(review.model) !==
-        normalizeValue(iemName)
+        normalizeValue(productName)
     ) {
       return false
     }
@@ -546,7 +546,7 @@ export async function getReviewBySlug(
         name,
         slug
       ),
-      iems (
+      products (
         model,
 		slug,
 		release_year,
@@ -588,15 +588,15 @@ export async function getReviewBySlug(
 
   const row = data as unknown as ReviewRow
   
-  const iem = getSingleRelation(row.iems)
+  const product = getSingleRelation(row.products)
 
-  if (!iem) {
+  if (!product) {
     throw new Error(
       `Review ${row.id} has no associated IEM`,
     )
   }
   
-  const brand = getSingleRelation(iem.brands)
+  const brand = getSingleRelation(product.brands)
   
   if (!brand?.slug) {
     throw new Error(
@@ -613,20 +613,20 @@ export async function getReviewBySlug(
 	brandSlug: brand.slug,
 	
 	releaseYear:
-      iem.release_year == null
+      product.release_year == null
         ? null
-        : Number(iem.release_year),
+        : Number(product.release_year),
   
     driverConfiguration:
-      iem.driver_configuration ?? null,
+      product.driver_configuration ?? null,
   
     launchPrice:
-      iem.launch_price == null
+      product.launch_price == null
         ? null
-        : Number(iem.launch_price),
+        : Number(product.launch_price),
   
     launchCurrency:
-      iem.launch_currency ?? null,
+      product.launch_currency ?? null,
 	
     artists: mapReviewArtists(row.review_artists),
     genres: mapReviewGenres(row.review_genres),

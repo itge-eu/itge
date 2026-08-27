@@ -118,7 +118,7 @@ function DiscoveryFilterGroup({
                     {item.name}
                   </span>
 
-                  {item.type === "iem" &&
+                  {item.type === "product" &&
                     item.subtitle && (
                       <span className="block truncate text-xs text-[var(--muted)]">
                         {item.subtitle}
@@ -169,7 +169,7 @@ function FilterTypeIcon({
   }
 
   switch (type) {
-    case "iem":
+    case "product":
       return (
         <svg {...commonProps}>
           <path d="M4 13v-2a8 8 0 0 1 16 0v2" />

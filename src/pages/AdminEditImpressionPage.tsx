@@ -86,7 +86,7 @@ type ImpressionForm = {
   sourcePostId: string
 
   reviewerName: string
-  iemName: string
+  productName: string
 
   pendingImages:
     PendingImage[]
@@ -121,7 +121,7 @@ function createEmptyImpression(): ImpressionForm {
     sourcePostId: "",
 
     reviewerName: "",
-    iemName: "",
+    productName: "",
 
     pendingImages: [],
 
@@ -328,7 +328,7 @@ function AdminEditImpressionPage() {
               name
             ),
 
-            iems (
+            products (
               model,
 
               brands (
@@ -627,20 +627,20 @@ function AdminEditImpressionPage() {
         loadedGenres,
       )
 
-      const iemRelation =
+      const productRelation =
         Array.isArray(
-          data.iems,
+          data.products,
         )
-          ? data.iems[0]
-          : data.iems
+          ? data.products[0]
+          : data.products
 
       const brandRelation =
         Array.isArray(
-          iemRelation?.brands,
+          productRelation?.brands,
         )
-          ? iemRelation
+          ? productRelation
               ?.brands[0]
-          : iemRelation
+          : productRelation
               ?.brands
 
       const reviewerRelation =
@@ -656,11 +656,11 @@ function AdminEditImpressionPage() {
         ""
 
       const modelName =
-        iemRelation
+        productRelation
           ?.model?.trim() ??
         ""
 
-      const iemName =
+      const productName =
         [
           brandName,
           modelName,
@@ -747,8 +747,8 @@ function AdminEditImpressionPage() {
             ?.name ??
           "Unknown contributor",
 
-        iemName:
-          iemName ||
+        productName:
+          productName ||
           "Unknown IEM",
 
         pendingImages,
@@ -1543,7 +1543,7 @@ function AdminEditImpressionPage() {
 
           <p className="mt-4 text-lg text-[var(--muted)]">
             {
-              impression.iemName
+              impression.productName
             }
             {" · "}
             {
@@ -1750,7 +1750,7 @@ function AdminEditImpressionPage() {
 
                   <dd className="mt-1 font-semibold">
                     {
-                      impression.iemName
+                      impression.productName
                     }
                   </dd>
                 </div>

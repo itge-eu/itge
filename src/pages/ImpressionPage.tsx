@@ -28,11 +28,11 @@ function ImpressionPage() {
 
   usePageMetadata({
     title: impression
-      ? `${impression.iem.model} impression by ${impression.reviewer.name} | ITGE`
+      ? `${impression.product.model} impression by ${impression.reviewer.name} | ITGE`
       : "Impression | ITGE",
 
     description: impression
-      ? `Listening impression of the ${impression.iem.brand.name} ${impression.iem.model} by ${impression.reviewer.name}.`
+      ? `Listening impression of the ${impression.product.brand.name} ${impression.product.model} by ${impression.reviewer.name}.`
       : "Short-form IEM listening impressions from ITGE reviewers.",
   })
 
@@ -126,8 +126,8 @@ function ImpressionPage() {
               to: "/impressions",
             },
             {
-              label: impression.iem.model,
-              to: `/iems/${impression.iem.slug}`,
+              label: impression.product.model,
+              to: `/products/${impression.product.slug}`,
             },
             {
               label: `${impression.reviewer.name} impression`,
@@ -141,20 +141,20 @@ function ImpressionPage() {
           </p>
 
           <Link
-            to={`/brands/${impression.iem.brand.slug}`}
+            to={`/brands/${impression.product.brand.slug}`}
             className="mt-4 inline-block text-sm uppercase tracking-[0.18em] text-[var(--accent)] transition hover:opacity-70"
           >
-            {impression.iem.brand.name}
+            {impression.product.brand.name}
           </Link>
 
           <div className="mt-3 flex flex-col justify-between gap-6 sm:flex-row sm:items-start">
             <div className="min-w-0">
               <h1 className="text-4xl font-semibold tracking-tight sm:text-6xl">
                 <Link
-                  to={`/iems/${impression.iem.slug}`}
+                  to={`/products/${impression.product.slug}`}
                   className="transition hover:text-[var(--accent)]"
                 >
-                  {impression.iem.model}
+                  {impression.product.model}
                 </Link>
               </h1>
 

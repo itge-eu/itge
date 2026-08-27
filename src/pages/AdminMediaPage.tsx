@@ -28,7 +28,7 @@ type MediaItem = {
   hero_image_confirmed: boolean
 
   reviewerName: string
-  iemName: string
+  productName: string
 
   images: MediaImage[]
 }
@@ -137,7 +137,7 @@ function AdminMediaPage() {
                 name
               ),
 
-              iems (
+              products (
                 model,
 
                 brands (
@@ -184,7 +184,7 @@ function AdminMediaPage() {
                 name
               ),
 
-              iems (
+              products (
                 model,
 
                 brands (
@@ -247,22 +247,22 @@ function AdminMediaPage() {
                   row.reviewers,
                 )
 
-              const iem =
+              const product =
                 getSingleRelation(
-                  row.iems,
+                  row.products,
                 )
 
               const brand =
                 getSingleRelation(
-                  iem
+                  product
                     ?.brands,
                 )
 
-              const iemName =
+              const productName =
                 [
                   brand
                     ?.name,
-                  iem?.model,
+                  product?.model,
                 ]
                   .filter(
                     Boolean,
@@ -314,8 +314,8 @@ function AdminMediaPage() {
                     ?.name ??
                   "Unknown reviewer",
 
-                iemName:
-                  iemName ||
+                productName:
+                  productName ||
                   "Unknown IEM",
 
                 images:
@@ -357,22 +357,22 @@ function AdminMediaPage() {
                   row.reviewers,
                 )
 
-              const iem =
+              const product =
                 getSingleRelation(
-                  row.iems,
+                  row.products,
                 )
 
               const brand =
                 getSingleRelation(
-                  iem
+                  product
                     ?.brands,
                 )
 
-              const iemName =
+              const productName =
                 [
                   brand
                     ?.name,
-                  iem?.model,
+                  product?.model,
                 ]
                   .filter(
                     Boolean,
@@ -436,8 +436,8 @@ function AdminMediaPage() {
                     ?.name ??
                   "Unknown contributor",
 
-                iemName:
-                  iemName ||
+                productName:
+                  productName ||
                   "Unknown IEM",
 
                 images:
@@ -630,7 +630,7 @@ function AdminMediaPage() {
           const searchable =
             [
               item.title,
-              item.iemName,
+              item.productName,
               item.reviewerName,
               item.slug,
               item.id,
@@ -1027,7 +1027,7 @@ function AdminMediaPage() {
 
                               <h2 className="mt-3 text-2xl font-semibold">
                                 {
-                                  item.iemName
+                                  item.productName
                                 }
                               </h2>
 

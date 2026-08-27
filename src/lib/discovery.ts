@@ -3,7 +3,7 @@ import { supabase } from "./supabase"
 import type {
   DiscoveryContentType,
   DiscoveryEntity,
-  DiscoveryIem,
+  DiscoveryProduct,
   DiscoveryImpressionItem,
   DiscoveryItem,
   DiscoveryReviewItem,
@@ -46,7 +46,7 @@ type GenreRelationRow = {
     | null
 }
 
-type RelatedIem = {
+type RelatedProduct = {
   id: number
   model: string
   slug: string
@@ -86,9 +86,9 @@ type DiscoveryReviewRow = {
     | RelatedReviewer[]
     | null
 
-  iems:
-    | RelatedIem
-    | RelatedIem[]
+  products:
+    | RelatedProduct
+    | RelatedProduct[]
     | null
 
   review_artists?:
@@ -114,9 +114,9 @@ type DiscoveryImpressionRow = {
     | RelatedReviewer[]
     | null
 
-  iems:
-    | RelatedIem
-    | RelatedIem[]
+  products:
+    | RelatedProduct
+    | RelatedProduct[]
     | null
 
   impression_artists?:
@@ -130,7 +130,7 @@ type DiscoveryImpressionRow = {
 
 const FILTER_TYPES: SearchSuggestionType[] =
   [
-    "iem",
+    "product",
     "brand",
     "artist",
     "genre",
@@ -217,9 +217,9 @@ function buildCommonEntities(
     | RelatedReviewer[]
     | null,
 
-  iemRelation:
-    | RelatedIem
-    | RelatedIem[]
+  productRelation:
+    | RelatedProduct
+    | RelatedProduct[]
     | null,
 
   itemLabel: string,
@@ -229,19 +229,19 @@ function buildCommonEntities(
       reviewerRelation,
     )
 
-  const iem =
+  const product =
     getSingleRelation(
-      iemRelation,
+      productRelation,
     )
 
   const brand =
     getSingleRelation(
-      iem?.brands,
+      product?.brands,
     )
 
   if (
     !reviewer ||
-    !iem ||
+    !product ||
     !brand
   ) {
     throw new Error(
@@ -260,11 +260,11 @@ function buildCommonEntities(
         brand.slug,
     }
 
-  const iemEntity: DiscoveryIem =
+  const productEntity: DiscoveryProduct =
     {
-      id: Number(iem.id),
-      name: iem.model,
-      slug: iem.slug,
+      id: Number(product.id),
+      name: product.model,
+      slug: product.slug,
 
       brandId:
         Number(
@@ -286,10 +286,10 @@ function buildCommonEntities(
 
   return {
     reviewer,
-    iem,
+    product,
     brand,
     brandEntity,
-    iemEntity,
+    productEntity,
     reviewerEntity,
   }
 }
@@ -300,7 +300,7 @@ function mapDiscoveryReview(
   const entities =
     buildCommonEntities(
       row.reviewers,
-      row.iems,
+      row.products,
       `Review ${row.id}`,
     )
 
@@ -329,10 +329,10 @@ function mapDiscoveryReview(
           .slug,
     
       model:
-        entities.iem.model,
+        entities.product.model,
     
-      iemSlug:
-        entities.iem.slug,
+      productSlug:
+        entities.product.slug,
     
       reviewer:
         entities.reviewer.name,
@@ -347,8 +347,8 @@ function mapDiscoveryReview(
         row.published_at,
     },
 
-    iem:
-      entities.iemEntity,
+    product:
+      entities.productEntity,
 
     brand:
       entities.brandEntity,
@@ -374,7 +374,7 @@ function mapDiscoveryImpression(
   const entities =
     buildCommonEntities(
       row.reviewers,
-      row.iems,
+      row.products,
       `Impression ${row.id}`,
     )
 
@@ -407,14 +407,14 @@ function mapDiscoveryImpression(
           entities.reviewer.slug,
       },
 
-      iem: {
+      product: {
         id: Number(
-          entities.iem.id,
+          entities.product.id,
         ),
         model:
-          entities.iem.model,
+          entities.product.model,
         slug:
-          entities.iem.slug,
+          entities.product.slug,
 
         brand: {
           id: Number(
@@ -431,8 +431,8 @@ function mapDiscoveryImpression(
       },
     },
 
-    iem:
-      entities.iemEntity,
+    product:
+      entities.productEntity,
 
     brand:
       entities.brandEntity,
@@ -494,7 +494,7 @@ export async function getDiscoveryItems(): Promise<
           slug
         ),
 
-        iems (
+        products (
           id,
           model,
           slug,
@@ -544,7 +544,7 @@ export async function getDiscoveryItems(): Promise<
           slug
         ),
 
-        iems (
+        products (
           id,
           model,
           slug,
@@ -640,10 +640,10 @@ export function buildDiscoveryState(
     )
 
   const suggestions = {
-    iem: buildSuggestionsForType(
+    product: buildSuggestionsForType(
       itemsForContentType,
       selectedFilters,
-      "iem",
+      "product",
     ),
 
     brand:
@@ -750,9 +750,9 @@ function itemMatchesFilter(
   selected: SearchSuggestion,
 ): boolean {
   switch (type) {
-    case "iem":
+    case "product":
       return (
-        item.iem.id ===
+        item.product.id ===
         selected.id
       )
 
@@ -843,7 +843,7 @@ function collectSuggestions(
           slug: entity.slug,
 
           subtitle:
-            type === "iem" &&
+            type === "product" &&
             "brandName" in
               entity
               ? entity.brandName
@@ -872,11 +872,11 @@ function getEntitiesForType(
   item: DiscoveryItem,
   type: SearchSuggestionType,
 ): Array<
-  DiscoveryEntity | DiscoveryIem
+  DiscoveryEntity | DiscoveryProduct
 > {
   switch (type) {
-    case "iem":
-      return [item.iem]
+    case "product":
+      return [item.product]
 
     case "brand":
       return [

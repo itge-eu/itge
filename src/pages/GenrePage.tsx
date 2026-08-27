@@ -179,7 +179,7 @@ function GenrePage() {
 
             <StatCard
               label="IEMs"
-              value={genre.iemCount.toString()}
+              value={genre.productCount.toString()}
             />
 
             <StatCard
@@ -269,14 +269,14 @@ function GenrePage() {
           )}
         </section>
 
-        {genre.iems.length >
+        {genre.products.length >
           0 && (
           <section className="mt-14">
             <SectionHeader
               eyebrow="IEM coverage"
               title={`IEMs heard with ${genre.name}`}
-              description={`${genre.iems.length} ${
-                genre.iems.length ===
+              description={`${genre.products.length} ${
+                genre.products.length ===
                 1
                   ? "IEM has"
                   : "IEMs have"
@@ -284,29 +284,29 @@ function GenrePage() {
             />
 
             <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {genre.iems.map(
-                (iem) => (
+              {genre.products.map(
+                (product) => (
                   <Link
-                    key={iem.id}
-                    to={`/iems/${iem.slug}`}
+                    key={product.id}
+                    to={`/products/${product.slug}`}
                     className="group rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
                   >
                     <p className="text-sm uppercase tracking-[0.16em] text-[var(--accent)]">
                       {
-                        iem.brandName
+                        product.brandName
                       }
                     </p>
 
                     <h3 className="mt-2 text-2xl font-semibold tracking-tight transition group-hover:text-[var(--accent)]">
-                      {iem.model}
+                      {product.model}
                     </h3>
 
                     <div className="mt-5 flex flex-wrap gap-x-4 gap-y-1 text-sm text-[var(--muted)]">
                       <span>
                         {
-                          iem.reviewCount
+                          product.reviewCount
                         }{" "}
-                        {iem.reviewCount ===
+                        {product.reviewCount ===
                         1
                           ? "review"
                           : "reviews"}
@@ -314,9 +314,9 @@ function GenrePage() {
 
                       <span>
                         {
-                          iem.impressionCount
+                          product.impressionCount
                         }{" "}
-                        {iem.impressionCount ===
+                        {product.impressionCount ===
                         1
                           ? "impression"
                           : "impressions"}

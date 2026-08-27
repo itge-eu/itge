@@ -17,7 +17,7 @@ export type DiscoveryEntity = {
   slug: string
 }
 
-export type DiscoveryIem =
+export type DiscoveryProduct =
   DiscoveryEntity & {
     brandId: number
     brandName: string
@@ -26,7 +26,7 @@ export type DiscoveryIem =
 type DiscoveryItemBase = {
   publishedAt: string | null
 
-  iem: DiscoveryIem
+  product: DiscoveryProduct
   brand: DiscoveryEntity
   reviewer: DiscoveryEntity
 
@@ -69,7 +69,7 @@ export type DiscoveryState = {
 
 export const EMPTY_DISCOVERY_FILTERS: SelectedDiscoveryFilters =
   {
-    iem: null,
+    product: null,
     brand: null,
     reviewer: null,
     artist: null,
@@ -78,7 +78,7 @@ export const EMPTY_DISCOVERY_FILTERS: SelectedDiscoveryFilters =
 
 export const EMPTY_DISCOVERY_SUGGESTIONS: DiscoverySuggestions =
   {
-    iem: [],
+    product: [],
     brand: [],
     reviewer: [],
     artist: [],

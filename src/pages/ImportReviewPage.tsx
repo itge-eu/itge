@@ -34,7 +34,7 @@ type ReviewerOption = {
   name: string;
 };
 
-type IemOption = {
+type ProductOption = {
   id: string;
   model: string;
   slug: string;
@@ -73,12 +73,12 @@ function slugify(value: string) {
     .replace(/^-+|-+$/g, "");
 }
 
-function getIemLabel(iem: IemOption) {
-  const brandName = iem.brands?.name?.trim();
+function getProductLabel(product: ProductOption) {
+  const brandName = product.brands?.name?.trim();
 
   return brandName
-    ? `${brandName} ${iem.model}`
-    : iem.model;
+    ? `${brandName} ${product.model}`
+    : product.model;
 }
 
 function ImportReviewPage() {
@@ -94,11 +94,11 @@ function ImportReviewPage() {
     null,
   );
   const [reviewers, setReviewers] = useState<ReviewerOption[]>([]);
-  const [iems, setIems] = useState<IemOption[]>([]);
+  const [products, setProducts] = useState<ProductOption[]>([]);
   const [selectedReviewerId, setSelectedReviewerId] = useState("");
-  const [selectedIemId, setSelectedIemId] = useState("");
-  const [iemSearch, setIemSearch] = useState("");
-  const [iemPickerOpen, setIemPickerOpen] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState("");
+  const [productSearch, setProductSearch] = useState("");
+  const [productPickerOpen, setProductPickerOpen] = useState(false);
 
   const formattedRating = useMemo(() => {
     if (importData?.rating == null) {
@@ -108,23 +108,23 @@ function ImportReviewPage() {
     return `${importData.rating.toFixed(1)} / 5`;
   }, [importData]);
   
-  const filteredIems = useMemo(() => {
-    const searchTerms = iemSearch
+  const filteredProducts = useMemo(() => {
+    const searchTerms = productSearch
       .toLowerCase()
       .trim()
       .split(/\s+/)
       .filter(Boolean);
   
     if (searchTerms.length === 0) {
-      return iems.slice(0, 10);
+      return products.slice(0, 10);
     }
   
-    return iems
-      .filter((iem) => {
+    return products
+      .filter((product) => {
         const searchableText = [
-          getIemLabel(iem),
-          iem.model,
-          iem.slug,
+          getProductLabel(product),
+          product.model,
+          product.slug,
         ]
           .join(" ")
           .toLowerCase();
@@ -134,12 +134,12 @@ function ImportReviewPage() {
         );
       })
       .slice(0, 10);
-  }, [iems, iemSearch]);
+  }, [products, productSearch]);
 
-const selectedIem = useMemo(
+const selectedProduct = useMemo(
   () =>
-    iems.find((iem) => String(iem.id) === selectedIemId) ?? null,
-  [iems, selectedIemId],
+    products.find((product) => String(product.id) === selectedProductId) ?? null,
+  [products, selectedProductId],
 );
 
   async function findExistingReview(
@@ -167,9 +167,9 @@ const selectedIem = useMemo(
     return (data ?? []) as ReviewerOption[];
   }
 
-  async function loadIems() {
+  async function loadProducts() {
     const { data, error: queryError } = await supabase
-      .from("iems")
+      .from("products")
       .select(
         `
         id,
@@ -183,7 +183,7 @@ const selectedIem = useMemo(
       .order("model");
 
     if (queryError) throw queryError;
-    return (data ?? []) as unknown as IemOption[];
+    return (data ?? []) as unknown as ProductOption[];
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -194,7 +194,7 @@ const selectedIem = useMemo(
     setExistingReview(null);
     setSavedSlug(null);
     setSelectedReviewerId("");
-    setSelectedIemId("");
+    setSelectedProductId("");
 
     const trimmedJson = rawJson.trim();
 
@@ -218,25 +218,25 @@ const selectedIem = useMemo(
         throw new Error("No Head-Fi review ID was found.");
       }
 
-      const [duplicate, reviewerRows, iemRows] = await Promise.all([
+      const [duplicate, reviewerRows, productRows] = await Promise.all([
         findExistingReview(parsed.source, parsed.reviewId),
         loadReviewers(),
-        loadIems(),
+        loadProducts(),
       ]);
 
       setImportData(parsed);
       setExistingReview(duplicate);
       setReviewers(reviewerRows);
-      setIems(iemRows);
+      setProducts(productRows);
 
       const normalizedProductSlug = parsed.productSlug?.toLowerCase() ?? "";
 
-      const matchingIem =
-        iemRows.find(
-          (iem) => iem.slug.toLowerCase() === normalizedProductSlug,
+      const matchingProduct =
+        productRows.find(
+          (product) => product.slug.toLowerCase() === normalizedProductSlug,
         ) ??
-        iemRows.find((iem) => {
-          const normalizedLabel = slugify(getIemLabel(iem));
+        productRows.find((product) => {
+          const normalizedLabel = slugify(getProductLabel(product));
       
           return (
             normalizedLabel === normalizedProductSlug ||
@@ -245,12 +245,12 @@ const selectedIem = useMemo(
           );
         });
       
-      if (matchingIem) {
-        setSelectedIemId(String(matchingIem.id));
-        setIemSearch(getIemLabel(matchingIem));
+      if (matchingProduct) {
+        setSelectedProductId(String(matchingProduct.id));
+        setProductSearch(getProductLabel(matchingProduct));
       } else {
-        setSelectedIemId("");
-        setIemSearch(
+        setSelectedProductId("");
+        setProductSearch(
           parsed.productSlug
             ?.replace(/-/g, " ")
             .replace(/\b\w/g, (letter) => letter.toUpperCase()) ?? "",
@@ -280,7 +280,7 @@ async function handleSaveDraft() {
   console.log("Save clicked", {
     importData,
     selectedReviewerId,
-    selectedIemId,
+    selectedProductId,
   });
 
   if (!importData) {
@@ -298,7 +298,7 @@ async function handleSaveDraft() {
     return;
   }
 
-  if (!selectedIemId) {
+  if (!selectedProductId) {
     setError("Select an ITGE IEM.");
     return;
   }
@@ -312,31 +312,31 @@ async function handleSaveDraft() {
     (reviewer) => String(reviewer.id) === selectedReviewerId,
   );
   
-  const selectedIem = iems.find(
-    (iem) => String(iem.id) === selectedIemId,
+  const selectedProduct = products.find(
+    (product) => String(product.id) === selectedProductId,
   );
 
-  if (!selectedReviewer || !selectedIem) {
+  if (!selectedReviewer || !selectedProduct) {
     setError("The selected member or IEM could not be found.");
     return;
   }
 
   const brandName =
-    selectedIem.brands?.name?.trim() ?? "";
+    selectedProduct.brands?.name?.trim() ?? "";
   
-  const fullIemName = [brandName, selectedIem.model]
+  const fullProductName = [brandName, selectedProduct.model]
     .filter(Boolean)
     .join(" ");
   
-  const reviewTitle = `${fullIemName} review`;
+  const reviewTitle = `${fullProductName} review`;
   
   const reviewSlug = slugify(
-    `${fullIemName}-${selectedReviewer.name}`,
+    `${fullProductName}-${selectedReviewer.name}`,
   );
 
   const reviewPayload = {
     reviewer_id: Number(selectedReviewerId),
-    iem_id: Number(selectedIemId),
+    product_id: Number(selectedProductId),
 	published_at: importData.publishedAt,
   
     title: reviewTitle,
@@ -408,11 +408,11 @@ async function handleSaveDraft() {
     setExistingReview(null);
     setSavedSlug(null);
     setReviewers([]);
-    setIems([]);
+    setProducts([]);
     setSelectedReviewerId("");
-    setSelectedIemId("");
-	setIemSearch("");
-    setIemPickerOpen(false);
+    setSelectedProductId("");
+	setProductSearch("");
+    setProductPickerOpen(false);
   }
   
   function normalizeUsername(value: string | null | undefined) {
@@ -592,47 +592,47 @@ async function handleSaveDraft() {
 
               <div className="relative">
                 <label
-                  htmlFor="iem-search"
+                  htmlFor="product-search"
                   className="block text-sm font-semibold"
                 >
                   ITGE IEM
                 </label>
               
                 <input
-                  id="iem-search"
+                  id="product-search"
                   type="text"
-                  value={iemSearch}
+                  value={productSearch}
                   autoComplete="off"
                   placeholder="Search by brand or model"
-                  onFocus={() => setIemPickerOpen(true)}
+                  onFocus={() => setProductPickerOpen(true)}
                   onChange={(event) => {
-                    setIemSearch(event.target.value);
-                    setSelectedIemId("");
-                    setIemPickerOpen(true);
+                    setProductSearch(event.target.value);
+                    setSelectedProductId("");
+                    setProductPickerOpen(true);
                   }}
                   className="mt-3 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 outline-none transition focus:border-[var(--accent)]"
                 />
               
-                {iemPickerOpen && !selectedIem && (
+                {productPickerOpen && !selectedProduct && (
                   <div className="absolute z-20 mt-2 max-h-72 w-full overflow-y-auto rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2 shadow-xl">
-                    {filteredIems.length > 0 ? (
-                      filteredIems.map((iem) => (
+                    {filteredProducts.length > 0 ? (
+                      filteredProducts.map((product) => (
                         <button
-                          key={iem.id}
+                          key={product.id}
                           type="button"
                           onClick={() => {
-                            setSelectedIemId(String(iem.id));
-                            setIemSearch(getIemLabel(iem));
-                            setIemPickerOpen(false);
+                            setSelectedProductId(String(product.id));
+                            setProductSearch(getProductLabel(product));
+                            setProductPickerOpen(false);
                           }}
                           className="block w-full rounded-lg px-3 py-3 text-left transition hover:bg-[var(--surface-soft)]"
                         >
                           <span className="block font-medium">
-                            {getIemLabel(iem)}
+                            {getProductLabel(product)}
                           </span>
               
                           <span className="mt-1 block text-xs text-[var(--muted)]">
-                            {iem.slug}
+                            {product.slug}
                           </span>
                         </button>
                       ))
@@ -649,7 +649,7 @@ async function handleSaveDraft() {
                   </div>
                 )}
               
-                {selectedIem && (
+                {selectedProduct && (
                   <div className="mt-3 flex items-center justify-between gap-4 rounded-xl border border-[var(--accent)] bg-[var(--accent)]/10 px-4 py-3">
                     <div>
                       <p className="text-xs uppercase tracking-[0.14em] text-[var(--muted)]">
@@ -657,16 +657,16 @@ async function handleSaveDraft() {
                       </p>
               
                       <p className="mt-1 font-semibold">
-                        {getIemLabel(selectedIem)}
+                        {getProductLabel(selectedProduct)}
                       </p>
                     </div>
               
                     <button
                       type="button"
                       onClick={() => {
-                        setSelectedIemId("");
-                        setIemSearch("");
-                        setIemPickerOpen(true);
+                        setSelectedProductId("");
+                        setProductSearch("");
+                        setProductPickerOpen(true);
                       }}
                       className="text-sm font-medium text-[var(--accent)]"
                     >
@@ -753,7 +753,7 @@ async function handleSaveDraft() {
                     saving ||
                     Boolean(existingReview) ||
                     !selectedReviewerId ||
-                    !selectedIemId
+                    !selectedProductId
                   }
                   className="rounded-xl bg-[var(--accent)] px-5 py-3 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
@@ -767,7 +767,7 @@ async function handleSaveDraft() {
                 </span>
               )}
 
-              {selectedReviewerId && !selectedIemId && (
+              {selectedReviewerId && !selectedProductId && (
                 <span className="text-sm text-[var(--muted)]">
                   Select an IEM before saving.
                 </span>

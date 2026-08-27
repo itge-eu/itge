@@ -293,7 +293,7 @@ function BrandsPage() {
 
                     <div className="mt-auto grid grid-cols-3 gap-3 border-t border-[var(--border)] pt-5">
                       <Metric
-                        value={brand.iemCount}
+                        value={brand.productCount}
                         singular="IEM"
                         plural="IEMs"
                       />

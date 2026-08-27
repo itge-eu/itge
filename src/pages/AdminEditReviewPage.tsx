@@ -36,7 +36,7 @@ type ReviewForm = {
   createdAt: string;
   updatedAt: string;
   reviewerName: string;
-  iemName: string;
+  productName: string;
   pendingImages: {
     url: string;
     alt: string;
@@ -63,7 +63,7 @@ function createEmptyReview(): ReviewForm {
     createdAt: "",
     updatedAt: "",
     reviewerName: "",
-    iemName: "",
+    productName: "",
     pendingImages: [],
   };
 }
@@ -159,7 +159,7 @@ function AdminEditReviewPage() {
           reviewers (
             name
           ),
-          iems (
+          products (
             model,
             brands (
               name
@@ -307,13 +307,13 @@ function AdminEditReviewPage() {
       
       setSelectedGenres(loadedGenres);
 
-      const iemRelation = Array.isArray(data.iems)
-        ? data.iems[0]
-        : data.iems;
+      const productRelation = Array.isArray(data.products)
+        ? data.products[0]
+        : data.products;
       
-      const brandRelation = Array.isArray(iemRelation?.brands)
-        ? iemRelation.brands[0]
-        : iemRelation?.brands;
+      const brandRelation = Array.isArray(productRelation?.brands)
+        ? productRelation.brands[0]
+        : productRelation?.brands;
       
       const reviewerRelation = Array.isArray(data.reviewers)
         ? data.reviewers[0]
@@ -323,9 +323,9 @@ function AdminEditReviewPage() {
         brandRelation?.name?.trim() ?? "";
       
       const modelName =
-        iemRelation?.model?.trim() ?? "";
+        productRelation?.model?.trim() ?? "";
       
-      const iemName = [brandName, modelName]
+      const productName = [brandName, modelName]
         .filter(Boolean)
         .join(" ");
         
@@ -356,7 +356,7 @@ function AdminEditReviewPage() {
         createdAt: data.created_at ?? "",
         updatedAt: data.updated_at ?? "",
         reviewerName: reviewerRelation?.name ?? "Unknown reviewer",
-        iemName: iemName || "Unknown IEM",
+        productName: productName || "Unknown IEM",
         pendingImages,
       });
 
@@ -823,7 +823,7 @@ function AdminEditReviewPage() {
           </h1>
 
           <p className="mt-4 text-lg text-[var(--muted)]">
-            {review.iemName} · {review.reviewerName}
+            {review.productName} · {review.reviewerName}
           </p>
         </header>
 
@@ -1042,7 +1042,7 @@ function AdminEditReviewPage() {
                     IEM
                   </dt>
                   <dd className="mt-1 font-semibold">
-                    {review.iemName}
+                    {review.productName}
                   </dd>
                 </div>
 

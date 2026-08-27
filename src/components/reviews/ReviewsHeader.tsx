@@ -33,7 +33,7 @@ function ReviewsHeader({
       `Published ITGE reviews covering ${genreName}.`
   } else if (additionalFilterName) {
     switch (additionalFilterType) {
-      case "iem":
+      case "product":
         heading = `Reviews of ${additionalFilterName}`
         description =
           `Published ITGE reviews of ${additionalFilterName}.`

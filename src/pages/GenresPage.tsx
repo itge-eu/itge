@@ -269,10 +269,10 @@ function GenresPage() {
 
                     <Metric
                       value={
-                        genre.iemCount
+                        genre.productCount
                       }
                       label={
-                        genre.iemCount ===
+                        genre.productCount ===
                         1
                           ? "IEM"
                           : "IEMs"

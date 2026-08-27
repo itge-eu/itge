@@ -38,7 +38,7 @@ type ReviewRow = {
   summary: string
   hero_image_url: string | null
 
-  iems:
+  products:
     | {
         model: string
         slug: string
@@ -85,13 +85,13 @@ function getSingleRelation<T>(
 function mapReview(
   row: ReviewRow,
 ): FeaturedReview {
-  const iem = getSingleRelation(row.iems)
+  const product = getSingleRelation(row.products)
 
   const brand = getSingleRelation(
-    iem?.brands,
+    product?.brands,
   )
 
-  if (!iem || !brand) {
+  if (!product || !brand) {
     throw new Error(
       `Review ${row.id} has incomplete data.`,
     )
@@ -105,8 +105,8 @@ function mapReview(
     summary: row.summary,
     brand: brand.name,
     brandSlug: brand.slug,
-    model: iem.model,
-    iemSlug: iem.slug,
+    model: product.model,
+    productSlug: product.slug,
     reviewer: "",
     reviewerSlug: "",
     heroImageUrl: row.hero_image_url,
@@ -289,7 +289,7 @@ export async function getReviewerBySlug(
       summary,
       hero_image_url,
 
-      iems (
+      products (
         model,
         slug,
 

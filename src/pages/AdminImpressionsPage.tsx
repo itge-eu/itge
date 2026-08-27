@@ -37,7 +37,7 @@ type AdminImpression = {
       }[]
     | null
 
-  iems:
+  products:
     | {
         model: string
 
@@ -192,7 +192,7 @@ function AdminImpressionsPage() {
               name
             ),
 
-            iems (
+            products (
               model,
 
               brands (
@@ -374,14 +374,14 @@ function AdminImpressionsPage() {
               impression.reviewers,
             )
 
-          const iem =
+          const product =
             getSingleRelation(
-              impression.iems,
+              impression.products,
             )
 
           const brand =
             getSingleRelation(
-              iem?.brands,
+              product?.brands,
             )
 
           const searchable =
@@ -395,7 +395,7 @@ function AdminImpressionsPage() {
 
               brand?.name,
 
-              iem?.model,
+              product?.model,
             ]
               .filter(
                 Boolean,
@@ -719,14 +719,14 @@ function AdminImpressionsPage() {
                           impression.reviewers,
                         )
 
-                      const iem =
+                      const product =
                         getSingleRelation(
-                          impression.iems,
+                          impression.products,
                         )
 
                       const brand =
                         getSingleRelation(
-                          iem?.brands,
+                          product?.brands,
                         )
 
                       const brandName =
@@ -735,10 +735,10 @@ function AdminImpressionsPage() {
                         ""
 
                       const modelName =
-                        iem?.model ??
+                        product?.model ??
                         "Unknown IEM"
 
-                      const fullIemName =
+                      const fullProductName =
                         [
                           brandName,
                           modelName,
@@ -792,12 +792,12 @@ function AdminImpressionsPage() {
 
                             <h2 className="mt-3 truncate text-xl font-semibold">
                               {impression.title ||
-                                fullIemName}
+                                fullProductName}
                             </h2>
 
                             <p className="mt-2 text-sm text-[var(--muted)]">
                               {
-                                fullIemName
+                                fullProductName
                               }
 
                               {reviewer?.name

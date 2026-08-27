@@ -1,28 +1,28 @@
 import { Link } from "react-router"
 
-import type { IemDirectoryItem } from "../../lib/iems"
+import type { ProductDirectoryItem } from "../../lib/products"
 
-type IemCardProps = {
-  iem: IemDirectoryItem
+type ProductCardProps = {
+  product: ProductDirectoryItem
 }
 
-function IemCard({ iem }: IemCardProps) {
-  const iemUrl = `/iems/${iem.slug}`
+function ProductCard({ product }: ProductCardProps) {
+  const productUrl = `/products/${product.slug}`
   const brandUrl =
-    `/brands/${iem.brand.slug}`
+    `/brands/${product.brand.slug}`
 
   return (
     <article className="group overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] transition hover:-translate-y-1 hover:border-[var(--accent)]">
       <Link
-        to={iemUrl}
-        aria-label={`View ${iem.brand.name} ${iem.model}`}
+        to={productUrl}
+        aria-label={`View ${product.brand.name} ${product.model}`}
         className="block"
       >
-        {iem.heroImageUrl ? (
+        {product.heroImageUrl ? (
           <div className="aspect-[16/10] overflow-hidden bg-[var(--surface-soft)]">
             <img
-              src={iem.heroImageUrl}
-              alt={`${iem.brand.name} ${iem.model}`}
+              src={product.heroImageUrl}
+              alt={`${product.brand.name} ${product.model}`}
               loading="lazy"
               className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.025]"
             />
@@ -39,43 +39,43 @@ function IemCard({ iem }: IemCardProps) {
           to={brandUrl}
           className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--accent)] transition hover:opacity-70"
         >
-          {iem.brand.name}
+          {product.brand.name}
         </Link>
 
         <h2 className="mt-2 text-2xl font-semibold tracking-tight">
           <Link
-            to={iemUrl}
+            to={productUrl}
             className="transition hover:text-[var(--accent)]"
           >
-            {iem.model}
+            {product.model}
           </Link>
         </h2>
 
         <div className="mt-5 grid grid-cols-3 gap-3 border-t border-[var(--border)] pt-5">
           <Metric
             label={
-              iem.reviewCount === 1
+              product.reviewCount === 1
                 ? "Review"
                 : "Reviews"
             }
-            value={iem.reviewCount.toString()}
+            value={product.reviewCount.toString()}
           />
 
           <Metric
             label={
-              iem.reviewerCount === 1
+              product.reviewerCount === 1
                 ? "Member"
                 : "Members"
             }
-            value={iem.reviewerCount.toString()}
+            value={product.reviewerCount.toString()}
           />
 
           <Metric
             label="Average"
             value={
-              iem.averageRating == null
+              product.averageRating == null
                 ? "—"
-                : iem.averageRating.toFixed(1)
+                : product.averageRating.toFixed(1)
             }
           />
         </div>
@@ -104,4 +104,4 @@ function Metric({
   )
 }
 
-export default IemCard
+export default ProductCard

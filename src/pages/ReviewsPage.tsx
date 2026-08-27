@@ -34,7 +34,7 @@ type ContentType =
 type SortOption =
   | "newest"
   | "oldest"
-  | "iem"
+  | "product"
   | "reviewer"
 
 type ContentItem =
@@ -89,8 +89,8 @@ function ReviewsPage() {
   const genreSlug =
     searchParams.get("genre")
 
-  const iemName =
-    searchParams.get("iem")
+  const productName =
+    searchParams.get("product")
 
   const brandName =
     searchParams.get(
@@ -127,8 +127,8 @@ function ReviewsPage() {
               genreSlug ??
               undefined,
 
-            iemName:
-              iemName ??
+            productName:
+              productName ??
               undefined,
 
             brandName:
@@ -149,8 +149,8 @@ function ReviewsPage() {
               genreSlug ??
               undefined,
           
-            iemName:
-              iemName ??
+            productName:
+              productName ??
               undefined,
           
             brandName:
@@ -213,7 +213,7 @@ function ReviewsPage() {
   }, [
     artistSlug,
     genreSlug,
-    iemName,
+    productName,
     brandName,
     reviewerName,
   ])
@@ -221,7 +221,7 @@ function ReviewsPage() {
   const hasFilters = Boolean(
     artistSlug ||
       genreSlug ||
-      iemName ||
+      productName ||
       brandName ||
       reviewerName,
   )
@@ -234,9 +234,9 @@ function ReviewsPage() {
     | string
     | null = null
 
-  if (iemName) {
-    additionalFilterType = "iem"
-    additionalFilterName = iemName
+  if (productName) {
+    additionalFilterType = "product"
+    additionalFilterName = productName
   } else if (
     brandName
   ) {
@@ -327,9 +327,9 @@ function ReviewsPage() {
         )
         break
 
-      case "iem":
+      case "product":
         params.set(
-          "iem",
+          "product",
           suggestion.name,
         )
         break
@@ -450,7 +450,7 @@ function ReviewsPage() {
                 Oldest first
               </option>
 
-              <option value="iem">
+              <option value="product">
                 IEM A–Z
               </option>
 
@@ -559,11 +559,11 @@ function compareContentItems(
         getTimestamp(second)
       )
 
-    case "iem":
-      return getIemName(
+    case "product":
+      return getProductName(
         first,
       ).localeCompare(
-        getIemName(second),
+        getProductName(second),
         undefined,
         {
           sensitivity: "base",
@@ -612,7 +612,7 @@ function getTimestamp(
     : timestamp
 }
 
-function getIemName(
+function getProductName(
   item: ContentItem,
 ): string {
   if (
@@ -621,7 +621,7 @@ function getIemName(
     return `${item.review.brand} ${item.review.model}`
   }
 
-  return `${item.impression.iem.brand.name} ${item.impression.iem.model}`
+  return `${item.impression.product.brand.name} ${item.impression.product.model}`
 }
 
 function getReviewerName(

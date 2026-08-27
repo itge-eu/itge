@@ -214,12 +214,12 @@ export function buildLatestCoverageItems(
             impression.slug,
 
           brand:
-            impression.iem
+            impression.product
               .brand
               .name,
 
           model:
-            impression.iem
+            impression.product
               .model,
 
           member:

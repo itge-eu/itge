@@ -36,7 +36,7 @@ const FILTER_GROUPS: {
   title: string
 }[] = [
   {
-    type: "iem",
+    type: "product",
     title: "IEMs",
   },
   {

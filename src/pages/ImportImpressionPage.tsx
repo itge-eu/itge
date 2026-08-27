@@ -68,7 +68,7 @@ type ReviewerOption = {
   name: string
 }
 
-type IemOption = {
+type ProductOption = {
   id: number
   model: string
   slug: string
@@ -179,24 +179,24 @@ function slugify(
 }
 
 function getBrandName(
-  iem: IemOption,
+  product: ProductOption,
 ) {
   return (
     getSingleRelation(
-      iem.brands,
+      product.brands,
     )?.name?.trim() ?? ""
   )
 }
 
-function getIemLabel(
-  iem: IemOption,
+function getProductLabel(
+  product: ProductOption,
 ) {
   const brandName =
-    getBrandName(iem)
+    getBrandName(product)
 
   return [
     brandName,
-    iem.model,
+    product.model,
   ]
     .filter(Boolean)
     .join(" ")
@@ -264,10 +264,10 @@ function ImportImpressionPage() {
     )
 
   const [
-    iems,
-    setIems,
+    products,
+    setProducts,
   ] =
-    useState<IemOption[]>(
+    useState<ProductOption[]>(
       [],
     )
 
@@ -278,20 +278,20 @@ function ImportImpressionPage() {
     useState("")
 
   const [
-    selectedIemId,
-    setSelectedIemId,
+    selectedProductId,
+    setSelectedProductId,
   ] =
     useState("")
 
   const [
-    iemSearch,
-    setIemSearch,
+    productSearch,
+    setProductSearch,
   ] =
     useState("")
 
   const [
-    iemPickerOpen,
-    setIemPickerOpen,
+    productPickerOpen,
+    setProductPickerOpen,
   ] =
     useState(false)
 
@@ -323,24 +323,24 @@ function ImportImpressionPage() {
       null,
     )
 
-  const selectedIem =
+  const selectedProduct =
     useMemo(
       () =>
-        iems.find(
-          (iem) =>
-            String(iem.id) ===
-            selectedIemId,
+        products.find(
+          (product) =>
+            String(product.id) ===
+            selectedProductId,
         ) ?? null,
       [
-        iems,
-        selectedIemId,
+        products,
+        selectedProductId,
       ],
     )
 
-  const filteredIems =
+  const filteredProducts =
     useMemo(() => {
       const searchTerms =
-        iemSearch
+        productSearch
           .toLowerCase()
           .trim()
           .split(/\s+/)
@@ -350,21 +350,21 @@ function ImportImpressionPage() {
         searchTerms.length ===
         0
       ) {
-        return iems.slice(
+        return products.slice(
           0,
           10,
         )
       }
 
-      return iems
-        .filter((iem) => {
+      return products
+        .filter((product) => {
           const searchable =
             [
-              getIemLabel(
-                iem,
+              getProductLabel(
+                product,
               ),
-              iem.model,
-              iem.slug,
+              product.model,
+              product.slug,
             ]
               .join(" ")
               .toLowerCase()
@@ -378,8 +378,8 @@ function ImportImpressionPage() {
         })
         .slice(0, 10)
     }, [
-      iems,
-      iemSearch,
+      products,
+      productSearch,
     ])
 
   const suggestedSummary =
@@ -456,14 +456,14 @@ function ImportImpressionPage() {
     ) as ReviewerOption[]
   }
 
-  async function loadIems() {
+  async function loadProducts() {
     const {
       data,
       error:
         queryError,
     } =
       await supabase
-        .from("iems")
+        .from("products")
         .select(`
           id,
           model,
@@ -483,7 +483,7 @@ function ImportImpressionPage() {
 
     return (
       data ?? []
-    ) as unknown as IemOption[]
+    ) as unknown as ProductOption[]
   }
 
   async function handleSubmit(
@@ -503,9 +503,9 @@ function ImportImpressionPage() {
     setSelectedReviewerId(
       "",
     )
-    setSelectedIemId("")
-    setIemSearch("")
-    setIemPickerOpen(false)
+    setSelectedProductId("")
+    setProductSearch("")
+    setProductPickerOpen(false)
 
     const trimmed =
       rawJson.trim()
@@ -546,7 +546,7 @@ function ImportImpressionPage() {
       const [
         duplicate,
         reviewerRows,
-        iemRows,
+        productRows,
       ] =
         await Promise.all([
           findExistingImpression(
@@ -556,7 +556,7 @@ function ImportImpressionPage() {
 
           loadReviewers(),
 
-          loadIems(),
+          loadProducts(),
         ])
 
       setImportData(
@@ -571,8 +571,8 @@ function ImportImpressionPage() {
         reviewerRows,
       )
 
-      setIems(
-        iemRows,
+      setProducts(
+        productRows,
       )
 
       const matchingReviewer =
@@ -602,7 +602,7 @@ function ImportImpressionPage() {
        * so we deliberately select
        * this manually.
        */
-      setIemPickerOpen(
+      setProductPickerOpen(
         true,
       )
     } catch (
@@ -654,7 +654,7 @@ function ImportImpressionPage() {
       return
     }
 
-    if (!selectedIemId) {
+    if (!selectedProductId) {
       setError(
         "Select an ITGE IEM.",
       )
@@ -671,16 +671,16 @@ function ImportImpressionPage() {
           selectedReviewerId,
       )
 
-    const selectedIem =
-      iems.find(
-        (iem) =>
-          String(iem.id) ===
-          selectedIemId,
+    const selectedProduct =
+      products.find(
+        (product) =>
+          String(product.id) ===
+          selectedProductId,
       )
 
     if (
       !selectedReviewer ||
-      !selectedIem
+      !selectedProduct
     ) {
       setError(
         "The selected contributor or IEM could not be found.",
@@ -691,19 +691,19 @@ function ImportImpressionPage() {
 
     const brandName =
       getBrandName(
-        selectedIem,
+        selectedProduct,
       )
 
-    const fullIemName =
+    const fullProductName =
       [
         brandName,
-        selectedIem.model,
+        selectedProduct.model,
       ]
         .filter(Boolean)
         .join(" ")
 
     const title =
-      `${fullIemName} impression`
+      `${fullProductName} impression`
 
     /*
      * Include source post ID so the
@@ -713,7 +713,7 @@ function ImportImpressionPage() {
      */
     const slug =
       slugify(
-        `${fullIemName}-${selectedReviewer.name}-${importData.postId}`,
+        `${fullProductName}-${selectedReviewer.name}-${importData.postId}`,
       )
 
     setSaving(true)
@@ -740,9 +740,9 @@ function ImportImpressionPage() {
                 selectedReviewerId,
               ),
 
-            iem_id:
+            product_id:
               Number(
-                selectedIemId,
+                selectedProductId,
               ),
 
             title,
@@ -879,18 +879,18 @@ function ImportImpressionPage() {
       null,
     )
     setReviewers([])
-    setIems([])
+    setProducts([])
 
     setSelectedReviewerId(
       "",
     )
 
-    setSelectedIemId(
+    setSelectedProductId(
       "",
     )
 
-    setIemSearch("")
-    setIemPickerOpen(
+    setProductSearch("")
+    setProductPickerOpen(
       false,
     )
 
@@ -1176,86 +1176,86 @@ function ImportImpressionPage() {
 
               <div className="relative">
                 <label
-                  htmlFor="impression-iem-search"
+                  htmlFor="impression-product-search"
                   className="block text-sm font-semibold"
                 >
                   ITGE IEM
                 </label>
 
                 <input
-                  id="impression-iem-search"
+                  id="impression-product-search"
                   type="text"
                   value={
-                    iemSearch
+                    productSearch
                   }
                   autoComplete="off"
                   placeholder="Search by brand or model"
                   onFocus={() =>
-                    setIemPickerOpen(
+                    setProductPickerOpen(
                       true,
                     )
                   }
                   onChange={(
                     event,
                   ) => {
-                    setIemSearch(
+                    setProductSearch(
                       event.target
                         .value,
                     )
 
-                    setSelectedIemId(
+                    setSelectedProductId(
                       "",
                     )
 
-                    setIemPickerOpen(
+                    setProductPickerOpen(
                       true,
                     )
                   }}
                   className="mt-3 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 outline-none transition focus:border-[var(--accent)]"
                 />
 
-                {iemPickerOpen &&
-                  !selectedIem && (
+                {productPickerOpen &&
+                  !selectedProduct && (
                   <div className="absolute z-20 mt-2 max-h-72 w-full overflow-y-auto rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2 shadow-xl">
-                    {filteredIems.length >
+                    {filteredProducts.length >
                     0 ? (
-                      filteredIems.map(
+                      filteredProducts.map(
                         (
-                          iem,
+                          product,
                         ) => (
                           <button
                             key={
-                              iem.id
+                              product.id
                             }
                             type="button"
                             onClick={() => {
-                              setSelectedIemId(
+                              setSelectedProductId(
                                 String(
-                                  iem.id,
+                                  product.id,
                                 ),
                               )
 
-                              setIemSearch(
-                                getIemLabel(
-                                  iem,
+                              setProductSearch(
+                                getProductLabel(
+                                  product,
                                 ),
                               )
 
-                              setIemPickerOpen(
+                              setProductPickerOpen(
                                 false,
                               )
                             }}
                             className="block w-full rounded-lg px-3 py-3 text-left transition hover:bg-[var(--surface-soft)]"
                           >
                             <span className="block font-medium">
-                              {getIemLabel(
-                                iem,
+                              {getProductLabel(
+                                product,
                               )}
                             </span>
 
                             <span className="mt-1 block text-xs text-[var(--muted)]">
                               {
-                                iem.slug
+                                product.slug
                               }
                             </span>
                           </button>
@@ -1282,7 +1282,7 @@ function ImportImpressionPage() {
                   </div>
                 )}
 
-                {selectedIem && (
+                {selectedProduct && (
                   <div className="mt-3 flex items-center justify-between gap-4 rounded-xl border border-[var(--accent)] bg-[var(--accent)]/10 px-4 py-3">
                     <div>
                       <p className="text-xs uppercase tracking-[0.14em] text-[var(--muted)]">
@@ -1290,8 +1290,8 @@ function ImportImpressionPage() {
                       </p>
 
                       <p className="mt-1 font-semibold">
-                        {getIemLabel(
-                          selectedIem,
+                        {getProductLabel(
+                          selectedProduct,
                         )}
                       </p>
                     </div>
@@ -1299,15 +1299,15 @@ function ImportImpressionPage() {
                     <button
                       type="button"
                       onClick={() => {
-                        setSelectedIemId(
+                        setSelectedProductId(
                           "",
                         )
 
-                        setIemSearch(
+                        setProductSearch(
                           "",
                         )
 
-                        setIemPickerOpen(
+                        setProductPickerOpen(
                           true,
                         )
                       }}
@@ -1619,7 +1619,7 @@ function ImportImpressionPage() {
                       existingImpression,
                     ) ||
                     !selectedReviewerId ||
-                    !selectedIemId
+                    !selectedProductId
                   }
                   className="rounded-xl bg-[var(--accent)] px-5 py-3 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
@@ -1639,7 +1639,7 @@ function ImportImpressionPage() {
               )}
 
               {selectedReviewerId &&
-                !selectedIemId &&
+                !selectedProductId &&
                 !savedImpression && (
                 <span className="text-sm text-[var(--muted)]">
                   Select an IEM

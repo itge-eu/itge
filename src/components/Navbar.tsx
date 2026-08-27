@@ -195,7 +195,7 @@ function Navbar() {
           </Link>
 
           <Link
-            to="/iems"
+            to="/products"
             onClick={closeDesktopMenus}
             className="transition hover:text-[var(--foreground)]"
           >
@@ -422,7 +422,7 @@ function Navbar() {
             </MobileLink>
 
             <MobileLink
-              to="/iems"
+              to="/products"
               onClick={closeMobileMenu}
               className="rounded-xl px-4 py-3 hover:text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
             >

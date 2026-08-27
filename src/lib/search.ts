@@ -11,7 +11,7 @@ type NamedRow = {
   slug?: string | null
 }
 
-type IemRow = {
+type ProductRow = {
   id: number
   model: string
   brand_id: number | null
@@ -29,7 +29,7 @@ type IemRow = {
 
 type PublishedReviewRow = {
   id: number
-  iem_id: number | null
+  product_id: number | null
   reviewer_id: number | null
 }
 
@@ -102,7 +102,7 @@ export async function getSearchSuggestions(): Promise<
 > {
   const [
     reviewsResult,
-    iemsResult,
+    productsResult,
     brandsResult,
     reviewersResult,
     artistsResult,
@@ -112,13 +112,13 @@ export async function getSearchSuggestions(): Promise<
       .from("reviews")
       .select(`
         id,
-        iem_id,
+        product_id,
         reviewer_id
       `)
       .eq("published", true),
 
     supabase
-      .from("iems")
+      .from("products")
       .select(`
         id,
         model,
@@ -168,7 +168,7 @@ export async function getSearchSuggestions(): Promise<
 
   const firstError =
     reviewsResult.error ||
-    iemsResult.error ||
+    productsResult.error ||
     brandsResult.error ||
     reviewersResult.error ||
     artistsResult.error ||
@@ -185,32 +185,32 @@ export async function getSearchSuggestions(): Promise<
     (review) => Number(review.id),
   )
 
-  const iemCounts = new Map<number, number>()
+  const productCounts = new Map<number, number>()
   const reviewerCounts = new Map<number, number>()
 
   publishedReviews.forEach((review) => {
-    increaseCount(iemCounts, review.iem_id)
+    increaseCount(productCounts, review.product_id)
     increaseCount(reviewerCounts, review.reviewer_id)
   })
 
-  const iemRows =
-    (iemsResult.data ?? []) as unknown as IemRow[]
+  const productRows =
+    (productsResult.data ?? []) as unknown as ProductRow[]
 
   const brandCounts = new Map<number, number>()
 
-  iemRows.forEach((iem) => {
-    const reviewCount = iemCounts.get(Number(iem.id)) ?? 0
+  productRows.forEach((product) => {
+    const reviewCount = productCounts.get(Number(product.id)) ?? 0
 
     if (reviewCount === 0) {
       return
     }
 
     const brand = getSingleRelation(
-      iem.brands,
+      product.brands,
     )
 
     const brandId =
-      iem.brand_id ?? brand?.id
+      product.brand_id ?? brand?.id
 
     if (brandId !== null && brandId !== undefined) {
       brandCounts.set(
@@ -269,10 +269,10 @@ export async function getSearchSuggestions(): Promise<
     )
   }
 
-  const iemSuggestions = iemRows.flatMap(
+  const productSuggestions = productRows.flatMap(
     (row): SearchSuggestion[] => {
       const reviewCount =
-        iemCounts.get(Number(row.id)) ?? 0
+        productCounts.get(Number(row.id)) ?? 0
 
       if (reviewCount === 0) {
         return []
@@ -285,7 +285,7 @@ export async function getSearchSuggestions(): Promise<
       return [
         {
           id: Number(row.id),
-          type: "iem",
+          type: "product",
           name: row.model,
           slug: slugify(row.model),
           subtitle: brand?.name,
@@ -320,7 +320,7 @@ export async function getSearchSuggestions(): Promise<
   )
 
   return [
-    ...iemSuggestions,
+    ...productSuggestions,
     ...brandSuggestions,
     ...reviewerSuggestions,
     ...artistSuggestions,

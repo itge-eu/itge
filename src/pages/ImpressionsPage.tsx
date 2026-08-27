@@ -85,8 +85,8 @@ function ImpressionsPage() {
         (impression) => {
           const searchableText = [
             impression.title ?? "",
-            impression.iem.model,
-            impression.iem.brand.name,
+            impression.product.model,
+            impression.product.brand.name,
             impression.reviewer.name,
           ]
             .join(" ")

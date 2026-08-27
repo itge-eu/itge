@@ -31,7 +31,7 @@ import usePageMetadata from "../hooks/usePageMetadata"
 type SortOption =
   | "newest"
   | "oldest"
-  | "iem"
+  | "product"
   | "reviewer"
 
 function DiscoverPage() {
@@ -183,7 +183,7 @@ function DiscoverPage() {
     useMemo(
       () => [
         ...discoveryState
-          .suggestions.iem,
+          .suggestions.product,
 
         ...discoveryState
           .suggestions
@@ -514,11 +514,11 @@ function compareDiscoveryItems(
         getTimestamp(second)
       )
 
-    case "iem":
-      return getIemName(
+    case "product":
+      return getProductName(
         first,
       ).localeCompare(
-        getIemName(second),
+        getProductName(second),
         undefined,
         {
           sensitivity: "base",
@@ -567,7 +567,7 @@ function getTimestamp(
     : timestamp
 }
 
-function getIemName(
+function getProductName(
   item: DiscoveryItem,
 ): string {
   if (
@@ -576,7 +576,7 @@ function getIemName(
     return `${item.review.brand} ${item.review.model}`
   }
 
-  return `${item.impression.iem.brand.name} ${item.impression.iem.model}`
+  return `${item.impression.product.brand.name} ${item.impression.product.model}`
 }
 
 function getReviewerName(

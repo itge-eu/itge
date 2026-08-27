@@ -194,7 +194,7 @@ function ArtistPage() {
 
             <StatCard
               label="IEMs"
-              value={artist.iemCount.toString()}
+              value={artist.productCount.toString()}
             />
 
             <StatCard
@@ -284,14 +284,14 @@ function ArtistPage() {
           )}
         </section>
 
-        {artist.iems.length >
+        {artist.products.length >
           0 && (
           <section className="mt-14">
             <SectionHeader
               eyebrow="IEM coverage"
               title={`IEMs heard with ${artist.name}`}
-              description={`${artist.iems.length} ${
-                artist.iems.length ===
+              description={`${artist.products.length} ${
+                artist.products.length ===
                 1
                   ? "IEM has"
                   : "IEMs have"
@@ -299,29 +299,29 @@ function ArtistPage() {
             />
 
             <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {artist.iems.map(
-                (iem) => (
+              {artist.products.map(
+                (product) => (
                   <Link
-                    key={iem.id}
-                    to={`/iems/${iem.slug}`}
+                    key={product.id}
+                    to={`/products/${product.slug}`}
                     className="group rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
                   >
                     <p className="text-sm uppercase tracking-[0.16em] text-[var(--accent)]">
                       {
-                        iem.brandName
+                        product.brandName
                       }
                     </p>
 
                     <h3 className="mt-2 text-2xl font-semibold tracking-tight transition group-hover:text-[var(--accent)]">
-                      {iem.model}
+                      {product.model}
                     </h3>
 
                     <div className="mt-5 flex flex-wrap gap-x-4 gap-y-1 text-sm text-[var(--muted)]">
                       <span>
                         {
-                          iem.reviewCount
+                          product.reviewCount
                         }{" "}
-                        {iem.reviewCount ===
+                        {product.reviewCount ===
                         1
                           ? "review"
                           : "reviews"}
@@ -329,9 +329,9 @@ function ArtistPage() {
 
                       <span>
                         {
-                          iem.impressionCount
+                          product.impressionCount
                         }{" "}
-                        {iem.impressionCount ===
+                        {product.impressionCount ===
                         1
                           ? "impression"
                           : "impressions"}

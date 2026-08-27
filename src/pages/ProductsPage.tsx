@@ -6,22 +6,22 @@ import {
 import { Link } from "react-router"
 
 import {
-  getIems,
-  type IemDirectoryItem,
-} from "../lib/iems"
+  getProducts,
+  type ProductDirectoryItem,
+} from "../lib/products"
 
 import usePageMetadata from "../hooks/usePageMetadata"
 
-type IemSort =
+type ProductSort =
   | "most-covered"
   | "highest-rated"
   | "recent"
   | "alphabetical"
 
-function IemsPage() {
-  const [iems, setIems] =
+function ProductsPage() {
+  const [products, setProducts] =
     useState<
-      IemDirectoryItem[]
+      ProductDirectoryItem[]
     >([])
 
   const [
@@ -30,7 +30,7 @@ function IemsPage() {
   ] = useState("")
 
   const [sort, setSort] =
-    useState<IemSort>(
+    useState<ProductSort>(
       "most-covered",
     )
 
@@ -51,16 +51,16 @@ function IemsPage() {
   useEffect(() => {
     let cancelled = false
 
-    async function loadIems() {
+    async function loadProducts() {
       setLoading(true)
       setError(null)
 
       try {
         const result =
-          await getIems()
+          await getProducts()
 
         if (!cancelled) {
-          setIems(result)
+          setProducts(result)
         }
       } catch (loadError) {
         console.error(
@@ -69,7 +69,7 @@ function IemsPage() {
         )
 
         if (!cancelled) {
-          setIems([])
+          setProducts([])
 
           setError(
             "The IEM directory could not be loaded.",
@@ -82,14 +82,14 @@ function IemsPage() {
       }
     }
 
-    void loadIems()
+    void loadProducts()
 
     return () => {
       cancelled = true
     }
   }, [])
 
-  const visibleIems =
+  const visibleProducts =
     useMemo(() => {
       const normalizedQuery =
         searchQuery
@@ -98,10 +98,10 @@ function IemsPage() {
 
       const filtered =
         normalizedQuery
-          ? iems.filter(
-              (iem) => {
+          ? products.filter(
+              (product) => {
                 const searchableText =
-                  `${iem.brand.name} ${iem.model}`
+                  `${product.brand.name} ${product.model}`
                     .toLocaleLowerCase()
 
                 return searchableText.includes(
@@ -109,7 +109,7 @@ function IemsPage() {
                 )
               },
             )
-          : [...iems]
+          : [...products]
 
       return filtered.sort(
         (
@@ -213,7 +213,7 @@ function IemsPage() {
         },
       )
     }, [
-      iems,
+      products,
       searchQuery,
       sort,
     ])
@@ -222,44 +222,44 @@ function IemsPage() {
     useMemo(
       () =>
         new Set(
-          iems.map(
-            (iem) =>
-              iem
+          products.map(
+            (product) =>
+              product
                 .brand
                 .id,
           ),
         ).size,
-      [iems],
+      [products],
     )
 
   const totalReviewCount =
     useMemo(
       () =>
-        iems.reduce(
+        products.reduce(
           (
             total,
-            iem,
+            product,
           ) =>
             total +
-            iem.reviewCount,
+            product.reviewCount,
           0,
         ),
-      [iems],
+      [products],
     )
 
   const totalImpressionCount =
     useMemo(
       () =>
-        iems.reduce(
+        products.reduce(
           (
             total,
-            iem,
+            product,
           ) =>
             total +
-            (iem.impressionCount ?? 0),
+            (product.impressionCount ?? 0),
           0,
         ),
-      [iems],
+      [products],
     )
 
   return (
@@ -288,11 +288,11 @@ function IemsPage() {
 
         {!loading &&
           !error &&
-          iems.length > 0 && (
+          products.length > 0 && (
             <section className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <SummaryCard
                 label="IEMs represented"
-                value={iems.length.toString()}
+                value={products.length.toString()}
               />
 
               <SummaryCard
@@ -355,7 +355,7 @@ function IemsPage() {
                   setSort(
                     event
                       .target
-                      .value as IemSort,
+                      .value as ProductSort,
                   )
                 }
                 className="w-full rounded-2xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
@@ -385,8 +385,8 @@ function IemsPage() {
           <p className="text-sm text-[var(--muted)]">
             {loading
               ? "Loading IEMs…"
-              : `${visibleIems.length} ${
-                  visibleIems.length ===
+              : `${visibleProducts.length} ${
+                  visibleProducts.length ===
                   1
                     ? "IEM"
                     : "IEMs"
@@ -422,14 +422,14 @@ function IemsPage() {
               {error}
             </p>
           </DirectoryMessage>
-        ) : iems.length ===
+        ) : products.length ===
           0 ? (
           <DirectoryMessage>
             No IEMs with published
             reviews or impressions
             are available yet.
           </DirectoryMessage>
-        ) : visibleIems.length ===
+        ) : visibleProducts.length ===
           0 ? (
           <DirectoryMessage>
             No IEMs match “
@@ -437,11 +437,11 @@ function IemsPage() {
           </DirectoryMessage>
         ) : (
           <section className="mt-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {visibleIems.map(
-              (iem) => (
-                <IemDirectoryCard
-                  key={iem.id}
-                  iem={iem}
+            {visibleProducts.map(
+              (product) => (
+                <ProductDirectoryCard
+                  key={product.id}
+                  product={product}
                 />
               ),
             )}
@@ -452,23 +452,23 @@ function IemsPage() {
   )
 }
 
-function IemDirectoryCard({
-  iem,
+function ProductDirectoryCard({
+  product,
 }: {
-  iem: IemDirectoryItem
+  product: ProductDirectoryItem
 }) {
   return (
     <Link
-      to={`/iems/${iem.slug}`}
+      to={`/products/${product.slug}`}
       className="group overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] transition hover:-translate-y-1 hover:border-[var(--accent)]"
     >
-      {iem.heroImageUrl ? (
+      {product.heroImageUrl ? (
         <div className="aspect-[16/10] overflow-hidden bg-[var(--surface-soft)]">
           <img
             src={
-              iem.heroImageUrl
+              product.heroImageUrl
             }
-            alt={`${iem.brand.name} ${iem.model}`}
+            alt={`${product.brand.name} ${product.model}`}
             loading="lazy"
             className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.025]"
           />
@@ -482,48 +482,48 @@ function IemDirectoryCard({
       <div className="p-6">
         <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
           {
-            iem.brand
+            product.brand
               .name
           }
         </p>
 
         <h2 className="mt-2 text-2xl font-semibold tracking-tight transition group-hover:text-[var(--accent)]">
-          {iem.model}
+          {product.model}
         </h2>
 
         <div className="mt-5 grid grid-cols-2 gap-4 border-t border-[var(--border)] pt-5 sm:grid-cols-4">
           <Metric
             label={
-              iem.reviewCount ===
+              product.reviewCount ===
               1
                 ? "Review"
                 : "Reviews"
             }
-            value={iem.reviewCount.toString()}
+            value={product.reviewCount.toString()}
           />
 
           <Metric
             label={
-              (iem.impressionCount ?? 0) === 1
+              (product.impressionCount ?? 0) === 1
                 ? "Impression"
                 : "Impressions"
             }
-            value={(iem.impressionCount ?? 0).toString()}
+            value={(product.impressionCount ?? 0).toString()}
           />
 
           <Metric
             label={
               (
-                iem.contributorCount ??
-                iem.reviewerCount
+                product.contributorCount ??
+                product.reviewerCount
               ) === 1
                 ? "Contributor"
                 : "Contributors"
             }
             value={
               (
-                iem.contributorCount ??
-                iem.reviewerCount
+                product.contributorCount ??
+                product.reviewerCount
               ).toString()
             }
           />
@@ -531,10 +531,10 @@ function IemDirectoryCard({
           <Metric
             label="Avg. review"
             value={
-              iem.averageRating ==
+              product.averageRating ==
               null
                 ? "—"
-                : iem.averageRating.toFixed(
+                : product.averageRating.toFixed(
                     1,
                   )
             }
@@ -620,4 +620,4 @@ function SearchIcon() {
   )
 }
 
-export default IemsPage
+export default ProductsPage

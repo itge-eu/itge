@@ -127,7 +127,7 @@ function ReviewPage() {
             },
             {
               label: review.model,
-              to: `/iems/${review.iemSlug}`,
+              to: `/products/${review.productSlug}`,
             },
             {
               label: `${review.reviewer} review`,
@@ -146,7 +146,7 @@ function ReviewPage() {
             <div className="min-w-0">
               <h1 className="text-4xl font-semibold tracking-tight sm:text-6xl">
                 <Link
-                  to={`/iems/${review.iemSlug}`}
+                  to={`/products/${review.productSlug}`}
                   className="transition hover:text-[var(--accent)]"
                 >
                   {review.model}
