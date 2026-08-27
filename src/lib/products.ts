@@ -105,6 +105,7 @@ type ProductDirectoryReviewRow = {
   rating: number
   hero_image_url: string | null
   published_at: string | null
+  published: boolean
 
   reviewers:
     | {
@@ -120,6 +121,7 @@ type ProductDirectoryImpressionRow = {
   id: number
   hero_image_url: string | null
   published_at: string | null
+  published: boolean
 
   reviewers:
     | {
@@ -765,6 +767,7 @@ export async function getProducts(): Promise<
         rating,
         hero_image_url,
         published_at,
+        published,
 
         reviewers (
           slug
@@ -775,20 +778,13 @@ export async function getProducts(): Promise<
         id,
         hero_image_url,
         published_at,
+        published,
 
         reviewers (
           slug
         )
       )
     `)
-    .eq(
-      "reviews.published",
-      true,
-    )
-    .eq(
-      "impressions.published",
-      true,
-    )
 
   if (error) {
     throw error
@@ -812,33 +808,46 @@ export async function getProducts(): Promise<
       const reviews = [
         ...(row.reviews ??
           []),
-      ].sort(
-        (first, second) =>
-          timestampValue(
-            second.published_at,
-          ) -
-          timestampValue(
-            first.published_at,
-          ),
-      )
+      ]
+        .filter(
+          (review) =>
+            review.published,
+        )
+        .sort(
+          (first, second) =>
+            timestampValue(
+              second.published_at,
+            ) -
+            timestampValue(
+              first.published_at,
+            ),
+        )
 
       const impressions = [
         ...(row.impressions ??
           []),
-      ].sort(
-        (first, second) =>
-          timestampValue(
-            second.published_at,
-          ) -
-          timestampValue(
-            first.published_at,
-          ),
-      )
+      ]
+        .filter(
+          (impression) =>
+            impression.published,
+        )
+        .sort(
+          (first, second) =>
+            timestampValue(
+              second.published_at,
+            ) -
+            timestampValue(
+              first.published_at,
+            ),
+        )
 
       /*
        * Gear directory only contains
        * products represented by actual
        * published ITGE coverage.
+       *
+       * A product only needs a published
+       * review OR a published impression.
        */
       if (
         reviews.length === 0 &&
