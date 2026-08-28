@@ -28,20 +28,17 @@ export type ProductDirectoryItem = {
   model: string
   slug: string
   productType: ProductType
-
+  featured?: boolean
   brand: {
     id: number
     name: string
     slug: string
   }
-
   heroImageUrl: string | null
-
   reviewCount: number
   reviewerCount: number
   averageRating: number | null
   latestReviewAt: string | null
-
   impressionCount?: number
   coverageCount?: number
   contributorCount?: number
@@ -138,6 +135,7 @@ type ProductDirectoryRow = {
   model: string
   slug: string
   product_type: ProductType | null
+  featured: boolean | null
 
   brands:
     | {
@@ -755,6 +753,7 @@ export async function getProducts(): Promise<
       model,
       slug,
       product_type,
+      featured,
 
       brands (
         id,
@@ -966,6 +965,10 @@ export async function getProducts(): Promise<
             normalizeProductType(
               row.product_type,
             ),
+
+          featured:
+            row.featured ??
+            false,
 
           brand: {
             id: Number(

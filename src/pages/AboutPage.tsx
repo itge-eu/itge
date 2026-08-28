@@ -39,15 +39,25 @@ function AboutPage() {
 
             <div className="mt-6 space-y-6 text-base leading-8 text-[var(--muted)]">
               <p>
-                This is where Niclas&apos; About ITGE text will go.
-                Once we have the final copy, we can replace this
-                section without changing the rest of the page.
+                IEM Tour Group Europe is an independent, community driven collective connecting enthusiasts and reviewers across Europe with manufacturers and retailers from around the world. IEMs are at the heart of what we do, though our tours occasionally extend to other products within personal audio. 
               </p>
-
               <p>
-                The surrounding structure is already in place, so
-                his text can be as short or as detailed as it needs
-                to be.
+                We organise tours that give our members the opportunity to experience products they may not otherwise be able to audition. They then share their experiences through reviews, listening impressions and conversations that help others discover new products and make more informed choices. 
+              </p>
+              <p>
+                Our aim is to make the field more accessible and keep the European personal audio community active, curious and connected. We believe the best conversations happen when brands, retailers and listeners come together through a shared interest in great audio and a shared respect for different perspectives. 
+              </p>
+              <p>
+                For our partners, the tours offer a direct and natural way to introduce their work to knowledgeable, engaged listeners across Europe. For our members, they provide access to interesting products, new experiences and a community of people who truly care about the hobby. 
+              </p>
+              <p>
+                Today our group includes dedicated enthusiasts and some of the most established voices in the European audio community. We are also proud to work with many of the fields most respected manufacturers and retailers worldwide.  
+              </p>
+              <p>
+                Whether you create personal audio products, sell them, write about them or simply enjoy discovering new ways to listen, IEM Tour Group Europe is a place to connect, exchange ideas and take part. 
+              </p>
+              <p>
+                We are here to share our enthusiasm, make exceptional audio easier to experience and help the hobby grow across Europe and beyond.                  
               </p>
             </div>
           </div>
