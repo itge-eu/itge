@@ -8,14 +8,18 @@ import {
 } from "react-router"
 
 import {
-  getFeaturedReviews,
   getLatestReviews,
-  type FeaturedReview,
 } from "../lib/reviews"
 
 import {
   getAllImpressions,
 } from "../lib/impressions"
+
+import {
+  getProducts,
+  getProductTypeLabel,
+  type ProductDirectoryItem,
+} from "../lib/products"
 
 import LatestCoverageCarousel, {
   buildLatestCoverageItems,
@@ -27,11 +31,11 @@ import AboutTeaser from "../components/home/AboutTeaser"
 
 function HomePage() {
   const [
-    featuredReviews,
-    setFeaturedReviews,
+    featuredGear,
+    setFeaturedGear,
   ] =
     useState<
-      FeaturedReview[]
+      ProductDirectoryItem[]
     >([])
 
   const [
@@ -49,14 +53,14 @@ function HomePage() {
     useState(0)
 
   const [
-    reviewsLoading,
-    setReviewsLoading,
+    contentLoading,
+    setContentLoading,
   ] =
     useState(true)
 
   const [
-    reviewsError,
-    setReviewsError,
+    contentError,
+    setContentError,
   ] =
     useState<
       string | null
@@ -67,22 +71,22 @@ function HomePage() {
       false
 
     async function loadHomepageContent() {
-      setReviewsLoading(
+      setContentLoading(
         true,
       )
 
-      setReviewsError(
+      setContentError(
         null,
       )
 
       try {
         const [
-          featured,
+          products,
           latestReviews,
           impressions,
         ] =
           await Promise.all([
-            getFeaturedReviews(),
+            getProducts(),
 
             getLatestReviews(
               20,
@@ -95,11 +99,34 @@ function HomePage() {
           return
         }
 
-        setFeaturedReviews(
-          featured.slice(
-            0,
-            4,
-          ),
+        /*
+         * Pick four random pieces of gear
+         * on each homepage load.
+         *
+         * getProducts() already only
+         * returns gear represented by
+         * published ITGE coverage.
+         */
+        const featured =
+          [...products]
+            .filter(
+              (product) =>
+                Boolean(
+                  product.heroImageUrl,
+                ),
+            )
+            .sort(
+              () =>
+                Math.random() -
+                0.5,
+            )
+            .slice(
+              0,
+              4,
+            )
+
+        setFeaturedGear(
+          featured,
         )
 
         setLatestCoverage(
@@ -115,13 +142,13 @@ function HomePage() {
         )
 
         if (!cancelled) {
-          setReviewsError(
+          setContentError(
             "The latest ITGE content could not be loaded.",
           )
         }
       } finally {
         if (!cancelled) {
-          setReviewsLoading(
+          setContentLoading(
             false,
           )
         }
@@ -138,7 +165,7 @@ function HomePage() {
 
   useEffect(() => {
     if (
-      featuredReviews.length <
+      featuredGear.length <
       2
     ) {
       return
@@ -156,7 +183,7 @@ function HomePage() {
 
     setActiveFeaturedIndex(
       sequence[0] %
-        featuredReviews.length,
+        featuredGear.length,
     )
 
     const interval =
@@ -173,7 +200,7 @@ function HomePage() {
             sequence[
               sequenceIndex
             ] %
-              featuredReviews.length,
+              featuredGear.length,
           )
         },
         6000,
@@ -185,13 +212,13 @@ function HomePage() {
       )
     }
   }, [
-    featuredReviews.length,
+    featuredGear.length,
   ])
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] transition-colors duration-200">
       <main>
-        {/* INTRO + FEATURED */}
+        {/* INTRO + FEATURED GEAR */}
         <section className="relative overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(193,151,69,0.13),transparent_40%)] dark:bg-[radial-gradient(circle_at_top_right,rgba(193,151,69,0.10),transparent_40%)]" />
 
@@ -218,9 +245,9 @@ function HomePage() {
                   Europe to review
                   and share
                   impressions of
-                  in-ear monitors
-                  through organised
-                  product tours.
+                  audio gear through
+                  organised product
+                  tours.
                 </p>
 
                 <p className="mt-4 max-w-xl leading-7 text-[var(--muted)]">
@@ -230,79 +257,78 @@ function HomePage() {
                   artists, genres
                   and music actually
                   used to evaluate
-                  each IEM.
+                  each piece of
+                  gear.
                 </p>
 
                 <div className="mt-8">
                   <Link
-                    to="/reviews"
+                    to="/about"
                     className="inline-flex rounded-full bg-[var(--accent)] px-6 py-3 text-sm font-semibold text-[var(--accent-foreground)] transition hover:bg-[var(--accent-hover)]"
                   >
-                    Browse reviews
+                    Learn more
                   </Link>
                 </div>
               </div>
 
-              {/* FEATURED */}
+              {/* FEATURED GEAR */}
               <div>
                 <div className="mb-4 flex items-end justify-between gap-4">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
-                      ITGE picks
+                      Explore ITGE
                     </p>
 
                     <h2 className="mt-1 text-2xl font-semibold tracking-tight">
-                      Featured
+                      Featured gear
                     </h2>
                   </div>
 
                   <Link
-                    to="/reviews"
+                    to="/gear"
                     className="text-sm font-medium text-[var(--accent)] transition hover:opacity-75"
                   >
-                    All reviews →
+                    Browse gear →
                   </Link>
                 </div>
 
-                {reviewsLoading ? (
+                {contentLoading ? (
                   <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
                     Loading
-                    featured
-                    content…
+                    featured gear…
                   </div>
-                ) : reviewsError ? (
+                ) : contentError ? (
                   <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
                     <p className="font-medium">
                       Unable to load
-                      featured content
+                      featured gear
                     </p>
 
                     <p className="mt-2 text-sm text-[var(--muted)]">
                       {
-                        reviewsError
+                        contentError
                       }
                     </p>
                   </div>
-                ) : featuredReviews.length ===
+                ) : featuredGear.length ===
                   0 ? (
                   <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
-                    No featured
-                    content has been
-                    selected yet.
+                    No featured gear
+                    is available yet.
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                    {featuredReviews.map(
+                    {featuredGear.map(
                       (
-                        review,
+                        product,
                         index,
                       ) => (
-                        <FeaturedTile
+                        <FeaturedGearTile
                           key={
-                            review.id
+                            product.id
                           }
-                          review={
-                            review
+                          product={
+                            product
                           }
                           active={
                             index ===
@@ -346,7 +372,7 @@ function HomePage() {
               </div>
 
               <Link
-                to="/reviews"
+                to="/discover"
                 className="text-sm font-medium text-[var(--accent)] transition hover:opacity-75"
               >
                 Browse all
@@ -355,8 +381,8 @@ function HomePage() {
             </div>
           </div>
 
-          {!reviewsLoading &&
-            !reviewsError &&
+          {!contentLoading &&
+            !contentError &&
             latestCoverage.length >
               0 && (
               <div className="mt-10">
@@ -368,11 +394,11 @@ function HomePage() {
               </div>
             )}
 
-          {reviewsError && (
+          {contentError && (
             <div className="mx-auto mt-10 max-w-7xl px-6 lg:px-8">
               <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
                 {
-                  reviewsError
+                  contentError
                 }
               </div>
             </div>
@@ -387,28 +413,34 @@ function HomePage() {
   )
 }
 
-function FeaturedTile({
-  review,
+function FeaturedGearTile({
+  product,
   active,
 }: {
-  review: FeaturedReview
+  product: ProductDirectoryItem
   active: boolean
 }) {
+  const coverageCount =
+    product.coverageCount ??
+    product.reviewCount +
+      (product.impressionCount ??
+        0)
+
   return (
     <Link
-      to={`/reviews/${review.slug}`}
+      to={`/gear/${product.slug}`}
       className={`group relative aspect-[4/3] overflow-hidden rounded-2xl border bg-[var(--surface)] transition-all duration-700 sm:rounded-3xl ${
         active
           ? "scale-[1.025] border-[var(--accent)] shadow-lg"
           : "border-[var(--border)]"
       } hover:-translate-y-0.5 hover:border-[var(--accent)]`}
     >
-      {review.heroImageUrl ? (
+      {product.heroImageUrl ? (
         <img
           src={
-            review.heroImageUrl
+            product.heroImageUrl
           }
-          alt={`${review.brand} ${review.model}`}
+          alt={`${product.brand.name} ${product.model}`}
           loading="lazy"
           className={`absolute inset-0 h-full w-full object-cover transition-all duration-700 group-hover:scale-[1.035] ${
             active
@@ -429,7 +461,7 @@ function FeaturedTile({
       />
 
       <div className="relative flex h-full flex-col justify-end p-3 text-white sm:p-5">
-        <div className="mb-auto">
+        <div className="mb-auto flex items-start justify-between gap-2">
           <span
             className={`rounded-full border px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.13em] backdrop-blur-sm transition-all duration-700 sm:px-2.5 sm:text-[10px] ${
               active
@@ -437,17 +469,35 @@ function FeaturedTile({
                 : "border-white/25 bg-black/30"
             }`}
           >
-            Review
+            {getProductTypeLabel(
+              product.productType,
+            )}
           </span>
+
+          {product.averageRating != null && (
+            <span className="rounded-full border border-white/25 bg-black/35 px-2 py-1 text-[9px] font-semibold backdrop-blur-sm sm:px-2.5 sm:text-[10px]">
+              ★{" "}
+              {product.averageRating.toFixed(
+                1,
+              )}
+            </span>
+          )}
         </div>
 
         <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70 sm:text-xs">
-          {review.brand}
+          {product.brand.name}
         </p>
 
         <h3 className="mt-1 line-clamp-2 text-base font-semibold leading-tight sm:text-xl">
-          {review.model}
+          {product.model}
         </h3>
+
+        <p className="mt-2 text-[10px] text-white/70 sm:text-xs">
+          {coverageCount}{" "}
+          {coverageCount === 1
+            ? "published entry"
+            : "published entries"}
+        </p>
       </div>
     </Link>
   )

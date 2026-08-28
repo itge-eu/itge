@@ -1,4 +1,13 @@
-import { Link } from "react-router"
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react"
+
+import {
+  Link,
+} from "react-router"
 
 import type {
   FeaturedReview,
@@ -33,25 +42,391 @@ type LatestCoverageCarouselProps = {
   items: LatestCoverageItem[]
 }
 
+const MANUAL_PAUSE_DURATION =
+  7000
+
+/*
+ * Continuous automatic movement.
+ *
+ * Higher = faster.
+ */
+const AUTO_SCROLL_SPEED =
+  0.08
+
 function LatestCoverageCarousel({
   items,
 }: LatestCoverageCarouselProps) {
-  if (items.length === 0) {
-    return null
-  }
+  const scrollRef =
+    useRef<HTMLDivElement | null>(
+      null,
+    )
+
+  const animationFrameRef =
+    useRef<number | null>(
+      null,
+    )
+
+  const lastFrameTimeRef =
+    useRef<number | null>(
+      null,
+    )
+
+  const resumeTimeoutRef =
+    useRef<number | null>(
+      null,
+    )
+
+  const [
+    manualPause,
+    setManualPause,
+  ] =
+    useState(false)
+
+  const [
+    interactionPause,
+    setInteractionPause,
+  ] =
+    useState(false)
 
   /*
-   * Duplicate the sequence so the CSS animation
-   * can loop continuously without a visible jump.
+   * We duplicate the cards so the
+   * automatic movement can wrap around
+   * without a visible jump.
    */
   const repeatedItems = [
     ...items,
     ...items,
   ]
 
+  const getSingleSetWidth =
+    useCallback(() => {
+      const container =
+        scrollRef.current
+
+      if (!container) {
+        return 0
+      }
+
+      return (
+        container.scrollWidth /
+        2
+      )
+    }, [])
+
+  const getScrollDistance =
+    useCallback(() => {
+      const container =
+        scrollRef.current
+
+      if (!container) {
+        return 320
+      }
+
+      const firstCard =
+        container.querySelector<HTMLElement>(
+          "[data-coverage-card]",
+        )
+
+      if (!firstCard) {
+        return 320
+      }
+
+      const styles =
+        window.getComputedStyle(
+          container,
+        )
+
+      const gap =
+        Number.parseFloat(
+          styles.columnGap ||
+            styles.gap ||
+            "0",
+        ) || 0
+
+      return (
+        firstCard.offsetWidth +
+        gap
+      )
+    }, [])
+
+  /*
+   * Keep the scroll position inside the
+   * duplicated sequence.
+   *
+   * The two halves contain exactly the
+   * same cards, so moving between them
+   * is visually invisible.
+   */
+  const normalizeScrollPosition =
+    useCallback(() => {
+      const container =
+        scrollRef.current
+
+      if (!container) {
+        return
+      }
+
+      const singleSetWidth =
+        getSingleSetWidth()
+
+      if (
+        singleSetWidth <= 0
+      ) {
+        return
+      }
+
+      if (
+        container.scrollLeft >=
+        singleSetWidth
+      ) {
+        container.scrollLeft -=
+          singleSetWidth
+      }
+
+      if (
+        container.scrollLeft <
+        0
+      ) {
+        container.scrollLeft +=
+          singleSetWidth
+      }
+    }, [
+      getSingleSetWidth,
+    ])
+
+  /*
+   * Continuous smooth automatic glide.
+   */
+  useEffect(() => {
+    if (
+      items.length < 2 ||
+      manualPause ||
+      interactionPause
+    ) {
+      lastFrameTimeRef.current =
+        null
+
+      return
+    }
+
+    const animate = (
+      time: number,
+    ) => {
+      const container =
+        scrollRef.current
+
+      if (!container) {
+        return
+      }
+
+      if (
+        lastFrameTimeRef.current ===
+        null
+      ) {
+        lastFrameTimeRef.current =
+          time
+      }
+
+      const elapsed =
+        time -
+        lastFrameTimeRef.current
+
+      lastFrameTimeRef.current =
+        time
+
+      container.scrollLeft +=
+        AUTO_SCROLL_SPEED *
+        elapsed
+
+      normalizeScrollPosition()
+
+      animationFrameRef.current =
+        window.requestAnimationFrame(
+          animate,
+        )
+    }
+
+    animationFrameRef.current =
+      window.requestAnimationFrame(
+        animate,
+      )
+
+    return () => {
+      if (
+        animationFrameRef.current !==
+        null
+      ) {
+        window.cancelAnimationFrame(
+          animationFrameRef.current,
+        )
+
+        animationFrameRef.current =
+          null
+      }
+
+      lastFrameTimeRef.current =
+        null
+    }
+  }, [
+    items.length,
+    manualPause,
+    interactionPause,
+    normalizeScrollPosition,
+  ])
+
+  /*
+   * Any arrow click pauses automatic
+   * movement for seven seconds.
+   *
+   * Clicking again during that period
+   * restarts the seven-second timer.
+   */
+  const registerManualInteraction =
+    useCallback(() => {
+      setManualPause(
+        true,
+      )
+
+      if (
+        resumeTimeoutRef.current !==
+        null
+      ) {
+        window.clearTimeout(
+          resumeTimeoutRef.current,
+        )
+      }
+
+      resumeTimeoutRef.current =
+        window.setTimeout(
+          () => {
+            setManualPause(
+              false,
+            )
+
+            resumeTimeoutRef.current =
+              null
+          },
+          MANUAL_PAUSE_DURATION,
+        )
+    }, [])
+
+  /*
+   * Move exactly one card when using
+   * the manual controls.
+   */
+  const handleManualScroll =
+    useCallback(
+      (
+        direction:
+          | "previous"
+          | "next",
+      ) => {
+        const container =
+          scrollRef.current
+
+        if (!container) {
+          return
+        }
+
+        registerManualInteraction()
+
+        const distance =
+          getScrollDistance()
+
+        /*
+         * Make sure there is always room
+         * to move backwards into the
+         * duplicated sequence.
+         */
+        if (
+          direction ===
+            "previous" &&
+          container.scrollLeft <
+            distance
+        ) {
+          const singleSetWidth =
+            getSingleSetWidth()
+
+          container.scrollLeft +=
+            singleSetWidth
+        }
+
+        container.scrollBy({
+          left:
+            direction ===
+            "next"
+              ? distance
+              : -distance,
+
+          behavior: "smooth",
+        })
+      },
+      [
+        getScrollDistance,
+        getSingleSetWidth,
+        registerManualInteraction,
+      ],
+    )
+
+  /*
+   * Clear the manual-resume timer if
+   * the component disappears.
+   */
+  useEffect(() => {
+    return () => {
+      if (
+        resumeTimeoutRef.current !==
+        null
+      ) {
+        window.clearTimeout(
+          resumeTimeoutRef.current,
+        )
+      }
+    }
+  }, [])
+
+  if (items.length === 0) {
+    return null
+  }
+
   return (
-    <div className="coverage-carousel overflow-hidden">
-      <div className="coverage-carousel-track flex w-max gap-4 px-4 sm:gap-5">
+    <div
+      className="relative"
+      onMouseEnter={() =>
+        setInteractionPause(
+          true,
+        )
+      }
+      onMouseLeave={() =>
+        setInteractionPause(
+          false,
+        )
+      }
+      onFocusCapture={() =>
+        setInteractionPause(
+          true,
+        )
+      }
+      onBlurCapture={(
+        event,
+      ) => {
+        if (
+          !event.currentTarget.contains(
+            event.relatedTarget as
+              | Node
+              | null,
+          )
+        ) {
+          setInteractionPause(
+            false,
+          )
+        }
+      }}
+    >
+      <div
+        ref={scrollRef}
+        className="flex gap-4 overflow-x-hidden px-4 sm:gap-5"
+      >
         {repeatedItems.map(
           (
             item,
@@ -68,6 +443,36 @@ function LatestCoverageCarousel({
           ),
         )}
       </div>
+
+      {items.length > 1 && (
+        <>
+          <button
+            type="button"
+            aria-label="Previous coverage"
+            onClick={() =>
+              handleManualScroll(
+                "previous",
+              )
+            }
+            className="absolute left-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-black/45 text-2xl leading-none text-white shadow-lg backdrop-blur-sm transition hover:scale-105 hover:bg-black/65 focus:outline-none focus:ring-2 focus:ring-[var(--accent)] sm:left-5"
+          >
+            ‹
+          </button>
+
+          <button
+            type="button"
+            aria-label="Next coverage"
+            onClick={() =>
+              handleManualScroll(
+                "next",
+              )
+            }
+            className="absolute right-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-black/45 text-2xl leading-none text-white shadow-lg backdrop-blur-sm transition hover:scale-105 hover:bg-black/65 focus:outline-none focus:ring-2 focus:ring-[var(--accent)] sm:right-5"
+          >
+            ›
+          </button>
+        </>
+      )}
     </div>
   )
 }
@@ -87,6 +492,7 @@ function CoverageTile({
   return (
     <Link
       to={url}
+      data-coverage-card
       aria-hidden={
         duplicate
           ? "true"
@@ -189,7 +595,7 @@ export function buildLatestCoverageItems(
 
         heroImageUrl:
           review.heroImageUrl!,
-        
+
         publishedAt:
           review.publishedAt,
       }))
