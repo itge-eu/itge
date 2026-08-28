@@ -46,8 +46,8 @@ function ArtistPage() {
       : "Artist | ITGE",
 
     description: artist
-      ? `Explore IEM reviews and listening impressions that feature ${artist.name} as a listening reference.`
-      : "Explore artists used as listening references by ITGE reviewers.",
+      ? `Explore ITGE reviews and listening impressions that feature ${artist.name} as a listening reference.`
+      : "Explore artists used as listening references by ITGE members.",
   })
 
   useEffect(() => {
@@ -193,7 +193,7 @@ function ArtistPage() {
             />
 
             <StatCard
-              label="IEMs"
+              label="Gear"
               value={artist.productCount.toString()}
             />
 
@@ -204,7 +204,67 @@ function ArtistPage() {
           </div>
         </header>
 
-        <section className="mt-14">
+        {artist.products.length >
+          0 && (
+          <section className="mt-14">
+            <SectionHeader
+              eyebrow="Gear coverage"
+              title={`Gear heard with ${artist.name}`}
+              description={`${artist.products.length} ${
+                artist.products.length ===
+                1
+                  ? "piece of gear has"
+                  : "pieces of gear have"
+              } published coverage referencing ${artist.name}.`}
+            />
+
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {artist.products.map(
+                (product) => (
+                  <Link
+                    key={product.id}
+                    to={`/gear/${product.slug}`}
+                    className="group rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
+                  >
+                    <p className="text-sm uppercase tracking-[0.16em] text-[var(--accent)]">
+                      {
+                        product.brandName
+                      }
+                    </p>
+
+                    <h3 className="mt-2 text-2xl font-semibold tracking-tight transition group-hover:text-[var(--accent)]">
+                      {product.model}
+                    </h3>
+
+                    <div className="mt-5 flex flex-wrap gap-x-4 gap-y-1 text-sm text-[var(--muted)]">
+                      <span>
+                        {
+                          product.reviewCount
+                        }{" "}
+                        {product.reviewCount ===
+                        1
+                          ? "review"
+                          : "reviews"}
+                      </span>
+
+                      <span>
+                        {
+                          product.impressionCount
+                        }{" "}
+                        {product.impressionCount ===
+                        1
+                          ? "impression"
+                          : "impressions"}
+                      </span>
+                    </div>
+                  </Link>
+                ),
+              )}
+            </div>
+          </section>
+        )}
+
+        <section className="mt-14 border-t border-[var(--border)] pt-14">
           <SectionHeader
             eyebrow="Full reviews"
             title={`Reviews featuring ${artist.name}`}
@@ -284,69 +344,9 @@ function ArtistPage() {
           )}
         </section>
 
-        {artist.products.length >
-          0 && (
-          <section className="mt-14">
-            <SectionHeader
-              eyebrow="IEM coverage"
-              title={`IEMs heard with ${artist.name}`}
-              description={`${artist.products.length} ${
-                artist.products.length ===
-                1
-                  ? "IEM has"
-                  : "IEMs have"
-              } published coverage referencing ${artist.name}.`}
-            />
-
-            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {artist.products.map(
-                (product) => (
-                  <Link
-                    key={product.id}
-                    to={`/gear/${product.slug}`}
-                    className="group rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
-                  >
-                    <p className="text-sm uppercase tracking-[0.16em] text-[var(--accent)]">
-                      {
-                        product.brandName
-                      }
-                    </p>
-
-                    <h3 className="mt-2 text-2xl font-semibold tracking-tight transition group-hover:text-[var(--accent)]">
-                      {product.model}
-                    </h3>
-
-                    <div className="mt-5 flex flex-wrap gap-x-4 gap-y-1 text-sm text-[var(--muted)]">
-                      <span>
-                        {
-                          product.reviewCount
-                        }{" "}
-                        {product.reviewCount ===
-                        1
-                          ? "review"
-                          : "reviews"}
-                      </span>
-
-                      <span>
-                        {
-                          product.impressionCount
-                        }{" "}
-                        {product.impressionCount ===
-                        1
-                          ? "impression"
-                          : "impressions"}
-                      </span>
-                    </div>
-                  </Link>
-                ),
-              )}
-            </div>
-          </section>
-        )}
-
         {artist.reviewers.length >
           0 && (
-          <section className="mt-14">
+          <section className="mt-14 border-t border-[var(--border)] pt-14">
             <SectionHeader
               eyebrow="Community"
               title={`Contributors listening with ${artist.name}`}

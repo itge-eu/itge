@@ -47,7 +47,7 @@ function BrandsPage() {
       "Brands | ITGE",
 
     description:
-      "Browse IEM brands covered by IEM Tour Group Europe through reviews and listening impressions.",
+      "Browse audio brands covered by IEM Tour Group Europe through reviews and listening impressions.",
   })
 
   useEffect(() => {
@@ -138,7 +138,7 @@ function BrandsPage() {
                 These retailers help make
                 ITGE tours possible by
                 supporting the group and
-                helping us get more IEMs
+                helping us get more gear
                 into the hands of European
                 reviewers.
               </p>
@@ -184,7 +184,7 @@ function BrandsPage() {
                         )}
                       </div>
 
-                      <div className="flex min-h-20 min-w-0 flex-1 items-center justify-end">
+                      <div className="flex h-20 w-36 shrink-0 items-center justify-center">
                         <StoreLogo
                           name={
                             store.name
@@ -277,7 +277,7 @@ function BrandsPage() {
                         </h2>
                       </div>
 
-                      <div className="flex min-h-16 min-w-0 flex-1 items-center justify-end">
+                      <div className="flex h-20 w-32 shrink-0 items-center justify-center rounded-xl bg-white p-3">
                         <BrandLogo
                           name={
                             brand.name
@@ -286,7 +286,7 @@ function BrandsPage() {
                             brand.slug
                           }
                           size="card"
-                          className="max-h-16 max-w-full"
+                          className="max-h-full max-w-full"
                         />
                       </div>
                     </div>
@@ -294,8 +294,8 @@ function BrandsPage() {
                     <div className="mt-auto grid grid-cols-3 gap-3 border-t border-[var(--border)] pt-5">
                       <Metric
                         value={brand.productCount}
-                        singular="IEM"
-                        plural="IEMs"
+                        singular="item"
+                        plural="gear"
                       />
 
                       <Metric

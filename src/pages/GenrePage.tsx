@@ -46,8 +46,8 @@ function GenrePage() {
       : "Genre | ITGE",
 
     description: genre
-      ? `Explore IEM reviews and listening impressions covering ${genre.name} music.`
-      : "Explore IEM coverage by music genre at ITGE.",
+      ? `Explore ITGE reviews and listening impressions covering ${genre.name} music.`
+      : "Explore ITGE coverage by music genre.",
   })
 
   useEffect(() => {
@@ -158,9 +158,9 @@ function GenrePage() {
           </h1>
 
           <p className="mt-5 max-w-2xl text-lg leading-8 text-[var(--muted)]">
-            Explore the IEM
-            reviews, listening
-            impressions, products
+            Explore the reviews,
+            listening
+            impressions, gear
             and contributors
             connected to{" "}
             {genre.name}.
@@ -178,7 +178,7 @@ function GenrePage() {
             />
 
             <StatCard
-              label="IEMs"
+              label="Gear"
               value={genre.productCount.toString()}
             />
 
@@ -189,7 +189,67 @@ function GenrePage() {
           </div>
         </header>
 
-        <section className="mt-14">
+        {genre.products.length >
+          0 && (
+          <section className="mt-14">
+            <SectionHeader
+              eyebrow="Gear coverage"
+              title={`Gear heard with ${genre.name}`}
+              description={`${genre.products.length} ${
+                genre.products.length ===
+                1
+                  ? "piece of gear has"
+                  : "pieces of gear have"
+              } published coverage connected to ${genre.name}.`}
+            />
+
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {genre.products.map(
+                (product) => (
+                  <Link
+                    key={product.id}
+                    to={`/gear/${product.slug}`}
+                    className="group rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
+                  >
+                    <p className="text-sm uppercase tracking-[0.16em] text-[var(--accent)]">
+                      {
+                        product.brandName
+                      }
+                    </p>
+
+                    <h3 className="mt-2 text-2xl font-semibold tracking-tight transition group-hover:text-[var(--accent)]">
+                      {product.model}
+                    </h3>
+
+                    <div className="mt-5 flex flex-wrap gap-x-4 gap-y-1 text-sm text-[var(--muted)]">
+                      <span>
+                        {
+                          product.reviewCount
+                        }{" "}
+                        {product.reviewCount ===
+                        1
+                          ? "review"
+                          : "reviews"}
+                      </span>
+
+                      <span>
+                        {
+                          product.impressionCount
+                        }{" "}
+                        {product.impressionCount ===
+                        1
+                          ? "impression"
+                          : "impressions"}
+                      </span>
+                    </div>
+                  </Link>
+                ),
+              )}
+            </div>
+          </section>
+        )}
+
+        <section className="mt-14 border-t border-[var(--border)] pt-14">
           <SectionHeader
             eyebrow="Full reviews"
             title={`Reviews covering ${genre.name}`}
@@ -269,69 +329,9 @@ function GenrePage() {
           )}
         </section>
 
-        {genre.products.length >
-          0 && (
-          <section className="mt-14">
-            <SectionHeader
-              eyebrow="IEM coverage"
-              title={`IEMs heard with ${genre.name}`}
-              description={`${genre.products.length} ${
-                genre.products.length ===
-                1
-                  ? "IEM has"
-                  : "IEMs have"
-              } published coverage connected to ${genre.name}.`}
-            />
-
-            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {genre.products.map(
-                (product) => (
-                  <Link
-                    key={product.id}
-                    to={`/gear/${product.slug}`}
-                    className="group rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
-                  >
-                    <p className="text-sm uppercase tracking-[0.16em] text-[var(--accent)]">
-                      {
-                        product.brandName
-                      }
-                    </p>
-
-                    <h3 className="mt-2 text-2xl font-semibold tracking-tight transition group-hover:text-[var(--accent)]">
-                      {product.model}
-                    </h3>
-
-                    <div className="mt-5 flex flex-wrap gap-x-4 gap-y-1 text-sm text-[var(--muted)]">
-                      <span>
-                        {
-                          product.reviewCount
-                        }{" "}
-                        {product.reviewCount ===
-                        1
-                          ? "review"
-                          : "reviews"}
-                      </span>
-
-                      <span>
-                        {
-                          product.impressionCount
-                        }{" "}
-                        {product.impressionCount ===
-                        1
-                          ? "impression"
-                          : "impressions"}
-                      </span>
-                    </div>
-                  </Link>
-                ),
-              )}
-            </div>
-          </section>
-        )}
-
         {genre.reviewers.length >
           0 && (
-          <section className="mt-14">
+          <section className="mt-14 border-t border-[var(--border)] pt-14">
             <SectionHeader
               eyebrow="Community"
               title={`Contributors covering ${genre.name}`}
@@ -451,8 +451,7 @@ function SectionHeader({
 function EmptyPanel({
   children,
 }: {
-  children:
-    React.ReactNode
+  children: React.ReactNode
 }) {
   return (
     <div className="mt-8 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
