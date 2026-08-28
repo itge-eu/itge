@@ -18,7 +18,7 @@ type ReviewSearchProps = {
 }
 
 const TYPE_LABELS: Record<SearchSuggestionType, string> = {
-  product: "IEM",
+  product: "Gear",
   brand: "Brand",
   reviewer: "Member",
   artist: "Artist",
@@ -353,7 +353,7 @@ function ReviewSearch({
             }
           }}
           onKeyDown={handleKeyDown}
-          placeholder="Search IEMs, brands, artists, genres or reviewers..."
+          placeholder="Search gear, brands, artists, genres or members..."
           autoComplete="off"
           spellCheck={false}
           aria-autocomplete="list"
@@ -412,7 +412,7 @@ function ReviewSearch({
               </p>
 
               <p className="mt-1 text-sm text-[var(--muted)]">
-                Try another IEM, brand, reviewer,
+                Try other gear, a brand, member,
                 artist, or genre.
               </p>
             </div>
@@ -531,7 +531,7 @@ function getPluralTypeLabel(
 ): string {
   switch (type) {
     case "product":
-      return "IEMs"
+      return "Gear"
     case "brand":
       return "Brands"
     case "reviewer":
@@ -556,11 +556,6 @@ function getCoverageCountLabel(
     reviewResultCount !== undefined ||
     impressionResultCount !== undefined
 
-  /*
-   * Normal site search is still review-only.
-   * If Discover has not supplied its separate counts,
-   * preserve the existing wording.
-   */
   if (!hasDiscoveryCounts) {
     const count = suggestion.reviewCount
     const reviewWord =
@@ -604,10 +599,6 @@ function getCoverageCountLabel(
     )
   }
 
-  /*
-   * Should only occur for a selected suggestion that
-   * is being kept visible with a zero count.
-   */
   if (parts.length === 0) {
     return "0 results"
   }

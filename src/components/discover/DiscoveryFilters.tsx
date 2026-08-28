@@ -34,22 +34,22 @@ const FILTER_GROUPS: {
   {
     type: "gear_type",
     title: "Gear type",
-    defaultOpen: true,
+    defaultOpen: false,
   },
   {
     type: "product",
     title: "Gear",
-    defaultOpen: true,
+    defaultOpen: false,
   },
   {
     type: "brand",
     title: "Brands",
-    defaultOpen: true,
+    defaultOpen: false,
   },
   {
     type: "reviewer",
     title: "Members",
-    defaultOpen: true,
+    defaultOpen: false,
   },
   {
     type: "artist",

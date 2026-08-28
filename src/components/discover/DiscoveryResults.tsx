@@ -3,6 +3,7 @@ import {
   useState,
 } from "react"
 
+import DirectorySortSelect from "../directory/DirectorySortSelect"
 import ReviewCard from "../reviews/ReviewCard"
 import ImpressionCard from "../impressions/ImpressionCard"
 
@@ -35,6 +36,28 @@ type DiscoveryResultsProps = {
 }
 
 const ITEMS_PER_PAGE = 12
+
+const SORT_OPTIONS: {
+  value: SortOption
+  label: string
+}[] = [
+  {
+    value: "newest",
+    label: "Newest first",
+  },
+  {
+    value: "oldest",
+    label: "Oldest first",
+  },
+  {
+    value: "product",
+    label: "Gear A–Z",
+  },
+  {
+    value: "reviewer",
+    label: "Member A–Z",
+  },
+]
 
 function DiscoveryResults({
   items,
@@ -70,94 +93,68 @@ function DiscoveryResults({
 
   return (
     <section aria-live="polite">
-      <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
-            Results
-          </p>
+      <div>
+        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
+          Results
+        </p>
 
-          <h2 className="mt-2 text-3xl font-semibold tracking-tight">
-            {loading
-              ? "Finding coverage..."
-              : buildResultTitle(
-                  items.length,
-                  contentType,
-                )}
-          </h2>
-
-          <p className="mt-2 text-sm text-[var(--muted)]">
-            {hasFilters
-              ? "Results update whenever you change a filter."
-              : buildDefaultDescription(
-                  contentType,
-                )}
-          </p>
-        </div>
-
-        {!loading &&
-          !error &&
-          items.length > 0 && (
-            <div className="flex flex-wrap items-center gap-4">
-              {items.length >
-                ITEMS_PER_PAGE && (
-                <span className="text-sm text-[var(--muted)]">
-                  Showing{" "}
-                  {
-                    visibleItems.length
-                  }{" "}
-                  of {items.length}
-                </span>
+        <h2 className="mt-2 text-3xl font-semibold tracking-tight">
+          {loading
+            ? "Finding coverage..."
+            : buildResultTitle(
+                items.length,
+                contentType,
               )}
+        </h2>
 
-              <div className="flex items-center gap-3">
-                <label
-                  htmlFor="discovery-sort"
-                  className="text-sm text-[var(--muted)]"
-                >
-                  Sort by
-                </label>
-
-                <select
-                  id="discovery-sort"
-                  value={sortOption}
-                  onChange={(
-                    event,
-                  ) =>
-                    onSortChange(
-                      event.target
-                        .value as SortOption,
-                    )
-                  }
-                  className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
-                >
-                  <option value="newest">
-                    Newest first
-                  </option>
-
-                  <option value="oldest">
-                    Oldest first
-                  </option>
-
-                  <option value="product">
-                    IEM A–Z
-                  </option>
-
-                  <option value="reviewer">
-                    Member A–Z
-                  </option>
-                </select>
-              </div>
-            </div>
-          )}
+        <p className="mt-2 text-sm text-[var(--muted)]">
+          {hasFilters
+            ? "Results update whenever you change a filter."
+            : buildDefaultDescription(
+                contentType,
+              )}
+        </p>
       </div>
 
+      {!loading &&
+        !error &&
+        items.length > 0 && (
+          <div className="mb-7 mt-6 flex flex-wrap items-end justify-between gap-4 border-b border-[var(--border)] pb-5">
+            <p className="text-sm text-[var(--muted)]">
+              {items.length >
+              ITEMS_PER_PAGE
+                ? `Showing ${visibleItems.length} of ${items.length}`
+                : `${items.length} ${
+                    items.length ===
+                    1
+                      ? "result"
+                      : "results"
+                  }`}
+            </p>
+
+            <DirectorySortSelect
+              id="discovery-sort"
+              value={
+                sortOption
+              }
+              options={
+                SORT_OPTIONS
+              }
+              onChange={
+                onSortChange
+              }
+              className="w-full sm:w-56"
+            />
+          </div>
+        )}
+
       {loading ? (
-        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
+        <div className="mt-7 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
           Loading matching
           coverage...
         </div>
       ) : error ? (
-        <div className="rounded-3xl border border-red-500/30 bg-red-500/10 p-8">
+        <div className="mt-7 rounded-3xl border border-red-500/30 bg-red-500/10 p-8">
           <p className="font-semibold">
             Unable to load
             coverage
@@ -169,7 +166,7 @@ function DiscoveryResults({
         </div>
       ) : items.length ===
         0 ? (
-        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
+        <div className="mt-7 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
           <p className="font-semibold">
             No coverage matches
             this combination

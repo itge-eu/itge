@@ -1,6 +1,13 @@
-import { useEffect, useState } from "react"
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react"
+
 import { Link } from "react-router"
 
+import DirectoryControls from "../components/directory/DirectoryControls"
+import DirectorySearchInput from "../components/directory/DirectorySearchInput"
 import ReviewerAvatar from "../components/reviewers/ReviewerAvatar"
 
 import {
@@ -16,22 +23,20 @@ function ReviewersPage() {
     ReviewerSummary[]
   >([])
 
+  const [
+    searchQuery,
+    setSearchQuery,
+  ] = useState("")
+
   const [loading, setLoading] =
     useState(true)
 
   const [error, setError] =
     useState<string | null>(null)
 
-  const activeReviewers = reviewers.filter(
-    (reviewer) => reviewer.active,
-  )
-
-  const formerReviewers = reviewers.filter(
-    (reviewer) => !reviewer.active,
-  )
-
   usePageMetadata({
     title: "Members | ITGE",
+
     description:
       "Meet the members of IEM Tour Group Europe and explore their reviews and listening impressions.",
   })
@@ -75,6 +80,59 @@ function ReviewersPage() {
     }
   }, [])
 
+  const visibleReviewers =
+    useMemo(() => {
+      const normalizedQuery =
+        searchQuery
+          .trim()
+          .toLocaleLowerCase()
+
+      if (!normalizedQuery) {
+        return reviewers
+      }
+
+      return reviewers.filter(
+        (reviewer) => {
+          const country =
+            reviewer.country
+              ? countryCodeToName(
+                  reviewer.country,
+                )
+              : ""
+
+          const searchable =
+            [
+              reviewer.name,
+              reviewer.bio,
+              reviewer.country,
+              country,
+            ]
+              .filter(Boolean)
+              .join(" ")
+              .toLocaleLowerCase()
+
+          return searchable.includes(
+            normalizedQuery,
+          )
+        },
+      )
+    }, [
+      reviewers,
+      searchQuery,
+    ])
+
+  const activeReviewers =
+    visibleReviewers.filter(
+      (reviewer) =>
+        reviewer.active,
+    )
+
+  const formerReviewers =
+    visibleReviewers.filter(
+      (reviewer) =>
+        !reviewer.active,
+    )
+
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
       <div className="mx-auto max-w-6xl">
@@ -90,7 +148,7 @@ function ReviewersPage() {
           <p className="mt-4 max-w-2xl text-lg leading-8 text-[var(--muted)]">
             Meet the members of ITGE sharing reviews,
             listening impressions and their experiences
-            with IEMs touring across Europe.
+            with gear touring across Europe.
           </p>
         </header>
 
@@ -108,64 +166,140 @@ function ReviewersPage() {
           </div>
         ) : (
           <>
-            <section>
-              <div className="mb-7">
-                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
-                  ITGE community
+            <DirectoryControls>
+              <DirectorySearchInput
+                id="member-search"
+                value={
+                  searchQuery
+                }
+                onChange={
+                  setSearchQuery
+                }
+                placeholder="Search members…"
+              />
+            </DirectoryControls>
+
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+              <p className="text-sm text-[var(--muted)]">
+                {
+                  visibleReviewers.length
+                }{" "}
+                {visibleReviewers.length === 1
+                  ? "member"
+                  : "members"}
+              </p>
+
+              {searchQuery.trim() && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSearchQuery(
+                      "",
+                    )
+                  }
+                  className="text-sm font-semibold text-[var(--accent)] transition hover:opacity-75"
+                >
+                  Clear search
+                </button>
+              )}
+            </div>
+
+            {visibleReviewers.length ===
+            0 ? (
+              <div className="mt-6 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
+                <p className="font-semibold">
+                  No matching members
                 </p>
 
-                <h2 className="mt-2 text-3xl font-semibold tracking-tight">
-                  Active members
-                </h2>
-
-                <p className="mt-2 text-[var(--muted)]">
-                  Members currently participating in
-                  IEM Tour Group Europe.
+                <p className="mt-2 text-sm text-[var(--muted)]">
+                  No members match{" "}
+                  <span className="font-medium text-[var(--foreground)]">
+                    “{searchQuery.trim()}”
+                  </span>
+                  .
                 </p>
               </div>
+            ) : (
+              <>
+                {activeReviewers.length >
+                  0 && (
+                  <section className="mt-10">
+                    <div className="mb-7">
+                      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
+                        ITGE community
+                      </p>
 
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {activeReviewers.map(
-                  (reviewer) => (
-                    <ReviewerCard
-                      key={reviewer.id}
-                      reviewer={reviewer}
-                    />
-                  ),
+                      <h2 className="mt-2 text-3xl font-semibold tracking-tight">
+                        Active members
+                      </h2>
+
+                      <p className="mt-2 text-[var(--muted)]">
+                        Members currently participating in
+                        IEM Tour Group Europe.
+                      </p>
+                    </div>
+
+                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                      {activeReviewers.map(
+                        (reviewer) => (
+                          <ReviewerCard
+                            key={
+                              reviewer.id
+                            }
+                            reviewer={
+                              reviewer
+                            }
+                          />
+                        ),
+                      )}
+                    </div>
+                  </section>
                 )}
-              </div>
-            </section>
 
-            {formerReviewers.length > 0 && (
-              <section className="mt-16 border-t border-[var(--border)] pt-14">
-                <div className="mb-7">
-                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-                    ITGE archive
-                  </p>
+                {formerReviewers.length >
+                  0 && (
+                  <section
+                    className={
+                      activeReviewers.length >
+                      0
+                        ? "mt-16 border-t border-[var(--border)] pt-14"
+                        : "mt-10"
+                    }
+                  >
+                    <div className="mb-7">
+                      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+                        ITGE archive
+                      </p>
 
-                  <h2 className="mt-2 text-3xl font-semibold tracking-tight">
-                    Former members
-                  </h2>
+                      <h2 className="mt-2 text-3xl font-semibold tracking-tight">
+                        Former members
+                      </h2>
 
-                  <p className="mt-2 max-w-2xl text-[var(--muted)]">
-                    Previous members of ITGE. Their
-                    reviews and listening impressions
-                    remain part of our library.
-                  </p>
-                </div>
+                      <p className="mt-2 max-w-2xl text-[var(--muted)]">
+                        Previous members of ITGE. Their
+                        reviews and listening impressions
+                        remain part of our library.
+                      </p>
+                    </div>
 
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {formerReviewers.map(
-                    (reviewer) => (
-                      <ReviewerCard
-                        key={reviewer.id}
-                        reviewer={reviewer}
-                        former
-                      />
-                    ),
-                  )}
-                </div>
-              </section>
+                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                      {formerReviewers.map(
+                        (reviewer) => (
+                          <ReviewerCard
+                            key={
+                              reviewer.id
+                            }
+                            reviewer={
+                              reviewer
+                            }
+                            former
+                          />
+                        ),
+                      )}
+                    </div>
+                  </section>
+                )}
+              </>
             )}
           </>
         )}

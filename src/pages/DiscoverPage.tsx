@@ -88,7 +88,7 @@ function DiscoverPage() {
       "Reviews | ITGE",
 
     description:
-      "Browse ITGE gear reviews and listening impressions by gear type, product, brand, member, artist and genre.",
+      "Browse ITGE reviews and listening impressions by gear, brand, member, artist and genre.",
   })
 
   useEffect(() => {
