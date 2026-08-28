@@ -296,7 +296,7 @@ function Navbar() {
                 desktopExploreOpen
               }
             >
-              Tags
+              Explore
 
               <span
                 className={`transition-transform duration-200 ${
@@ -547,7 +547,7 @@ function Navbar() {
                   mobileExploreOpen
                 }
               >
-                Tags
+                Explore
 
                 <span
                   className={`transition-transform duration-200 ${
