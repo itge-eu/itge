@@ -6,12 +6,44 @@ import {
 
 import { Link } from "react-router"
 
+import DirectoryControls from "../components/directory/DirectoryControls"
+import DirectorySearchInput from "../components/directory/DirectorySearchInput"
+import DirectorySortSelect from "../components/directory/DirectorySortSelect"
+
 import {
   getArtists,
   type ArtistSummary,
 } from "../lib/artists"
 
 import usePageMetadata from "../hooks/usePageMetadata"
+
+type ArtistSort =
+  | "most-referenced"
+  | "alphabetical"
+  | "most-reviews"
+  | "most-impressions"
+
+const SORT_OPTIONS: {
+  value: ArtistSort
+  label: string
+}[] = [
+  {
+    value: "most-referenced",
+    label: "Most referenced",
+  },
+  {
+    value: "alphabetical",
+    label: "A–Z",
+  },
+  {
+    value: "most-reviews",
+    label: "Most reviews",
+  },
+  {
+    value: "most-impressions",
+    label: "Most impressions",
+  },
+]
 
 function ArtistsPage() {
   const [artists, setArtists] =
@@ -24,6 +56,11 @@ function ArtistsPage() {
     setSearchQuery,
   ] =
     useState("")
+
+  const [sort, setSort] =
+    useState<ArtistSort>(
+      "most-referenced",
+    )
 
   const [loading, setLoading] =
     useState(true)
@@ -38,7 +75,7 @@ function ArtistsPage() {
       "Artists | ITGE",
 
     description:
-      "Explore artists used as listening references across ITGE IEM reviews and listening impressions.",
+      "Explore artists used as listening references across ITGE reviews and listening impressions.",
   })
 
   useEffect(() => {
@@ -77,37 +114,114 @@ function ArtistsPage() {
     }
   }, [])
 
-  const filteredArtists =
+  const visibleArtists =
     useMemo(() => {
       const normalizedSearch =
         searchQuery
           .trim()
           .toLocaleLowerCase()
 
-      if (!normalizedSearch) {
-        return artists
-      }
+      const filtered =
+        artists.filter(
+          (artist) => {
+            if (
+              !normalizedSearch
+            ) {
+              return true
+            }
 
-      return artists.filter(
-        (artist) => {
-          const searchable =
-            [
-              artist.name,
-              artist.artistType,
-              artist.country,
-            ]
-              .filter(Boolean)
-              .join(" ")
-              .toLocaleLowerCase()
+            const searchable =
+              [
+                artist.name,
+                artist.artistType,
+                artist.country,
+              ]
+                .filter(Boolean)
+                .join(" ")
+                .toLocaleLowerCase()
 
-          return searchable.includes(
-            normalizedSearch,
+            return searchable.includes(
+              normalizedSearch,
+            )
+          },
+        )
+
+      return [...filtered].sort(
+        (
+          first,
+          second,
+        ) => {
+          if (
+            sort ===
+            "alphabetical"
+          ) {
+            return first.name.localeCompare(
+              second.name,
+            )
+          }
+
+          if (
+            sort ===
+            "most-reviews"
+          ) {
+            const difference =
+              second.reviewCount -
+              first.reviewCount
+
+            if (
+              difference !== 0
+            ) {
+              return difference
+            }
+          }
+
+          if (
+            sort ===
+            "most-impressions"
+          ) {
+            const difference =
+              second.impressionCount -
+              first.impressionCount
+
+            if (
+              difference !== 0
+            ) {
+              return difference
+            }
+          }
+
+          if (
+            sort ===
+            "most-referenced"
+          ) {
+            const firstCoverage =
+              first.reviewCount +
+              first.impressionCount
+
+            const secondCoverage =
+              second.reviewCount +
+              second.impressionCount
+
+            const difference =
+              secondCoverage -
+              firstCoverage
+
+            if (
+              difference !== 0
+            ) {
+              return difference
+            }
+          }
+
+          return first.name.localeCompare(
+            second.name,
           )
         },
       )
     }, [
       artists,
       searchQuery,
+      sort,
     ])
 
   if (loading) {
@@ -162,49 +276,62 @@ function ArtistsPage() {
           </p>
         </header>
 
-        {artists.length > 0 && (
-          <section className="mt-8">
-            <label
-              htmlFor="artist-search"
-              className="block text-sm font-semibold text-[var(--muted)]"
-            >
-              Search artists
-            </label>
-
-            <div className="relative mt-3 max-w-xl">
-              <SearchIcon />
-
-              <input
+        {artists.length >
+          0 && (
+          <DirectoryControls className="mt-8">
+            <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_15rem]">
+              <DirectorySearchInput
                 id="artist-search"
-                type="search"
                 value={
                   searchQuery
                 }
-                onChange={(
-                  event,
-                ) =>
-                  setSearchQuery(
-                    event.target
-                      .value,
-                  )
+                onChange={
+                  setSearchQuery
                 }
                 placeholder="Search by artist name…"
-                className="w-full rounded-2xl border border-[var(--border)] bg-[var(--surface)] py-3.5 pl-11 pr-4 text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--accent)]"
+              />
+
+              <DirectorySortSelect
+                id="artist-sort"
+                value={sort}
+                options={
+                  SORT_OPTIONS
+                }
+                onChange={
+                  setSort
+                }
               />
             </div>
+          </DirectoryControls>
+        )}
+
+        {artists.length >
+          0 && (
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+            <p className="text-sm text-[var(--muted)]">
+              {
+                visibleArtists.length
+              }{" "}
+              {visibleArtists.length ===
+              1
+                ? "artist"
+                : "artists"}
+            </p>
 
             {searchQuery.trim() && (
-              <p className="mt-3 text-sm text-[var(--muted)]">
-                {
-                  filteredArtists.length
-                }{" "}
-                {filteredArtists.length ===
-                1
-                  ? "matching artist"
-                  : "matching artists"}
-              </p>
+              <button
+                type="button"
+                onClick={() =>
+                  setSearchQuery(
+                    "",
+                  )
+                }
+                className="text-sm font-semibold text-[var(--accent)] transition hover:opacity-75"
+              >
+                Clear search
+              </button>
             )}
-          </section>
+          </div>
         )}
 
         {artists.length ===
@@ -214,16 +341,15 @@ function ArtistsPage() {
             published coverage are
             available yet.
           </div>
-        ) : filteredArtists.length ===
+        ) : visibleArtists.length ===
           0 ? (
-          <div className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
+          <div className="mt-6 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
             <p className="font-semibold">
               No matching artists
             </p>
 
             <p className="mt-2 text-sm text-[var(--muted)]">
-              No artists match
-              {" "}
+              No artists match{" "}
               <span className="font-medium text-[var(--foreground)]">
                 “{searchQuery.trim()}”
               </span>
@@ -231,8 +357,8 @@ function ArtistsPage() {
             </p>
           </div>
         ) : (
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredArtists.map(
+          <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {visibleArtists.map(
               (artist) => (
                 <Link
                   key={
@@ -289,12 +415,7 @@ function ArtistsPage() {
                       value={
                         artist.productCount
                       }
-                      label={
-                        artist.productCount ===
-                        1
-                          ? "IEM"
-                          : "IEMs"
-                      }
+                      label="gear"
                     />
 
                     <Metric
@@ -336,29 +457,6 @@ function Metric({
         {label}
       </p>
     </div>
-  )
-}
-
-function SearchIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted)]"
-    >
-      <circle
-        cx="11"
-        cy="11"
-        r="7"
-      />
-
-      <path d="m20 20-3.5-3.5" />
-    </svg>
   )
 }
 
