@@ -29,6 +29,7 @@ export type ProductDirectoryItem = {
   slug: string
   productType: ProductType
   featured?: boolean
+  launchPrice?: number | null
   brand: {
     id: number
     name: string
@@ -136,6 +137,7 @@ type ProductDirectoryRow = {
   slug: string
   product_type: ProductType | null
   featured: boolean | null
+  launch_price: string | number | null
 
   brands:
     | {
@@ -754,6 +756,7 @@ export async function getProducts(): Promise<
       slug,
       product_type,
       featured,
+      launch_price,
 
       brands (
         id,
@@ -969,6 +972,14 @@ export async function getProducts(): Promise<
           featured:
             row.featured ??
             false,
+
+          launchPrice:
+            row.launch_price ==
+            null
+              ? null
+              : Number(
+                  row.launch_price,
+                ),
 
           brand: {
             id: Number(

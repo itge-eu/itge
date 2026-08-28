@@ -121,21 +121,6 @@ function HomePage() {
                 0.5,
             )
 
-        const fallbackPool =
-          [...products]
-            .filter(
-              (product) =>
-                !product.featured &&
-                Boolean(
-                  product.heroImageUrl,
-                ),
-            )
-            .sort(
-              () =>
-                Math.random() -
-                0.5,
-            )
-
         const selectedFeatured =
           featuredPool.slice(
             0,
@@ -145,6 +130,23 @@ function HomePage() {
         const remainingSlots =
           4 -
           selectedFeatured.length
+
+        const fallbackPool =
+          [...products]
+            .filter(
+              (product) =>
+                !product.featured &&
+                Boolean(
+                  product.heroImageUrl,
+                ) &&
+                product.launchPrice != null &&
+                product.launchPrice >= 1500,
+            )
+            .sort(
+              () =>
+                Math.random() -
+                0.5,
+            )
 
         const featured = [
           ...selectedFeatured,
