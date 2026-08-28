@@ -3,57 +3,82 @@ import {
   useMemo,
   useState,
 } from "react"
-import { Link, useParams } from "react-router"
+import {
+  Link,
+  useParams,
+} from "react-router"
+
 import ReviewerAvatar from "../components/reviewers/ReviewerAvatar"
+import Breadcrumbs from "../components/navigation/Breadcrumbs"
+import PageState from "../components/layout/PageState"
+
 import {
   getReviewBySlug,
   type FullReview,
 } from "../lib/reviews"
-import Breadcrumbs from "../components/navigation/Breadcrumbs"
+
 import usePageMetadata from "../hooks/usePageMetadata"
-import PageState from "../components/layout/PageState"
 
 function ReviewPage() {
-  const { slug } = useParams<{ slug: string }>()
+  const { slug } =
+    useParams<{
+      slug: string
+    }>()
 
   const [review, setReview] =
-    useState<FullReview | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(
-    null,
-  )
+    useState<FullReview | null>(
+      null,
+    )
 
-  const preparedBody = useMemo(
-    () =>
-      prepareReviewHtml(
-        review?.body ?? "",
-        review?.heroImageUrl ?? null,
-      ),
-    [review?.body, review?.heroImageUrl],
-  )
-  
+  const [loading, setLoading] =
+    useState(true)
+
+  const [error, setError] =
+    useState<string | null>(
+      null,
+    )
+
+  const preparedBody =
+    useMemo(
+      () =>
+        prepareReviewHtml(
+          review?.body ?? "",
+          review?.heroImageUrl ??
+            null,
+        ),
+      [
+        review?.body,
+        review?.heroImageUrl,
+      ],
+    )
+
   usePageMetadata({
     title: review
       ? `${review.model} review by ${review.reviewer} | ITGE`
       : "Review | ITGE",
-  
+
     description: review
       ? `${review.brand} ${review.model} review by ${review.reviewer}. ${review.summary}`
-      : "Independent IEM reviews from ITGE.",
+      : "Independent gear reviews from ITGE.",
   })
-    
+
   useEffect(() => {
     let cancelled = false
 
     async function loadReview() {
       if (!slug) {
-        setError("No review was specified.")
+        setError(
+          "No review was specified.",
+        )
         setLoading(false)
         return
       }
 
       try {
-        const result = await getReviewBySlug(slug)
+        const result =
+          await getReviewBySlug(
+            slug,
+          )
 
         if (!cancelled) {
           setReview(result)
@@ -119,14 +144,15 @@ function ReviewPage() {
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
       <article className="mx-auto max-w-4xl">
-	    <Breadcrumbs
+        <Breadcrumbs
           items={[
             {
               label: "Reviews",
               to: "/reviews",
             },
             {
-              label: review.model,
+              label:
+                review.model,
               to: `/gear/${review.productSlug}`,
             },
             {
@@ -134,6 +160,7 @@ function ReviewPage() {
             },
           ]}
         />
+
         <header className="border-b border-[var(--border)] pb-12">
           <Link
             to={`/brands/${review.brandSlug}`}
@@ -149,34 +176,56 @@ function ReviewPage() {
                   to={`/gear/${review.productSlug}`}
                   className="transition hover:text-[var(--accent)]"
                 >
-                  {review.model}
+                  {
+                    review.model
+                  }
                 </Link>
               </h1>
-			  
-			  {(review.driverConfiguration ||
-                review.releaseYear != null ||
-                review.launchPrice != null) && (
+
+              {(review.driverConfiguration ||
+                review.releaseYear !=
+                  null ||
+                review.launchPrice !=
+                  null) && (
                 <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-[var(--muted)]">
                   {review.driverConfiguration && (
-                    <span>{review.driverConfiguration}</span>
+                    <span>
+                      {
+                        review.driverConfiguration
+                      }
+                    </span>
                   )}
-              
+
                   {review.driverConfiguration &&
-                    review.releaseYear != null && (
-                      <span aria-hidden="true">·</span>
+                    review.releaseYear !=
+                      null && (
+                      <span aria-hidden="true">
+                        ·
+                      </span>
                     )}
-              
-                  {review.releaseYear != null && (
-                    <span>Released {review.releaseYear}</span>
+
+                  {review.releaseYear !=
+                    null && (
+                    <span>
+                      Released{" "}
+                      {
+                        review.releaseYear
+                      }
+                    </span>
                   )}
-              
+
                   {(review.driverConfiguration ||
-                    review.releaseYear != null) &&
-                    review.launchPrice != null && (
-                      <span aria-hidden="true">·</span>
+                    review.releaseYear !=
+                      null) &&
+                    review.launchPrice !=
+                      null && (
+                      <span aria-hidden="true">
+                        ·
+                      </span>
                     )}
-              
-                  {review.launchPrice != null && (
+
+                  {review.launchPrice !=
+                    null && (
                     <span>
                       Launch price{" "}
                       {formatLaunchPrice(
@@ -193,8 +242,12 @@ function ReviewPage() {
                 className="mt-5 inline-flex items-center gap-3 rounded-xl transition hover:opacity-80"
               >
                 <ReviewerAvatar
-                  name={review.reviewer}
-                  slug={review.reviewerSlug}
+                  name={
+                    review.reviewer
+                  }
+                  slug={
+                    review.reviewerSlug
+                  }
                   size="sm"
                   shape="circle"
                   eager
@@ -203,58 +256,82 @@ function ReviewPage() {
                 <span className="text-[var(--muted)]">
                   Reviewed by{" "}
                   <span className="font-semibold text-[var(--accent)]">
-                    {review.reviewer}
+                    {
+                      review.reviewer
+                    }
                   </span>
                 </span>
               </Link>
 
-              {review.artists.length > 0 && (
+              {review.artists
+                .length > 0 && (
                 <div className="mt-6">
                   <p className="text-sm font-semibold text-[var(--muted)]">
-                    Artists mentioned
+                    Artists
+                    mentioned
                   </p>
 
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {review.artists.map((artist) => (
-                      <Link
-                        key={artist.musicbrainzId}
-                        to={`/artists/${encodeURIComponent(
-                          artist.slug,
-                        )}`}
-                        className="rounded-full border border-[var(--accent)] bg-[var(--surface-soft)] px-3 py-2 text-sm font-semibold transition hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]"
-                      >
-                        {artist.name}
-                      </Link>
-                    ))}
+                    {review.artists.map(
+                      (
+                        artist,
+                      ) => (
+                        <Link
+                          key={
+                            artist.musicbrainzId
+                          }
+                          to={`/artists/${encodeURIComponent(
+                            artist.slug,
+                          )}`}
+                          className="rounded-full border border-[var(--accent)] bg-[var(--surface-soft)] px-3 py-2 text-sm font-semibold transition hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]"
+                        >
+                          {
+                            artist.name
+                          }
+                        </Link>
+                      ),
+                    )}
                   </div>
                 </div>
               )}
 
-              {review.genres.length > 0 && (
+              {review.genres
+                .length > 0 && (
                 <div className="mt-6">
                   <p className="text-sm font-semibold text-[var(--muted)]">
                     Genres covered
                   </p>
 
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {review.genres.map((genre) => (
-                      <Link
-                        key={genre.id}
-                        to={`/genres/${encodeURIComponent(
-                          genre.slug,
-                        )}`}
-                        className="rounded-full border border-[var(--border)] bg-[var(--surface-soft)] px-3 py-2 text-sm font-semibold transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
-                      >
-                        {genre.name}
-                      </Link>
-                    ))}
+                    {review.genres.map(
+                      (
+                        genre,
+                      ) => (
+                        <Link
+                          key={
+                            genre.id
+                          }
+                          to={`/genres/${encodeURIComponent(
+                            genre.slug,
+                          )}`}
+                          className="rounded-full border border-[var(--border)] bg-[var(--surface-soft)] px-3 py-2 text-sm font-semibold transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                        >
+                          {
+                            genre.name
+                          }
+                        </Link>
+                      ),
+                    )}
                   </div>
                 </div>
               )}
             </div>
 
             <div className="w-fit shrink-0 rounded-full border border-[var(--border)] px-4 py-2 text-lg font-semibold">
-              {review.rating.toFixed(1)}/5
+              {review.rating.toFixed(
+                1,
+              )}
+              /5
             </div>
           </div>
 
@@ -262,7 +339,8 @@ function ReviewPage() {
             {review.summary}
           </p>
 
-          {(review.pros || review.cons) && (
+          {(review.pros ||
+            review.cons) && (
             <section className="grid gap-6 py-8 md:grid-cols-2">
               {review.pros && (
                 <div className="rounded-2xl border border-green-500/30 bg-green-500/10 p-6">
@@ -271,7 +349,9 @@ function ReviewPage() {
                   </h2>
 
                   <p className="mt-3 whitespace-pre-line leading-7">
-                    {review.pros}
+                    {
+                      review.pros
+                    }
                   </p>
                 </div>
               )}
@@ -283,7 +363,9 @@ function ReviewPage() {
                   </h2>
 
                   <p className="mt-3 whitespace-pre-line leading-7">
-                    {review.cons}
+                    {
+                      review.cons
+                    }
                   </p>
                 </div>
               )}
@@ -294,7 +376,9 @@ function ReviewPage() {
         {review.heroImageUrl && (
           <figure className="mt-10 overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)]">
             <img
-              src={review.heroImageUrl}
+              src={
+                review.heroImageUrl
+              }
               alt={`${review.brand} ${review.model}`}
               className="aspect-[16/9] w-full object-cover"
             />
@@ -306,17 +390,98 @@ function ReviewPage() {
             <div
               className="review-content"
               dangerouslySetInnerHTML={{
-                __html: preparedBody,
+                __html:
+                  preparedBody,
               }}
             />
           ) : (
             <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
-              The full review has not been added yet.
+              The full review
+              has not been added
+              yet.
             </div>
           )}
         </section>
+
+        <section className="border-t border-[var(--border)] py-10">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
+            Continue exploring
+          </p>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <Link
+              to="/reviews"
+              className="group flex items-center justify-between gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-5 py-4 transition hover:border-[var(--accent)]"
+            >
+              <span>
+                <span className="block text-sm text-[var(--muted)]">
+                  Back to
+                </span>
+
+                <span className="mt-1 block font-semibold transition group-hover:text-[var(--accent)]">
+                  All reviews
+                </span>
+              </span>
+
+              <ArrowLeftIcon />
+            </Link>
+
+            <Link
+              to={`/gear/${review.productSlug}`}
+              className="group flex items-center justify-between gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-5 py-4 transition hover:border-[var(--accent)]"
+            >
+              <span>
+                <span className="block text-sm text-[var(--muted)]">
+                  More coverage
+                </span>
+
+                <span className="mt-1 block font-semibold transition group-hover:text-[var(--accent)]">
+                  {
+                    review.model
+                  }
+                </span>
+              </span>
+
+              <ArrowRightIcon />
+            </Link>
+          </div>
+        </section>
       </article>
     </main>
+  )
+}
+
+function ArrowLeftIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className="h-5 w-5 shrink-0 text-[var(--accent)]"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m15 18-6-6 6-6" />
+    </svg>
+  )
+}
+
+function ArrowRightIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className="h-5 w-5 shrink-0 text-[var(--accent)]"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m9 18 6-6-6-6" />
+    </svg>
   )
 }
 
@@ -325,54 +490,78 @@ function formatLaunchPrice(
   currency: string | null,
 ): string {
   if (!currency) {
-    return price.toLocaleString("en-US")
+    return price.toLocaleString(
+      "en-US",
+    )
   }
 
   try {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency,
-      maximumFractionDigits:
-        Number.isInteger(price) ? 0 : 2,
-    }).format(price)
+    return new Intl.NumberFormat(
+      "en-US",
+      {
+        style: "currency",
+        currency,
+        maximumFractionDigits:
+          Number.isInteger(
+            price,
+          )
+            ? 0
+            : 2,
+      },
+    ).format(price)
   } catch {
-    return `${price.toLocaleString("en-US")} ${currency}`
+    return `${price.toLocaleString(
+      "en-US",
+    )} ${currency}`
   }
 }
 
 function prepareReviewHtml(
   html: string,
-  heroImageUrl: string | null,
+  heroImageUrl:
+    | string
+    | null,
 ) {
-  const document = new DOMParser().parseFromString(
-    html,
-    "text/html",
-  )
+  const document =
+    new DOMParser().parseFromString(
+      html,
+      "text/html",
+    )
 
   if (heroImageUrl) {
     const firstImage =
-      document.querySelector<HTMLImageElement>("img")
-  
+      document.querySelector<HTMLImageElement>(
+        "img",
+      )
+
     const firstImageUrl =
-      firstImage?.getAttribute("src") ?? null
-  
+      firstImage?.getAttribute(
+        "src",
+      ) ?? null
+
     if (
       firstImage &&
-      firstImageUrl === heroImageUrl
+      firstImageUrl ===
+        heroImageUrl
     ) {
-      removeImageWrapper(firstImage)
+      removeImageWrapper(
+        firstImage,
+      )
     }
   }
 
   document
-    .querySelectorAll(".bbCodeSpoiler")
+    .querySelectorAll(
+      ".bbCodeSpoiler",
+    )
     .forEach((spoiler) => {
       const title =
         spoiler
           .querySelector(
             ".bbCodeSpoiler-button-title",
           )
-          ?.textContent?.trim() || "Spoiler"
+          ?.textContent?.trim() ||
+        "Spoiler"
 
       const content =
         spoiler.querySelector(
@@ -380,43 +569,77 @@ function prepareReviewHtml(
         )?.innerHTML || ""
 
       const details =
-        document.createElement("details")
-      details.className = "review-spoiler"
+        document.createElement(
+          "details",
+        )
+
+      details.className =
+        "review-spoiler"
 
       const summary =
-        document.createElement("summary")
-      summary.textContent = title
+        document.createElement(
+          "summary",
+        )
+
+      summary.textContent =
+        title
 
       const contentWrapper =
-        document.createElement("div")
+        document.createElement(
+          "div",
+        )
+
       contentWrapper.className =
         "review-spoiler-content"
-      contentWrapper.innerHTML = content
 
-      details.append(summary, contentWrapper)
-      spoiler.replaceWith(details)
+      contentWrapper.innerHTML =
+        content
+
+      details.append(
+        summary,
+        contentWrapper,
+      )
+
+      spoiler.replaceWith(
+        details,
+      )
     })
 
-  return document.body.innerHTML
+  return document.body
+    .innerHTML
 }
 
 function removeImageWrapper(
   image: HTMLImageElement,
 ) {
-  const link = image.closest("a")
+  const link =
+    image.closest("a")
 
-  if (link && link.childElementCount === 1) {
-    const parent = link.parentElement
+  if (
+    link &&
+    link.childElementCount ===
+      1
+  ) {
+    const parent =
+      link.parentElement
 
     link.remove()
-    removeEmptyWrapper(parent)
+
+    removeEmptyWrapper(
+      parent,
+    )
+
     return
   }
 
-  const parent = image.parentElement
+  const parent =
+    image.parentElement
 
   image.remove()
-  removeEmptyWrapper(parent)
+
+  removeEmptyWrapper(
+    parent,
+  )
 }
 
 function removeEmptyWrapper(
@@ -426,17 +649,22 @@ function removeEmptyWrapper(
     return
   }
 
-  const hasText = Boolean(
-    element.textContent?.trim(),
-  )
+  const hasText =
+    Boolean(
+      element.textContent?.trim(),
+    )
 
-  const hasContent = Boolean(
-    element.querySelector(
-      "img, video, iframe, table, ul, ol, blockquote",
-    ),
-  )
+  const hasContent =
+    Boolean(
+      element.querySelector(
+        "img, video, iframe, table, ul, ol, blockquote",
+      ),
+    )
 
-  if (!hasText && !hasContent) {
+  if (
+    !hasText &&
+    !hasContent
+  ) {
     element.remove()
   }
 }

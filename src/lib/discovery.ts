@@ -3,6 +3,9 @@ import { supabase } from "./supabase"
 import type {
   DiscoveryContentType,
   DiscoveryEntity,
+  DiscoveryFilterSuggestion,
+  DiscoveryFilterType,
+  DiscoveryGearType,
   DiscoveryProduct,
   DiscoveryImpressionItem,
   DiscoveryItem,
@@ -12,9 +15,8 @@ import type {
 } from "../types/discovery"
 
 import type {
-  SearchSuggestion,
-  SearchSuggestionType,
-} from "../types/search"
+  ProductType,
+} from "./products"
 
 type ArtistRelationRow = {
   artists:
@@ -50,6 +52,7 @@ type RelatedProduct = {
   id: number
   model: string
   slug: string
+  product_type: ProductType | null
 
   brands:
     | {
@@ -128,14 +131,64 @@ type DiscoveryImpressionRow = {
     | null
 }
 
-const FILTER_TYPES: SearchSuggestionType[] =
+const FILTER_TYPES: DiscoveryFilterType[] =
   [
+    "gear_type",
     "product",
     "brand",
+    "reviewer",
     "artist",
     "genre",
-    "reviewer",
   ]
+
+const GEAR_TYPES: Record<
+  ProductType,
+  DiscoveryGearType
+> = {
+  iem: {
+    id: 1,
+    name: "IEMs",
+    slug: "iem",
+  },
+
+  headphone: {
+    id: 2,
+    name: "Headphones",
+    slug: "headphone",
+  },
+
+  source: {
+    id: 3,
+    name: "Source gear",
+    slug: "source",
+  },
+
+  cable_accessory: {
+    id: 4,
+    name: "Cables & accessories",
+    slug: "cable_accessory",
+  },
+}
+
+function normalizeProductType(
+  value:
+    | ProductType
+    | null
+    | undefined,
+): ProductType {
+  return value ?? "iem"
+}
+
+function getGearType(
+  value:
+    | ProductType
+    | null
+    | undefined,
+): DiscoveryGearType {
+  return GEAR_TYPES[
+    normalizeProductType(value)
+  ]
+}
 
 function getSingleRelation<T>(
   relation:
@@ -249,6 +302,11 @@ function buildCommonEntities(
     )
   }
 
+  const gearType =
+    getGearType(
+      product.product_type,
+    )
+
   const brandEntity: DiscoveryEntity =
     {
       id: Number(
@@ -262,9 +320,13 @@ function buildCommonEntities(
 
   const productEntity: DiscoveryProduct =
     {
-      id: Number(product.id),
-      name: product.model,
-      slug: product.slug,
+      id: Number(
+        product.id,
+      ),
+      name:
+        product.model,
+      slug:
+        product.slug,
 
       brandId:
         Number(
@@ -273,6 +335,8 @@ function buildCommonEntities(
 
       brandName:
         brand.name,
+
+      gearType,
     }
 
   const reviewerEntity: DiscoveryEntity =
@@ -280,14 +344,17 @@ function buildCommonEntities(
       id: Number(
         reviewer.id,
       ),
-      name: reviewer.name,
-      slug: reviewer.slug,
+      name:
+        reviewer.name,
+      slug:
+        reviewer.slug,
     }
 
   return {
     reviewer,
     product,
     brand,
+    gearType,
     brandEntity,
     productEntity,
     reviewerEntity,
@@ -311,41 +378,56 @@ function mapDiscoveryReview(
       row.published_at,
 
     review: {
-      id: Number(row.id),
-      slug: row.slug,
+      id: Number(
+        row.id,
+      ),
+      slug:
+        row.slug,
       rating:
-        Number(row.rating),
-    
-      title: row.title,
-      summary: row.summary,
-      body: row.body,
-    
+        Number(
+          row.rating,
+        ),
+
+      title:
+        row.title,
+      summary:
+        row.summary,
+      body:
+        row.body,
+
       brand:
         entities.brand
           .name,
-    
+
       brandSlug:
         entities.brand
           .slug,
-    
+
       model:
-        entities.product.model,
-    
+        entities.product
+          .model,
+
       productSlug:
-        entities.product.slug,
-    
+        entities.product
+          .slug,
+
       reviewer:
-        entities.reviewer.name,
-    
+        entities.reviewer
+          .name,
+
       reviewerSlug:
-        entities.reviewer.slug,
-    
+        entities.reviewer
+          .slug,
+
       heroImageUrl:
         row.hero_image_url,
-    
+
       publishedAt:
         row.published_at,
     },
+
+    gearType:
+      entities.gearType,
 
     product:
       entities.productEntity,
@@ -385,11 +467,17 @@ function mapDiscoveryImpression(
       row.published_at,
 
     impression: {
-      id: Number(row.id),
-      slug: row.slug,
-      title: row.title,
-      summary: row.summary,
-      body: row.body,
+      id: Number(
+        row.id,
+      ),
+      slug:
+        row.slug,
+      title:
+        row.title,
+      summary:
+        row.summary,
+      body:
+        row.body,
 
       heroImageUrl:
         row.hero_image_url,
@@ -399,22 +487,28 @@ function mapDiscoveryImpression(
 
       reviewer: {
         id: Number(
-          entities.reviewer.id,
+          entities.reviewer
+            .id,
         ),
         name:
-          entities.reviewer.name,
+          entities.reviewer
+            .name,
         slug:
-          entities.reviewer.slug,
+          entities.reviewer
+            .slug,
       },
 
       product: {
         id: Number(
-          entities.product.id,
+          entities.product
+            .id,
         ),
         model:
-          entities.product.model,
+          entities.product
+            .model,
         slug:
-          entities.product.slug,
+          entities.product
+            .slug,
 
         brand: {
           id: Number(
@@ -430,6 +524,9 @@ function mapDiscoveryImpression(
         },
       },
     },
+
+    gearType:
+      entities.gearType,
 
     product:
       entities.productEntity,
@@ -460,7 +557,9 @@ function timestampValue(
   }
 
   const valueAsTime =
-    new Date(value).getTime()
+    new Date(
+      value,
+    ).getTime()
 
   return Number.isNaN(
     valueAsTime,
@@ -484,7 +583,7 @@ export async function getDiscoveryItems(): Promise<
         rating,
         title,
         summary,
-		body,
+        body,
         hero_image_url,
         published_at,
 
@@ -498,6 +597,7 @@ export async function getDiscoveryItems(): Promise<
           id,
           model,
           slug,
+          product_type,
 
           brands (
             id,
@@ -548,6 +648,7 @@ export async function getDiscoveryItems(): Promise<
           id,
           model,
           slug,
+          product_type,
 
           brands (
             id,
@@ -578,7 +679,9 @@ export async function getDiscoveryItems(): Promise<
       ),
   ])
 
-  if (reviewsResult.error) {
+  if (
+    reviewsResult.error
+  ) {
     throw reviewsResult.error
   }
 
@@ -619,15 +722,20 @@ export async function getDiscoveryItems(): Promise<
 }
 
 export function buildDiscoveryState(
-  discoveryItems: DiscoveryItem[],
-  selectedFilters: SelectedDiscoveryFilters,
-  contentType: DiscoveryContentType,
+  discoveryItems:
+    DiscoveryItem[],
+  selectedFilters:
+    SelectedDiscoveryFilters,
+  contentType:
+    DiscoveryContentType,
 ): DiscoveryState {
   const itemsForContentType =
     discoveryItems.filter(
       (item) =>
-        contentType === "all" ||
-        item.type === contentType,
+        contentType ===
+          "all" ||
+        item.type ===
+          contentType,
     )
 
   const matchingItems =
@@ -640,11 +748,19 @@ export function buildDiscoveryState(
     )
 
   const suggestions = {
-    product: buildSuggestionsForType(
-      itemsForContentType,
-      selectedFilters,
-      "product",
-    ),
+    gear_type:
+      buildSuggestionsForType(
+        itemsForContentType,
+        selectedFilters,
+        "gear_type",
+      ),
+
+    product:
+      buildSuggestionsForType(
+        itemsForContentType,
+        selectedFilters,
+        "product",
+      ),
 
     brand:
       buildSuggestionsForType(
@@ -682,10 +798,13 @@ export function buildDiscoveryState(
 }
 
 function buildSuggestionsForType(
-  discoveryItems: DiscoveryItem[],
-  selectedFilters: SelectedDiscoveryFilters,
-  type: SearchSuggestionType,
-): SearchSuggestion[] {
+  discoveryItems:
+    DiscoveryItem[],
+  selectedFilters:
+    SelectedDiscoveryFilters,
+  type:
+    DiscoveryFilterType,
+): DiscoveryFilterSuggestion[] {
   const relevantItems =
     discoveryItems.filter(
       (item) =>
@@ -704,27 +823,34 @@ function buildSuggestionsForType(
 
   return ensureSelectedSuggestion(
     suggestions,
-    selectedFilters[type],
+    selectedFilters[
+      type
+    ],
   )
 }
 
 function itemMatchesFilters(
   item: DiscoveryItem,
-  selectedFilters: SelectedDiscoveryFilters,
-  ignoredType?: SearchSuggestionType,
+  selectedFilters:
+    SelectedDiscoveryFilters,
+  ignoredType?:
+    DiscoveryFilterType,
 ): boolean {
   for (
     const type of
     FILTER_TYPES
   ) {
     if (
-      type === ignoredType
+      type ===
+      ignoredType
     ) {
       continue
     }
 
     const selected =
-      selectedFilters[type]
+      selectedFilters[
+        type
+      ]
 
     if (!selected) {
       continue
@@ -746,10 +872,18 @@ function itemMatchesFilters(
 
 function itemMatchesFilter(
   item: DiscoveryItem,
-  type: SearchSuggestionType,
-  selected: SearchSuggestion,
+  type:
+    DiscoveryFilterType,
+  selected:
+    DiscoveryFilterSuggestion,
 ): boolean {
   switch (type) {
+    case "gear_type":
+      return (
+        item.gearType.id ===
+        selected.id
+      )
+
     case "product":
       return (
         item.product.id ===
@@ -786,15 +920,18 @@ function itemMatchesFilter(
 
 function collectSuggestions(
   items: DiscoveryItem[],
-  type: SearchSuggestionType,
-): SearchSuggestion[] {
+  type:
+    DiscoveryFilterType,
+): DiscoveryFilterSuggestion[] {
   const suggestions =
     new Map<
       number,
-      SearchSuggestion
+      DiscoveryFilterSuggestion
     >()
 
-  for (const item of items) {
+  for (
+    const item of items
+  ) {
     const entities =
       getEntitiesForType(
         item,
@@ -821,29 +958,39 @@ function collectSuggestions(
         )
 
       if (existing) {
-        existing.reviewCount += 1
-      
-        if (item.type === "review") {
+        existing.reviewCount +=
+          1
+
+        if (
+          item.type ===
+          "review"
+        ) {
           existing.reviewResultCount =
-            (existing.reviewResultCount ?? 0) + 1
+            (existing.reviewResultCount ??
+              0) + 1
         } else {
           existing.impressionResultCount =
-            (existing.impressionResultCount ?? 0) + 1
+            (existing.impressionResultCount ??
+              0) + 1
         }
-      
+
         continue
       }
 
       suggestions.set(
         entity.id,
         {
-          id: entity.id,
+          id:
+            entity.id,
           type,
-          name: entity.name,
-          slug: entity.slug,
+          name:
+            entity.name,
+          slug:
+            entity.slug,
 
           subtitle:
-            type === "product" &&
+            type ===
+              "product" &&
             "brandName" in
               entity
               ? entity.brandName
@@ -852,10 +999,16 @@ function collectSuggestions(
           reviewCount: 1,
 
           reviewResultCount:
-            item.type === "review" ? 1 : 0,
-          
+            item.type ===
+            "review"
+              ? 1
+              : 0,
+
           impressionResultCount:
-            item.type === "impression" ? 1 : 0,
+            item.type ===
+            "impression"
+              ? 1
+              : 0,
         },
       )
     }
@@ -870,13 +1023,22 @@ function collectSuggestions(
 
 function getEntitiesForType(
   item: DiscoveryItem,
-  type: SearchSuggestionType,
+  type:
+    DiscoveryFilterType,
 ): Array<
-  DiscoveryEntity | DiscoveryProduct
+  DiscoveryEntity |
+  DiscoveryProduct
 > {
   switch (type) {
+    case "gear_type":
+      return [
+        item.gearType,
+      ]
+
     case "product":
-      return [item.product]
+      return [
+        item.product,
+      ]
 
     case "brand":
       return [
@@ -898,10 +1060,10 @@ function getEntitiesForType(
 
 function ensureSelectedSuggestion(
   suggestions:
-    SearchSuggestion[],
+    DiscoveryFilterSuggestion[],
   selected:
-    SearchSuggestion | null,
-): SearchSuggestion[] {
+    DiscoveryFilterSuggestion | null,
+): DiscoveryFilterSuggestion[] {
   if (!selected) {
     return suggestions
   }
@@ -915,7 +1077,9 @@ function ensureSelectedSuggestion(
           selected.type,
     )
 
-  if (alreadyPresent) {
+  if (
+    alreadyPresent
+  ) {
     return suggestions
   }
 
@@ -929,15 +1093,18 @@ function ensureSelectedSuggestion(
 }
 
 function compareSuggestions(
-  first: SearchSuggestion,
-  second: SearchSuggestion,
+  first:
+    DiscoveryFilterSuggestion,
+  second:
+    DiscoveryFilterSuggestion,
 ): number {
   const countDifference =
     second.reviewCount -
     first.reviewCount
 
   if (
-    countDifference !== 0
+    countDifference !==
+    0
   ) {
     return countDifference
   }

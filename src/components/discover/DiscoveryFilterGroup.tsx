@@ -1,16 +1,23 @@
-import { useMemo, useState } from "react"
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react"
 
 import type {
-  SearchSuggestion,
-  SearchSuggestionType,
-} from "../../types/search"
+  DiscoveryFilterSuggestion,
+  DiscoveryFilterType,
+} from "../../types/discovery"
 
 type DiscoveryFilterGroupProps = {
-  type: SearchSuggestionType
+  type: DiscoveryFilterType
   title: string
-  items: SearchSuggestion[]
-  selectedItem: SearchSuggestion | null
-  onSelect: (suggestion: SearchSuggestion) => void
+  items: DiscoveryFilterSuggestion[]
+  selectedItem: DiscoveryFilterSuggestion | null
+  onSelect: (
+    suggestion: DiscoveryFilterSuggestion,
+  ) => void
+  defaultOpen?: boolean
 }
 
 const INITIAL_VISIBLE_ITEMS = 6
@@ -21,132 +28,223 @@ function DiscoveryFilterGroup({
   items,
   selectedItem,
   onSelect,
+  defaultOpen = false,
 }: DiscoveryFilterGroupProps) {
-  const [expanded, setExpanded] = useState(false)
-  const [query, setQuery] = useState("")
+  const [open, setOpen] =
+    useState(defaultOpen)
 
-  const filteredItems = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase()
+  const [expanded, setExpanded] =
+    useState(false)
 
-    if (!normalizedQuery) {
-      return items
+  const [query, setQuery] =
+    useState("")
+
+  useEffect(() => {
+    if (selectedItem) {
+      setOpen(true)
     }
+  }, [selectedItem])
 
-    return items.filter((item) =>
-      [item.name, item.subtitle]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase()
-        .includes(normalizedQuery),
-    )
-  }, [items, query])
+  const filteredItems =
+    useMemo(() => {
+      const normalizedQuery =
+        query
+          .trim()
+          .toLowerCase()
 
-  const visibleItems = expanded
-    ? filteredItems
-    : filteredItems.slice(0, INITIAL_VISIBLE_ITEMS)
+      if (!normalizedQuery) {
+        return items
+      }
+
+      return items.filter(
+        (item) =>
+          [
+            item.name,
+            item.subtitle,
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase()
+            .includes(
+              normalizedQuery,
+            ),
+      )
+    }, [items, query])
+
+  const visibleItems =
+    expanded
+      ? filteredItems
+      : filteredItems.slice(
+          0,
+          INITIAL_VISIBLE_ITEMS,
+        )
 
   const hasMoreItems =
-    filteredItems.length > INITIAL_VISIBLE_ITEMS
+    filteredItems.length >
+    INITIAL_VISIBLE_ITEMS
+
+  function toggleOpen() {
+    setOpen(
+      (current) => !current,
+    )
+  }
 
   return (
-    <section className="border-t border-[var(--border)] py-5 first:border-t-0 first:pt-0">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <span className="text-[var(--accent)]">
-            <FilterTypeIcon type={type} />
+    <section className="border-t border-[var(--border)] first:border-t-0">
+      <button
+        type="button"
+        onClick={toggleOpen}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between gap-3 py-4 text-left transition hover:text-[var(--accent)]"
+      >
+        <span className="flex min-w-0 items-center gap-2.5">
+          <span className="shrink-0 text-[var(--accent)]">
+            <FilterTypeIcon
+              type={type}
+            />
           </span>
 
-          <h3 className="font-semibold">
+          <span className="font-semibold">
             {title}
-          </h3>
-        </div>
+          </span>
 
-        <span className="text-xs text-[var(--muted)]">
-          {filteredItems.length}
+          {selectedItem && (
+            <span
+              className="h-2 w-2 shrink-0 rounded-full bg-[var(--accent)]"
+              aria-label="Filter active"
+            />
+          )}
         </span>
-      </div>
 
-      {items.length > INITIAL_VISIBLE_ITEMS && (
-        <input
-          type="search"
-          value={query}
-          onChange={(event) => {
-            setQuery(event.target.value)
-            setExpanded(true)
-          }}
-          placeholder={`Find ${title.toLowerCase()}...`}
-          aria-label={`Search ${title.toLowerCase()}`}
-          className="mb-3 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/15"
-        />
-      )}
+        <span className="flex shrink-0 items-center gap-2">
+          <span className="text-xs text-[var(--muted)]">
+            {items.length}
+          </span>
 
-      {visibleItems.length === 0 ? (
-        <p className="py-2 text-sm text-[var(--muted)]">
-          No matching options.
-        </p>
-      ) : (
-        <div className="space-y-1">
-          {visibleItems.map((item) => {
-            const selected =
-              selectedItem?.type === item.type &&
-              selectedItem.id === item.id
+          <ChevronIcon
+            open={open}
+          />
+        </span>
+      </button>
 
-            return (
-              <button
-                key={`${item.type}-${item.id}`}
-                type="button"
-                onClick={() => onSelect(item)}
-                aria-pressed={selected}
-                className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition ${
-                  selected
-                    ? "bg-[var(--accent)]/12 text-[var(--foreground)]"
-                    : "text-[var(--muted)] hover:bg-[var(--surface-soft)] hover:text-[var(--foreground)]"
-                }`}
-              >
-                <span
-                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
-                    selected
-                      ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-foreground)]"
-                      : "border-[var(--border)]"
-                  }`}
-                >
-                  {selected && <CheckIcon />}
-                </span>
+      {open && (
+        <div className="pb-5">
+          {items.length >
+            INITIAL_VISIBLE_ITEMS && (
+            <input
+              type="search"
+              value={query}
+              onChange={(
+                event,
+              ) => {
+                setQuery(
+                  event.target
+                    .value,
+                )
 
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate">
-                    {item.name}
-                  </span>
+                setExpanded(
+                  true,
+                )
+              }}
+              placeholder={`Find ${title.toLowerCase()}...`}
+              aria-label={`Search ${title.toLowerCase()}`}
+              className="mb-3 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/15"
+            />
+          )}
 
-                  {item.type === "product" &&
-                    item.subtitle && (
-                      <span className="block truncate text-xs text-[var(--muted)]">
-                        {item.subtitle}
+          {visibleItems.length ===
+          0 ? (
+            <p className="py-2 text-sm text-[var(--muted)]">
+              No matching
+              options.
+            </p>
+          ) : (
+            <div className="space-y-1">
+              {visibleItems.map(
+                (item) => {
+                  const selected =
+                    selectedItem?.type ===
+                      item.type &&
+                    selectedItem?.id ===
+                      item.id
+
+                  return (
+                    <button
+                      key={`${item.type}-${item.id}`}
+                      type="button"
+                      onClick={() =>
+                        onSelect(
+                          item,
+                        )
+                      }
+                      aria-pressed={
+                        selected
+                      }
+                      className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition ${
+                        selected
+                          ? "bg-[var(--accent)]/12 text-[var(--foreground)]"
+                          : "text-[var(--muted)] hover:bg-[var(--surface-soft)] hover:text-[var(--foreground)]"
+                      }`}
+                    >
+                      <span
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
+                          selected
+                            ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-foreground)]"
+                            : "border-[var(--border)]"
+                        }`}
+                      >
+                        {selected && (
+                          <CheckIcon />
+                        )}
                       </span>
-                    )}
-                </span>
 
-                <span className="shrink-0 text-xs text-[var(--muted)]">
-                  {item.reviewCount}
-                </span>
-              </button>
-            )
-          })}
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate">
+                          {
+                            item.name
+                          }
+                        </span>
+
+                        {item.type ===
+                          "product" &&
+                          item.subtitle && (
+                            <span className="block truncate text-xs text-[var(--muted)]">
+                              {
+                                item.subtitle
+                              }
+                            </span>
+                          )}
+                      </span>
+
+                      <span className="shrink-0 text-xs text-[var(--muted)]">
+                        {
+                          item.reviewCount
+                        }
+                      </span>
+                    </button>
+                  )
+                },
+              )}
+            </div>
+          )}
+
+          {hasMoreItems && (
+            <button
+              type="button"
+              onClick={() =>
+                setExpanded(
+                  (current) =>
+                    !current,
+                )
+              }
+              className="mt-3 text-sm font-medium text-[var(--accent)] transition hover:opacity-75"
+            >
+              {expanded
+                ? "Show fewer"
+                : `Show all ${filteredItems.length}`}
+            </button>
+          )}
         </div>
-      )}
-
-      {hasMoreItems && (
-        <button
-          type="button"
-          onClick={() =>
-            setExpanded((current) => !current)
-          }
-          className="mt-3 text-sm font-medium text-[var(--accent)] transition hover:opacity-75"
-        >
-          {expanded
-            ? "Show fewer"
-            : `Show all ${filteredItems.length}`}
-        </button>
       )}
     </section>
   )
@@ -155,7 +253,7 @@ function DiscoveryFilterGroup({
 function FilterTypeIcon({
   type,
 }: {
-  type: SearchSuggestionType
+  type: DiscoveryFilterType
 }) {
   const commonProps = {
     "aria-hidden": true,
@@ -164,8 +262,10 @@ function FilterTypeIcon({
     fill: "none",
     stroke: "currentColor",
     strokeWidth: 1.8,
-    strokeLinecap: "round" as const,
-    strokeLinejoin: "round" as const,
+    strokeLinecap:
+      "round" as const,
+    strokeLinejoin:
+      "round" as const,
   }
 
   switch (type) {
@@ -189,7 +289,11 @@ function FilterTypeIcon({
     case "reviewer":
       return (
         <svg {...commonProps}>
-          <circle cx="12" cy="8" r="4" />
+          <circle
+            cx="12"
+            cy="8"
+            r="4"
+          />
           <path d="M4.5 21a7.5 7.5 0 0 1 15 0" />
         </svg>
       )
@@ -198,8 +302,16 @@ function FilterTypeIcon({
       return (
         <svg {...commonProps}>
           <path d="M9 18V5l10-2v13" />
-          <circle cx="6" cy="18" r="3" />
-          <circle cx="16" cy="16" r="3" />
+          <circle
+            cx="6"
+            cy="18"
+            r="3"
+          />
+          <circle
+            cx="16"
+            cy="16"
+            r="3"
+          />
         </svg>
       )
 
@@ -227,6 +339,31 @@ function CheckIcon() {
       strokeLinejoin="round"
     >
       <path d="m5 12 4 4L19 6" />
+    </svg>
+  )
+}
+
+function ChevronIcon({
+  open,
+}: {
+  open: boolean
+}) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className={`h-4 w-4 text-[var(--muted)] transition-transform duration-200 ${
+        open
+          ? "rotate-180"
+          : ""
+      }`}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m6 9 6 6 6-6" />
     </svg>
   )
 }

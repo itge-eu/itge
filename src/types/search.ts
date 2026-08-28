@@ -12,7 +12,7 @@ export type SearchSuggestion = {
   slug: string
   subtitle?: string
   reviewCount: number
-  
+
   reviewResultCount?: number
   impressionResultCount?: number
 }

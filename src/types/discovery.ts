@@ -11,21 +11,35 @@ export type DiscoveryContentType =
   | "review"
   | "impression"
 
+export type DiscoveryFilterType =
+  | "gear_type"
+  | SearchSuggestionType
+
+export type DiscoveryFilterSuggestion =
+  Omit<SearchSuggestion, "type"> & {
+    type: DiscoveryFilterType
+  }
+
 export type DiscoveryEntity = {
   id: number
   name: string
   slug: string
 }
 
+export type DiscoveryGearType =
+  DiscoveryEntity
+
 export type DiscoveryProduct =
   DiscoveryEntity & {
     brandId: number
     brandName: string
+    gearType: DiscoveryGearType
   }
 
 type DiscoveryItemBase = {
   publishedAt: string | null
 
+  gearType: DiscoveryGearType
   product: DiscoveryProduct
   brand: DiscoveryEntity
   reviewer: DiscoveryEntity
@@ -52,14 +66,14 @@ export type DiscoveryItem =
 
 export type SelectedDiscoveryFilters =
   Record<
-    SearchSuggestionType,
-    SearchSuggestion | null
+    DiscoveryFilterType,
+    DiscoveryFilterSuggestion | null
   >
 
 export type DiscoverySuggestions =
   Record<
-    SearchSuggestionType,
-    SearchSuggestion[]
+    DiscoveryFilterType,
+    DiscoveryFilterSuggestion[]
   >
 
 export type DiscoveryState = {
@@ -69,6 +83,7 @@ export type DiscoveryState = {
 
 export const EMPTY_DISCOVERY_FILTERS: SelectedDiscoveryFilters =
   {
+    gear_type: null,
     product: null,
     brand: null,
     reviewer: null,
@@ -78,6 +93,7 @@ export const EMPTY_DISCOVERY_FILTERS: SelectedDiscoveryFilters =
 
 export const EMPTY_DISCOVERY_SUGGESTIONS: DiscoverySuggestions =
   {
+    gear_type: [],
     product: [],
     brand: [],
     reviewer: [],

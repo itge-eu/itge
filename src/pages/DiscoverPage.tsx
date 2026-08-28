@@ -17,13 +17,14 @@ import {
   EMPTY_DISCOVERY_FILTERS,
   EMPTY_DISCOVERY_SUGGESTIONS,
   type DiscoveryContentType,
+  type DiscoveryFilterSuggestion,
+  type DiscoveryFilterType,
   type DiscoveryItem,
   type SelectedDiscoveryFilters,
 } from "../types/discovery"
 
 import type {
   SearchSuggestion,
-  SearchSuggestionType,
 } from "../types/search"
 
 import usePageMetadata from "../hooks/usePageMetadata"
@@ -87,7 +88,7 @@ function DiscoverPage() {
       "Reviews | ITGE",
 
     description:
-      "Browse ITGE IEM reviews and listening impressions by IEM, brand, reviewer, artist and genre.",
+      "Browse ITGE gear reviews and listening impressions by gear type, product, brand, member, artist and genre.",
   })
 
   useEffect(() => {
@@ -180,24 +181,42 @@ function DiscoverPage() {
     ])
 
   const searchSuggestions =
-    useMemo(
+    useMemo<SearchSuggestion[]>(
       () => [
         ...discoveryState
-          .suggestions.product,
+          .suggestions.product
+          .map((suggestion) => ({
+            ...suggestion,
+            type: "product" as const,
+          })),
 
         ...discoveryState
-          .suggestions
-          .brand,
+          .suggestions.brand
+          .map((suggestion) => ({
+            ...suggestion,
+            type: "brand" as const,
+          })),
 
         ...discoveryState
-          .suggestions.artist,
+          .suggestions.artist
+          .map((suggestion) => ({
+            ...suggestion,
+            type: "artist" as const,
+          })),
 
         ...discoveryState
-          .suggestions.genre,
+          .suggestions.genre
+          .map((suggestion) => ({
+            ...suggestion,
+            type: "genre" as const,
+          })),
 
         ...discoveryState
-          .suggestions
-          .reviewer,
+          .suggestions.reviewer
+          .map((suggestion) => ({
+            ...suggestion,
+            type: "reviewer" as const,
+          })),
       ],
       [
         discoveryState
@@ -213,9 +232,9 @@ function DiscoverPage() {
   const hasFilters =
     activeFilterCount > 0
 
-  const handleSelection = (
-    suggestion: SearchSuggestion,
-  ) => {
+const handleSelection = (
+  suggestion: DiscoveryFilterSuggestion,
+) => {
     setSelectedFilters(
       (current) => {
         const existing =
@@ -239,9 +258,9 @@ function DiscoverPage() {
     )
   }
 
-  const removeFilter = (
-    type: SearchSuggestionType,
-  ) => {
+const removeFilter = (
+  type: DiscoveryFilterType,
+) => {
     setSelectedFilters(
       (current) => ({
         ...current,
@@ -272,10 +291,11 @@ function DiscoverPage() {
           <p className="mt-5 text-lg leading-8 text-[var(--muted)]">
             Browse all ITGE reviews
             and listening impressions,
-            or combine IEM, brand,
-            artist, genre and reviewer
-            filters to find exactly
-            what you're looking for.
+            or combine gear type,
+            product, brand, member,
+            artist and genre filters
+            to find exactly what
+            you're looking for.
           </p>
         </header>
 
