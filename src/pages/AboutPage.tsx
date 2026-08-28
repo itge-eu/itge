@@ -15,8 +15,8 @@ function AboutPage() {
     <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
       <div className="mx-auto max-w-6xl">
         {/* ABOUT / OUR STORY */}
-        <section className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
-          <div>
+        <section className="grid gap-12">
+          <div className="max-w-4xl">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
               About ITGE
             </p>
@@ -36,7 +36,7 @@ function AboutPage() {
                 />
               </div>
 
-              <p className="text-lg leading-8 text-[var(--muted)]">
+              <p className="text-base leading-8 text-[var(--muted)]">
                 IEM Tour Group Europe is an independent, community
                 driven collective connecting enthusiasts and reviewers
                 across Europe with manufacturers and retailers from
@@ -95,23 +95,6 @@ function AboutPage() {
               </p>
             </div>
           </div>
-
-          <aside className="space-y-5 lg:sticky lg:top-8">
-            <InfoCard
-              title="Europe-wide"
-              text="ITGE connects audio enthusiasts across Europe and organises gear tours between members in the region."
-            />
-
-            <InfoCard
-              title="Community driven"
-              text="The group is built around people who enjoy listening, comparing gear and sharing useful experiences with others."
-            />
-
-            <InfoCard
-              title="More than full reviews"
-              text="ITGE includes both detailed reviews and shorter listening impressions, giving different kinds of listeners room to contribute."
-            />
-          </aside>
         </section>
 
         {/* HOW IT WORKS */}
@@ -199,26 +182,6 @@ function AboutPage() {
         </section>
       </div>
     </main>
-  )
-}
-
-function InfoCard({
-  title,
-  text,
-}: {
-  title: string
-  text: string
-}) {
-  return (
-    <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
-      <h2 className="font-semibold">
-        {title}
-      </h2>
-
-      <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
-        {text}
-      </p>
-    </div>
   )
 }
 
