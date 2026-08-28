@@ -673,6 +673,21 @@ function ProductDirectoryCard({
             product.productType,
           )}
         </span>
+
+        {product.averageRating != null && (
+          <span className="absolute right-4 top-4 flex items-center gap-1.5 rounded-full border border-white/25 bg-black/55 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+            <span
+              aria-hidden="true"
+              className="text-[var(--accent)]"
+            >
+              ★
+            </span>
+
+            {product.averageRating.toFixed(
+              1,
+            )}
+          </span>
+        )}
       </div>
 
       <div className="p-6">
@@ -687,7 +702,7 @@ function ProductDirectoryCard({
           {product.model}
         </h2>
 
-        <div className="mt-5 grid grid-cols-2 gap-4 border-t border-[var(--border)] pt-5 sm:grid-cols-4">
+        <div className="mt-5 grid grid-cols-3 gap-4 border-t border-[var(--border)] pt-5">
           <Metric
             label={
               product.reviewCount ===
@@ -726,18 +741,6 @@ function ProductDirectoryCard({
               product.contributorCount ??
               product.reviewerCount
             ).toString()}
-          />
-
-          <Metric
-            label="Avg. review"
-            value={
-              product.averageRating ==
-              null
-                ? "—"
-                : product.averageRating.toFixed(
-                    1,
-                  )
-            }
           />
         </div>
       </div>
