@@ -17,7 +17,6 @@ import {
 
 import {
   getProducts,
-  getProductTypeLabel,
   type ProductDirectoryItem,
 } from "../lib/products"
 
@@ -420,12 +419,6 @@ function FeaturedGearTile({
   product: ProductDirectoryItem
   active: boolean
 }) {
-  const coverageCount =
-    product.coverageCount ??
-    product.reviewCount +
-      (product.impressionCount ??
-        0)
-
   return (
     <Link
       to={`/gear/${product.slug}`}
@@ -461,29 +454,6 @@ function FeaturedGearTile({
       />
 
       <div className="relative flex h-full flex-col justify-end p-3 text-white sm:p-5">
-        <div className="mb-auto flex items-start justify-between gap-2">
-          <span
-            className={`rounded-full border px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.13em] backdrop-blur-sm transition-all duration-700 sm:px-2.5 sm:text-[10px] ${
-              active
-                ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-foreground)]"
-                : "border-white/25 bg-black/30"
-            }`}
-          >
-            {getProductTypeLabel(
-              product.productType,
-            )}
-          </span>
-
-          {product.averageRating != null && (
-            <span className="rounded-full border border-white/25 bg-black/35 px-2 py-1 text-[9px] font-semibold backdrop-blur-sm sm:px-2.5 sm:text-[10px]">
-              ★{" "}
-              {product.averageRating.toFixed(
-                1,
-              )}
-            </span>
-          )}
-        </div>
-
         <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70 sm:text-xs">
           {product.brand.name}
         </p>
@@ -491,13 +461,6 @@ function FeaturedGearTile({
         <h3 className="mt-1 line-clamp-2 text-base font-semibold leading-tight sm:text-xl">
           {product.model}
         </h3>
-
-        <p className="mt-2 text-[10px] text-white/70 sm:text-xs">
-          {coverageCount}{" "}
-          {coverageCount === 1
-            ? "published entry"
-            : "published entries"}
-        </p>
       </div>
     </Link>
   )

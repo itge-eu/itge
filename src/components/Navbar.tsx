@@ -1,18 +1,28 @@
-import { useEffect, useState } from "react"
+import {
+  useEffect,
+  useState,
+} from "react"
+
 import {
   Link,
   useLocation,
 } from "react-router-dom"
 
-type Theme = "light" | "dark"
+type Theme =
+  | "light"
+  | "dark"
 
 function getInitialTheme(): Theme {
   const savedTheme =
-    localStorage.getItem("itge-theme")
+    localStorage.getItem(
+      "itge-theme",
+    )
 
   if (
-    savedTheme === "light" ||
-    savedTheme === "dark"
+    savedTheme ===
+      "light" ||
+    savedTheme ===
+      "dark"
   ) {
     return savedTheme
   }
@@ -26,7 +36,9 @@ function getInitialTheme(): Theme {
 
 function Navbar() {
   const [theme, setTheme] =
-    useState<Theme>(getInitialTheme)
+    useState<Theme>(
+      getInitialTheme,
+    )
 
   const [
     mobileMenuOpen,
@@ -53,7 +65,8 @@ function Navbar() {
     setDesktopAboutOpen,
   ] = useState(false)
 
-  const location = useLocation()
+  const location =
+    useLocation()
 
   useEffect(() => {
     const root =
@@ -88,7 +101,10 @@ function Navbar() {
     const handleEscape = (
       event: KeyboardEvent,
     ) => {
-      if (event.key !== "Escape") {
+      if (
+        event.key !==
+        "Escape"
+      ) {
         return
       }
 
@@ -112,24 +128,31 @@ function Navbar() {
     }
   }, [])
 
-  const toggleTheme = () => {
-    setTheme((currentTheme) =>
-      currentTheme === "dark"
-        ? "light"
-        : "dark",
-    )
-  }
+  const toggleTheme =
+    () => {
+      setTheme(
+        (
+          currentTheme,
+        ) =>
+          currentTheme ===
+          "dark"
+            ? "light"
+            : "dark",
+      )
+    }
 
-  const closeMobileMenu = () => {
-    setMobileMenuOpen(false)
-    setMobileExploreOpen(false)
-    setMobileAboutOpen(false)
-  }
+  const closeMobileMenu =
+    () => {
+      setMobileMenuOpen(false)
+      setMobileExploreOpen(false)
+      setMobileAboutOpen(false)
+    }
 
-  const closeDesktopMenus = () => {
-    setDesktopExploreOpen(false)
-    setDesktopAboutOpen(false)
-  }
+  const closeDesktopMenus =
+    () => {
+      setDesktopExploreOpen(false)
+      setDesktopAboutOpen(false)
+    }
 
   return (
     <header className="relative z-50 border-b border-[var(--border)] bg-[var(--background)]">
@@ -145,14 +168,20 @@ function Navbar() {
         >
           <span className="flex items-center dark:hidden">
             <img
-              src={`${import.meta.env.BASE_URL}branding/icon-light.svg`}
+              src={`${
+                import.meta.env
+                  .BASE_URL
+              }branding/icon-light.svg`}
               alt=""
               aria-hidden="true"
               className="h-11 w-auto sm:hidden"
             />
 
             <img
-              src={`${import.meta.env.BASE_URL}branding/logo-compact-light.svg`}
+              src={`${
+                import.meta.env
+                  .BASE_URL
+              }branding/logo-compact-light.svg`}
               alt="IEM Tour Group Europe"
               className="hidden h-14 w-auto sm:block"
             />
@@ -160,14 +189,20 @@ function Navbar() {
 
           <span className="hidden items-center dark:flex">
             <img
-              src={`${import.meta.env.BASE_URL}branding/icon-dark.svg`}
+              src={`${
+                import.meta.env
+                  .BASE_URL
+              }branding/icon-dark.svg`}
               alt=""
               aria-hidden="true"
               className="h-11 w-auto sm:hidden"
             />
 
             <img
-              src={`${import.meta.env.BASE_URL}branding/logo-compact-dark.svg`}
+              src={`${
+                import.meta.env
+                  .BASE_URL
+              }branding/logo-compact-dark.svg`}
               alt="IEM Tour Group Europe"
               className="hidden h-14 w-auto sm:block"
             />
@@ -180,7 +215,9 @@ function Navbar() {
         >
           <Link
             to="/reviews"
-            onClick={closeDesktopMenus}
+            onClick={
+              closeDesktopMenus
+            }
             className="rounded-xl bg-[var(--accent)] px-4 py-3 font-semibold text-[var(--accent-foreground)] transition hover:bg-[var(--accent-hover)]"
           >
             Reviews
@@ -188,7 +225,9 @@ function Navbar() {
 
           <Link
             to="/members"
-            onClick={closeDesktopMenus}
+            onClick={
+              closeDesktopMenus
+            }
             className="transition hover:text-[var(--foreground)]"
           >
             Members
@@ -196,7 +235,9 @@ function Navbar() {
 
           <Link
             to="/gear"
-            onClick={closeDesktopMenus}
+            onClick={
+              closeDesktopMenus
+            }
             className="transition hover:text-[var(--foreground)]"
           >
             Gear
@@ -204,7 +245,9 @@ function Navbar() {
 
           <Link
             to="/brands"
-            onClick={closeDesktopMenus}
+            onClick={
+              closeDesktopMenus
+            }
             className="transition hover:text-[var(--foreground)]"
           >
             Brands
@@ -213,24 +256,39 @@ function Navbar() {
           <div
             className="relative"
             onMouseEnter={() => {
-              setDesktopExploreOpen(true)
-              setDesktopAboutOpen(false)
+              setDesktopExploreOpen(
+                true,
+              )
+              setDesktopAboutOpen(
+                false,
+              )
             }}
             onMouseLeave={() =>
-              setDesktopExploreOpen(false)
+              setDesktopExploreOpen(
+                false,
+              )
             }
           >
             <button
               type="button"
               onClick={() => {
                 setDesktopExploreOpen(
-                  (current) => !current,
+                  (
+                    current,
+                  ) =>
+                    !current,
                 )
-                setDesktopAboutOpen(false)
+                setDesktopAboutOpen(
+                  false,
+                )
               }}
               onFocus={() => {
-                setDesktopExploreOpen(true)
-                setDesktopAboutOpen(false)
+                setDesktopExploreOpen(
+                  true,
+                )
+                setDesktopAboutOpen(
+                  false,
+                )
               }}
               className="flex items-center gap-1.5 py-3 transition hover:text-[var(--foreground)]"
               aria-haspopup="true"
@@ -279,24 +337,39 @@ function Navbar() {
           <div
             className="relative"
             onMouseEnter={() => {
-              setDesktopAboutOpen(true)
-              setDesktopExploreOpen(false)
+              setDesktopAboutOpen(
+                true,
+              )
+              setDesktopExploreOpen(
+                false,
+              )
             }}
             onMouseLeave={() =>
-              setDesktopAboutOpen(false)
+              setDesktopAboutOpen(
+                false,
+              )
             }
           >
             <button
               type="button"
               onClick={() => {
                 setDesktopAboutOpen(
-                  (current) => !current,
+                  (
+                    current,
+                  ) =>
+                    !current,
                 )
-                setDesktopExploreOpen(false)
+                setDesktopExploreOpen(
+                  false,
+                )
               }}
               onFocus={() => {
-                setDesktopAboutOpen(true)
-                setDesktopExploreOpen(false)
+                setDesktopAboutOpen(
+                  true,
+                )
+                setDesktopExploreOpen(
+                  false,
+                )
               }}
               className="flex items-center gap-1.5 py-3 transition hover:text-[var(--foreground)]"
               aria-haspopup="true"
@@ -321,7 +394,7 @@ function Navbar() {
               <div className="absolute left-1/2 top-full w-60 -translate-x-1/2 pt-2">
                 <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-2 shadow-xl">
                   <DropdownLink
-                    to="/#about"
+                    to="/about"
                     title="About us"
                     description="Learn more about ITGE"
                     onClick={
@@ -330,7 +403,7 @@ function Navbar() {
                   />
 
                   <DropdownLink
-                    to="/#join"
+                    to="/join"
                     title="Join ITGE"
                     description="Become part of our tour group"
                     onClick={
@@ -339,12 +412,10 @@ function Navbar() {
                   />
 
                   <DropdownLink
-                    to="/#join"
+                    to="/for-brands"
                     title="For brands"
-                    description="Send an IEM on tour with ITGE"
-                    onClick={
-                      closeDesktopMenus
-                    }
+                    description="Send gear on tour with ITGE"
+                    onClick={closeDesktopMenus}
                   />
                 </div>
               </div>
@@ -355,29 +426,39 @@ function Navbar() {
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={toggleTheme}
+            onClick={
+              toggleTheme
+            }
             className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] transition hover:border-[var(--accent)] hover:bg-[var(--surface-soft)]"
             aria-label={`Switch to ${
-              theme === "dark"
+              theme ===
+              "dark"
                 ? "light"
                 : "dark"
             } mode`}
             title={`Switch to ${
-              theme === "dark"
+              theme ===
+              "dark"
                 ? "light"
                 : "dark"
             } mode`}
           >
-            {theme === "dark"
-              ? <SunIcon />
-              : <MoonIcon />}
+            {theme ===
+            "dark" ? (
+              <SunIcon />
+            ) : (
+              <MoonIcon />
+            )}
           </button>
 
           <button
             type="button"
             onClick={() =>
               setMobileMenuOpen(
-                (current) => !current,
+                (
+                  current,
+                ) =>
+                  !current,
               )
             }
             className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] transition hover:border-[var(--accent)] hover:bg-[var(--surface-soft)] md:hidden"
@@ -391,9 +472,11 @@ function Navbar() {
             }
             aria-controls="mobile-navigation"
           >
-            {mobileMenuOpen
-              ? <CloseIcon />
-              : <MenuIcon />}
+            {mobileMenuOpen ? (
+              <CloseIcon />
+            ) : (
+              <MenuIcon />
+            )}
           </button>
         </div>
       </div>
@@ -407,7 +490,9 @@ function Navbar() {
           <div className="mx-auto flex max-w-7xl flex-col gap-2">
             <Link
               to="/reviews"
-              onClick={closeMobileMenu}
+              onClick={
+                closeMobileMenu
+              }
               className="rounded-xl bg-[var(--accent)] px-4 py-3 font-semibold text-[var(--accent-foreground)] transition hover:bg-[var(--accent-hover)]"
             >
               Reviews
@@ -415,24 +500,30 @@ function Navbar() {
 
             <MobileLink
               to="/members"
-              onClick={closeMobileMenu}
-              className="rounded-xl px-4 py-3 hover:text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
+              onClick={
+                closeMobileMenu
+              }
+              className="rounded-xl px-4 py-3 transition hover:bg-[var(--surface-soft)] hover:text-[var(--foreground)]"
             >
               Members
             </MobileLink>
 
             <MobileLink
               to="/gear"
-              onClick={closeMobileMenu}
-              className="rounded-xl px-4 py-3 hover:text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
+              onClick={
+                closeMobileMenu
+              }
+              className="rounded-xl px-4 py-3 transition hover:bg-[var(--surface-soft)] hover:text-[var(--foreground)]"
             >
               Gear
             </MobileLink>
 
             <MobileLink
               to="/brands"
-              onClick={closeMobileMenu}
-              className="rounded-xl px-4 py-3 hover:text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
+              onClick={
+                closeMobileMenu
+              }
+              className="rounded-xl px-4 py-3 transition hover:bg-[var(--surface-soft)] hover:text-[var(--foreground)]"
             >
               Brands
             </MobileLink>
@@ -442,9 +533,14 @@ function Navbar() {
                 type="button"
                 onClick={() => {
                   setMobileExploreOpen(
-                    (current) => !current,
+                    (
+                      current,
+                    ) =>
+                      !current,
                   )
-                  setMobileAboutOpen(false)
+                  setMobileAboutOpen(
+                    false,
+                  )
                 }}
                 className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
                 aria-expanded={
@@ -492,9 +588,14 @@ function Navbar() {
                 type="button"
                 onClick={() => {
                   setMobileAboutOpen(
-                    (current) => !current,
+                    (
+                      current,
+                    ) =>
+                      !current,
                   )
-                  setMobileExploreOpen(false)
+                  setMobileExploreOpen(
+                    false,
+                  )
                 }}
                 className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-soft)]"
                 aria-expanded={
@@ -517,7 +618,7 @@ function Navbar() {
               {mobileAboutOpen && (
                 <div className="ml-4 mt-1 flex flex-col gap-1 border-l border-[var(--border)] pl-3">
                   <MobileDropdownLink
-                    to="/#about"
+                    to="/about"
                     onClick={
                       closeMobileMenu
                     }
@@ -526,7 +627,7 @@ function Navbar() {
                   </MobileDropdownLink>
 
                   <MobileDropdownLink
-                    to="/#join"
+                    to="/join"
                     onClick={
                       closeMobileMenu
                     }
@@ -535,17 +636,14 @@ function Navbar() {
                   </MobileDropdownLink>
 
                   <MobileDropdownLink
-                    to="/#join"
-                    onClick={
-                      closeMobileMenu
-                    }
+                    to="/for-brands"
+                    onClick={closeMobileMenu}
                   >
                     For brands
                   </MobileDropdownLink>
                 </div>
               )}
             </div>
-
           </div>
         </nav>
       )}
@@ -655,7 +753,11 @@ function SunIcon() {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <circle cx="12" cy="12" r="4" />
+      <circle
+        cx="12"
+        cy="12"
+        r="4"
+      />
       <path d="M12 2v2" />
       <path d="M12 20v2" />
       <path d="m4.93 4.93 1.42 1.42" />
