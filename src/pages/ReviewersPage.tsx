@@ -8,6 +8,7 @@ import { Link } from "react-router"
 
 import DirectoryControls from "../components/directory/DirectoryControls"
 import DirectorySearchInput from "../components/directory/DirectorySearchInput"
+import DirectorySortSelect from "../components/directory/DirectorySortSelect"
 import ReviewerAvatar from "../components/reviewers/ReviewerAvatar"
 
 import {
@@ -18,6 +19,10 @@ import {
 
 import usePageMetadata from "../hooks/usePageMetadata"
 
+type MemberSortMode =
+  | "activity"
+  | "alphabetical"
+
 function ReviewersPage() {
   const [reviewers, setReviewers] = useState<
     ReviewerSummary[]
@@ -27,6 +32,14 @@ function ReviewersPage() {
     searchQuery,
     setSearchQuery,
   ] = useState("")
+
+  const [
+    sortMode,
+    setSortMode,
+  ] =
+    useState<MemberSortMode>(
+      "activity",
+    )
 
   const [loading, setLoading] =
     useState(true)
@@ -122,16 +135,34 @@ function ReviewersPage() {
     ])
 
   const activeReviewers =
-    visibleReviewers.filter(
-      (reviewer) =>
-        reviewer.active,
-    )
+    visibleReviewers
+      .filter(
+        (reviewer) =>
+          reviewer.active,
+      )
+      .sort(
+        (first, second) =>
+          sortReviewers(
+            first,
+            second,
+            sortMode,
+          ),
+      )
 
   const formerReviewers =
-    visibleReviewers.filter(
-      (reviewer) =>
-        !reviewer.active,
-    )
+    visibleReviewers
+      .filter(
+        (reviewer) =>
+          !reviewer.active,
+      )
+      .sort(
+        (first, second) =>
+          sortReviewers(
+            first,
+            second,
+            sortMode,
+          ),
+      )
 
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
@@ -167,16 +198,40 @@ function ReviewersPage() {
         ) : (
           <>
             <DirectoryControls>
-              <DirectorySearchInput
-                id="member-search"
-                value={
-                  searchQuery
-                }
-                onChange={
-                  setSearchQuery
-                }
-                placeholder="Search members…"
-              />
+              <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
+                <DirectorySearchInput
+                  id="member-search"
+                  value={
+                    searchQuery
+                  }
+                  onChange={
+                    setSearchQuery
+                  }
+                  placeholder="Search members…"
+                />
+
+                <DirectorySortSelect
+                  id="member-sort"
+                  value={sortMode}
+                  onChange={
+                    setSortMode
+                  }
+                  options={[
+                    {
+                      value:
+                        "activity",
+                      label:
+                        "Most active",
+                    },
+                    {
+                      value:
+                        "alphabetical",
+                      label:
+                        "A–Z",
+                    },
+                  ]}
+                />
+              </div>
             </DirectoryControls>
 
             <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
@@ -305,6 +360,43 @@ function ReviewersPage() {
         )}
       </div>
     </main>
+  )
+}
+
+function sortReviewers(
+  first: ReviewerSummary,
+  second: ReviewerSummary,
+  sortMode: MemberSortMode,
+): number {
+  if (
+    sortMode ===
+    "alphabetical"
+  ) {
+    return first.name.localeCompare(
+      second.name,
+    )
+  }
+
+  const firstActivity =
+    first.reviewCount +
+    first.impressionCount
+
+  const secondActivity =
+    second.reviewCount +
+    second.impressionCount
+
+  if (
+    firstActivity !==
+    secondActivity
+  ) {
+    return (
+      secondActivity -
+      firstActivity
+    )
+  }
+
+  return first.name.localeCompare(
+    second.name,
   )
 }
 
