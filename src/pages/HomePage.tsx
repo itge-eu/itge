@@ -106,7 +106,7 @@ function HomePage() {
          * returns gear represented by
          * published ITGE coverage.
          */
-        const featured =
+        const featuredPool =
           [...products]
             .filter(
               (product) =>
@@ -120,10 +120,39 @@ function HomePage() {
                 Math.random() -
                 0.5,
             )
-            .slice(
-              0,
-              4,
+
+        const fallbackPool =
+          [...products]
+            .filter(
+              (product) =>
+                !product.featured &&
+                Boolean(
+                  product.heroImageUrl,
+                ),
             )
+            .sort(
+              () =>
+                Math.random() -
+                0.5,
+            )
+
+        const selectedFeatured =
+          featuredPool.slice(
+            0,
+            4,
+          )
+
+        const remainingSlots =
+          4 -
+          selectedFeatured.length
+
+        const featured = [
+          ...selectedFeatured,
+          ...fallbackPool.slice(
+            0,
+            remainingSlots,
+          ),
+        ]
 
         setFeaturedGear(
           featured,
