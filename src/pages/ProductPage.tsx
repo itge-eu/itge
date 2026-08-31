@@ -550,7 +550,7 @@ function StatCard({
   value: string
 }) {
   return (
-    <div className="flex min-h-28 flex-col justify-between rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5">
+    <div className="flex min-h-28 flex-col items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5 text-center">
       <p className="text-sm leading-5 text-[var(--muted)]">
         {label}
       </p>

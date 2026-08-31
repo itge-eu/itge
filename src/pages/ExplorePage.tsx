@@ -740,7 +740,7 @@ function Metric({
   label: string
 }) {
   return (
-    <div className="min-w-0">
+    <div className="min-w-0 items-center text-center">
       <p className="font-semibold">
         {value}
       </p>

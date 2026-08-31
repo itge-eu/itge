@@ -4,9 +4,10 @@ import {
   useState,
 } from "react"
 
-import {
-  Link,
-} from "react-router"
+import DirectoryControls from "../components/directory/DirectoryControls"
+import DirectorySearchInput from "../components/directory/DirectorySearchInput"
+import DirectorySortSelect from "../components/directory/DirectorySortSelect"
+import ProductCard from "../components/products/ProductCard"
 
 import {
   getProducts,
@@ -45,6 +46,28 @@ const PRODUCT_TYPES: {
   },
 ]
 
+const SORT_OPTIONS: {
+  value: ProductSort
+  label: string
+}[] = [
+  {
+    value: "most-covered",
+    label: "Most covered",
+  },
+  {
+    value: "highest-rated",
+    label: "Highest review rating",
+  },
+  {
+    value: "recent",
+    label: "Recently covered",
+  },
+  {
+    value: "alphabetical",
+    label: "A–Z",
+  },
+]
+
 function ProductsPage() {
   const [
     products,
@@ -68,15 +91,24 @@ function ProductsPage() {
       ProductType[]
     >([])
 
-  const [sort, setSort] =
+  const [
+    sort,
+    setSort,
+  ] =
     useState<ProductSort>(
       "most-covered",
     )
 
-  const [loading, setLoading] =
+  const [
+    loading,
+    setLoading,
+  ] =
     useState(true)
 
-  const [error, setError] =
+  const [
+    error,
+    setError,
+  ] =
     useState<
       string | null
     >(null)
@@ -101,16 +133,22 @@ function ProductsPage() {
           await getProducts()
 
         if (!cancelled) {
-          setProducts(result)
+          setProducts(
+            result,
+          )
         }
-      } catch (loadError) {
+      } catch (
+        loadError
+      ) {
         console.error(
           "Could not load gear directory:",
           loadError,
         )
 
         if (!cancelled) {
-          setProducts([])
+          setProducts(
+            [],
+          )
 
           setError(
             "The gear directory could not be loaded.",
@@ -118,7 +156,9 @@ function ProductsPage() {
         }
       } finally {
         if (!cancelled) {
-          setLoading(false)
+          setLoading(
+            false,
+          )
         }
       }
     }
@@ -197,7 +237,7 @@ function ProductsPage() {
           },
         )
 
-      return filtered.sort(
+      return [...filtered].sort(
         (
           first,
           second,
@@ -228,7 +268,8 @@ function ProductsPage() {
           }
 
           if (
-            sort === "recent"
+            sort ===
+            "recent"
           ) {
             const firstLatest =
               first.latestActivityAt ??
@@ -324,9 +365,7 @@ function ProductsPage() {
         new Set(
           products.map(
             (product) =>
-              product
-                .brand
-                .id,
+              product.brand.id,
           ),
         ).size,
       [products],
@@ -368,10 +407,13 @@ function ProductsPage() {
   ) {
     setSelectedTypes(
       (current) =>
-        current.includes(type)
+        current.includes(
+          type,
+        )
           ? current.filter(
               (item) =>
-                item !== type,
+                item !==
+                type,
             )
           : [
               ...current,
@@ -381,21 +423,28 @@ function ProductsPage() {
   }
 
   function clearFilters() {
-    setSelectedTypes([])
-    setSearchQuery("")
+    setSelectedTypes(
+      [],
+    )
+
+    setSearchQuery(
+      "",
+    )
   }
 
+  const activeFilterCount =
+    selectedTypes.length +
+    (searchQuery.trim()
+      ? 1
+      : 0)
+
   const hasFilters =
-    selectedTypes.length >
-      0 ||
-    Boolean(
-      searchQuery.trim(),
-    )
+    activeFilterCount > 0
 
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <header className="max-w-3xl">
+        <header>
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
             ITGE library
           </p>
@@ -403,17 +452,6 @@ function ProductsPage() {
           <h1 className="mt-4 text-5xl font-semibold tracking-tight sm:text-6xl">
             Gear
           </h1>
-
-          <p className="mt-5 text-lg leading-8 text-[var(--muted)]">
-            Explore all gear
-            represented in the
-            ITGE library, from
-            IEMs and headphones
-            to source gear and
-            accessories. Search by
-            product or brand, or
-            filter by gear type.
-          </p>
         </header>
 
         {!loading &&
@@ -436,14 +474,14 @@ function ProductsPage() {
               />
 
               <SummaryCard
-                label="Published reviews"
+                label="Reviews"
                 value={
                   totalReviewCount.toString()
                 }
               />
 
               <SummaryCard
-                label="Published impressions"
+                label="Impressions"
                 value={
                   totalImpressionCount.toString()
                 }
@@ -451,141 +489,116 @@ function ProductsPage() {
             </section>
           )}
 
-        <section className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6">
-          <div>
-            <p className="text-sm font-semibold">
-              Gear type
-            </p>
+        <DirectoryControls className="mt-10">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+                Gear type
+              </p>
+            </div>
 
-            <p className="mt-1 text-sm text-[var(--muted)]">
-              Select multiple
-              types, or leave all
-              unselected to show
-              everything.
-            </p>
+            {hasFilters && (
+              <button
+                type="button"
+                onClick={
+                  clearFilters
+                }
+                className="shrink-0 text-sm font-semibold text-[var(--accent)] transition hover:opacity-75"
+              >
+                Clear (
+                {
+                  activeFilterCount
+                }
+                )
+              </button>
+            )}
+          </div>
 
-            <div className="mt-4 flex flex-wrap gap-2">
-              {PRODUCT_TYPES.map(
-                (type) => (
-                  <TypeFilterButton
-                    key={
+          <div className="mt-4 flex flex-wrap gap-2">
+            {PRODUCT_TYPES.map(
+              (type) => (
+                <TypeFilterButton
+                  key={
+                    type.value
+                  }
+                  label={
+                    type.label
+                  }
+                  count={
+                    typeCounts[
                       type.value
-                    }
-                    label={
-                      type.label
-                    }
-                    count={
-                      typeCounts[
-                        type.value
-                      ]
-                    }
-                    active={
-                      selectedTypes.includes(
-                        type.value,
-                      )
-                    }
-                    onClick={() =>
-                      toggleType(
-                        type.value,
-                      )
-                    }
-                  />
-                ),
-              )}
+                    ]
+                  }
+                  active={
+                    selectedTypes.includes(
+                      type.value,
+                    )
+                  }
+                  onClick={() =>
+                    toggleType(
+                      type.value,
+                    )
+                  }
+                />
+              ),
+            )}
+          </div>
+
+          <div className="mt-5 border-t border-[var(--border)] pt-5">
+            <DirectorySearchInput
+              id="gear-search"
+              value={
+                searchQuery
+              }
+              onChange={
+                setSearchQuery
+              }
+              placeholder="Search by product or brand…"
+            />
+          </div>
+        </DirectoryControls>
+
+        <div className="sticky top-0 z-20 -mx-2 mt-8 px-2">
+          <div className="bg-[var(--background)] pt-3">
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border)] pb-4">
+              <div className="flex items-baseline gap-2">
+                <p className="text-2xl font-semibold">
+                  {loading
+                    ? "Loading…"
+                    : `${visibleProducts.length} ${
+                        visibleProducts.length === 1
+                          ? "result"
+                          : "results"
+                      }`}
+                </p>
+
+                {!loading &&
+                  visibleProducts.length > 0 && (
+                    <span className="text-sm text-[var(--muted)]">
+                      showing all
+                    </span>
+                  )}
+              </div>
+
+              {!loading &&
+                !error &&
+                products.length > 0 && (
+                  <div className="w-full sm:w-60">
+                    <DirectorySortSelect
+                      id="gear-sort"
+                      value={sort}
+                      options={SORT_OPTIONS}
+                      onChange={setSort}
+                    />
+                  </div>
+                )}
             </div>
           </div>
 
-          <div className="mt-6 grid gap-4 border-t border-[var(--border)] pt-6 md:grid-cols-[minmax(0,1fr)_15rem]">
-            <label className="block">
-              <span className="sr-only">
-                Search gear
-              </span>
-
-              <div className="relative">
-                <SearchIcon />
-
-                <input
-                  type="search"
-                  value={
-                    searchQuery
-                  }
-                  onChange={(
-                    event,
-                  ) =>
-                    setSearchQuery(
-                      event
-                        .target
-                        .value,
-                    )
-                  }
-                  placeholder="Search by product or brand…"
-                  className="w-full rounded-2xl border border-[var(--border)] bg-[var(--background)] py-3 pl-11 pr-4 text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--accent)]"
-                />
-              </div>
-            </label>
-
-            <label className="block">
-              <span className="sr-only">
-                Sort gear
-              </span>
-
-              <select
-                value={sort}
-                onChange={(
-                  event,
-                ) =>
-                  setSort(
-                    event
-                      .target
-                      .value as ProductSort,
-                  )
-                }
-                className="w-full rounded-2xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
-              >
-                <option value="most-covered">
-                  Most covered
-                </option>
-
-                <option value="highest-rated">
-                  Highest review
-                  rating
-                </option>
-
-                <option value="recent">
-                  Recently covered
-                </option>
-
-                <option value="alphabetical">
-                  A–Z
-                </option>
-              </select>
-            </label>
-          </div>
-        </section>
-
-        <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
-          <p className="text-sm text-[var(--muted)]">
-            {loading
-              ? "Loading gear…"
-              : `${visibleProducts.length} ${
-                  visibleProducts.length ===
-                  1
-                    ? "product"
-                    : "products"
-                }`}
-          </p>
-
-          {hasFilters && (
-            <button
-              type="button"
-              onClick={
-                clearFilters
-              }
-              className="text-sm font-semibold text-[var(--accent)] transition hover:opacity-75"
-            >
-              Clear filters
-            </button>
-          )}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none h-8 bg-gradient-to-b from-[var(--background)] to-transparent"
+          />
         </div>
 
         {loading ? (
@@ -619,10 +632,10 @@ function ProductsPage() {
             current filters.
           </DirectoryMessage>
         ) : (
-          <section className="mt-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          <section className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {visibleProducts.map(
               (product) => (
-                <ProductDirectoryCard
+                <ProductCard
                   key={
                     product.id
                   }
@@ -636,115 +649,6 @@ function ProductsPage() {
         )}
       </div>
     </main>
-  )
-}
-
-function ProductDirectoryCard({
-  product,
-}: {
-  product:
-    ProductDirectoryItem
-}) {
-  return (
-    <Link
-      to={`/gear/${product.slug}`}
-      className="group overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] transition hover:-translate-y-1 hover:border-[var(--accent)]"
-    >
-      <div className="relative">
-        {product.heroImageUrl ? (
-          <div className="aspect-[16/10] overflow-hidden bg-[var(--surface-soft)]">
-            <img
-              src={
-                product.heroImageUrl
-              }
-              alt={`${product.brand.name} ${product.model}`}
-              loading="lazy"
-              className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.025]"
-            />
-          </div>
-        ) : (
-          <div className="flex aspect-[16/10] items-center justify-center bg-[var(--surface-soft)] px-6 text-center text-sm text-[var(--muted)]">
-            No image available
-          </div>
-        )}
-
-        <span className="absolute left-4 top-4 rounded-full border border-white/25 bg-black/55 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
-          {getProductTypeLabel(
-            product.productType,
-          )}
-        </span>
-
-        {product.averageRating != null && (
-          <span className="absolute right-4 top-4 flex items-center gap-1.5 rounded-full border border-white/25 bg-black/55 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
-            <span
-              aria-hidden="true"
-              className="text-[var(--accent)]"
-            >
-              ★
-            </span>
-
-            {product.averageRating.toFixed(
-              1,
-            )}
-          </span>
-        )}
-      </div>
-
-      <div className="p-6">
-        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
-          {
-            product.brand
-              .name
-          }
-        </p>
-
-        <h2 className="mt-2 text-2xl font-semibold tracking-tight transition group-hover:text-[var(--accent)]">
-          {product.model}
-        </h2>
-
-        <div className="mt-5 grid grid-cols-3 gap-4 border-t border-[var(--border)] pt-5">
-          <Metric
-            label={
-              product.reviewCount ===
-              1
-                ? "Review"
-                : "Reviews"
-            }
-            value={
-              product.reviewCount.toString()
-            }
-          />
-
-          <Metric
-            label={
-              (product.impressionCount ??
-                0) === 1
-                ? "Impression"
-                : "Impressions"
-            }
-            value={(
-              product.impressionCount ??
-              0
-            ).toString()}
-          />
-
-          <Metric
-            label={
-              (
-                product.contributorCount ??
-                product.reviewerCount
-              ) === 1
-                ? "Contributor"
-                : "Contributors"
-            }
-            value={(
-              product.contributorCount ??
-              product.reviewerCount
-            ).toString()}
-          />
-        </div>
-      </div>
-    </Link>
   )
 }
 
@@ -789,26 +693,6 @@ function TypeFilterButton({
   )
 }
 
-function Metric({
-  label,
-  value,
-}: {
-  label: string
-  value: string
-}) {
-  return (
-    <div className="min-w-0">
-      <p className="text-xl font-semibold">
-        {value}
-      </p>
-
-      <p className="mt-1 text-xs leading-4 text-[var(--muted)]">
-        {label}
-      </p>
-    </div>
-  )
-}
-
 function SummaryCard({
   label,
   value,
@@ -839,29 +723,6 @@ function DirectoryMessage({
     <div className="mt-6 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
       {children}
     </div>
-  )
-}
-
-function SearchIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--muted)]"
-    >
-      <circle
-        cx="11"
-        cy="11"
-        r="7"
-      />
-
-      <path d="m20 20-3.5-3.5" />
-    </svg>
   )
 }
 

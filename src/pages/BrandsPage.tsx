@@ -350,7 +350,7 @@ function Metric({
   plural: string
 }) {
   return (
-    <div>
+    <div className="flex flex-col items-center text-center">
       <p className="text-xl font-semibold text-[var(--foreground)]">
         {value}
       </p>

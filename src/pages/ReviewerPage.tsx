@@ -212,7 +212,7 @@ function ReviewerPage() {
             </div>
           </div>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+          <div className="mt-8 grid gap-4 sm:grid-cols-3 items-center text-center">
             <div className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5">
               <p className="text-sm text-[var(--muted)]">
                 Published reviews
