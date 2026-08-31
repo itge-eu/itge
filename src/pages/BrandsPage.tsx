@@ -134,14 +134,6 @@ function BrandsPage() {
                 Stores that support our tours
               </h1>
 
-              <p className="mt-3 max-w-2xl text-[var(--muted)]">
-                These retailers help make
-                ITGE tours possible by
-                supporting the group and
-                helping us get more gear
-                into the hands of European
-                reviewers.
-              </p>
             </div>
 
             <div className="mt-8 grid gap-5 md:grid-cols-2">

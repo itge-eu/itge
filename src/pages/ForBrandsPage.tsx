@@ -226,7 +226,7 @@ function ForBrandsPage() {
                 id="shipping_details"
                 name="shipping_details"
                 label="Shipping and availability"
-                placeholder="Where will the gear ship from? Is it already available in Europe? Anything we should know about return shipping?"
+                placeholder="Where will the gear ship from? Is it already available in Europe?"
                 helperText="A rough overview is enough at this stage."
                 rows={5}
               />
