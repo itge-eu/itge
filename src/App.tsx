@@ -26,9 +26,7 @@ import ProductPage from "./pages/ProductPage"
 import ProductsPage from "./pages/ProductsPage"
 import BrandPage from "./pages/BrandPage"
 import BrandsPage from "./pages/BrandsPage"
-import ArtistsPage from "./pages/ArtistsPage"
 import ArtistPage from "./pages/ArtistPage"
-import GenresPage from "./pages/GenresPage"
 import GenrePage from "./pages/GenrePage"
 import NotFoundPage from "./pages/NotFoundPage"
 import ImpressionsPage from "./pages/ImpressionsPage"
@@ -36,6 +34,7 @@ import ImpressionPage from "./pages/ImpressionPage"
 import JoinPage from "./pages/JoinPage"
 import ForBrandsPage from "./pages/ForBrandsPage"
 import AboutPage from "./pages/AboutPage"
+import ExplorePage from "./pages/ExplorePage"
 
 function App() {
   return (
@@ -60,11 +59,11 @@ function App() {
         <Route path="/members" element={<ReviewersPage />} />
         <Route path="/members/:slug" element={<ReviewerPage />} />
 
-        <Route path="/artists" element={<ArtistsPage />} />
+        <Route path="/explore" element={<ExplorePage />} />
+        <Route path="/artists" element={<Navigate to="/explore" replace />} />
+        <Route path="/genres" element={<Navigate to="/explore?view=genres" replace />} />
         <Route path="/artists/:slug" element={<ArtistPage />} />
-
-        <Route path="/genres" element={<GenresPage />} />
-        <Route path="/genres/:slug" element={<GenrePage />} />
+        <Route path="/genres/:slug" element={<GenrePage />} />        
 
         <Route path="/about" element={<AboutPage />} />
         <Route path="/join" element={<JoinPage />} />
