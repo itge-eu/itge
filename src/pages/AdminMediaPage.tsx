@@ -20,7 +20,10 @@ type MediaImage = {
 }
 
 type MediaItem = {
-  type: "review" | "impression"
+  type:
+    | "review"
+    | "impression"
+
   id: number
   title: string | null
   slug: string
@@ -28,15 +31,37 @@ type MediaItem = {
   hero_image_confirmed: boolean
 
   reviewerName: string
+  productId: number
   productName: string
 
   images: MediaImage[]
 }
 
+type GearItem = {
+  type: "gear"
+  id: number
+  title: null
+  slug: string
+  hero_image_url: string | null
+  hero_image_confirmed: boolean
+
+  reviewerName: string
+  productId: number
+  productName: string
+
+  images: MediaImage[]
+  coverageCount: number
+}
+
+type AdminMediaItem =
+  | MediaItem
+  | GearItem
+
 type TypeFilter =
   | "all"
   | "review"
   | "impression"
+  | "gear"
 
 type ConfirmationFilter =
   | "all"
@@ -62,7 +87,9 @@ function AdminMediaPage() {
     items,
     setItems,
   ] =
-    useState<MediaItem[]>([])
+    useState<
+      AdminMediaItem[]
+    >([])
 
   const [
     loading,
@@ -130,6 +157,7 @@ function AdminMediaPage() {
               id,
               title,
               slug,
+              product_id,
               hero_image_url,
               hero_image_confirmed,
 
@@ -138,7 +166,10 @@ function AdminMediaPage() {
               ),
 
               products (
+                id,
                 model,
+                slug,
+                hero_image_url,
 
                 brands (
                   name
@@ -177,6 +208,7 @@ function AdminMediaPage() {
               id,
               title,
               slug,
+              product_id,
               hero_image_url,
               hero_image_confirmed,
 
@@ -185,7 +217,10 @@ function AdminMediaPage() {
               ),
 
               products (
+                id,
                 model,
+                slug,
+                hero_image_url,
 
                 brands (
                   name
@@ -240,7 +275,7 @@ function AdminMediaPage() {
           (
             reviewRows ??
             []
-          ).map(
+          ).flatMap(
             (row) => {
               const reviewer =
                 getSingleRelation(
@@ -252,17 +287,21 @@ function AdminMediaPage() {
                   row.products,
                 )
 
+              if (!product) {
+                return []
+              }
+
               const brand =
                 getSingleRelation(
                   product
-                    ?.brands,
+                    .brands,
                 )
 
               const productName =
                 [
                   brand
                     ?.name,
-                  product?.model,
+                  product.model,
                 ]
                   .filter(
                     Boolean,
@@ -280,68 +319,79 @@ function AdminMediaPage() {
                     first,
                     second,
                   ) =>
-                    first.sort_order -
-                    second.sort_order,
+                    Number(
+                      first.sort_order,
+                    ) -
+                    Number(
+                      second.sort_order,
+                    ),
                 )
 
-              return {
-                type:
-                  "review",
+              return [
+                {
+                  type:
+                    "review" as const,
 
-                id:
-                  Number(
-                    row.id,
-                  ),
+                  id:
+                    Number(
+                      row.id,
+                    ),
 
-                title:
-                  row.title ??
-                  null,
+                  title:
+                    row.title ??
+                    null,
 
-                slug:
-                  row.slug,
+                  slug:
+                    row.slug,
 
-                hero_image_url:
-                  row.hero_image_url ??
-                  null,
+                  hero_image_url:
+                    row.hero_image_url ??
+                    null,
 
-                hero_image_confirmed:
-                  Boolean(
-                    row.hero_image_confirmed,
-                  ),
+                  hero_image_confirmed:
+                    Boolean(
+                      row.hero_image_confirmed,
+                    ),
 
-                reviewerName:
-                  reviewer
-                    ?.name ??
-                  "Unknown reviewer",
+                  reviewerName:
+                    reviewer
+                      ?.name ??
+                    "Unknown reviewer",
 
-                productName:
-                  productName ||
-                  "Unknown IEM",
+                  productId:
+                    Number(
+                      product.id,
+                    ),
 
-                images:
-                  images.map(
-                    (
-                      image,
-                    ) => ({
-                      id:
-                        Number(
-                          image.id,
-                        ),
+                  productName:
+                    productName ||
+                    "Unknown gear",
 
-                      sort_order:
-                        Number(
-                          image.sort_order,
-                        ),
+                  images:
+                    images.map(
+                      (
+                        image,
+                      ) => ({
+                        id:
+                          Number(
+                            image.id,
+                          ),
 
-                      public_url:
-                        image.public_url,
+                        sort_order:
+                          Number(
+                            image.sort_order,
+                          ),
 
-                      alt_text:
-                        image.alt_text ??
-                        null,
-                    }),
-                  ),
-              }
+                        public_url:
+                          image.public_url,
+
+                        alt_text:
+                          image.alt_text ??
+                          null,
+                      }),
+                    ),
+                },
+              ]
             },
           )
 
@@ -350,7 +400,7 @@ function AdminMediaPage() {
           (
             impressionRows ??
             []
-          ).map(
+          ).flatMap(
             (row) => {
               const reviewer =
                 getSingleRelation(
@@ -362,17 +412,21 @@ function AdminMediaPage() {
                   row.products,
                 )
 
+              if (!product) {
+                return []
+              }
+
               const brand =
                 getSingleRelation(
                   product
-                    ?.brands,
+                    .brands,
                 )
 
               const productName =
                 [
                   brand
                     ?.name,
-                  product?.model,
+                  product.model,
                 ]
                   .filter(
                     Boolean,
@@ -406,68 +460,284 @@ function AdminMediaPage() {
                       ),
                   )
 
-              return {
-                type:
-                  "impression",
+              return [
+                {
+                  type:
+                    "impression" as const,
 
-                id:
-                  Number(
-                    row.id,
-                  ),
+                  id:
+                    Number(
+                      row.id,
+                    ),
 
-                title:
-                  row.title ??
-                  null,
+                  title:
+                    row.title ??
+                    null,
 
-                slug:
-                  row.slug,
+                  slug:
+                    row.slug,
 
-                hero_image_url:
-                  row.hero_image_url ??
-                  null,
+                  hero_image_url:
+                    row.hero_image_url ??
+                    null,
 
-                hero_image_confirmed:
-                  Boolean(
-                    row.hero_image_confirmed,
-                  ),
+                  hero_image_confirmed:
+                    Boolean(
+                      row.hero_image_confirmed,
+                    ),
 
-                reviewerName:
-                  reviewer
-                    ?.name ??
-                  "Unknown contributor",
+                  reviewerName:
+                    reviewer
+                      ?.name ??
+                    "Unknown contributor",
 
-                productName:
-                  productName ||
-                  "Unknown IEM",
+                  productId:
+                    Number(
+                      product.id,
+                    ),
 
-                images:
-                  images.map(
-                    (
-                      image,
-                    ) => ({
-                      id:
-                        Number(
-                          image.id,
-                        ),
+                  productName:
+                    productName ||
+                    "Unknown gear",
 
-                      sort_order:
-                        Number(
-                          image.sort_order,
-                        ),
+                  images:
+                    images.map(
+                      (
+                        image,
+                      ) => ({
+                        id:
+                          Number(
+                            image.id,
+                          ),
 
-                      public_url:
-                        image.public_url,
+                        sort_order:
+                          Number(
+                            image.sort_order,
+                          ),
 
-                      alt_text:
-                        image.alt_text ??
-                        null,
-                    }),
-                  ),
-              }
+                        public_url:
+                          image.public_url,
+
+                        alt_text:
+                          image.alt_text ??
+                          null,
+                      }),
+                    ),
+                },
+              ]
             },
           )
 
+        const gearMap =
+          new Map<
+            number,
+            GearItem
+          >()
+
+        function addToGear(
+          item: MediaItem,
+          product:
+            | {
+                slug: string
+                hero_image_url:
+                  | string
+                  | null
+              }
+            | null,
+        ) {
+          const existing =
+            gearMap.get(
+              item.productId,
+            )
+
+          if (existing) {
+            existing.coverageCount +=
+              1
+
+            const existingUrls =
+              new Set(
+                existing.images.map(
+                  (image) =>
+                    image.public_url,
+                ),
+              )
+
+            item.images.forEach(
+              (image) => {
+                if (
+                  !existingUrls.has(
+                    image.public_url,
+                  )
+                ) {
+                  existing.images.push(
+                    image,
+                  )
+
+                  existingUrls.add(
+                    image.public_url,
+                  )
+                }
+              },
+            )
+
+            return
+          }
+
+          gearMap.set(
+            item.productId,
+            {
+              type: "gear",
+
+              id:
+                item.productId,
+
+              title: null,
+
+              slug:
+                product?.slug ??
+                "",
+
+              hero_image_url:
+                product
+                  ?.hero_image_url ??
+                null,
+
+              hero_image_confirmed:
+                Boolean(
+                  product
+                    ?.hero_image_url,
+                ),
+
+              reviewerName:
+                "",
+
+              productId:
+                item.productId,
+
+              productName:
+                item.productName,
+
+              images:
+                [...item.images],
+
+              coverageCount:
+                1,
+            },
+          )
+        }
+
+        const productById =
+          new Map<
+            number,
+            {
+              slug: string
+              hero_image_url:
+                | string
+                | null
+            }
+          >()
+
+        ;(
+          reviewRows ??
+          []
+        ).forEach(
+          (row) => {
+            const product =
+              getSingleRelation(
+                row.products,
+              )
+
+            if (!product) {
+              return
+            }
+
+            productById.set(
+              Number(
+                product.id,
+              ),
+              {
+                slug:
+                  product.slug,
+                hero_image_url:
+                  product.hero_image_url ??
+                  null,
+              },
+            )
+          },
+        )
+
+        ;(
+          impressionRows ??
+          []
+        ).forEach(
+          (row) => {
+            const product =
+              getSingleRelation(
+                row.products,
+              )
+
+            if (!product) {
+              return
+            }
+
+            productById.set(
+              Number(
+                product.id,
+              ),
+              {
+                slug:
+                  product.slug,
+                hero_image_url:
+                  product.hero_image_url ??
+                  null,
+              },
+            )
+          },
+        )
+
+        reviewItems.forEach(
+          (item) =>
+            addToGear(
+              item,
+              productById.get(
+                item.productId,
+              ) ??
+                null,
+            ),
+        )
+
+        impressionItems.forEach(
+          (item) =>
+            addToGear(
+              item,
+              productById.get(
+                item.productId,
+              ) ??
+                null,
+            ),
+        )
+
+        const gearItems =
+          Array.from(
+            gearMap.values(),
+          ).map(
+            (item) => ({
+              ...item,
+
+              images:
+                item.images.sort(
+                  (
+                    first,
+                    second,
+                  ) =>
+                    first.sort_order -
+                    second.sort_order,
+                ),
+            }),
+          )
+
         setItems([
+          ...gearItems,
           ...reviewItems,
           ...impressionItems,
         ])
@@ -494,7 +764,7 @@ function AdminMediaPage() {
   }, [])
 
   async function handleSelectHero(
-    item: MediaItem,
+    item: AdminMediaItem,
     image: MediaImage,
   ) {
     const key =
@@ -505,37 +775,41 @@ function AdminMediaPage() {
 
     const tableName =
       item.type ===
-      "review"
-        ? "reviews"
-        : "impressions"
+      "gear"
+        ? "products"
+        : item.type ===
+            "review"
+          ? "reviews"
+          : "impressions"
 
-    const payload = {
-      hero_image_url:
-        image.public_url,
+    const payload =
+      item.type ===
+      "gear"
+        ? {
+            hero_image_url:
+              image.public_url,
+          }
+        : {
+            hero_image_url:
+              image.public_url,
 
-      hero_image_confirmed:
-        true,
+            hero_image_confirmed:
+              true,
 
-      updated_at:
-        new Date()
-          .toISOString(),
-    }
+            updated_at:
+              new Date()
+                .toISOString(),
+          }
 
     const {
-      error:
-        updateError,
+      data: updatedRows,
+      error: updateError,
     } =
       await supabase
-        .from(
-          tableName,
-        )
-        .update(
-          payload,
-        )
-        .eq(
-          "id",
-          item.id,
-        )
+        .from(tableName)
+        .update(payload)
+        .eq("id", item.id)
+        .select("id")
 
     if (updateError) {
       console.error(
@@ -545,6 +819,18 @@ function AdminMediaPage() {
 
       setError(
         updateError.message,
+      )
+
+      setSavingKey(null)
+      return
+    }
+
+    if (
+      !updatedRows ||
+      updatedRows.length === 0
+    ) {
+      setError(
+        `No ${item.type} row was updated. Check Supabase RLS permissions.`,
       )
 
       setSavingKey(null)
@@ -689,11 +975,9 @@ function AdminMediaPage() {
           </h1>
 
           <p className="mt-5 max-w-3xl text-lg leading-8 text-[var(--muted)]">
-            Review all imported
-            images and choose the
-            hero image used for
-            reviews and
-            impressions.
+            Choose hero images
+            for reviews,
+            impressions and gear.
           </p>
         </header>
 
@@ -735,7 +1019,7 @@ function AdminMediaPage() {
           items.length >
             0 && (
             <section className="mt-8 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6">
-              <div className="grid gap-6 xl:grid-cols-[1fr_1fr_1fr_300px]">
+              <div className="grid gap-6 xl:grid-cols-[1.2fr_1fr_1fr_300px]">
                 <div>
                   <p className="text-sm font-semibold">
                     Type
@@ -751,6 +1035,19 @@ function AdminMediaPage() {
                       onClick={() =>
                         setTypeFilter(
                           "all",
+                        )
+                      }
+                    />
+
+                    <FilterButton
+                      label="Gear"
+                      active={
+                        typeFilter ===
+                        "gear"
+                      }
+                      onClick={() =>
+                        setTypeFilter(
+                          "gear",
                         )
                       }
                     />
@@ -882,7 +1179,7 @@ function AdminMediaPage() {
                           .value,
                       )
                     }
-                    placeholder="IEM, reviewer…"
+                    placeholder="Gear, reviewer…"
                     className="mt-3 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 outline-none transition focus:border-[var(--accent)]"
                   />
                 </div>
@@ -1023,6 +1320,19 @@ function AdminMediaPage() {
                                     ? "image"
                                     : "images"}
                                 </span>
+
+                                {item.type ===
+                                  "gear" && (
+                                  <span className="rounded-full border border-[var(--border)] px-3 py-1 text-xs text-[var(--muted)]">
+                                    {
+                                      item.coverageCount
+                                    }{" "}
+                                    {item.coverageCount ===
+                                    1
+                                      ? "entry"
+                                      : "entries"}
+                                  </span>
+                                )}
                               </div>
 
                               <h2 className="mt-3 text-2xl font-semibold">
@@ -1031,41 +1341,57 @@ function AdminMediaPage() {
                                 }
                               </h2>
 
-                              <p className="mt-2 text-sm text-[var(--muted)]">
-                                {
-                                  item.reviewerName
-                                }
-                                {" · "}
-                                {item.type ===
-                                "review"
-                                  ? "Review"
-                                  : "Impression"}{" "}
-                                #
-                                {
-                                  item.id
-                                }
-                              </p>
+                              {item.type !==
+                              "gear" ? (
+                                <>
+                                  <p className="mt-2 text-sm text-[var(--muted)]">
+                                    {
+                                      item.reviewerName
+                                    }
+                                    {" · "}
+                                    {item.type ===
+                                    "review"
+                                      ? "Review"
+                                      : "Impression"}{" "}
+                                    #
+                                    {
+                                      item.id
+                                    }
+                                  </p>
 
-                              {item.title && (
+                                  {item.title && (
+                                    <p className="mt-2 text-sm text-[var(--muted)]">
+                                      {
+                                        item.title
+                                      }
+                                    </p>
+                                  )}
+                                </>
+                              ) : (
                                 <p className="mt-2 text-sm text-[var(--muted)]">
-                                  {
-                                    item.title
-                                  }
+                                  Choose the
+                                  image used
+                                  across Gear
+                                  cards and the
+                                  Gear page.
                                 </p>
                               )}
                             </div>
 
-                            <Link
-                              to={
-                                item.type ===
-                                "review"
-                                  ? `/admin/reviews/${item.id}/edit`
-                                  : `/admin/impressions/${item.id}/edit`
-                              }
-                              className="w-fit shrink-0 rounded-xl border border-[var(--border)] px-4 py-2 text-sm font-semibold transition hover:bg-[var(--background)]"
-                            >
-                              Edit
-                            </Link>
+                            {item.type !==
+                              "gear" && (
+                              <Link
+                                to={
+                                  item.type ===
+                                  "review"
+                                    ? `/admin/reviews/${item.id}/edit`
+                                    : `/admin/impressions/${item.id}/edit`
+                                }
+                                className="w-fit shrink-0 rounded-xl border border-[var(--border)] px-4 py-2 text-sm font-semibold transition hover:bg-[var(--background)]"
+                              >
+                                Edit
+                              </Link>
+                            )}
                           </div>
 
                           {item.images.length ===
@@ -1093,9 +1419,7 @@ function AdminMediaPage() {
 
                                     return (
                                       <button
-                                        key={
-                                          image.id
-                                        }
+                                        key={`${image.id}-${image.public_url}`}
                                         type="button"
                                         onClick={() =>
                                           void handleSelectHero(

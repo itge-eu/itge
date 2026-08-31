@@ -78,6 +78,7 @@ type ProductRow = {
   model: string
   slug: string
   product_type: ProductType | null
+  hero_image_url: string | null
 
   release_year: number | null
   driver_configuration: string | null
@@ -138,6 +139,7 @@ type ProductDirectoryRow = {
   product_type: ProductType | null
   featured: boolean | null
   launch_price: string | number | null
+  hero_image_url: string | null
 
   brands:
     | {
@@ -551,6 +553,7 @@ export async function getProductBySlug(
       model,
       slug,
       product_type,
+      hero_image_url,
       release_year,
       driver_configuration,
       launch_price,
@@ -668,7 +671,7 @@ export async function getProductBySlug(
       Number(product.id),
     )
 
-  const heroImageUrl =
+  const fallbackHeroImageUrl =
     reviews.find(
       (review) =>
         review.heroImageUrl !==
@@ -680,6 +683,10 @@ export async function getProductBySlug(
         null,
     )?.heroImageUrl ??
     null
+
+  const heroImageUrl =
+    product.hero_image_url ??
+    fallbackHeroImageUrl
 
   return {
     id: Number(product.id),
@@ -757,6 +764,7 @@ export async function getProducts(): Promise<
       product_type,
       featured,
       launch_price,
+      hero_image_url,
 
       brands (
         id,
@@ -843,14 +851,6 @@ export async function getProducts(): Promise<
             ),
         )
 
-      /*
-       * Gear directory only contains
-       * products represented by actual
-       * published ITGE coverage.
-       *
-       * A product only needs a published
-       * review OR a published impression.
-       */
       if (
         reviews.length === 0 &&
         impressions.length ===
@@ -942,7 +942,7 @@ export async function getProducts(): Promise<
           ? latestReviewAt
           : latestImpressionAt
 
-      const heroImageUrl =
+      const fallbackHeroImageUrl =
         reviews.find(
           (review) =>
             review.hero_image_url !==
@@ -954,6 +954,10 @@ export async function getProducts(): Promise<
             null,
         )?.hero_image_url ??
         null
+
+      const heroImageUrl =
+        row.hero_image_url ??
+        fallbackHeroImageUrl
 
       return [
         {
