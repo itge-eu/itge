@@ -201,10 +201,10 @@ function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--background)]">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-5 lg:px-10">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-5 lg:px-8">
         <Link
           to="/"
-          className="flex shrink-0 items-center"
+          className="flex shrink-0 cursor-pointer items-center"
           aria-label="IEM Tour Group Europe homepage"
           onClick={() => {
             closeMobileMenu()

@@ -9,7 +9,7 @@ function Footer() {
             <Link
               to="/"
               aria-label="IEM Tour Group Europe homepage"
-              className="inline-flex"
+              className="inline-flex cursor-pointer"
             >
               <img
                 src={`${import.meta.env.BASE_URL}branding/logo-primary-light.svg`}
@@ -26,21 +26,14 @@ function Footer() {
 
             <p className="mt-6 max-w-xl leading-7 text-[var(--muted)]">
               Independent reviews by enthusiasts, helping listeners find the
-              IEM that fits their music.
+              audio gear that fits their music.
             </p>
           </div>
 
           <nav
             aria-label="Footer navigation"
-            className="grid content-start gap-4 text-sm"
+            className="grid content-start grid-cols-2 gap-x-10 gap-y-4 text-sm"
           >
-		    <Link
-              to="/discover"
-              className="text-[var(--muted)] transition hover:text-[var(--accent)]"
-            >
-              Discover
-            </Link>
-
             <Link
               to="/reviews"
               className="text-[var(--muted)] transition hover:text-[var(--accent)]"
@@ -49,17 +42,31 @@ function Footer() {
             </Link>
 
             <Link
-              to="/members"
+              to="/gear"
               className="text-[var(--muted)] transition hover:text-[var(--accent)]"
             >
-              Reviewers
+              Gear
             </Link>
 
             <Link
-              to="/join"
+              to="/brands"
               className="text-[var(--muted)] transition hover:text-[var(--accent)]"
             >
-              Join
+              Brands
+            </Link>
+
+            <Link
+              to="/explore"
+              className="text-[var(--muted)] transition hover:text-[var(--accent)]"
+            >
+              Explore
+            </Link>
+
+            <Link
+              to="/members"
+              className="text-[var(--muted)] transition hover:text-[var(--accent)]"
+            >
+              Members
             </Link>
 
             <Link
@@ -67,6 +74,20 @@ function Footer() {
               className="text-[var(--muted)] transition hover:text-[var(--accent)]"
             >
               About
+            </Link>
+
+            <Link
+              to="/join"
+              className="text-[var(--muted)] transition hover:text-[var(--accent)]"
+            >
+              Join ITGE
+            </Link>
+
+            <Link
+              to="/for-brands"
+              className="text-[var(--muted)] transition hover:text-[var(--accent)]"
+            >
+              For brands
             </Link>
           </nav>
         </div>

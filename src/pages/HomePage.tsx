@@ -26,7 +26,6 @@ import LatestCoverageCarousel, {
 } from "../components/home/LatestCoverageCarousel"
 
 import TakePartSection from "../components/home/TakePartSection"
-import AboutTeaser from "../components/home/AboutTeaser"
 
 function HomePage() {
   const [
@@ -98,14 +97,6 @@ function HomePage() {
           return
         }
 
-        /*
-         * Pick four random pieces of gear
-         * on each homepage load.
-         *
-         * getProducts() already only
-         * returns gear represented by
-         * published ITGE coverage.
-         */
         const featuredPool =
           [...products]
             .filter(
@@ -254,10 +245,10 @@ function HomePage() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(193,151,69,0.13),transparent_40%)] dark:bg-[radial-gradient(circle_at_top_right,rgba(193,151,69,0.10),transparent_40%)]" />
 
           <div className="relative mx-auto max-w-7xl px-6 pb-12 pt-14 lg:px-8 lg:pb-14 lg:pt-16">
-            <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+            <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr]">
               {/* INTRO */}
               <div className="max-w-2xl">
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[var(--accent)]">
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
                   IEM Tour Group
                   Europe
                 </p>
@@ -281,7 +272,7 @@ function HomePage() {
                   tours.
                 </p>
 
-                <p className="mt-4 max-w-xl leading-7 text-[var(--muted)]">
+                <p className="mt-4 max-w-xl text-lg leading-8 text-[var(--muted)]">
                   Our reviews
                   connect what we
                   hear with the
@@ -306,7 +297,7 @@ function HomePage() {
               <div>
                 <div className="mb-4 flex items-end justify-between gap-4">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
+                    <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
                       Explore ITGE
                     </p>
 
@@ -403,11 +394,10 @@ function HomePage() {
               </div>
 
               <Link
-                to="/discover"
-                className="text-sm font-medium text-[var(--accent)] transition hover:opacity-75"
+                to="/reviews"
+                className="mb-[1px] shrink-0 text-sm font-medium text-[var(--accent)] transition hover:opacity-75"
               >
-                Browse all
-                reviews →
+                Browse all →
               </Link>
             </div>
           </div>
@@ -437,8 +427,6 @@ function HomePage() {
         </section>
 
         <TakePartSection />
-
-        <AboutTeaser />
       </main>
     </div>
   )
@@ -478,7 +466,7 @@ function FeaturedGearTile({
       )}
 
       <div
-        className={`absolute inset-0 bg-gradient-to-t from-black/85 via-black/5 to-transparent transition-opacity duration-700 ${
+        className={`absolute inset-0 bg-gradient-to-t from-black/95 via-black/35 via-45% to-transparent transition-opacity duration-700 ${
           active
             ? "opacity-90"
             : "opacity-100"
@@ -486,7 +474,7 @@ function FeaturedGearTile({
       />
 
       <div className="relative flex h-full flex-col justify-end p-3 text-white sm:p-5">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70 sm:text-xs">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/75 sm:text-xs">
           {product.brand.name}
         </p>
 

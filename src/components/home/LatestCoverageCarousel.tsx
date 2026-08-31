@@ -45,11 +45,6 @@ type LatestCoverageCarouselProps = {
 const MANUAL_PAUSE_DURATION =
   7000
 
-/*
- * Continuous automatic movement.
- *
- * Higher = faster.
- */
 const AUTO_SCROLL_SPEED =
   0.08
 
@@ -88,11 +83,6 @@ function LatestCoverageCarousel({
   ] =
     useState(false)
 
-  /*
-   * We duplicate the cards so the
-   * automatic movement can wrap around
-   * without a visible jump.
-   */
   const repeatedItems = [
     ...items,
     ...items,
@@ -149,14 +139,6 @@ function LatestCoverageCarousel({
       )
     }, [])
 
-  /*
-   * Keep the scroll position inside the
-   * duplicated sequence.
-   *
-   * The two halves contain exactly the
-   * same cards, so moving between them
-   * is visually invisible.
-   */
   const normalizeScrollPosition =
     useCallback(() => {
       const container =
@@ -194,9 +176,6 @@ function LatestCoverageCarousel({
       getSingleSetWidth,
     ])
 
-  /*
-   * Continuous smooth automatic glide.
-   */
   useEffect(() => {
     if (
       items.length < 2 ||
@@ -274,13 +253,6 @@ function LatestCoverageCarousel({
     normalizeScrollPosition,
   ])
 
-  /*
-   * Any arrow click pauses automatic
-   * movement for seven seconds.
-   *
-   * Clicking again during that period
-   * restarts the seven-second timer.
-   */
   const registerManualInteraction =
     useCallback(() => {
       setManualPause(
@@ -310,10 +282,6 @@ function LatestCoverageCarousel({
         )
     }, [])
 
-  /*
-   * Move exactly one card when using
-   * the manual controls.
-   */
   const handleManualScroll =
     useCallback(
       (
@@ -333,11 +301,6 @@ function LatestCoverageCarousel({
         const distance =
           getScrollDistance()
 
-        /*
-         * Make sure there is always room
-         * to move backwards into the
-         * duplicated sequence.
-         */
         if (
           direction ===
             "previous" &&
@@ -368,10 +331,6 @@ function LatestCoverageCarousel({
       ],
     )
 
-  /*
-   * Clear the manual-resume timer if
-   * the component disappears.
-   */
   useEffect(() => {
     return () => {
       if (
@@ -424,24 +383,34 @@ function LatestCoverageCarousel({
       }}
     >
       <div
-        ref={scrollRef}
-        className="flex gap-4 overflow-x-hidden px-4 sm:gap-5"
+        className="overflow-hidden"
+        style={{
+          WebkitMaskImage:
+            "linear-gradient(to right, transparent 0, black 60px, black calc(100% - 60px), transparent 100%)",
+          maskImage:
+            "linear-gradient(to right, transparent 0, black 60px, black calc(100% - 60px), transparent 100%)",
+        }}
       >
-        {repeatedItems.map(
-          (
-            item,
-            index,
-          ) => (
-            <CoverageTile
-              key={`${item.type}-${item.id}-${index}`}
-              item={item}
-              duplicate={
-                index >=
-                items.length
-              }
-            />
-          ),
-        )}
+        <div
+          ref={scrollRef}
+          className="flex gap-4 overflow-x-hidden px-4 sm:gap-5"
+        >
+          {repeatedItems.map(
+            (
+              item,
+              index,
+            ) => (
+              <CoverageTile
+                key={`${item.type}-${item.id}-${index}`}
+                item={item}
+                duplicate={
+                  index >=
+                  items.length
+                }
+              />
+            ),
+          )}
+        </div>
       </div>
 
       {items.length > 1 && (
@@ -546,10 +515,10 @@ function CoverageTile({
             {item.type ===
               "review" && (
               <span className="shrink-0 rounded-full border border-white/25 bg-black/20 px-2 py-1 font-semibold text-white">
+                ★{" "}
                 {item.rating.toFixed(
                   1,
                 )}
-                /5
               </span>
             )}
           </div>
