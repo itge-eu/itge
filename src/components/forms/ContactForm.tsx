@@ -137,15 +137,15 @@ function ContactForm({
         </div>
       )}
 
-      <div className="mt-8 border-t border-[var(--border)] pt-6">
-        <p className="mb-5 text-sm leading-6 text-[var(--muted)]">
-          Fields marked with{" "}
-          <span className="font-semibold text-[var(--accent)]">
-            *
-          </span>{" "}
-          are required.
-        </p>
+      <p className="mt-8 text-sm leading-6 text-[var(--muted)]">
+        Fields marked with{" "}
+        <span className="font-semibold text-[var(--accent)]">
+          *
+        </span>{" "}
+        are required.
+      </p>
 
+      <div className="mt-5 flex justify-end border-t border-[var(--border)] pt-6">
         <button
           type="submit"
           disabled={

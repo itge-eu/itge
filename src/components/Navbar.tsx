@@ -154,7 +154,7 @@ function Navbar() {
     active: boolean,
   ) =>
     active
-      ? "relative px-4 py-3 font-semibold text-[#F4E6C8] transition after:absolute after:inset-x-4 after:-bottom-[1px] after:h-0.5 after:rounded-full after:bg-[var(--accent)]"
+      ? "relative px-4 py-3 font-semibold text-[var(--foreground)] dark:text-[#F4E6C8] transition after:absolute after:inset-x-4 after:-bottom-[1px] after:h-0.5 after:rounded-full after:bg-[var(--accent)]"
       : "relative px-4 py-3 font-semibold transition hover:text-[var(--foreground)]"
 
   const mobileLinkClass = (
@@ -358,7 +358,7 @@ function Navbar() {
               }
               className={
                 aboutActive
-                  ? "relative flex items-center gap-1.5 px-4 py-3 font-semibold text-[#F4E6C8] transition after:absolute after:inset-x-4 after:-bottom-[1px] after:h-0.5 after:rounded-full after:bg-[var(--accent)]"
+                  ? "relative flex items-center gap-1.5 px-4 py-3 font-semibold text-[var(--foreground)] dark:text-[#F4E6C8] transition after:absolute after:inset-x-4 after:-bottom-[1px] after:h-0.5 after:rounded-full after:bg-[var(--accent)]"
                   : "relative flex items-center gap-1.5 px-4 py-3 font-semibold transition hover:text-[var(--foreground)]"
               }
               aria-haspopup="true"
