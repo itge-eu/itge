@@ -154,8 +154,8 @@ function Navbar() {
     active: boolean,
   ) =>
     active
-      ? "rounded-xl bg-[var(--accent)] px-4 py-3 font-semibold text-[var(--accent-foreground)] transition hover:bg-[var(--accent-hover)]"
-      : "rounded-xl px-4 py-3 font-semibold transition hover:text-[var(--foreground)]"
+      ? "relative px-4 py-3 font-semibold text-[#F4E6C8] transition after:absolute after:inset-x-4 after:-bottom-[1px] after:h-0.5 after:rounded-full after:bg-[var(--accent)]"
+      : "relative px-4 py-3 font-semibold transition hover:text-[var(--foreground)]"
 
   const mobileLinkClass = (
     active: boolean,
@@ -273,20 +273,6 @@ function Navbar() {
           </Link>
 
           <Link
-            to="/members"
-            onClick={
-              closeDesktopMenus
-            }
-            className={
-              desktopLinkClass(
-                membersActive,
-              )
-            }
-          >
-            Members
-          </Link>
-
-          <Link
             to="/gear"
             onClick={
               closeDesktopMenus
@@ -328,6 +314,20 @@ function Navbar() {
             Explore
           </Link>
 
+          <Link
+            to="/members"
+            onClick={
+              closeDesktopMenus
+            }
+            className={
+              desktopLinkClass(
+                membersActive,
+              )
+            }
+          >
+            Members
+          </Link>
+
           <div
             className="relative"
             onMouseEnter={() =>
@@ -358,8 +358,8 @@ function Navbar() {
               }
               className={
                 aboutActive
-                  ? "flex items-center gap-1.5 rounded-xl bg-[var(--accent)] px-4 py-3 font-semibold text-[var(--accent-foreground)] transition hover:bg-[var(--accent-hover)]"
-                  : "flex items-center gap-1.5 rounded-xl px-4 py-3 font-semibold transition hover:text-[var(--foreground)]"
+                  ? "relative flex items-center gap-1.5 px-4 py-3 font-semibold text-[#F4E6C8] transition after:absolute after:inset-x-4 after:-bottom-[1px] after:h-0.5 after:rounded-full after:bg-[var(--accent)]"
+                  : "relative flex items-center gap-1.5 px-4 py-3 font-semibold transition hover:text-[var(--foreground)]"
               }
               aria-haspopup="true"
               aria-expanded={
@@ -494,20 +494,6 @@ function Navbar() {
             </MobileLink>
 
             <MobileLink
-              to="/members"
-              onClick={
-                closeMobileMenu
-              }
-              className={
-                mobileLinkClass(
-                  membersActive,
-                )
-              }
-            >
-              Members
-            </MobileLink>
-
-            <MobileLink
               to="/gear"
               onClick={
                 closeMobileMenu
@@ -547,6 +533,20 @@ function Navbar() {
               }
             >
               Explore
+            </MobileLink>
+
+            <MobileLink
+              to="/members"
+              onClick={
+                closeMobileMenu
+              }
+              className={
+                mobileLinkClass(
+                  membersActive,
+                )
+              }
+            >
+              Members
             </MobileLink>
 
             <div>
