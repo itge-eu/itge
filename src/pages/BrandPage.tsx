@@ -3,6 +3,7 @@ import {
   useMemo,
   useState,
 } from "react"
+
 import {
   Link,
   useParams,
@@ -39,7 +40,9 @@ function BrandPage() {
     useState(true)
 
   const [error, setError] =
-    useState<string | null>(null)
+    useState<string | null>(
+      null,
+    )
 
   usePageMetadata({
     title: brand
@@ -47,8 +50,8 @@ function BrandPage() {
       : "Brand | ITGE",
 
     description: brand
-      ? `Explore ${brand.name} IEMs, reviews and listening impressions at ITGE.`
-      : "Explore IEM brands covered by ITGE.",
+      ? `Explore ${brand.name} gear, reviews and listening impressions at ITGE.`
+      : "Explore audio brands covered by ITGE.",
   })
 
   useEffect(() => {
@@ -59,6 +62,7 @@ function BrandPage() {
         setError(
           "No brand was specified.",
         )
+
         setLoading(false)
         return
       }
@@ -106,7 +110,10 @@ function BrandPage() {
     useMemo(
       () =>
         brand?.products.reduce(
-          (total, product) =>
+          (
+            total,
+            product,
+          ) =>
             total +
             (product.coverageCount ??
               product.reviewCount),
@@ -179,7 +186,7 @@ function BrandPage() {
               <p className="mt-5 max-w-2xl text-lg leading-8 text-[var(--muted)]">
                 Explore{" "}
                 {brand.name}{" "}
-                IEMs represented in
+                gear represented in
                 the ITGE library,
                 together with full
                 reviews, listening
@@ -199,6 +206,7 @@ function BrandPage() {
                 >
                   Visit brand
                   website
+
                   <span aria-hidden="true">
                     ↗
                   </span>
@@ -207,7 +215,7 @@ function BrandPage() {
 
               <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
                 <StatCard
-                  label="IEMs"
+                  label="Gear"
                   value={brand.products.length.toString()}
                 />
 
@@ -234,13 +242,12 @@ function BrandPage() {
                       ? "—"
                       : `${brand.averageRating.toFixed(
                           1,
-                        )}/5`
+                        )} ★`
                   }
                 />
               </div>
             </div>
 
-            {/* Brand logo hero */}
             <div className="flex min-h-72 items-center justify-center border-t border-[var(--border)] bg-[var(--background)] p-10 sm:p-12 lg:min-h-0 lg:border-l lg:border-t-0 lg:p-14">
               <BrandLogo
                 name={
@@ -259,16 +266,16 @@ function BrandPage() {
         <section className="mt-14">
           <SectionHeader
             eyebrow="Product coverage"
-            title={`${brand.name} IEMs`}
+            title={`${brand.name} gear`}
             description={
               brand.products
                 .length === 0
-                ? "No IEMs with published coverage are available yet."
+                ? "No gear with published coverage is available yet."
                 : `${brand.products.length} ${
                     brand.products
                       .length === 1
-                      ? "IEM is"
-                      : "IEMs are"
+                      ? "product is"
+                      : "products are"
                   } represented by ${totalProductCoverage} ${
                     totalProductCoverage ===
                     1
@@ -281,8 +288,8 @@ function BrandPage() {
           {brand.products
             .length === 0 ? (
             <EmptyPanel>
-              No covered IEMs from
-              this brand are
+              No covered gear from
+              this brand is
               available yet.
             </EmptyPanel>
           ) : (
@@ -290,8 +297,12 @@ function BrandPage() {
               {brand.products.map(
                 (product) => (
                   <ProductCard
-                    key={product.id}
-                    product={product}
+                    key={
+                      product.id
+                    }
+                    product={
+                      product
+                    }
                   />
                 ),
               )}
@@ -337,7 +348,7 @@ function BrandPage() {
                     />
 
                     <div className="min-w-0">
-                      <p className="truncate font-semibold group-hover:text-[var(--accent)]">
+                      <p className="truncate font-semibold transition group-hover:text-[var(--accent)]">
                         {
                           contributor.name
                         }
@@ -351,7 +362,9 @@ function BrandPage() {
                         1
                           ? "review"
                           : "reviews"}
+
                         {" · "}
+
                         {
                           contributor.impressionCount
                         }{" "}
@@ -372,12 +385,6 @@ function BrandPage() {
           <SectionHeader
             eyebrow="Full reviews"
             title={`Recent ${brand.name} reviews`}
-            description={
-              brand.latestReviews
-                .length === 0
-                ? "No published reviews are available yet."
-                : `The latest published ITGE reviews covering ${brand.name} IEMs.`
-            }
           />
 
           {brand.latestReviews
@@ -401,12 +408,6 @@ function BrandPage() {
           <SectionHeader
             eyebrow="Listening notes"
             title={`Recent ${brand.name} impressions`}
-            description={
-              brand.latestImpressions
-                .length === 0
-                ? "No published impressions are available yet."
-                : `The latest short-form listening impressions covering ${brand.name} IEMs.`
-            }
           />
 
           {brand.latestImpressions
@@ -448,12 +449,12 @@ function StatCard({
   value: string
 }) {
   return (
-    <div className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5">
-      <p className="text-sm text-[var(--muted)]">
+    <div className="flex min-h-28 flex-col justify-between rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5">
+      <p className="text-sm leading-5 text-[var(--muted)]">
         {label}
       </p>
 
-      <p className="mt-2 text-3xl font-semibold">
+      <p className="mt-3 text-3xl font-semibold">
         {value}
       </p>
     </div>
@@ -467,7 +468,7 @@ function SectionHeader({
 }: {
   eyebrow: string
   title: string
-  description: string
+  description?: string
 }) {
   return (
     <div>
@@ -479,9 +480,11 @@ function SectionHeader({
         {title}
       </h2>
 
-      <p className="mt-3 max-w-2xl text-[var(--muted)]">
-        {description}
-      </p>
+      {description && (
+        <p className="mt-3 max-w-2xl text-[var(--muted)]">
+          {description}
+        </p>
+      )}
     </div>
   )
 }
@@ -489,7 +492,8 @@ function SectionHeader({
 function EmptyPanel({
   children,
 }: {
-  children: React.ReactNode
+  children:
+    React.ReactNode
 }) {
   return (
     <div className="mt-8 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">

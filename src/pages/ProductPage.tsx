@@ -91,7 +91,9 @@ function ProductPage() {
           )
 
         if (!cancelled) {
-          setProduct(result)
+          setProduct(
+            result,
+          )
         }
       } catch (loadError) {
         console.error(
@@ -200,7 +202,8 @@ function ProductPage() {
         <Breadcrumbs
           items={[
             {
-              label: "Gear",
+              label:
+                "Gear",
               to: "/gear",
             },
             {
@@ -243,9 +246,8 @@ function ProductPage() {
 
               <p className="mt-5 max-w-2xl text-lg leading-8 text-[var(--muted)]">
                 Community reviews,
-                listening
-                impressions and
-                music references
+                listening impressions
+                and music references
                 for the{" "}
                 {
                   product.brand
@@ -258,28 +260,28 @@ function ProductPage() {
 
               <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <StatCard
-                  label="Published reviews"
+                  label="Reviews"
                   value={
                     product.reviews.length.toString()
                   }
                 />
 
                 <StatCard
-                  label="Published impressions"
+                  label="Impressions"
                   value={
                     product.impressions.length.toString()
                   }
                 />
 
                 <StatCard
-                  label="Average review rating"
+                  label="Avg. review rating"
                   value={
                     product.averageRating ==
                     null
                       ? "—"
                       : `${product.averageRating.toFixed(
                           1,
-                        )}/5`
+                        )} ★`
                   }
                 />
 
@@ -296,40 +298,42 @@ function ProductPage() {
                 product.launchPrice !=
                   null) && (
                 <div className="mt-6 border-t border-[var(--border)] pt-6">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-                    Product details
-                  </p>
+                  <div className="grid gap-5 sm:grid-cols-[2fr_1fr_1fr]">
+                    <div>
+                      {product.driverConfiguration && (
+                        <ProductDetail
+                          label="Driver configuration"
+                          value={
+                            product.driverConfiguration
+                          }
+                        />
+                      )}
+                    </div>
 
-                  <div className="mt-4 grid gap-5 sm:grid-cols-3">
-                    {product.driverConfiguration && (
-                      <ProductDetail
-                        label="Driver configuration"
-                        value={
-                          product.driverConfiguration
-                        }
-                      />
-                    )}
+                    <div>
+                      {product.releaseYear !=
+                        null && (
+                        <ProductDetail
+                          label="Released"
+                          value={
+                            product.releaseYear.toString()
+                          }
+                        />
+                      )}
+                    </div>
 
-                    {product.releaseYear !=
-                      null && (
-                      <ProductDetail
-                        label="Released"
-                        value={
-                          product.releaseYear.toString()
-                        }
-                      />
-                    )}
-
-                    {product.launchPrice !=
-                      null && (
-                      <ProductDetail
-                        label="Launch price"
-                        value={formatLaunchPrice(
-                          product.launchPrice,
-                          product.launchCurrency,
-                        )}
-                      />
-                    )}
+                    <div>
+                      {product.launchPrice !=
+                        null && (
+                        <ProductDetail
+                          label="Launch price"
+                          value={formatLaunchPrice(
+                            product.launchPrice,
+                            product.launchCurrency,
+                          )}
+                        />
+                      )}
+                    </div>
                   </div>
                 </div>
               )}
@@ -373,7 +377,9 @@ function ProductPage() {
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {product.reviewers.map(
-                (reviewer) => (
+                (
+                  reviewer,
+                ) => (
                   <Link
                     key={
                       reviewer.slug
@@ -393,7 +399,7 @@ function ProductPage() {
                     />
 
                     <div className="min-w-0">
-                      <p className="truncate font-semibold group-hover:text-[var(--accent)]">
+                      <p className="truncate font-semibold transition group-hover:text-[var(--accent)]">
                         {
                           reviewer.name
                         }
@@ -475,12 +481,6 @@ function ProductPage() {
           <SectionHeader
             eyebrow="Review library"
             title={`Reviews of ${product.model}`}
-            description={
-              product.reviews.length ===
-              0
-                ? "No published reviews are available yet."
-                : `Read every published ITGE review of the ${product.brand.name} ${product.model}.`
-            }
           />
 
           <div className="mt-8">
@@ -506,12 +506,6 @@ function ProductPage() {
           <SectionHeader
             eyebrow="Listening notes"
             title={`Impressions of ${product.model}`}
-            description={
-              product.impressions
-                .length === 0
-                ? "No published impressions are available yet."
-                : `Read short-form listening impressions of the ${product.brand.name} ${product.model}.`
-            }
           />
 
           <div className="mt-8">
@@ -556,12 +550,12 @@ function StatCard({
   value: string
 }) {
   return (
-    <div className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5">
-      <p className="text-sm text-[var(--muted)]">
+    <div className="flex min-h-28 flex-col justify-between rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5">
+      <p className="text-sm leading-5 text-[var(--muted)]">
         {label}
       </p>
 
-      <p className="mt-2 text-3xl font-semibold">
+      <p className="mt-3 text-3xl font-semibold">
         {value}
       </p>
     </div>
@@ -575,7 +569,7 @@ function SectionHeader({
 }: {
   eyebrow: string
   title: string
-  description: string
+  description?: string
 }) {
   return (
     <div>
@@ -587,9 +581,11 @@ function SectionHeader({
         {title}
       </h2>
 
-      <p className="mt-3 max-w-2xl text-[var(--muted)]">
-        {description}
-      </p>
+      {description && (
+        <p className="mt-3 max-w-2xl text-[var(--muted)]">
+          {description}
+        </p>
+      )}
     </div>
   )
 }
@@ -628,7 +624,8 @@ function formatLaunchPrice(
     return new Intl.NumberFormat(
       "en-US",
       {
-        style: "currency",
+        style:
+          "currency",
         currency,
         maximumFractionDigits:
           Number.isInteger(
@@ -637,7 +634,9 @@ function formatLaunchPrice(
             ? 0
             : 2,
       },
-    ).format(price)
+    ).format(
+      price,
+    )
   } catch {
     return `${price.toLocaleString(
       "en-US",
