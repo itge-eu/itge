@@ -230,11 +230,6 @@ function BrandPage() {
                 />
 
                 <StatCard
-                  label="Contributors"
-                  value={brand.contributorCount.toString()}
-                />
-
-                <StatCard
                   label="Avg. review"
                   value={
                     brand.averageRating ==
@@ -244,6 +239,11 @@ function BrandPage() {
                           1,
                         )} ★`
                   }
+                />
+
+                <StatCard
+                  label="Contributors"
+                  value={brand.contributorCount.toString()}
                 />
               </div>
             </div>
