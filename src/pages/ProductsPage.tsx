@@ -8,6 +8,7 @@ import DirectoryControls from "../components/directory/DirectoryControls"
 import DirectorySearchInput from "../components/directory/DirectorySearchInput"
 import ProductCard from "../components/products/ProductCard"
 import DirectoryResultsBar from "../components/directory/DirectoryResultsBar"
+import PageContainer from "../components/layout/PageContainer"
 
 import {
   getProducts,
@@ -442,8 +443,8 @@ function ProductsPage() {
     activeFilterCount > 0
 
   return (
-    <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
-      <div className="mx-auto max-w-7xl">
+    <main className="min-h-screen bg-[var(--background)] py-16 text-[var(--foreground)]">
+      <PageContainer>
         <header>
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
             ITGE library
@@ -616,7 +617,7 @@ function ProductsPage() {
             )}
           </section>
         )}
-      </div>
+      </PageContainer>
     </main>
   )
 }

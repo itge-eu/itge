@@ -10,6 +10,7 @@ import DirectoryControls from "../components/directory/DirectoryControls"
 import DirectorySearchInput from "../components/directory/DirectorySearchInput"
 import DirectoryResultsBar from "../components/directory/DirectoryResultsBar"
 import ReviewerAvatar from "../components/reviewers/ReviewerAvatar"
+import PageContainer from "../components/layout/PageContainer"
 
 import {
   countryCodeToName,
@@ -251,8 +252,8 @@ function ReviewersPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
-      <div className="mx-auto max-w-7xl">
+    <main className="min-h-screen bg-[var(--background)] py-16 text-[var(--foreground)]">
+     <PageContainer>
         <header>
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
             ITGE community
@@ -428,7 +429,7 @@ function ReviewersPage() {
             )}
           </>
         )}
-      </div>
+      </PageContainer>
     </main>
   )
 }

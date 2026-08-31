@@ -12,6 +12,7 @@ import {
 import DirectoryControls from "../components/directory/DirectoryControls"
 import DirectorySearchInput from "../components/directory/DirectorySearchInput"
 import DirectorySortSelect from "../components/directory/DirectorySortSelect"
+import PageContainer from "../components/layout/PageContainer"
 
 import {
   getArtists,
@@ -361,7 +362,7 @@ function ExplorePage() {
 
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
-      <div className="mx-auto max-w-7xl">
+       <PageContainer>
         <header className="max-w-3xl">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
             Explore
@@ -526,7 +527,7 @@ function ExplorePage() {
             }
           />
         )}
-      </div>
+      </PageContainer>
     </main>
   )
 }
@@ -848,9 +849,9 @@ function PageMessage({
 }) {
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-20 text-[var(--foreground)]">
-      <div className="mx-auto max-w-7xl text-[var(--muted)]">
+      <PageContainer className="text-[var(--muted)]">
         {children}
-      </div>
+      </PageContainer>
     </main>
   )
 }

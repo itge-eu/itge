@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom"
 
 import usePageMetadata from "../hooks/usePageMetadata"
+import PageContainer from "../components/layout/PageContainer"
 
 function AboutPage() {
   usePageMetadata({
@@ -12,8 +13,8 @@ function AboutPage() {
   })
 
   return (
-    <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
-      <div className="mx-auto max-w-7xl">
+    <main className="min-h-screen bg-[var(--background)] py-16 text-[var(--foreground)]">
+      <PageContainer>
         {/* PAGE HEADER */}
         <header className="max-w-4xl">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
@@ -186,7 +187,7 @@ function AboutPage() {
             to="/for-brands"
           />
         </section>
-      </div>
+      </PageContainer>
     </main>
   )
 }

@@ -8,6 +8,7 @@ import DirectoryControls from "../components/directory/DirectoryControls"
 import DiscoveryFilters from "../components/discover/DiscoveryFilters"
 import DiscoveryResults from "../components/discover/DiscoveryResults"
 import ReviewSearch from "../components/reviews/ReviewSearch"
+import PageContainer from "../components/layout/PageContainer"
 
 import {
   buildDiscoveryState,
@@ -501,8 +502,8 @@ function DiscoverPage() {
     }
 
   return (
-    <main className="min-h-screen bg-[var(--background)] px-6 py-12 text-[var(--foreground)] lg:px-8 lg:py-16">
-      <div className="mx-auto max-w-6xl">
+    <main className="min-h-screen bg-[var(--background)] py-16 text-[var(--foreground)]">
+      <PageContainer>
         <header className="mb-10 max-w-3xl">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
             Reviews &
@@ -685,7 +686,7 @@ function DiscoverPage() {
             }
           />
         </div>
-      </div>
+      </PageContainer>
     </main>
   )
 }
