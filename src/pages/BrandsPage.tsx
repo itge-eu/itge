@@ -130,9 +130,9 @@ function BrandsPage() {
                 Supporting ITGE
               </p>
 
-              <h2 className="mt-2 text-3xl font-semibold tracking-tight">
+              <h1 className="mt-2 text-3xl font-semibold tracking-tight">
                 Stores that support our tours
-              </h2>
+              </h1>
 
               <p className="mt-3 max-w-2xl text-[var(--muted)]">
                 These retailers help make
@@ -163,28 +163,30 @@ function BrandsPage() {
                         ? "noreferrer"
                         : undefined
                     }
-                    className="group flex min-h-[220px] flex-col rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7 transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
+                    className="group flex min-h-[210px] flex-col rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7 transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
                   >
-                    <div className="flex min-h-24 items-center justify-between gap-8">
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
-                          Supporting store
-                        </p>
-
-                        <h3 className="mt-2 break-words text-2xl font-semibold tracking-tight transition group-hover:text-[var(--accent)]">
-                          {store.name}
-                        </h3>
-
+                    <div className="flex items-start justify-between gap-8">
+                      <div className="min-w-0 flex-1">
                         {store.country && (
-                          <p className="mt-2 text-sm text-[var(--muted)]">
+                          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
                             {formatCountry(
                               store.country,
                             )}
                           </p>
                         )}
+
+                        <h2
+                          className={`break-words text-2xl font-semibold tracking-tight transition group-hover:text-[var(--accent)] ${
+                            store.country
+                              ? "mt-2"
+                              : ""
+                          }`}
+                        >
+                          {store.name}
+                        </h2>
                       </div>
 
-                      <div className="flex h-20 w-36 shrink-0 items-center justify-center">
+                      <div className="flex h-20 w-32 shrink-0 items-center justify-center rounded-xl bg-white p-3">
                         <StoreLogo
                           name={
                             store.name
@@ -192,13 +194,13 @@ function BrandsPage() {
                           slug={
                             store.slug
                           }
-                          className="max-h-20 max-w-full"
+                          className="max-h-full max-w-full"
                         />
                       </div>
                     </div>
 
                     {store.description && (
-                      <p className="mt-5 leading-7 text-[var(--muted)]">
+                      <p className="mt-5 max-w-xl leading-7 text-[var(--muted)]">
                         {
                           store.description
                         }
@@ -224,25 +226,18 @@ function BrandsPage() {
           className={
             stores.length > 0
               ? "mt-16 border-t border-[var(--border)] pt-14"
-              : "mt-10"
+              : ""
           }
         >
-          {stores.length > 0 && (
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
-                Directory
-              </p>
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
+              Directory
+            </p>
 
-              <h2 className="mt-2 text-3xl font-semibold tracking-tight">
-                All brands
-              </h2>
-
-              <p className="mt-3 max-w-2xl text-[var(--muted)]">
-                Browse every brand with
-                published ITGE coverage.
-              </p>
-            </div>
-          )}
+            <h2 className="mt-2 text-3xl font-semibold tracking-tight">
+              All brands
+            </h2>
+          </div>
 
           {brands.length ===
           0 ? (
@@ -252,7 +247,7 @@ function BrandsPage() {
               available yet.
             </div>
           ) : (
-            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {brands.map(
                 (
                   brand,
@@ -262,53 +257,27 @@ function BrandsPage() {
                       brand.id
                     }
                     to={`/brands/${brand.slug}`}
-                    className="group flex min-h-[220px] flex-col rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
+                    className="group overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
                   >
-                    <div className="flex min-h-24 items-start justify-between gap-6">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
-                          Brand
-                        </p>
-
-                        <h2 className="mt-2 break-words text-2xl font-semibold tracking-tight transition group-hover:text-[var(--accent)]">
-                          {
-                            brand.name
-                          }
-                        </h2>
-                      </div>
-
-                      <div className="flex h-20 w-32 shrink-0 items-center justify-center rounded-xl bg-white p-3">
-                        <BrandLogo
-                          name={
-                            brand.name
-                          }
-                          slug={
-                            brand.slug
-                          }
-                          size="card"
-                          className="max-h-full max-w-full"
-                        />
-                      </div>
+                    <div className="flex aspect-[4/3] items-center justify-center bg-white p-7">
+                      <BrandLogo
+                        name={
+                          brand.name
+                        }
+                        slug={
+                          brand.slug
+                        }
+                        size="card"
+                        className="max-h-full max-w-full"
+                      />
                     </div>
 
-                    <div className="mt-auto grid grid-cols-3 gap-3 border-t border-[var(--border)] pt-5">
-                      <Metric
-                        value={brand.productCount}
-                        singular="item"
-                        plural="gear"
-                      />
-
-                      <Metric
-                        value={brand.reviewCount}
-                        singular="review"
-                        plural="reviews"
-                      />
-
-                      <Metric
-                        value={brand.impressionCount}
-                        singular="impression"
-                        plural="impressions"
-                      />
+                    <div className="border-t border-[var(--border)] px-5 py-4">
+                      <h3 className="break-words text-lg font-semibold tracking-tight transition group-hover:text-[var(--accent)]">
+                        {
+                          brand.name
+                        }
+                      </h3>
                     </div>
                   </Link>
                 ),
@@ -340,37 +309,13 @@ function formatCountry(
   )
 }
 
-function Metric({
-  value,
-  singular,
-  plural,
-}: {
-  value: number
-  singular: string
-  plural: string
-}) {
-  return (
-    <div className="flex flex-col items-center text-center">
-      <p className="text-xl font-semibold text-[var(--foreground)]">
-        {value}
-      </p>
-
-      <p className="mt-1 text-xs leading-4 text-[var(--muted)]">
-        {value === 1
-          ? singular
-          : plural}
-      </p>
-    </div>
-  )
-}
-
 function PageMessage({
   children,
 }: {
   children: React.ReactNode
 }) {
   return (
-    <main className="min-h-screen bg-[var(--background)] px-6 py-20 text-[var(--foreground)]">
+    <main className="min-h-screen bg-[var(--background)] px-6 py-20 text-[var(--foreground)] lg:px-8">
       <div className="mx-auto max-w-7xl text-[var(--muted)]">
         {children}
       </div>
