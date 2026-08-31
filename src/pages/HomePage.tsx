@@ -254,35 +254,24 @@ function HomePage() {
                 </p>
 
                 <h1 className="mt-5 text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
-                  Independent
-                  listening. Real
-                  community.
+                  Rooted in Europe. Connected worldwide.
                 </h1>
 
                 <p className="mt-6 max-w-xl text-lg leading-8 text-[var(--muted)]">
-                  ITGE brings
-                  together
-                  experienced
-                  listeners across
-                  Europe to review
-                  and share
-                  impressions of
-                  audio gear through
-                  organised product
-                  tours.
+                  ITGE is an independent community bringing
+                  European listeners together with audio brands
+                  and retailers through product tours.
                 </p>
 
                 <p className="mt-4 max-w-xl text-lg leading-8 text-[var(--muted)]">
-                  Our reviews
-                  connect what we
-                  hear with the
-                  artists, genres
-                  and music actually
-                  used to evaluate
-                  each piece of
-                  gear.
+                  Each tour adds to a growing library of music-led
+                  listening impressions.
                 </p>
 
+                <p className="mt-4 max-w-xl text-lg leading-8 text-[var(--muted)]">
+                  Together, we’re growing the personal audio community
+                  across Europe and beyond.
+                </p>
                 <div className="mt-8">
                   <Link
                     to="/about"

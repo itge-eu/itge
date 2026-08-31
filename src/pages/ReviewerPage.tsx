@@ -193,9 +193,9 @@ function ReviewerPage() {
                 </p>
               )}
 
-              {reviewer.bio && (
-                <p className="mt-6 max-w-3xl text-lg leading-8 text-[var(--muted)]">
-                  {reviewer.bio}
+              {reviewer.title && (
+                <p className="mt-3 truncate text-sm font-medium text-[var(--muted)]">
+                  {reviewer.title}
                 </p>
               )}
 

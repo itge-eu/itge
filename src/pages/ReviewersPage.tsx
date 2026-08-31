@@ -194,7 +194,7 @@ function ReviewersPage() {
             const searchable =
               [
                 reviewer.name,
-                reviewer.bio,
+                reviewer.title,
                 reviewer.country,
                 country,
               ]
@@ -252,7 +252,7 @@ function ReviewersPage() {
 
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-7xl">
         <header>
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
             ITGE community
@@ -530,9 +530,9 @@ function ReviewerCard({
   return (
     <Link
       to={`/members/${reviewer.slug}`}
-      className="group flex h-full min-h-[19rem] flex-col rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 transition hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
+      className="group flex h-full flex-col rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 transition hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
     >
-      <div className="flex min-h-20 items-start gap-4">
+      <div className="flex items-start gap-4">
         <div className="relative shrink-0">
           <ReviewerAvatar
             name={
@@ -565,6 +565,17 @@ function ReviewerCard({
             />
           </div>
 
+          <p
+            className="mt-1 truncate text-sm font-medium text-[var(--muted)]"
+            title={
+              reviewer.title
+            }
+          >
+            {
+              reviewer.title
+            }
+          </p>
+
           {reviewer.country && (
             <p className="mt-2 flex items-center gap-2 text-sm text-[var(--muted)]">
               <span
@@ -582,27 +593,9 @@ function ReviewerCard({
         </div>
       </div>
 
-      <div className="mt-5 border-t border-[var(--border)] pt-5">
-        <div className="min-h-[3rem]">
-          {reviewer.bio ? (
-            <p className="line-clamp-2 text-sm leading-6 text-[var(--muted)]">
-              {
-                reviewer.bio
-              }
-            </p>
-          ) : (
-            <p
-              aria-hidden="true"
-              className="text-sm leading-6 text-transparent"
-            >
-              Member biography
-              placeholder.
-            </p>
-          )}
-        </div>
-      </div>
+      <div className="mt-5 border-t border-[var(--border)]" />
 
-      <div className="mt-auto grid grid-cols-2 gap-4 pt-6">
+      <div className="mt-auto grid grid-cols-2 gap-4 pt-5">
         <MemberMetric
           value={
             reviewer.reviewCount
