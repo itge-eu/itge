@@ -1,9 +1,13 @@
 import { Link } from "react-router"
 
-import type { FeaturedReview } from "../../lib/reviews"
+import type {
+  FeaturedReview,
+} from "../../lib/reviews"
 
 type ReviewCardProps = {
-  review: FeaturedReview
+  review:
+    FeaturedReview
+
   variant?:
     | "default"
     | "home"
@@ -33,14 +37,7 @@ function ReviewCard({
       : ""
 
   return (
-    <article
-      className={`group relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg focus-within:border-[var(--accent)] ${
-        variant ===
-        "home"
-          ? ""
-          : ""
-      }`}
-    >
+    <article className="group relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg focus-within:border-[var(--accent)]">
       <Link
         to={
           reviewUrl
@@ -77,14 +74,14 @@ function ReviewCard({
                   to={
                     brandUrl
                   }
-                  className="pointer-events-auto relative z-20 text-sm uppercase tracking-widest text-[var(--accent)] transition hover:opacity-70"
+                  className="pointer-events-auto relative z-20 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)] transition hover:opacity-70"
                 >
                   {
                     review.brand
                   }
                 </Link>
 
-                <h2 className="mt-1 text-2xl font-semibold">
+                <h2 className="mt-1 text-2xl font-semibold tracking-tight">
                   <Link
                     to={
                       productUrl
@@ -98,12 +95,11 @@ function ReviewCard({
                 </h2>
               </div>
 
-              <span className="shrink-0 rounded-full border border-[var(--border)] px-3 py-1 text-sm font-semibold">
-                {review.rating.toFixed(
-                  1,
-                )}
-                /5
-              </span>
+              <RatingBadge
+                rating={
+                  review.rating
+                }
+              />
             </div>
 
             <p className="mt-5 line-clamp-3 text-[var(--muted)]">
@@ -156,14 +152,14 @@ function ReviewCard({
                   to={
                     brandUrl
                   }
-                  className="pointer-events-auto relative z-20 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--accent)] transition hover:opacity-70"
+                  className="pointer-events-auto relative z-20 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)] transition hover:opacity-70"
                 >
                   {
                     review.brand
                   }
                 </Link>
 
-                <h2 className="mt-1 text-xl font-semibold tracking-tight">
+                <h2 className="mt-1 text-2xl font-semibold tracking-tight">
                   <Link
                     to={
                       productUrl
@@ -202,7 +198,7 @@ function ReviewCard({
             </p>
 
             {review.summary && (
-              <p className="mt-3 line-clamp-1 font-medium">
+              <p className="mt-4 line-clamp-1 font-semibold">
                 {
                   review.summary
                 }
@@ -210,18 +206,17 @@ function ReviewCard({
             )}
 
             {excerpt && (
-              <p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--muted)]">
+              <p className="mt-1 line-clamp-2 text-sm leading-6 text-[var(--muted)]">
                 {excerpt}
               </p>
             )}
 
             <div className="mt-auto flex items-center justify-between gap-4 pt-4">
-              <span className="rounded-full border border-[var(--border)] px-3 py-1 text-sm font-semibold">
-                {review.rating.toFixed(
-                  1,
-                )}
-                /5
-              </span>
+              <RatingBadge
+                rating={
+                  review.rating
+                }
+              />
 
               <span className="text-sm font-medium text-[var(--accent)] transition group-hover:translate-x-0.5">
                 Read review →
@@ -231,6 +226,21 @@ function ReviewCard({
         </div>
       )}
     </article>
+  )
+}
+
+function RatingBadge({
+  rating,
+}: {
+  rating: number
+}) {
+  return (
+    <span className="shrink-0 rounded-full border border-[var(--border)] px-3 py-1 text-sm font-semibold">
+      ★{" "}
+      {rating.toFixed(
+        1,
+      )}
+    </span>
   )
 }
 

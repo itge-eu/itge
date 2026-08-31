@@ -13,11 +13,18 @@ import type {
 } from "../../types/search"
 
 type ReviewSearchProps = {
-  onSelect: (suggestion: SearchSuggestion) => void
-  suggestionsOverride?: SearchSuggestion[]
+  onSelect: (
+    suggestion:
+      SearchSuggestion,
+  ) => void
+  suggestionsOverride?:
+    SearchSuggestion[]
 }
 
-const TYPE_LABELS: Record<SearchSuggestionType, string> = {
+const TYPE_LABELS: Record<
+  SearchSuggestionType,
+  string
+> = {
   product: "Gear",
   brand: "Brand",
   reviewer: "Member",
@@ -25,49 +32,73 @@ const TYPE_LABELS: Record<SearchSuggestionType, string> = {
   genre: "Genre",
 }
 
-const TYPE_ORDER: SearchSuggestionType[] = [
-  "brand",
-  "product",
-  "reviewer",
-  "artist",
-  "genre",
-]
+const TYPE_ORDER: SearchSuggestionType[] =
+  [
+    "product",
+    "brand",
+    "reviewer",
+    "artist",
+    "genre",
+  ]
 
-function normalizeSearchValue(value: string): string {
+function normalizeSearchValue(
+  value: string,
+): string {
   return value
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .replace(
+      /[\u0300-\u036f]/g,
+      "",
+    )
     .trim()
 }
 
 function getMatchPriority(
-  suggestion: SearchSuggestion,
+  suggestion:
+    SearchSuggestion,
   normalizedQuery: string,
 ): number {
-  const normalizedName = normalizeSearchValue(
-    suggestion.name,
-  )
+  const normalizedName =
+    normalizeSearchValue(
+      suggestion.name,
+    )
 
-  const normalizedSubtitle = normalizeSearchValue(
-    suggestion.subtitle ?? "",
-  )
+  const normalizedSubtitle =
+    normalizeSearchValue(
+      suggestion.subtitle ??
+        "",
+    )
 
-  if (normalizedName === normalizedQuery) {
+  if (
+    normalizedName ===
+    normalizedQuery
+  ) {
     return 0
   }
 
-  if (normalizedName.startsWith(normalizedQuery)) {
+  if (
+    normalizedName.startsWith(
+      normalizedQuery,
+    )
+  ) {
     return 1
   }
 
-  if (normalizedName.includes(normalizedQuery)) {
+  if (
+    normalizedName.includes(
+      normalizedQuery,
+    )
+  ) {
     return 2
   }
 
   if (
-    normalizedSubtitle === normalizedQuery ||
-    normalizedSubtitle.startsWith(normalizedQuery)
+    normalizedSubtitle ===
+      normalizedQuery ||
+    normalizedSubtitle.startsWith(
+      normalizedQuery,
+    )
   ) {
     return 3
   }
@@ -79,21 +110,59 @@ function ReviewSearch({
   onSelect,
   suggestionsOverride,
 }: ReviewSearchProps) {
-  const [query, setQuery] = useState("")
-  const [suggestions, setSuggestions] = useState<
-    SearchSuggestion[]
-  >([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [activeIndex, setActiveIndex] = useState(-1)
+  const [
+    query,
+    setQuery,
+  ] = useState("")
 
-  const containerRef = useRef<HTMLDivElement>(null)
-  const listRef = useRef<HTMLDivElement>(null)
+  const [
+    suggestions,
+    setSuggestions,
+  ] =
+    useState<
+      SearchSuggestion[]
+    >([])
+
+  const [
+    loading,
+    setLoading,
+  ] = useState(true)
+
+  const [
+    error,
+    setError,
+  ] =
+    useState<
+      string | null
+    >(null)
+
+  const [
+    menuOpen,
+    setMenuOpen,
+  ] = useState(false)
+
+  const [
+    activeIndex,
+    setActiveIndex,
+  ] = useState(-1)
+
+  const containerRef =
+    useRef<HTMLDivElement>(
+      null,
+    )
+
+  const listRef =
+    useRef<HTMLDivElement>(
+      null,
+    )
 
   useEffect(() => {
-    if (suggestionsOverride) {
-      setSuggestions(suggestionsOverride)
+    if (
+      suggestionsOverride
+    ) {
+      setSuggestions(
+        suggestionsOverride,
+      )
       setLoading(false)
       setError(null)
       return
@@ -106,10 +175,13 @@ function ReviewSearch({
       setError(null)
 
       try {
-        const result = await getSearchSuggestions()
+        const result =
+          await getSearchSuggestions()
 
         if (!cancelled) {
-          setSuggestions(result)
+          setSuggestions(
+            result,
+          )
         }
       } catch (loadError) {
         console.error(
@@ -134,20 +206,35 @@ function ReviewSearch({
     return () => {
       cancelled = true
     }
-  }, [suggestionsOverride])
+  }, [
+    suggestionsOverride,
+  ])
 
   useEffect(() => {
-    const handlePointerDown = (event: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
-        setMenuOpen(false)
-        setActiveIndex(-1)
+    const handlePointerDown =
+      (
+        event:
+          MouseEvent,
+      ) => {
+        if (
+          containerRef.current &&
+          !containerRef.current.contains(
+            event.target as Node,
+          )
+        ) {
+          setMenuOpen(
+            false,
+          )
+          setActiveIndex(
+            -1,
+          )
+        }
       }
-    }
 
-    document.addEventListener("mousedown", handlePointerDown)
+    document.addEventListener(
+      "mousedown",
+      handlePointerDown,
+    )
 
     return () => {
       document.removeEventListener(
@@ -157,184 +244,308 @@ function ReviewSearch({
     }
   }, [])
 
-  const filteredSuggestions = useMemo(() => {
-    const normalizedQuery = normalizeSearchValue(query)
-
-    if (!normalizedQuery) {
-      return []
-    }
-
-    return suggestions
-      .filter((suggestion) => {
-        const searchableText = normalizeSearchValue(
-          [
-            suggestion.name,
-            suggestion.subtitle,
-            TYPE_LABELS[suggestion.type],
-          ]
-            .filter(Boolean)
-            .join(" "),
+  const filteredSuggestions =
+    useMemo(() => {
+      const normalizedQuery =
+        normalizeSearchValue(
+          query,
         )
 
-        return searchableText.includes(normalizedQuery)
-      })
-      .sort((first, second) => {
-        const priorityDifference =
-          getMatchPriority(first, normalizedQuery) -
-          getMatchPriority(second, normalizedQuery)
+      if (
+        !normalizedQuery
+      ) {
+        return []
+      }
 
-        if (priorityDifference !== 0) {
-          return priorityDifference
-        }
+      return suggestions
+        .filter(
+          (
+            suggestion,
+          ) => {
+            const searchableText =
+              normalizeSearchValue(
+                [
+                  suggestion.name,
+                  suggestion.subtitle,
+                  TYPE_LABELS[
+                    suggestion
+                      .type
+                  ],
+                ]
+                  .filter(
+                    Boolean,
+                  )
+                  .join(
+                    " ",
+                  ),
+              )
 
-        const typeDifference =
-          TYPE_ORDER.indexOf(first.type) -
-          TYPE_ORDER.indexOf(second.type)
+            return searchableText.includes(
+              normalizedQuery,
+            )
+          },
+        )
+        .sort(
+          (
+            first,
+            second,
+          ) => {
+            const priorityDifference =
+              getMatchPriority(
+                first,
+                normalizedQuery,
+              ) -
+              getMatchPriority(
+                second,
+                normalizedQuery,
+              )
 
-        if (typeDifference !== 0) {
-          return typeDifference
-        }
+            if (
+              priorityDifference !==
+              0
+            ) {
+              return priorityDifference
+            }
 
-        const countDifference =
-          second.reviewCount - first.reviewCount
+            const typeDifference =
+              TYPE_ORDER.indexOf(
+                first.type,
+              ) -
+              TYPE_ORDER.indexOf(
+                second.type,
+              )
 
-        if (countDifference !== 0) {
-          return countDifference
-        }
+            if (
+              typeDifference !==
+              0
+            ) {
+              return typeDifference
+            }
 
-        return first.name.localeCompare(second.name)
-      })
-      .slice(0, 25)
-  }, [query, suggestions])
+            const countDifference =
+              second.reviewCount -
+              first.reviewCount
 
-  const groupedSuggestions = useMemo(() => {
-    const groups: Record<
-      SearchSuggestionType,
-      SearchSuggestion[]
-    > = {
-      brand: [],
-      product: [],
-      reviewer: [],
-      artist: [],
-      genre: [],
-    }
+            if (
+              countDifference !==
+              0
+            ) {
+              return countDifference
+            }
 
-    filteredSuggestions.forEach((suggestion) => {
-      groups[suggestion.type].push(suggestion)
-    })
+            return first.name.localeCompare(
+              second.name,
+            )
+          },
+        )
+        .slice(
+          0,
+          25,
+        )
+    }, [
+      query,
+      suggestions,
+    ])
 
-    return groups
-  }, [filteredSuggestions])
+  const groupedSuggestions =
+    useMemo(() => {
+      const groups: Record<
+        SearchSuggestionType,
+        SearchSuggestion[]
+      > = {
+        brand: [],
+        product: [],
+        reviewer: [],
+        artist: [],
+        genre: [],
+      }
+
+      filteredSuggestions.forEach(
+        (
+          suggestion,
+        ) => {
+          groups[
+            suggestion.type
+          ].push(
+            suggestion,
+          )
+        },
+      )
+
+      return groups
+    }, [
+      filteredSuggestions,
+    ])
 
   useEffect(() => {
-    if (activeIndex < 0) {
+    if (
+      activeIndex < 0
+    ) {
       return
     }
 
-    const activeOption = listRef.current?.querySelector(
-      `#review-search-option-${activeIndex}`,
-    )
+    const activeOption =
+      listRef.current?.querySelector(
+        `#review-search-option-${activeIndex}`,
+      )
 
-    activeOption?.scrollIntoView({
-      block: "nearest",
-    })
+    activeOption?.scrollIntoView(
+      {
+        block:
+          "nearest",
+      },
+    )
   }, [activeIndex])
 
-  const hasQuery = query.trim().length > 0
-  const showMenu = menuOpen && hasQuery
+  const hasQuery =
+    query.trim().length >
+    0
 
-  const selectSuggestion = (
-    suggestion: SearchSuggestion,
-  ) => {
-    onSelect(suggestion)
-    setQuery("")
-    setMenuOpen(false)
-    setActiveIndex(-1)
-  }
+  const showMenu =
+    menuOpen &&
+    hasQuery
 
-  const handleKeyDown = (
-    event: React.KeyboardEvent<HTMLInputElement>,
-  ) => {
-    if (event.key === "Escape") {
-      setMenuOpen(false)
-      setActiveIndex(-1)
-      return
-    }
-
-    if (!showMenu || filteredSuggestions.length === 0) {
-      return
-    }
-
-    if (event.key === "ArrowDown") {
-      event.preventDefault()
-
-      setActiveIndex((current) =>
-        current >= filteredSuggestions.length - 1
-          ? 0
-          : current + 1,
+  const selectSuggestion =
+    (
+      suggestion:
+        SearchSuggestion,
+    ) => {
+      onSelect(
+        suggestion,
       )
-
-      return
-    }
-
-    if (event.key === "ArrowUp") {
-      event.preventDefault()
-
-      setActiveIndex((current) =>
-        current <= 0
-          ? filteredSuggestions.length - 1
-          : current - 1,
+      setQuery("")
+      setMenuOpen(
+        false,
       )
-
-      return
+      setActiveIndex(
+        -1,
+      )
     }
 
-    if (event.key === "Home") {
-      event.preventDefault()
-      setActiveIndex(0)
-      return
-    }
+  const handleKeyDown =
+    (
+      event:
+        React.KeyboardEvent<HTMLInputElement>,
+    ) => {
+      if (
+        event.key ===
+        "Escape"
+      ) {
+        setMenuOpen(
+          false,
+        )
+        setActiveIndex(
+          -1,
+        )
+        return
+      }
 
-    if (event.key === "End") {
-      event.preventDefault()
-      setActiveIndex(filteredSuggestions.length - 1)
-      return
-    }
+      if (
+        !showMenu ||
+        filteredSuggestions.length ===
+          0
+      ) {
+        return
+      }
 
-    if (event.key === "Enter") {
-      event.preventDefault()
+      if (
+        event.key ===
+        "ArrowDown"
+      ) {
+        event.preventDefault()
 
-      const selectedSuggestion =
-        activeIndex >= 0
-          ? filteredSuggestions[activeIndex]
-          : filteredSuggestions[0]
+        setActiveIndex(
+          (
+            current,
+          ) =>
+            current >=
+            filteredSuggestions.length -
+              1
+              ? 0
+              : current +
+                1,
+        )
 
-      if (selectedSuggestion) {
-        selectSuggestion(selectedSuggestion)
+        return
+      }
+
+      if (
+        event.key ===
+        "ArrowUp"
+      ) {
+        event.preventDefault()
+
+        setActiveIndex(
+          (
+            current,
+          ) =>
+            current <=
+            0
+              ? filteredSuggestions.length -
+                1
+              : current -
+                1,
+        )
+
+        return
+      }
+
+      if (
+        event.key ===
+        "Home"
+      ) {
+        event.preventDefault()
+        setActiveIndex(
+          0,
+        )
+        return
+      }
+
+      if (
+        event.key ===
+        "End"
+      ) {
+        event.preventDefault()
+        setActiveIndex(
+          filteredSuggestions.length -
+            1,
+        )
+        return
+      }
+
+      if (
+        event.key ===
+        "Enter"
+      ) {
+        event.preventDefault()
+
+        const selectedSuggestion =
+          activeIndex >=
+          0
+            ? filteredSuggestions[
+                activeIndex
+              ]
+            : filteredSuggestions[
+                0
+              ]
+
+        if (
+          selectedSuggestion
+        ) {
+          selectSuggestion(
+            selectedSuggestion,
+          )
+        }
       }
     }
-  }
 
   return (
     <div
-      ref={containerRef}
-      className="relative mb-10"
+      ref={
+        containerRef
+      }
+      className="relative"
     >
-      <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
-        <label
-          htmlFor="review-search"
-          className="block text-sm font-semibold"
-        >
-          Search what ITGE currently contains
-        </label>
-
-        {!loading && !error && suggestions.length > 0 && (
-          <span className="text-xs text-[var(--muted)]">
-            {suggestions.length} searchable entries
-          </span>
-        )}
-      </div>
-
       <div className="relative">
         <SearchIcon />
 
@@ -342,38 +553,78 @@ function ReviewSearch({
           id="review-search"
           type="search"
           value={query}
-          onChange={(event) => {
-            setQuery(event.target.value)
-            setMenuOpen(true)
-            setActiveIndex(-1)
+          onChange={(
+            event,
+          ) => {
+            setQuery(
+              event.target
+                .value,
+            )
+            setMenuOpen(
+              true,
+            )
+            setActiveIndex(
+              -1,
+            )
           }}
           onFocus={() => {
-            if (query.trim()) {
-              setMenuOpen(true)
+            if (
+              query.trim()
+            ) {
+              setMenuOpen(
+                true,
+              )
             }
           }}
-          onKeyDown={handleKeyDown}
+          onKeyDown={
+            handleKeyDown
+          }
           placeholder="Search gear, brands, artists, genres or members..."
           autoComplete="off"
-          spellCheck={false}
+          spellCheck={
+            false
+          }
+          aria-label="Search ITGE coverage"
           aria-autocomplete="list"
-          aria-expanded={showMenu}
+          aria-expanded={
+            showMenu
+          }
           aria-controls="review-search-results"
           aria-activedescendant={
-            activeIndex >= 0
+            activeIndex >=
+            0
               ? `review-search-option-${activeIndex}`
               : undefined
           }
-          className="w-full rounded-2xl border border-[var(--border)] bg-[var(--surface)] py-4 pl-12 pr-12 text-base text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20"
+          className="w-full rounded-2xl border border-[var(--border)] bg-[var(--background)] py-4 pl-12 pr-28 text-base text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 sm:pr-32"
         />
+
+        {!query &&
+          !loading &&
+          !error &&
+          suggestions.length >
+            0 && (
+            <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-[var(--muted)]">
+              {
+                suggestions.length
+              }{" "}
+              entries
+            </span>
+          )}
 
         {query && (
           <button
             type="button"
             onClick={() => {
-              setQuery("")
-              setMenuOpen(false)
-              setActiveIndex(-1)
+              setQuery(
+                "",
+              )
+              setMenuOpen(
+                false,
+              )
+              setActiveIndex(
+                -1,
+              )
             }}
             aria-label="Clear search"
             className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-[var(--muted)] transition hover:bg-[var(--surface-soft)] hover:text-[var(--foreground)]"
@@ -388,137 +639,178 @@ function ReviewSearch({
           ref={listRef}
           id="review-search-results"
           role="listbox"
-          className="absolute z-30 mt-2 max-h-[32rem] w-full overflow-y-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-2 shadow-xl shadow-black/10 dark:shadow-black/30"
+          className="absolute z-50 mt-2 max-h-[32rem] w-full overflow-y-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-2 shadow-xl shadow-black/10 dark:shadow-black/30"
         >
           {loading ? (
             <div className="flex items-center gap-3 px-4 py-5 text-sm text-[var(--muted)]">
               <LoadingSpinner />
-              Loading available ITGE content...
+              Loading
+              available ITGE
+              content...
             </div>
           ) : error ? (
             <div className="px-4 py-5">
               <p className="font-medium text-red-600 dark:text-red-400">
-                Search is temporarily unavailable
+                Search is
+                temporarily
+                unavailable
               </p>
 
               <p className="mt-1 text-sm text-[var(--muted)]">
                 {error}
               </p>
             </div>
-          ) : filteredSuggestions.length === 0 ? (
+          ) : filteredSuggestions.length ===
+            0 ? (
             <div className="px-4 py-5">
               <p className="font-medium">
-                No matches in ITGE yet
+                No matches in
+                ITGE yet
               </p>
 
               <p className="mt-1 text-sm text-[var(--muted)]">
-                Try other gear, a brand, member,
-                artist, or genre.
+                Try another
+                piece of gear,
+                brand, member,
+                artist or genre.
               </p>
             </div>
           ) : (
-            TYPE_ORDER.map((type) => {
-              const items = groupedSuggestions[type]
+            TYPE_ORDER.map(
+              (type) => {
+                const items =
+                  groupedSuggestions[
+                    type
+                  ]
 
-              if (items.length === 0) {
-                return null
-              }
+                if (
+                  items.length ===
+                  0
+                ) {
+                  return null
+                }
 
-              return (
-                <section
-                  key={type}
-                  className="border-b border-[var(--border)] py-2 last:border-b-0"
-                >
-                  <div className="flex items-center justify-between gap-3 px-3 pb-2 pt-1">
-                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
-                      <SearchTypeIcon type={type} />
+                return (
+                  <section
+                    key={
+                      type
+                    }
+                    className="border-b border-[var(--border)] py-2 last:border-b-0"
+                  >
+                    <div className="flex items-center justify-between gap-3 px-3 pb-2 pt-1">
+                      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
+                        <SearchTypeIcon
+                          type={
+                            type
+                          }
+                        />
 
-                      <span>
-                        {getPluralTypeLabel(type)}
+                        <span>
+                          {getPluralTypeLabel(
+                            type,
+                          )}
+                        </span>
+                      </div>
+
+                      <span className="text-xs text-[var(--muted)]">
+                        {
+                          items.length
+                        }
                       </span>
                     </div>
 
-                    <span className="text-xs text-[var(--muted)]">
-                      {items.length}
-                    </span>
-                  </div>
-
-                  <div>
-                    {items.map((suggestion) => {
-                      const index =
-                        filteredSuggestions.indexOf(
+                    <div>
+                      {items.map(
+                        (
                           suggestion,
-                        )
+                        ) => {
+                          const index =
+                            filteredSuggestions.indexOf(
+                              suggestion,
+                            )
 
-                      const active =
-                        index === activeIndex
+                          const active =
+                            index ===
+                            activeIndex
 
-                      return (
-                        <button
-                          key={`${suggestion.type}-${suggestion.id}`}
-                          id={`review-search-option-${index}`}
-                          type="button"
-                          role="option"
-                          aria-selected={active}
-                          onMouseEnter={() =>
-                            setActiveIndex(index)
-                          }
-                          onClick={() =>
-                            selectSuggestion(suggestion)
-                          }
-                          className={`group flex w-full items-center gap-4 rounded-xl px-4 py-3 text-left transition ${
-                            active
-                              ? "bg-[var(--surface-soft)]"
-                              : "hover:bg-[var(--surface-soft)]"
-                          }`}
-                        >
-                          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--background)] text-[var(--accent)] transition group-hover:border-[var(--accent)]">
-                            <SearchTypeIcon
-                              type={suggestion.type}
-                              large
-                            />
-                          </span>
+                          return (
+                            <button
+                              key={`${suggestion.type}-${suggestion.id}`}
+                              id={`review-search-option-${index}`}
+                              type="button"
+                              role="option"
+                              aria-selected={
+                                active
+                              }
+                              onMouseEnter={() =>
+                                setActiveIndex(
+                                  index,
+                                )
+                              }
+                              onClick={() =>
+                                selectSuggestion(
+                                  suggestion,
+                                )
+                              }
+                              className={`group flex w-full items-center gap-4 rounded-xl px-4 py-3 text-left transition ${
+                                active
+                                  ? "bg-[var(--surface-soft)]"
+                                  : "hover:bg-[var(--surface-soft)]"
+                              }`}
+                            >
+                              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--background)] text-[var(--accent)] transition group-hover:border-[var(--accent)]">
+                                <SearchTypeIcon
+                                  type={
+                                    suggestion.type
+                                  }
+                                  large
+                                />
+                              </span>
 
-                          <span className="min-w-0 flex-1">
-                            <span className="block truncate font-medium">
-                              {highlightMatch(
-                                suggestion.name,
-                                query,
-                              )}
-                            </span>
-
-                            <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-[var(--muted)]">
-                              {suggestion.subtitle && (
-                                <span className="truncate">
+                              <span className="min-w-0 flex-1">
+                                <span className="block truncate font-medium">
                                   {highlightMatch(
-                                    suggestion.subtitle,
+                                    suggestion.name,
                                     query,
                                   )}
                                 </span>
-                              )}
 
-                              {suggestion.subtitle && (
-                                <span aria-hidden="true">
-                                  ·
+                                <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-[var(--muted)]">
+                                  {suggestion.subtitle && (
+                                    <span className="truncate">
+                                      {highlightMatch(
+                                        suggestion.subtitle,
+                                        query,
+                                      )}
+                                    </span>
+                                  )}
+
+                                  {suggestion.subtitle && (
+                                    <span
+                                      aria-hidden="true"
+                                    >
+                                      ·
+                                    </span>
+                                  )}
+
+                                  <span>
+                                    {getCoverageCountLabel(
+                                      suggestion,
+                                    )}
+                                  </span>
                                 </span>
-                              )}
-
-                              <span>
-                                {getCoverageCountLabel(
-                                  suggestion,
-                                )}
                               </span>
-                            </span>
-                          </span>
 
-                          <ChevronIcon />
-                        </button>
-                      )
-                    })}
-                  </div>
-                </section>
-              )
-            })
+                              <ChevronIcon />
+                            </button>
+                          )
+                        },
+                      )}
+                    </div>
+                  </section>
+                )
+              },
+            )
           )}
         </div>
       )}
@@ -527,24 +819,30 @@ function ReviewSearch({
 }
 
 function getPluralTypeLabel(
-  type: SearchSuggestionType,
+  type:
+    SearchSuggestionType,
 ): string {
   switch (type) {
     case "product":
       return "Gear"
+
     case "brand":
       return "Brands"
+
     case "reviewer":
       return "Members"
+
     case "artist":
       return "Artists"
+
     case "genre":
       return "Genres"
   }
 }
 
 function getCoverageCountLabel(
-  suggestion: SearchSuggestion,
+  suggestion:
+    SearchSuggestion,
 ): string {
   const reviewResultCount =
     suggestion.reviewResultCount
@@ -553,17 +851,27 @@ function getCoverageCountLabel(
     suggestion.impressionResultCount
 
   const hasDiscoveryCounts =
-    reviewResultCount !== undefined ||
-    impressionResultCount !== undefined
+    reviewResultCount !==
+      undefined ||
+    impressionResultCount !==
+      undefined
 
-  if (!hasDiscoveryCounts) {
-    const count = suggestion.reviewCount
+  if (
+    !hasDiscoveryCounts
+  ) {
+    const count =
+      suggestion.reviewCount
+
     const reviewWord =
-      count === 1 ? "review" : "reviews"
+      count === 1
+        ? "review"
+        : "reviews"
 
     if (
-      suggestion.type === "artist" ||
-      suggestion.type === "genre"
+      suggestion.type ===
+        "artist" ||
+      suggestion.type ===
+        "genre"
     ) {
       return `Mentioned in ${count} ${reviewWord}`
     }
@@ -571,15 +879,19 @@ function getCoverageCountLabel(
     return `${count} ${reviewWord}`
   }
 
-  const parts: string[] = []
+  const parts: string[] =
+    []
 
   if (
-    reviewResultCount !== undefined &&
-    reviewResultCount > 0
+    reviewResultCount !==
+      undefined &&
+    reviewResultCount >
+      0
   ) {
     parts.push(
       `${reviewResultCount} ${
-        reviewResultCount === 1
+        reviewResultCount ===
+        1
           ? "review"
           : "reviews"
       }`,
@@ -587,57 +899,86 @@ function getCoverageCountLabel(
   }
 
   if (
-    impressionResultCount !== undefined &&
-    impressionResultCount > 0
+    impressionResultCount !==
+      undefined &&
+    impressionResultCount >
+      0
   ) {
     parts.push(
       `${impressionResultCount} ${
-        impressionResultCount === 1
+        impressionResultCount ===
+        1
           ? "impression"
           : "impressions"
       }`,
     )
   }
 
-  if (parts.length === 0) {
+  if (
+    parts.length ===
+    0
+  ) {
     return "0 results"
   }
 
-  return parts.join(" · ")
+  return parts.join(
+    " · ",
+  )
 }
 
 function highlightMatch(
   text: string,
   query: string,
 ) {
-  const trimmedQuery = query.trim()
+  const trimmedQuery =
+    query.trim()
 
-  if (!trimmedQuery) {
+  if (
+    !trimmedQuery
+  ) {
     return text
   }
 
-  const normalizedText = normalizeSearchValue(text)
+  const normalizedText =
+    normalizeSearchValue(
+      text,
+    )
+
   const normalizedQuery =
-    normalizeSearchValue(trimmedQuery)
+    normalizeSearchValue(
+      trimmedQuery,
+    )
 
-  const index = normalizedText.indexOf(normalizedQuery)
+  const index =
+    normalizedText.indexOf(
+      normalizedQuery,
+    )
 
-  if (index === -1) {
+  if (
+    index === -1
+  ) {
     return text
   }
 
   return (
     <>
-      {text.slice(0, index)}
+      {text.slice(
+        0,
+        index,
+      )}
 
       <mark className="rounded bg-[var(--accent)]/20 px-0.5 text-[var(--foreground)]">
         {text.slice(
           index,
-          index + trimmedQuery.length,
+          index +
+            trimmedQuery.length,
         )}
       </mark>
 
-      {text.slice(index + trimmedQuery.length)}
+      {text.slice(
+        index +
+          trimmedQuery.length,
+      )}
     </>
   )
 }
@@ -646,12 +987,14 @@ function SearchTypeIcon({
   type,
   large = false,
 }: {
-  type: SearchSuggestionType
+  type:
+    SearchSuggestionType
   large?: boolean
 }) {
-  const className = large
-    ? "h-5 w-5"
-    : "h-4 w-4"
+  const className =
+    large
+      ? "h-5 w-5"
+      : "h-4 w-4"
 
   switch (type) {
     case "product":
@@ -659,7 +1002,9 @@ function SearchTypeIcon({
         <svg
           aria-hidden="true"
           viewBox="0 0 24 24"
-          className={className}
+          className={
+            className
+          }
           fill="none"
           stroke="currentColor"
           strokeWidth="1.8"
@@ -677,7 +1022,9 @@ function SearchTypeIcon({
         <svg
           aria-hidden="true"
           viewBox="0 0 24 24"
-          className={className}
+          className={
+            className
+          }
           fill="none"
           stroke="currentColor"
           strokeWidth="1.8"
@@ -697,14 +1044,20 @@ function SearchTypeIcon({
         <svg
           aria-hidden="true"
           viewBox="0 0 24 24"
-          className={className}
+          className={
+            className
+          }
           fill="none"
           stroke="currentColor"
           strokeWidth="1.8"
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          <circle cx="12" cy="8" r="4" />
+          <circle
+            cx="12"
+            cy="8"
+            r="4"
+          />
           <path d="M4.5 21a7.5 7.5 0 0 1 15 0" />
         </svg>
       )
@@ -714,7 +1067,9 @@ function SearchTypeIcon({
         <svg
           aria-hidden="true"
           viewBox="0 0 24 24"
-          className={className}
+          className={
+            className
+          }
           fill="none"
           stroke="currentColor"
           strokeWidth="1.8"
@@ -722,8 +1077,16 @@ function SearchTypeIcon({
           strokeLinejoin="round"
         >
           <path d="M9 18V5l10-2v13" />
-          <circle cx="6" cy="18" r="3" />
-          <circle cx="16" cy="16" r="3" />
+          <circle
+            cx="6"
+            cy="18"
+            r="3"
+          />
+          <circle
+            cx="16"
+            cy="16"
+            r="3"
+          />
         </svg>
       )
 
@@ -732,7 +1095,9 @@ function SearchTypeIcon({
         <svg
           aria-hidden="true"
           viewBox="0 0 24 24"
-          className={className}
+          className={
+            className
+          }
           fill="none"
           stroke="currentColor"
           strokeWidth="1.8"
@@ -742,7 +1107,11 @@ function SearchTypeIcon({
           <path d="M4 6h16" />
           <path d="M4 12h16" />
           <path d="M4 18h10" />
-          <circle cx="18" cy="18" r="2" />
+          <circle
+            cx="18"
+            cy="18"
+            r="2"
+          />
         </svg>
       )
   }
@@ -760,7 +1129,11 @@ function SearchIcon() {
       strokeLinejoin="round"
       className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--muted)]"
     >
-      <circle cx="11" cy="11" r="7" />
+      <circle
+        cx="11"
+        cy="11"
+        r="7"
+      />
       <path d="m20 20-3.5-3.5" />
     </svg>
   )

@@ -821,11 +821,12 @@ function buildSuggestionsForType(
       type,
     )
 
-  return ensureSelectedSuggestion(
+  return ensureSelectedSuggestions(
     suggestions,
-    selectedFilters[
-      type
-    ],
+    getSelectedItemsForType(
+      selectedFilters,
+      type,
+    ),
   )
 }
 
@@ -847,27 +848,66 @@ function itemMatchesFilters(
       continue
     }
 
-    const selected =
-      selectedFilters[
-        type
-      ]
+    const selectedItems =
+      getSelectedItemsForType(
+        selectedFilters,
+        type,
+      )
 
-    if (!selected) {
+    if (
+      selectedItems.length ===
+      0
+    ) {
       continue
     }
 
-    if (
-      !itemMatchesFilter(
-        item,
-        type,
-        selected,
+    const matchesOne =
+      selectedItems.some(
+        (selected) =>
+          itemMatchesFilter(
+            item,
+            type,
+            selected,
+          ),
       )
-    ) {
+
+    if (!matchesOne) {
       return false
     }
   }
 
   return true
+}
+
+function getSelectedItemsForType(
+  selectedFilters:
+    SelectedDiscoveryFilters,
+  type:
+    DiscoveryFilterType,
+): DiscoveryFilterSuggestion[] {
+  switch (type) {
+    case "gear_type":
+      return selectedFilters.gear_type
+
+    case "product":
+      return selectedFilters.product
+        ? [
+            selectedFilters.product,
+          ]
+        : []
+
+    case "brand":
+      return selectedFilters.brand
+
+    case "reviewer":
+      return selectedFilters.reviewer
+
+    case "artist":
+      return selectedFilters.artist
+
+    case "genre":
+      return selectedFilters.genre
+  }
 }
 
 function itemMatchesFilter(
@@ -1058,36 +1098,38 @@ function getEntitiesForType(
   }
 }
 
-function ensureSelectedSuggestion(
+function ensureSelectedSuggestions(
   suggestions:
     DiscoveryFilterSuggestion[],
-  selected:
-    DiscoveryFilterSuggestion | null,
+  selectedItems:
+    DiscoveryFilterSuggestion[],
 ): DiscoveryFilterSuggestion[] {
-  if (!selected) {
-    return suggestions
-  }
-
-  const alreadyPresent =
-    suggestions.some(
-      (suggestion) =>
-        suggestion.id ===
-          selected.id &&
-        suggestion.type ===
-          selected.type,
+  const missingSelected =
+    selectedItems.filter(
+      (selected) =>
+        !suggestions.some(
+          (suggestion) =>
+            suggestion.id ===
+              selected.id &&
+            suggestion.type ===
+              selected.type,
+        ),
     )
 
   if (
-    alreadyPresent
+    missingSelected.length ===
+    0
   ) {
     return suggestions
   }
 
   return [
-    {
-      ...selected,
-      reviewCount: 0,
-    },
+    ...missingSelected.map(
+      (selected) => ({
+        ...selected,
+        reviewCount: 0,
+      }),
+    ),
     ...suggestions,
   ]
 }

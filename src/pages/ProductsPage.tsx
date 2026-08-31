@@ -6,8 +6,8 @@ import {
 
 import DirectoryControls from "../components/directory/DirectoryControls"
 import DirectorySearchInput from "../components/directory/DirectorySearchInput"
-import DirectorySortSelect from "../components/directory/DirectorySortSelect"
 import ProductCard from "../components/products/ProductCard"
+import DirectoryResultsBar from "../components/directory/DirectoryResultsBar"
 
 import {
   getProducts,
@@ -558,48 +558,17 @@ function ProductsPage() {
           </div>
         </DirectoryControls>
 
-        <div className="sticky top-0 z-20 -mx-2 mt-8 px-2">
-          <div className="bg-[var(--background)] pt-3">
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border)] pb-4">
-              <div className="flex items-baseline gap-2">
-                <p className="text-2xl font-semibold">
-                  {loading
-                    ? "Loading…"
-                    : `${visibleProducts.length} ${
-                        visibleProducts.length === 1
-                          ? "result"
-                          : "results"
-                      }`}
-                </p>
-
-                {!loading &&
-                  visibleProducts.length > 0 && (
-                    <span className="text-sm text-[var(--muted)]">
-                      showing all
-                    </span>
-                  )}
-              </div>
-
-              {!loading &&
-                !error &&
-                products.length > 0 && (
-                  <div className="w-full sm:w-60">
-                    <DirectorySortSelect
-                      id="gear-sort"
-                      value={sort}
-                      options={SORT_OPTIONS}
-                      onChange={setSort}
-                    />
-                  </div>
-                )}
-            </div>
-          </div>
-
-          <div
-            aria-hidden="true"
-            className="pointer-events-none h-8 bg-gradient-to-b from-[var(--background)] to-transparent"
-          />
-        </div>
+        <DirectoryResultsBar
+          count={visibleProducts.length}
+          singular="result"
+          plural="results"
+          loading={loading}
+          sortValue={sort}
+          sortOptions={SORT_OPTIONS}
+          onSortChange={setSort}
+          sortId="gear-sort"
+          caption="showing all"
+        />
 
         {loading ? (
           <DirectoryMessage>

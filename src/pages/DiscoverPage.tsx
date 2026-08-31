@@ -4,6 +4,7 @@ import {
   useState,
 } from "react"
 
+import DirectoryControls from "../components/directory/DirectoryControls"
 import DiscoveryFilters from "../components/discover/DiscoveryFilters"
 import DiscoveryResults from "../components/discover/DiscoveryResults"
 import ReviewSearch from "../components/reviews/ReviewSearch"
@@ -70,18 +71,24 @@ function DiscoverPage() {
       "newest",
     )
 
-  const [loading, setLoading] =
-    useState(true)
+  const [
+    loading,
+    setLoading,
+  ] = useState(true)
 
-  const [error, setError] =
-    useState<string | null>(
-      null,
-    )
+  const [
+    error,
+    setError,
+  ] =
+    useState<
+      string | null
+    >(null)
 
   const [
     mobileFiltersOpen,
     setMobileFiltersOpen,
-  ] = useState(false)
+  ] =
+    useState(false)
 
   usePageMetadata({
     title:
@@ -124,7 +131,9 @@ function DiscoverPage() {
         }
       } finally {
         if (!cancelled) {
-          setLoading(false)
+          setLoading(
+            false,
+          )
         }
       }
     }
@@ -143,10 +152,12 @@ function DiscoverPage() {
         0
       ) {
         return {
-          matchingItems: [],
-          suggestions: {
-            ...EMPTY_DISCOVERY_SUGGESTIONS,
-          },
+          matchingItems:
+            [],
+          suggestions:
+            {
+              ...EMPTY_DISCOVERY_SUGGESTIONS,
+            },
         }
       }
 
@@ -167,7 +178,10 @@ function DiscoverPage() {
         ...discoveryState
           .matchingItems,
       ].sort(
-        (first, second) =>
+        (
+          first,
+          second,
+        ) =>
           compareDiscoveryItems(
             first,
             second,
@@ -181,42 +195,69 @@ function DiscoverPage() {
     ])
 
   const searchSuggestions =
-    useMemo<SearchSuggestion[]>(
+    useMemo<
+      SearchSuggestion[]
+    >(
       () => [
         ...discoveryState
           .suggestions.product
-          .map((suggestion) => ({
-            ...suggestion,
-            type: "product" as const,
-          })),
+          .map(
+            (
+              suggestion,
+            ) => ({
+              ...suggestion,
+              type:
+                "product" as const,
+            }),
+          ),
 
         ...discoveryState
           .suggestions.brand
-          .map((suggestion) => ({
-            ...suggestion,
-            type: "brand" as const,
-          })),
+          .map(
+            (
+              suggestion,
+            ) => ({
+              ...suggestion,
+              type:
+                "brand" as const,
+            }),
+          ),
 
         ...discoveryState
           .suggestions.artist
-          .map((suggestion) => ({
-            ...suggestion,
-            type: "artist" as const,
-          })),
+          .map(
+            (
+              suggestion,
+            ) => ({
+              ...suggestion,
+              type:
+                "artist" as const,
+            }),
+          ),
 
         ...discoveryState
           .suggestions.genre
-          .map((suggestion) => ({
-            ...suggestion,
-            type: "genre" as const,
-          })),
+          .map(
+            (
+              suggestion,
+            ) => ({
+              ...suggestion,
+              type:
+                "genre" as const,
+            }),
+          ),
 
         ...discoveryState
           .suggestions.reviewer
-          .map((suggestion) => ({
-            ...suggestion,
-            type: "reviewer" as const,
-          })),
+          .map(
+            (
+              suggestion,
+            ) => ({
+              ...suggestion,
+              type:
+                "reviewer" as const,
+            }),
+          ),
       ],
       [
         discoveryState
@@ -224,99 +265,288 @@ function DiscoverPage() {
       ],
     )
 
-  const activeFilterCount =
-    Object.values(
-      selectedFilters,
-    ).filter(Boolean).length
+  const activeFilters =
+    useMemo(
+      () =>
+        flattenSelectedFilters(
+          selectedFilters,
+        ),
+      [
+        selectedFilters,
+      ],
+    )
 
   const hasFilters =
-    activeFilterCount > 0
+    activeFilters.length >
+    0
 
-const handleSelection = (
-  suggestion: DiscoveryFilterSuggestion,
-) => {
-    setSelectedFilters(
-      (current) => {
-        const existing =
-          current[
-            suggestion.type
-          ]
+  const contentCounts =
+    useMemo(
+      () => {
+        const reviewCount =
+          discoveryItems.filter(
+            (item) =>
+              item.type ===
+              "review",
+          ).length
 
-        const selectingSameItem =
-          existing?.id ===
-          suggestion.id
+        const impressionCount =
+          discoveryItems.length -
+          reviewCount
 
         return {
-          ...current,
-
-          [suggestion.type]:
-            selectingSameItem
-              ? null
-              : suggestion,
+          all:
+            discoveryItems.length,
+          review:
+            reviewCount,
+          impression:
+            impressionCount,
         }
       },
+      [
+        discoveryItems,
+      ],
     )
-  }
 
-const removeFilter = (
-  type: DiscoveryFilterType,
-) => {
-    setSelectedFilters(
-      (current) => ({
-        ...current,
-        [type]: null,
-      }),
-    )
-  }
+  const handleSelection =
+    (
+      suggestion:
+        DiscoveryFilterSuggestion,
+    ) => {
+      setSelectedFilters(
+        (current) => {
+          switch (
+            suggestion.type
+          ) {
+            case "product": {
+              const selectingSameItem =
+                current.product
+                  ?.id ===
+                suggestion.id
 
-  const clearFilters = () => {
-    setSelectedFilters({
-      ...EMPTY_DISCOVERY_FILTERS,
-    })
-  }
+              return {
+                ...current,
+                product:
+                  selectingSameItem
+                    ? null
+                    : suggestion,
+              }
+            }
+
+            case "gear_type":
+              return {
+                ...current,
+                gear_type:
+                  toggleSuggestion(
+                    current.gear_type,
+                    suggestion,
+                  ),
+              }
+
+            case "brand":
+              return {
+                ...current,
+                brand:
+                  toggleSuggestion(
+                    current.brand,
+                    suggestion,
+                  ),
+              }
+
+            case "reviewer":
+              return {
+                ...current,
+                reviewer:
+                  toggleSuggestion(
+                    current.reviewer,
+                    suggestion,
+                  ),
+              }
+
+            case "artist":
+              return {
+                ...current,
+                artist:
+                  toggleSuggestion(
+                    current.artist,
+                    suggestion,
+                  ),
+              }
+
+            case "genre":
+              return {
+                ...current,
+                genre:
+                  toggleSuggestion(
+                    current.genre,
+                    suggestion,
+                  ),
+              }
+          }
+        },
+      )
+    }
+
+  const handleSearchSelection =
+    (
+      suggestion:
+        SearchSuggestion,
+    ) => {
+      handleSelection({
+        ...suggestion,
+        type:
+          suggestion.type,
+      })
+    }
+
+  const removeFilter =
+    (
+      type:
+        DiscoveryFilterType,
+      id: number,
+    ) => {
+      setSelectedFilters(
+        (current) => {
+          switch (type) {
+            case "product":
+              return {
+                ...current,
+                product:
+                  current.product
+                    ?.id ===
+                  id
+                    ? null
+                    : current.product,
+              }
+
+            case "gear_type":
+              return {
+                ...current,
+                gear_type:
+                  current.gear_type.filter(
+                    (
+                      item,
+                    ) =>
+                      item.id !==
+                      id,
+                  ),
+              }
+
+            case "brand":
+              return {
+                ...current,
+                brand:
+                  current.brand.filter(
+                    (
+                      item,
+                    ) =>
+                      item.id !==
+                      id,
+                  ),
+              }
+
+            case "reviewer":
+              return {
+                ...current,
+                reviewer:
+                  current.reviewer.filter(
+                    (
+                      item,
+                    ) =>
+                      item.id !==
+                      id,
+                  ),
+              }
+
+            case "artist":
+              return {
+                ...current,
+                artist:
+                  current.artist.filter(
+                    (
+                      item,
+                    ) =>
+                      item.id !==
+                      id,
+                  ),
+              }
+
+            case "genre":
+              return {
+                ...current,
+                genre:
+                  current.genre.filter(
+                    (
+                      item,
+                    ) =>
+                      item.id !==
+                      id,
+                  ),
+              }
+          }
+        },
+      )
+    }
+
+  const clearFilters =
+    () => {
+      setSelectedFilters({
+        gear_type: [],
+        product: null,
+        brand: [],
+        reviewer: [],
+        artist: [],
+        genre: [],
+      })
+    }
 
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-12 text-[var(--foreground)] lg:px-8 lg:py-16">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto max-w-6xl">
         <header className="mb-10 max-w-3xl">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
-            Reviews & impressions
+            Reviews &
+            impressions
           </p>
 
           <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
-            Find the reviews that
-            matter to you.
-          </h1>
+            <span className="block">
+              Find the
+              reviews
+            </span>
 
-          <p className="mt-5 text-lg leading-8 text-[var(--muted)]">
-            Browse all ITGE reviews
-            and listening impressions,
-            or combine gear type,
-            product, brand, member,
-            artist and genre filters
-            to find exactly what
-            you're looking for.
-          </p>
+            <span className="block">
+              that matter to
+              you.
+            </span>
+          </h1>
         </header>
 
-        <div className="mb-6">
-          <ContentTypeSelector
-            value={contentType}
-            onChange={
-              setContentType
-            }
-          />
-        </div>
+        <div className="mb-10">
+          <DirectoryControls>
+            <ContentTypeSelector
+              value={
+                contentType
+              }
+              counts={
+                contentCounts
+              }
+              onChange={
+                setContentType
+              }
+            />
 
-        <div className="mb-10 rounded-3xl border border-[var(--border)] bg-[var(--surface-soft)] p-5 sm:p-7">
-          <ReviewSearch
-            onSelect={
-              handleSelection
-            }
-            suggestionsOverride={
-              searchSuggestions
-            }
-          />
+            <div className="mt-5 border-t border-[var(--border)] pt-5">
+              <ReviewSearch
+                onSelect={
+                  handleSearchSelection
+                }
+                suggestionsOverride={
+                  searchSuggestions
+                }
+              />
+            </div>
+          </DirectoryControls>
         </div>
 
         <div className="mb-6 flex items-center justify-between gap-4 lg:hidden">
@@ -324,7 +554,9 @@ const removeFilter = (
             type="button"
             onClick={() =>
               setMobileFiltersOpen(
-                (current) =>
+                (
+                  current,
+                ) =>
                   !current,
               )
             }
@@ -338,26 +570,29 @@ const removeFilter = (
 
             Filters
 
-            {activeFilterCount >
+            {activeFilters.length >
               0 &&
-              ` (${activeFilterCount})`}
+              ` (${activeFilters.length})`}
           </button>
 
-          <span className="text-sm text-[var(--muted)]">
-            {loading
-              ? "Loading..."
-              : `${sortedItems.length} ${
-                  sortedItems.length === 1
-                    ? "result"
-                    : "results"
-                }`}
-          </span>
+          {activeFilters.length >
+            0 && (
+            <button
+              type="button"
+              onClick={
+                clearFilters
+              }
+              className="text-sm font-semibold text-[var(--accent)] transition hover:opacity-75"
+            >
+              Clear
+            </button>
+          )}
         </div>
 
         {mobileFiltersOpen && (
           <div
             id="mobile-discovery-filters"
-            className="mb-8 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-5 lg:hidden"
+            className="mb-8 lg:hidden"
           >
             {loading ? (
               <p className="text-sm text-[var(--muted)]">
@@ -380,9 +615,6 @@ const removeFilter = (
                 onSelect={
                   handleSelection
                 }
-                onRemove={
-                  removeFilter
-                }
                 onClear={
                   clearFilters
                 }
@@ -391,18 +623,18 @@ const removeFilter = (
           </div>
         )}
 
-        <div className="grid items-start gap-10 lg:grid-cols-[18rem_minmax(0,1fr)] xl:grid-cols-[20rem_minmax(0,1fr)]">
-          <aside className="hidden self-start lg:sticky lg:top-6 lg:block">
-            <div className="max-h-[calc(100vh-3rem)] overflow-y-auto rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-5">
+        <div className="grid items-start gap-8 lg:min-h-[calc(100vh-7rem)] lg:grid-cols-[17rem_minmax(0,1fr)]">
+          <aside className="hidden self-start lg:sticky lg:top-23 lg:block">
+            <div className="max-h-[calc(100vh-7rem)] overflow-y-auto">
               {loading ? (
-                <p className="text-sm text-[var(--muted)]">
+                <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-5 text-sm text-[var(--muted)]">
                   Loading
                   filters...
-                </p>
+                </div>
               ) : error ? (
-                <p className="text-sm text-red-600 dark:text-red-400">
+                <div className="rounded-3xl border border-red-500/30 bg-red-500/10 p-5 text-sm text-red-600 dark:text-red-400">
                   {error}
-                </p>
+                </div>
               ) : (
                 <DiscoveryFilters
                   groupedSuggestions={
@@ -415,9 +647,6 @@ const removeFilter = (
                   onSelect={
                     handleSelection
                   }
-                  onRemove={
-                    removeFilter
-                  }
                   onClear={
                     clearFilters
                   }
@@ -427,12 +656,18 @@ const removeFilter = (
           </aside>
 
           <DiscoveryResults
-            items={sortedItems}
+            items={
+              sortedItems
+            }
             contentType={
               contentType
             }
-            loading={loading}
-            error={error}
+            loading={
+              loading
+            }
+            error={
+              error
+            }
             hasFilters={
               hasFilters
             }
@@ -441,6 +676,12 @@ const removeFilter = (
             }
             onSortChange={
               setSortOption
+            }
+            activeFilters={
+              activeFilters
+            }
+            onRemoveFilter={
+              removeFilter
             }
           />
         </div>
@@ -451,16 +692,25 @@ const removeFilter = (
 
 function ContentTypeSelector({
   value,
+  counts,
   onChange,
 }: {
-  value: DiscoveryContentType
+  value:
+    DiscoveryContentType
+
+  counts: Record<
+    DiscoveryContentType,
+    number
+  >
 
   onChange: (
-    value: DiscoveryContentType,
+    value:
+      DiscoveryContentType,
   ) => void
 }) {
   const options: {
-    value: DiscoveryContentType
+    value:
+      DiscoveryContentType
     label: string
   }[] = [
     {
@@ -469,21 +719,24 @@ function ContentTypeSelector({
     },
     {
       value: "review",
-      label: "Reviews",
+      label:
+        "Reviews",
     },
     {
-      value: "impression",
-      label: "Impressions",
+      value:
+        "impression",
+      label:
+        "Impressions",
     },
   ]
 
   return (
     <div>
-      <p className="mb-3 text-sm font-semibold text-[var(--muted)]">
+      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
         Content type
       </p>
 
-      <div className="inline-flex flex-wrap gap-2 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-2">
+      <div className="mt-4 flex flex-wrap gap-2">
         {options.map(
           (option) => {
             const selected =
@@ -504,15 +757,29 @@ function ContentTypeSelector({
                 aria-pressed={
                   selected
                 }
-                className={`rounded-xl px-5 py-2.5 text-sm font-semibold transition ${
+                className={`rounded-xl border px-5 py-2.5 text-sm font-semibold transition ${
                   selected
-                    ? "bg-[var(--accent)] text-[var(--accent-foreground)]"
-                    : "text-[var(--muted)] hover:bg-[var(--surface-soft)] hover:text-[var(--foreground)]"
+                    ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-foreground)]"
+                    : "border-[var(--border)] bg-[var(--background)] text-[var(--muted)] hover:border-[var(--accent)] hover:text-[var(--foreground)]"
                 }`}
               >
                 {
                   option.label
-                }
+                }{" "}
+                <span
+                  className={
+                    selected
+                      ? "opacity-75"
+                      : "text-[var(--muted)]"
+                  }
+                >
+                  {
+                    counts[
+                      option
+                        .value
+                    ]
+                  }
+                </span>
               </button>
             )
           },
@@ -522,26 +789,89 @@ function ContentTypeSelector({
   )
 }
 
+function toggleSuggestion(
+  current:
+    DiscoveryFilterSuggestion[],
+  suggestion:
+    DiscoveryFilterSuggestion,
+): DiscoveryFilterSuggestion[] {
+  const exists =
+    current.some(
+      (item) =>
+        item.id ===
+          suggestion.id &&
+        item.type ===
+          suggestion.type,
+    )
+
+  if (exists) {
+    return current.filter(
+      (item) =>
+        !(
+          item.id ===
+            suggestion.id &&
+          item.type ===
+            suggestion.type
+        ),
+    )
+  }
+
+  return [
+    ...current,
+    suggestion,
+  ]
+}
+
+function flattenSelectedFilters(
+  selectedFilters:
+    SelectedDiscoveryFilters,
+): DiscoveryFilterSuggestion[] {
+  return [
+    ...selectedFilters.gear_type,
+
+    ...(selectedFilters.product
+      ? [
+          selectedFilters.product,
+        ]
+      : []),
+
+    ...selectedFilters.brand,
+    ...selectedFilters.reviewer,
+    ...selectedFilters.artist,
+    ...selectedFilters.genre,
+  ]
+}
+
 function compareDiscoveryItems(
-  first: DiscoveryItem,
-  second: DiscoveryItem,
-  sortOption: SortOption,
+  first:
+    DiscoveryItem,
+  second:
+    DiscoveryItem,
+  sortOption:
+    SortOption,
 ): number {
   switch (sortOption) {
     case "oldest":
       return (
-        getTimestamp(first) -
-        getTimestamp(second)
+        getTimestamp(
+          first,
+        ) -
+        getTimestamp(
+          second,
+        )
       )
 
     case "product":
       return getProductName(
         first,
       ).localeCompare(
-        getProductName(second),
+        getProductName(
+          second,
+        ),
         undefined,
         {
-          sensitivity: "base",
+          sensitivity:
+            "base",
         },
       )
 
@@ -549,36 +879,49 @@ function compareDiscoveryItems(
       return getReviewerName(
         first,
       ).localeCompare(
-        getReviewerName(second),
+        getReviewerName(
+          second,
+        ),
         undefined,
         {
-          sensitivity: "base",
+          sensitivity:
+            "base",
         },
       )
 
     case "newest":
     default:
       return (
-        getTimestamp(second) -
-        getTimestamp(first)
+        getTimestamp(
+          second,
+        ) -
+        getTimestamp(
+          first,
+        )
       )
   }
 }
 
 function getTimestamp(
-  item: DiscoveryItem,
+  item:
+    DiscoveryItem,
 ): number {
   const value =
-    item.type === "review"
-      ? item.review.publishedAt
-      : item.impression.publishedAt
+    item.type ===
+    "review"
+      ? item.review
+          .publishedAt
+      : item.impression
+          .publishedAt
 
   if (!value) {
     return 0
   }
 
   const timestamp =
-    new Date(value).getTime()
+    new Date(
+      value,
+    ).getTime()
 
   return Number.isNaN(
     timestamp,
@@ -588,10 +931,12 @@ function getTimestamp(
 }
 
 function getProductName(
-  item: DiscoveryItem,
+  item:
+    DiscoveryItem,
 ): string {
   if (
-    item.type === "review"
+    item.type ===
+    "review"
   ) {
     return `${item.review.brand} ${item.review.model}`
   }
@@ -600,11 +945,13 @@ function getProductName(
 }
 
 function getReviewerName(
-  item: DiscoveryItem,
+  item:
+    DiscoveryItem,
 ): string {
   return item.type ===
     "review"
-    ? item.review.reviewer
+    ? item.review
+        .reviewer
     : item.impression
         .reviewer.name
 }

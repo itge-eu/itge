@@ -8,7 +8,7 @@ import { Link } from "react-router"
 
 import DirectoryControls from "../components/directory/DirectoryControls"
 import DirectorySearchInput from "../components/directory/DirectorySearchInput"
-import DirectorySortSelect from "../components/directory/DirectorySortSelect"
+import DirectoryResultsBar from "../components/directory/DirectoryResultsBar"
 import ReviewerAvatar from "../components/reviewers/ReviewerAvatar"
 
 import {
@@ -23,15 +23,47 @@ type MemberSortMode =
   | "activity"
   | "alphabetical"
 
+type MemberStatus =
+  | "all"
+  | "active"
+  | "former"
+
+const SORT_OPTIONS: {
+  value: MemberSortMode
+  label: string
+}[] = [
+  {
+    value: "activity",
+    label: "Most active",
+  },
+  {
+    value: "alphabetical",
+    label: "A–Z",
+  },
+]
+
 function ReviewersPage() {
-  const [reviewers, setReviewers] = useState<
-    ReviewerSummary[]
-  >([])
+  const [
+    reviewers,
+    setReviewers,
+  ] =
+    useState<
+      ReviewerSummary[]
+    >([])
 
   const [
     searchQuery,
     setSearchQuery,
-  ] = useState("")
+  ] =
+    useState("")
+
+  const [
+    status,
+    setStatus,
+  ] =
+    useState<MemberStatus>(
+      "all",
+    )
 
   const [
     sortMode,
@@ -41,14 +73,23 @@ function ReviewersPage() {
       "activity",
     )
 
-  const [loading, setLoading] =
+  const [
+    loading,
+    setLoading,
+  ] =
     useState(true)
 
-  const [error, setError] =
-    useState<string | null>(null)
+  const [
+    error,
+    setError,
+  ] =
+    useState<string | null>(
+      null,
+    )
 
   usePageMetadata({
-    title: "Members | ITGE",
+    title:
+      "Members | ITGE",
 
     description:
       "Meet the members of IEM Tour Group Europe and explore their reviews and listening impressions.",
@@ -66,7 +107,9 @@ function ReviewersPage() {
           await getReviewers()
 
         if (!cancelled) {
-          setReviewers(result)
+          setReviewers(
+            result,
+          )
         }
       } catch (loadError) {
         console.error(
@@ -81,7 +124,9 @@ function ReviewersPage() {
         }
       } finally {
         if (!cancelled) {
-          setLoading(false)
+          setLoading(
+            false,
+          )
         }
       }
     }
@@ -93,6 +138,20 @@ function ReviewersPage() {
     }
   }, [])
 
+  const activeCount =
+    useMemo(
+      () =>
+        reviewers.filter(
+          (reviewer) =>
+            reviewer.active,
+        ).length,
+      [reviewers],
+    )
+
+  const formerCount =
+    reviewers.length -
+    activeCount
+
   const visibleReviewers =
     useMemo(() => {
       const normalizedQuery =
@@ -100,105 +159,209 @@ function ReviewersPage() {
           .trim()
           .toLocaleLowerCase()
 
-      if (!normalizedQuery) {
-        return reviewers
-      }
+      const filtered =
+        reviewers.filter(
+          (reviewer) => {
+            if (
+              status ===
+                "active" &&
+              !reviewer.active
+            ) {
+              return false
+            }
 
-      return reviewers.filter(
-        (reviewer) => {
-          const country =
-            reviewer.country
-              ? countryCodeToName(
-                  reviewer.country,
-                )
-              : ""
+            if (
+              status ===
+                "former" &&
+              reviewer.active
+            ) {
+              return false
+            }
 
-          const searchable =
-            [
-              reviewer.name,
-              reviewer.bio,
-              reviewer.country,
-              country,
-            ]
-              .filter(Boolean)
-              .join(" ")
-              .toLocaleLowerCase()
+            if (
+              !normalizedQuery
+            ) {
+              return true
+            }
 
-          return searchable.includes(
-            normalizedQuery,
-          )
-        },
+            const country =
+              reviewer.country
+                ? countryCodeToName(
+                    reviewer.country,
+                  )
+                : ""
+
+            const searchable =
+              [
+                reviewer.name,
+                reviewer.bio,
+                reviewer.country,
+                country,
+              ]
+                .filter(Boolean)
+                .join(" ")
+                .toLocaleLowerCase()
+
+            return searchable.includes(
+              normalizedQuery,
+            )
+          },
+        )
+
+      return [...filtered].sort(
+        (
+          first,
+          second,
+        ) =>
+          sortReviewers(
+            first,
+            second,
+            sortMode,
+          ),
       )
     }, [
       reviewers,
       searchQuery,
+      status,
+      sortMode,
     ])
 
-  const activeReviewers =
-    visibleReviewers
-      .filter(
-        (reviewer) =>
-          reviewer.active,
-      )
-      .sort(
-        (first, second) =>
-          sortReviewers(
-            first,
-            second,
-            sortMode,
-          ),
-      )
+  const hasFilters =
+    status !== "all" ||
+    Boolean(
+      searchQuery.trim(),
+    )
 
-  const formerReviewers =
-    visibleReviewers
-      .filter(
-        (reviewer) =>
-          !reviewer.active,
-      )
-      .sort(
-        (first, second) =>
-          sortReviewers(
-            first,
-            second,
-            sortMode,
-          ),
-      )
+  const activeFilterCount =
+    (status !== "all"
+      ? 1
+      : 0) +
+    (searchQuery.trim()
+      ? 1
+      : 0)
+
+  function clearFilters() {
+    setStatus(
+      "all",
+    )
+
+    setSearchQuery(
+      "",
+    )
+  }
 
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
       <div className="mx-auto max-w-6xl">
-        <header className="mb-12">
-          <p className="text-sm uppercase tracking-[0.2em] text-[var(--accent)]">
+        <header>
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
             ITGE community
           </p>
 
-          <h1 className="mt-4 text-5xl font-semibold">
+          <h1 className="mt-4 text-5xl font-semibold tracking-tight sm:text-6xl">
             Members
           </h1>
 
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-[var(--muted)]">
-            Meet the members of ITGE sharing reviews,
-            listening impressions and their experiences
-            with gear touring across Europe.
+          <p className="mt-5 max-w-2xl text-lg leading-8 text-[var(--muted)]">
+            Meet the members of
+            ITGE sharing reviews,
+            listening impressions
+            and their experiences
+            with gear touring
+            across Europe.
           </p>
         </header>
 
         {loading ? (
-          <p className="text-[var(--muted)]">
+          <DirectoryMessage>
             Loading members…
-          </p>
+          </DirectoryMessage>
         ) : error ? (
-          <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-5 py-4">
+          <div className="mt-10 rounded-2xl border border-red-500/30 bg-red-500/10 px-5 py-4">
             {error}
           </div>
-        ) : reviewers.length === 0 ? (
-          <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
-            No members are available yet.
-          </div>
+        ) : reviewers.length ===
+          0 ? (
+          <DirectoryMessage>
+            No members are
+            available yet.
+          </DirectoryMessage>
         ) : (
           <>
-            <DirectoryControls>
-              <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
+            <DirectoryControls className="mt-10">
+              <div className="flex items-start justify-between gap-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+                  Status
+                </p>
+
+                {hasFilters && (
+                  <button
+                    type="button"
+                    onClick={
+                      clearFilters
+                    }
+                    className="shrink-0 text-sm font-semibold text-[var(--accent)] transition hover:opacity-75"
+                  >
+                    Clear (
+                    {
+                      activeFilterCount
+                    }
+                    )
+                  </button>
+                )}
+              </div>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                <StatusButton
+                  label="All"
+                  count={
+                    reviewers.length
+                  }
+                  active={
+                    status ===
+                    "all"
+                  }
+                  onClick={() =>
+                    setStatus(
+                      "all",
+                    )
+                  }
+                />
+
+                <StatusButton
+                  label="Active"
+                  count={
+                    activeCount
+                  }
+                  active={
+                    status ===
+                    "active"
+                  }
+                  onClick={() =>
+                    setStatus(
+                      "active",
+                    )
+                  }
+                />
+
+                <StatusButton
+                  label="Former"
+                  count={
+                    formerCount
+                  }
+                  active={
+                    status ===
+                    "former"
+                  }
+                  onClick={() =>
+                    setStatus(
+                      "former",
+                    )
+                  }
+                />
+              </div>
+
+              <div className="mt-5 border-t border-[var(--border)] pt-5">
                 <DirectorySearchInput
                   id="member-search"
                   value={
@@ -209,157 +372,105 @@ function ReviewersPage() {
                   }
                   placeholder="Search members…"
                 />
-
-                <DirectorySortSelect
-                  id="member-sort"
-                  value={sortMode}
-                  onChange={
-                    setSortMode
-                  }
-                  options={[
-                    {
-                      value:
-                        "activity",
-                      label:
-                        "Most active",
-                    },
-                    {
-                      value:
-                        "alphabetical",
-                      label:
-                        "A–Z",
-                    },
-                  ]}
-                />
               </div>
             </DirectoryControls>
 
-            <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-              <p className="text-sm text-[var(--muted)]">
-                {
-                  visibleReviewers.length
-                }{" "}
-                {visibleReviewers.length === 1
-                  ? "member"
-                  : "members"}
-              </p>
-
-              {searchQuery.trim() && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    setSearchQuery(
-                      "",
-                    )
-                  }
-                  className="text-sm font-semibold text-[var(--accent)] transition hover:opacity-75"
-                >
-                  Clear search
-                </button>
-              )}
-            </div>
+            <DirectoryResultsBar
+              count={
+                visibleReviewers.length
+              }
+              singular="result"
+              plural="results"
+              sortValue={
+                sortMode
+              }
+              sortOptions={
+                SORT_OPTIONS
+              }
+              onSortChange={
+                setSortMode
+              }
+              sortId="member-sort"
+              caption="showing all"
+            />
 
             {visibleReviewers.length ===
             0 ? (
-              <div className="mt-6 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
+              <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
                 <p className="font-semibold">
-                  No matching members
+                  No matching
+                  members
                 </p>
 
                 <p className="mt-2 text-sm text-[var(--muted)]">
-                  No members match{" "}
-                  <span className="font-medium text-[var(--foreground)]">
-                    “{searchQuery.trim()}”
-                  </span>
-                  .
+                  No members match
+                  the current
+                  filters.
                 </p>
               </div>
             ) : (
-              <>
-                {activeReviewers.length >
-                  0 && (
-                  <section className="mt-10">
-                    <div className="mb-7">
-                      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
-                        ITGE community
-                      </p>
-
-                      <h2 className="mt-2 text-3xl font-semibold tracking-tight">
-                        Active members
-                      </h2>
-
-                      <p className="mt-2 text-[var(--muted)]">
-                        Members currently participating in
-                        IEM Tour Group Europe.
-                      </p>
-                    </div>
-
-                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                      {activeReviewers.map(
-                        (reviewer) => (
-                          <ReviewerCard
-                            key={
-                              reviewer.id
-                            }
-                            reviewer={
-                              reviewer
-                            }
-                          />
-                        ),
-                      )}
-                    </div>
-                  </section>
+              <section className="grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {visibleReviewers.map(
+                  (
+                    reviewer,
+                  ) => (
+                    <ReviewerCard
+                      key={
+                        reviewer.id
+                      }
+                      reviewer={
+                        reviewer
+                      }
+                    />
+                  ),
                 )}
-
-                {formerReviewers.length >
-                  0 && (
-                  <section
-                    className={
-                      activeReviewers.length >
-                      0
-                        ? "mt-16 border-t border-[var(--border)] pt-14"
-                        : "mt-10"
-                    }
-                  >
-                    <div className="mb-7">
-                      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-                        ITGE archive
-                      </p>
-
-                      <h2 className="mt-2 text-3xl font-semibold tracking-tight">
-                        Former members
-                      </h2>
-
-                      <p className="mt-2 max-w-2xl text-[var(--muted)]">
-                        Previous members of ITGE. Their
-                        reviews and listening impressions
-                        remain part of our library.
-                      </p>
-                    </div>
-
-                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                      {formerReviewers.map(
-                        (reviewer) => (
-                          <ReviewerCard
-                            key={
-                              reviewer.id
-                            }
-                            reviewer={
-                              reviewer
-                            }
-                            former
-                          />
-                        ),
-                      )}
-                    </div>
-                  </section>
-                )}
-              </>
+              </section>
             )}
           </>
         )}
       </div>
     </main>
+  )
+}
+
+function StatusButton({
+  label,
+  count,
+  active,
+  onClick,
+}: {
+  label: string
+  count: number
+  active: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={
+        onClick
+      }
+      aria-pressed={
+        active
+      }
+      className={`rounded-xl px-5 py-2.5 text-sm font-semibold transition ${
+        active
+          ? "bg-[var(--accent)] text-[var(--accent-foreground)]"
+          : "border border-[var(--border)] bg-[var(--background)] hover:border-[var(--accent)]"
+      }`}
+    >
+      {label}
+
+      <span
+        className={`ml-2 ${
+          active
+            ? "opacity-75"
+            : "text-[var(--muted)]"
+        }`}
+      >
+        {count}
+      </span>
+    </button>
   )
 }
 
@@ -374,6 +485,11 @@ function sortReviewers(
   ) {
     return first.name.localeCompare(
       second.name,
+      undefined,
+      {
+        sensitivity:
+          "base",
+      },
     )
   }
 
@@ -397,94 +513,170 @@ function sortReviewers(
 
   return first.name.localeCompare(
     second.name,
+    undefined,
+    {
+      sensitivity:
+        "base",
+    },
   )
 }
 
 function ReviewerCard({
   reviewer,
-  former = false,
 }: {
-  reviewer: ReviewerSummary
-  former?: boolean
+  reviewer:
+    ReviewerSummary
 }) {
   return (
     <Link
       to={`/members/${reviewer.slug}`}
-      className={`group rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 transition hover:-translate-y-1 hover:border-[var(--accent)] ${
-        former ? "opacity-80" : ""
-      }`}
+      className="group flex h-full min-h-[19rem] flex-col rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 transition hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
     >
-      <div className="flex items-center gap-4">
+      <div className="flex min-h-20 items-start gap-4">
         <div className="relative shrink-0">
           <ReviewerAvatar
-            name={reviewer.name}
-            slug={reviewer.slug}
+            name={
+              reviewer.name
+            }
+            slug={
+              reviewer.slug
+            }
             size="lg"
             shape="rounded"
           />
 
-          {former && (
-            <div className="pointer-events-none absolute inset-0 rounded-2xl bg-black/35" />
+          {!reviewer.active && (
+            <div className="pointer-events-none absolute inset-0 rounded-2xl bg-black/25" />
           )}
         </div>
 
-        <div className="min-w-0">
-          <h3 className="truncate text-xl font-semibold transition group-hover:text-[var(--accent)]">
-            {reviewer.name}
-          </h3>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-3">
+            <h2 className="min-w-0 truncate text-xl font-semibold transition group-hover:text-[var(--accent)]">
+              {
+                reviewer.name
+              }
+            </h2>
+
+            <StatusPill
+              active={
+                reviewer.active
+              }
+            />
+          </div>
 
           {reviewer.country && (
-            <p className="mt-1 flex items-center gap-2 text-sm text-[var(--muted)]">
+            <p className="mt-2 flex items-center gap-2 text-sm text-[var(--muted)]">
               <span
                 className={`fi fi-${reviewer.country.toLowerCase()} rounded-sm`}
                 aria-hidden="true"
               />
 
-              <span>
+              <span className="truncate">
                 {countryCodeToName(
                   reviewer.country,
                 )}
               </span>
             </p>
           )}
+        </div>
+      </div>
 
-          {former && (
-            <p className="mt-2 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
-              Former member
+      <div className="mt-5 border-t border-[var(--border)] pt-5">
+        <div className="min-h-[3rem]">
+          {reviewer.bio ? (
+            <p className="line-clamp-2 text-sm leading-6 text-[var(--muted)]">
+              {
+                reviewer.bio
+              }
+            </p>
+          ) : (
+            <p
+              aria-hidden="true"
+              className="text-sm leading-6 text-transparent"
+            >
+              Member biography
+              placeholder.
             </p>
           )}
         </div>
       </div>
 
-      {reviewer.bio && (
-        <p className="mt-5 line-clamp-3 text-sm leading-6 text-[var(--muted)]">
-          {reviewer.bio}
-        </p>
-      )}
+      <div className="mt-auto grid grid-cols-2 gap-4 pt-6">
+        <MemberMetric
+          value={
+            reviewer.reviewCount
+          }
+          singular="review"
+          plural="reviews"
+        />
 
-      <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-semibold text-[var(--accent)]">
-        <span>
-          {reviewer.reviewCount}{" "}
-          {reviewer.reviewCount === 1
-            ? "review"
-            : "reviews"}
-        </span>
-
-        <span
-          aria-hidden="true"
-          className="text-[var(--muted)]"
-        >
-          ·
-        </span>
-
-        <span>
-          {reviewer.impressionCount}{" "}
-          {reviewer.impressionCount === 1
-            ? "impression"
-            : "impressions"}
-        </span>
+        <MemberMetric
+          value={
+            reviewer.impressionCount
+          }
+          singular="impression"
+          plural="impressions"
+        />
       </div>
     </Link>
+  )
+}
+
+function StatusPill({
+  active,
+}: {
+  active: boolean
+}) {
+  return (
+    <span
+      className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold ${
+        active
+          ? "border-[var(--accent)]/35 bg-[var(--accent)]/10 text-[var(--accent)]"
+          : "border-[var(--border)] bg-[var(--surface-soft)] text-[var(--muted)]"
+      }`}
+    >
+      {active
+        ? "Active"
+        : "Former"}
+    </span>
+  )
+}
+
+function MemberMetric({
+  value,
+  singular,
+  plural,
+}: {
+  value: number
+  singular: string
+  plural: string
+}) {
+  return (
+    <div className="flex flex-col items-center text-center">
+      <p className="text-xl font-semibold">
+        {value}
+      </p>
+
+      <p className="mt-1 text-xs text-[var(--muted)]">
+        {value === 1
+          ? singular
+          : plural}
+      </p>
+    </div>
+  )
+}
+
+function DirectoryMessage({
+  children,
+}: {
+  children:
+    React.ReactNode
+}) {
+  return (
+    <div className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
+      {children}
+    </div>
   )
 }
 

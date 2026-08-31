@@ -19,10 +19,6 @@ type DiscoveryFiltersProps = {
     suggestion: DiscoveryFilterSuggestion,
   ) => void
 
-  onRemove: (
-    type: DiscoveryFilterType,
-  ) => void
-
   onClear: () => void
 }
 
@@ -67,132 +63,101 @@ function DiscoveryFilters({
   groupedSuggestions,
   selectedFilters,
   onSelect,
-  onRemove,
   onClear,
 }: DiscoveryFiltersProps) {
-  const activeFilters =
-    FILTER_GROUPS.flatMap(
-      ({ type }) => {
-        const filter =
-          selectedFilters[type]
-
-        return filter
-          ? [filter]
-          : []
-      },
+  const activeFilterCount =
+    getActiveFilterCount(
+      selectedFilters,
     )
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
-      <div className="border-b border-[var(--border)] px-5 py-5">
-        <h2 className="text-lg font-semibold">
-          Filters
-        </h2>
+    <div className="flex max-h-[calc(100vh-12rem)] flex-col overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)]">
+      <div className="shrink-0 border-b border-[var(--border)] bg-[var(--surface)] px-5 py-5">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+            Filters
+          </h2>
 
-        <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
-          Combine categories to
-          narrow the coverage.
-        </p>
-      </div>
-
-      {activeFilters.length >
-        0 && (
-        <div className="border-b border-[var(--border)] bg-[var(--surface-soft)] px-5 py-4">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
-              Active filters
-            </p>
-
+          {activeFilterCount > 0 && (
             <button
               type="button"
               onClick={onClear}
-              className="shrink-0 text-sm font-medium text-[var(--accent)] transition hover:opacity-75"
+              className="shrink-0 text-sm font-semibold text-[var(--accent)] transition hover:opacity-75"
             >
-              Clear all
+              Clear ({activeFilterCount})
             </button>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {activeFilters.map(
-              (filter) => (
-                <button
-                  key={
-                    filter.type
-                  }
-                  type="button"
-                  onClick={() =>
-                    onRemove(
-                      filter.type,
-                    )
-                  }
-                  aria-label={`Remove ${filter.name} filter`}
-                  className="inline-flex max-w-full items-center gap-2 rounded-full border border-[var(--accent)]/40 bg-[var(--accent)]/10 px-3 py-2 text-xs font-medium transition hover:border-[var(--accent)]"
-                >
-                  <span className="truncate">
-                    {
-                      filter.name
-                    }
-                  </span>
-
-                  <CloseIcon />
-                </button>
-              ),
-            )}
-          </div>
+          )}
         </div>
-      )}
 
-      <div className="px-5">
-        {FILTER_GROUPS.map(
-          (group) => (
-            <DiscoveryFilterGroup
-              key={
-                group.type
-              }
-              type={
-                group.type
-              }
-              title={
-                group.title
-              }
-              items={
-                groupedSuggestions[
-                  group.type
-                ]
-              }
-              selectedItem={
-                selectedFilters[
-                  group.type
-                ]
-              }
-              onSelect={
-                onSelect
-              }
-              defaultOpen={
-                group.defaultOpen
-              }
-            />
-          ),
-        )}
+        <p className="mt-2 text-sm text-[var(--muted)]">
+          Combine to narrow the coverage.
+        </p>
+      </div>
+
+      <div className="min-h-0 overflow-y-auto px-5">
+        {FILTER_GROUPS.map((group) => (
+          <DiscoveryFilterGroup
+            key={group.type}
+            type={group.type}
+            title={group.title}
+            items={groupedSuggestions[group.type]}
+            selectedItems={getSelectedItems(
+              selectedFilters,
+              group.type,
+            )}
+            onSelect={onSelect}
+            defaultOpen={group.defaultOpen}
+          />
+        ))}
       </div>
     </div>
   )
 }
 
-function CloseIcon() {
+function getSelectedItems(
+  selectedFilters:
+    SelectedDiscoveryFilters,
+  type:
+    DiscoveryFilterType,
+): DiscoveryFilterSuggestion[] {
+  switch (type) {
+    case "gear_type":
+      return selectedFilters.gear_type
+
+    case "product":
+      return selectedFilters.product
+        ? [
+            selectedFilters.product,
+          ]
+        : []
+
+    case "brand":
+      return selectedFilters.brand
+
+    case "reviewer":
+      return selectedFilters.reviewer
+
+    case "artist":
+      return selectedFilters.artist
+
+    case "genre":
+      return selectedFilters.genre
+  }
+}
+
+function getActiveFilterCount(
+  selectedFilters:
+    SelectedDiscoveryFilters,
+): number {
   return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 24 24"
-      className="h-3.5 w-3.5 shrink-0"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-    >
-      <path d="m6 6 12 12" />
-      <path d="m18 6-12 12" />
-    </svg>
+    selectedFilters.gear_type.length +
+    (selectedFilters.product
+      ? 1
+      : 0) +
+    selectedFilters.brand.length +
+    selectedFilters.reviewer.length +
+    selectedFilters.artist.length +
+    selectedFilters.genre.length
   )
 }
 

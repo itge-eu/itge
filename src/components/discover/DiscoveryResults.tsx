@@ -3,12 +3,14 @@ import {
   useState,
 } from "react"
 
-import DirectorySortSelect from "../directory/DirectorySortSelect"
+import DirectoryResultsBar from "../directory/DirectoryResultsBar"
 import ReviewCard from "../reviews/ReviewCard"
 import ImpressionCard from "../impressions/ImpressionCard"
 
 import type {
   DiscoveryContentType,
+  DiscoveryFilterSuggestion,
+  DiscoveryFilterType,
   DiscoveryItem,
 } from "../../types/discovery"
 
@@ -32,6 +34,15 @@ type DiscoveryResultsProps = {
 
   onSortChange: (
     value: SortOption,
+  ) => void
+
+  activeFilters:
+    DiscoveryFilterSuggestion[]
+
+  onRemoveFilter: (
+    type:
+      DiscoveryFilterType,
+    id: number,
   ) => void
 }
 
@@ -67,6 +78,8 @@ function DiscoveryResults({
   hasFilters,
   sortOption,
   onSortChange,
+  activeFilters,
+  onRemoveFilter,
 }: DiscoveryResultsProps) {
   const [
     visibleCount,
@@ -91,70 +104,61 @@ function DiscoveryResults({
     visibleCount <
     items.length
 
+  const caption =
+    !loading &&
+    items.length > 0
+      ? `· showing 1–${visibleItems.length}`
+      : undefined
+
   return (
-    <section aria-live="polite">
-      <div>
-        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
-          Results
-        </p>
-
-        <h2 className="mt-2 text-3xl font-semibold tracking-tight">
-          {loading
-            ? "Finding coverage..."
-            : buildResultTitle(
-                items.length,
-                contentType,
-              )}
-        </h2>
-
-        <p className="mt-2 text-sm text-[var(--muted)]">
-          {hasFilters
-            ? "Results update whenever you change a filter."
-            : buildDefaultDescription(
-                contentType,
-              )}
-        </p>
-      </div>
-
-      {!loading &&
-        !error &&
-        items.length > 0 && (
-          <div className="mb-7 mt-6 flex flex-wrap items-end justify-between gap-4 border-b border-[var(--border)] pb-5">
-            <p className="text-sm text-[var(--muted)]">
-              {items.length >
-              ITEMS_PER_PAGE
-                ? `Showing ${visibleItems.length} of ${items.length}`
-                : `${items.length} ${
-                    items.length ===
-                    1
-                      ? "result"
-                      : "results"
-                  }`}
-            </p>
-
-            <DirectorySortSelect
-              id="discovery-sort"
-              value={
-                sortOption
-              }
-              options={
-                SORT_OPTIONS
-              }
-              onChange={
-                onSortChange
-              }
-              className="w-full sm:w-56"
-            />
-          </div>
+    <section
+      aria-live="polite"
+      className="min-w-0"
+    >
+      <DirectoryResultsBar
+        count={
+          items.length
+        }
+        singular="result"
+        plural="results"
+        loading={
+          loading
+        }
+        sortValue={
+          sortOption
+        }
+        sortOptions={
+          SORT_OPTIONS
+        }
+        onSortChange={
+          onSortChange
+        }
+        sortId="discovery-sort"
+        caption={
+          caption
+        }
+        className="mt-0"
+      >
+        {activeFilters.length >
+          0 && (
+          <ActiveFilterChips
+            filters={
+              activeFilters
+            }
+            onRemove={
+              onRemoveFilter
+            }
+          />
         )}
+      </DirectoryResultsBar>
 
       {loading ? (
-        <div className="mt-7 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
+        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
           Loading matching
           coverage...
         </div>
       ) : error ? (
-        <div className="mt-7 rounded-3xl border border-red-500/30 bg-red-500/10 p-8">
+        <div className="rounded-3xl border border-red-500/30 bg-red-500/10 p-8">
           <p className="font-semibold">
             Unable to load
             coverage
@@ -166,18 +170,16 @@ function DiscoveryResults({
         </div>
       ) : items.length ===
         0 ? (
-        <div className="mt-7 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
+        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
           <p className="font-semibold">
             No coverage matches
             this combination
           </p>
 
           <p className="mt-2 text-sm text-[var(--muted)]">
-            Remove one of the
-            selected filters or
-            choose another content
-            type to broaden the
-            results.
+            {hasFilters
+              ? "Remove one of the selected filters or choose another content type to broaden the results."
+              : "There is no published coverage for this content type yet."}
           </p>
         </div>
       ) : (
@@ -257,10 +259,99 @@ function DiscoveryResults({
   )
 }
 
+function ActiveFilterChips({
+  filters,
+  onRemove,
+}: {
+  filters:
+    DiscoveryFilterSuggestion[]
+
+  onRemove: (
+    type:
+      DiscoveryFilterType,
+    id: number,
+  ) => void
+}) {
+  const [
+    expanded,
+    setExpanded,
+  ] = useState(false)
+
+  const visibleFilters =
+    expanded
+      ? filters
+      : filters.slice(
+          0,
+          4,
+        )
+
+  const hiddenCount =
+    filters.length -
+    visibleFilters.length
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {visibleFilters.map(
+        (filter) => (
+          <button
+            key={`${filter.type}-${filter.id}`}
+            type="button"
+            onClick={() =>
+              onRemove(
+                filter.type,
+                filter.id,
+              )
+            }
+            aria-label={`Remove ${filter.name} filter`}
+            className="inline-flex max-w-full items-center gap-2 rounded-full border border-[var(--accent)]/45 bg-[var(--accent)]/10 px-3 py-2 text-xs font-semibold transition hover:border-[var(--accent)]"
+          >
+            <span className="truncate">
+              {filter.name}
+            </span>
+
+            <CloseIcon />
+          </button>
+        ),
+      )}
+
+      {!expanded &&
+        hiddenCount > 0 && (
+        <button
+          type="button"
+          onClick={() =>
+            setExpanded(
+              true,
+            )
+          }
+          className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs font-semibold text-[var(--muted)] transition hover:border-[var(--accent)] hover:text-[var(--foreground)]"
+        >
+          + {hiddenCount} more
+        </button>
+      )}
+
+      {expanded &&
+        filters.length > 4 && (
+        <button
+          type="button"
+          onClick={() =>
+            setExpanded(
+              false,
+            )
+          }
+          className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs font-semibold text-[var(--muted)] transition hover:border-[var(--accent)] hover:text-[var(--foreground)]"
+        >
+          Show less
+        </button>
+      )}
+    </div>
+  )
+}
+
 function ContentLabel({
   children,
 }: {
-  children: React.ReactNode
+  children:
+    React.ReactNode
 }) {
   return (
     <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
@@ -269,57 +360,21 @@ function ContentLabel({
   )
 }
 
-function buildResultTitle(
-  count: number,
-  contentType:
-    DiscoveryContentType,
-) {
-  if (
-    contentType === "review"
-  ) {
-    return `${count} matching ${
-      count === 1
-        ? "review"
-        : "reviews"
-    }`
-  }
-
-  if (
-    contentType ===
-    "impression"
-  ) {
-    return `${count} matching ${
-      count === 1
-        ? "impression"
-        : "impressions"
-    }`
-  }
-
-  return `${count} matching ${
-    count === 1
-      ? "result"
-      : "results"
-  }`
-}
-
-function buildDefaultDescription(
-  contentType:
-    DiscoveryContentType,
-) {
-  if (
-    contentType === "review"
-  ) {
-    return "Showing every published ITGE review."
-  }
-
-  if (
-    contentType ===
-    "impression"
-  ) {
-    return "Showing every published ITGE listening impression."
-  }
-
-  return "Showing all published ITGE reviews and listening impressions."
+function CloseIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className="h-3.5 w-3.5 shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    >
+      <path d="m6 6 12 12" />
+      <path d="m18 6-12 12" />
+    </svg>
+  )
 }
 
 export default DiscoveryResults

@@ -13,7 +13,7 @@ type DiscoveryFilterGroupProps = {
   type: DiscoveryFilterType
   title: string
   items: DiscoveryFilterSuggestion[]
-  selectedItem: DiscoveryFilterSuggestion | null
+  selectedItems: DiscoveryFilterSuggestion[]
   onSelect: (
     suggestion: DiscoveryFilterSuggestion,
   ) => void
@@ -26,7 +26,7 @@ function DiscoveryFilterGroup({
   type,
   title,
   items,
-  selectedItem,
+  selectedItems,
   onSelect,
   defaultOpen = false,
 }: DiscoveryFilterGroupProps) {
@@ -40,10 +40,13 @@ function DiscoveryFilterGroup({
     useState("")
 
   useEffect(() => {
-    if (selectedItem) {
+    if (
+      selectedItems.length >
+      0
+    ) {
       setOpen(true)
     }
-  }, [selectedItem])
+  }, [selectedItems])
 
   const filteredItems =
     useMemo(() => {
@@ -83,9 +86,13 @@ function DiscoveryFilterGroup({
     filteredItems.length >
     INITIAL_VISIBLE_ITEMS
 
+  const multiple =
+    type !== "product"
+
   function toggleOpen() {
     setOpen(
-      (current) => !current,
+      (current) =>
+        !current,
     )
   }
 
@@ -108,7 +115,8 @@ function DiscoveryFilterGroup({
             {title}
           </span>
 
-          {selectedItem && (
+          {selectedItems.length >
+            0 && (
             <span
               className="h-2 w-2 shrink-0 rounded-full bg-[var(--accent)]"
               aria-label="Filter active"
@@ -163,10 +171,15 @@ function DiscoveryFilterGroup({
               {visibleItems.map(
                 (item) => {
                   const selected =
-                    selectedItem?.type ===
-                      item.type &&
-                    selectedItem?.id ===
-                      item.id
+                    selectedItems.some(
+                      (
+                        selectedItem,
+                      ) =>
+                        selectedItem.type ===
+                          item.type &&
+                        selectedItem.id ===
+                          item.id,
+                    )
 
                   return (
                     <button
@@ -187,7 +200,11 @@ function DiscoveryFilterGroup({
                       }`}
                     >
                       <span
-                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center border ${
+                          multiple
+                            ? "rounded-md"
+                            : "rounded-full"
+                        } ${
                           selected
                             ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-foreground)]"
                             : "border-[var(--border)]"
@@ -269,6 +286,15 @@ function FilterTypeIcon({
   }
 
   switch (type) {
+    case "gear_type":
+      return (
+        <svg {...commonProps}>
+          <path d="m12 3 8 4-8 4-8-4 8-4Z" />
+          <path d="m4 12 8 4 8-4" />
+          <path d="m4 17 8 4 8-4" />
+        </svg>
+      )
+
     case "product":
       return (
         <svg {...commonProps}>

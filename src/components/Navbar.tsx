@@ -200,7 +200,7 @@ function Navbar() {
     ])
 
   return (
-    <header className="relative z-50 border-b border-[var(--border)] bg-[var(--background)]">
+    <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--background)]">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-5 lg:px-10">
         <Link
           to="/"
