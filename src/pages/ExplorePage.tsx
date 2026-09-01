@@ -24,6 +24,10 @@ import {
   type GenreSummary,
 } from "../lib/genres"
 
+import {
+  supabase,
+} from "../lib/supabase"
+
 import usePageMetadata from "../hooks/usePageMetadata"
 
 type ExploreView =
@@ -362,7 +366,7 @@ function ExplorePage() {
 
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
-       <PageContainer>
+      <PageContainer>
         <header className="max-w-3xl">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
             Explore
@@ -707,73 +711,112 @@ function GenreGrid({
   return (
     <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {genres.map(
-        (genre) => (
-          <Link
-            key={
-              genre.id
-            }
-            to={`/genres/${genre.slug}`}
-            className="group rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
-          >
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
-              Genre
-            </p>
+        (genre) => {
+          const imageUrl =
+            getGenreImageUrl(
+              genre.slug,
+            )
 
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight transition group-hover:text-[var(--accent)]">
-              {
-                genre.name
+          return (
+            <Link
+              key={
+                genre.id
               }
-            </h2>
+              to={`/genres/${genre.slug}`}
+              className="group overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
+            >
+              <div className="relative aspect-[4/3] overflow-hidden bg-[var(--surface-soft)]">
+                <img
+                  src={
+                    imageUrl
+                  }
+                  alt={`${genre.name} genre`}
+                  loading="lazy"
+                  className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+                />
 
-            <div className="mt-6 grid grid-cols-2 gap-4 border-t border-[var(--border)] pt-5 sm:grid-cols-4">
-              <Metric
-                value={
-                  genre.reviewCount
-                }
-                label={
-                  genre.reviewCount ===
-                  1
-                    ? "review"
-                    : "reviews"
-                }
-              />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/15 to-transparent" />
 
-              <Metric
-                value={
-                  genre.impressionCount
-                }
-                label={
-                  genre.impressionCount ===
-                  1
-                    ? "impression"
-                    : "impressions"
-                }
-              />
+                <div className="absolute inset-x-0 bottom-0 p-6 text-white">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
+                    Genre
+                  </p>
 
-              <Metric
-                value={
-                  genre.productCount
-                }
-                label="gear"
-              />
+                  <h2 className="mt-1 text-3xl font-semibold leading-tight tracking-tight">
+                    {
+                      genre.name
+                    }
+                  </h2>
+                </div>
+              </div>
 
-              <Metric
-                value={
-                  genre.contributorCount
-                }
-                label={
-                  genre.contributorCount ===
-                  1
-                    ? "contributor"
-                    : "contributors"
-                }
-              />
-            </div>
-          </Link>
-        ),
+              <div className="grid grid-cols-2 gap-4 px-6 py-5 sm:grid-cols-4">
+                <Metric
+                  value={
+                    genre.reviewCount
+                  }
+                  label={
+                    genre.reviewCount ===
+                    1
+                      ? "review"
+                      : "reviews"
+                  }
+                />
+
+                <Metric
+                  value={
+                    genre.impressionCount
+                  }
+                  label={
+                    genre.impressionCount ===
+                    1
+                      ? "impression"
+                      : "impressions"
+                  }
+                />
+
+                <Metric
+                  value={
+                    genre.productCount
+                  }
+                  label="gear"
+                />
+
+                <Metric
+                  value={
+                    genre.contributorCount
+                  }
+                  label={
+                    genre.contributorCount ===
+                    1
+                      ? "contributor"
+                      : "contributors"
+                  }
+                />
+              </div>
+            </Link>
+          )
+        },
       )}
     </div>
   )
+}
+
+function getGenreImageUrl(
+  slug: string,
+): string {
+  const {
+    data,
+  } =
+    supabase.storage
+      .from(
+        "genre-images",
+      )
+      .getPublicUrl(
+        `${slug}.png`,
+      )
+
+  return data.publicUrl
 }
 
 function Metric({
