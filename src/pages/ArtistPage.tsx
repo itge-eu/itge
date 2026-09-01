@@ -148,40 +148,92 @@ function ArtistPage() {
           ]}
         />
 
-        <header className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 sm:p-10">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
-            {artist.artistType ??
-              "Artist"}
-          </p>
+        <header className="overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)]">
+          {artist.imageUrl && (
+            <div className="relative aspect-[16/7] min-h-[280px] overflow-hidden">
+              <img
+                src={artist.imageUrl}
+                alt={artist.name}
+                className="h-full w-full object-cover"
+              />
 
-          <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-6xl">
-            {artist.name}
-          </h1>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-black/5" />
 
-          {(artist.country ||
-            artist.musicbrainzId) && (
-            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-[var(--muted)]">
-              {artist.country && (
-                <span>
-                  {artist.country}
-                </span>
-              )}
+              <div className="absolute inset-x-0 bottom-0 p-8 text-white sm:p-10">
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/70">
+                  {artist.artistType ??
+                    "Artist"}
+                </p>
 
-              {artist.musicbrainzId && (
-                <a
-                  href={`https://musicbrainz.org/artist/${artist.musicbrainzId}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="font-medium text-[var(--accent)] transition hover:opacity-75"
-                >
-                  View on
-                  MusicBrainz ↗
-                </a>
+                <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-6xl">
+                  {artist.name}
+                </h1>
+
+                {(artist.country ||
+                  artist.musicbrainzId) && (
+                  <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-white/75">
+                    {artist.country && (
+                      <span>
+                        {
+                          artist.country
+                        }
+                      </span>
+                    )}
+
+                    {artist.musicbrainzId && (
+                      <a
+                        href={`https://musicbrainz.org/artist/${artist.musicbrainzId}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-medium text-[var(--accent)] transition hover:opacity-75"
+                      >
+                        View on MusicBrainz ↗
+                      </a>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {!artist.imageUrl && (
+            <div className="p-8 sm:p-10">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
+                {artist.artistType ??
+                  "Artist"}
+              </p>
+
+              <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-6xl">
+                {artist.name}
+              </h1>
+
+              {(artist.country ||
+                artist.musicbrainzId) && (
+                <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-[var(--muted)]">
+                  {artist.country && (
+                    <span>
+                      {
+                        artist.country
+                      }
+                    </span>
+                  )}
+
+                  {artist.musicbrainzId && (
+                    <a
+                      href={`https://musicbrainz.org/artist/${artist.musicbrainzId}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="font-medium text-[var(--accent)] transition hover:opacity-75"
+                    >
+                      View on MusicBrainz ↗
+                    </a>
+                  )}
+                </div>
               )}
             </div>
           )}
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 border-t border-[var(--border)] p-8 sm:grid-cols-2 sm:p-10 lg:grid-cols-4">
             <StatCard
               label="Reviews"
               value={artist.reviewCount.toString()}

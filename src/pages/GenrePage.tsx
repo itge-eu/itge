@@ -21,6 +21,10 @@ import {
   type GenreProfile,
 } from "../lib/genres"
 
+import {
+  supabase,
+} from "../lib/supabase"
+
 function GenrePage() {
   const { slug } =
     useParams<{
@@ -132,6 +136,11 @@ function GenrePage() {
     )
   }
 
+  const imageUrl =
+    getGenreImageUrl(
+      genre.slug,
+    )
+
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -148,25 +157,36 @@ function GenrePage() {
           ]}
         />
 
-        <header className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 sm:p-10">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
-            Genre
-          </p>
+        <header className="overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)]">
+          <div className="relative aspect-[16/7] min-h-[280px] overflow-hidden">
+            <img
+              src={imageUrl}
+              alt={`${genre.name} genre`}
+              className="h-full w-full object-cover"
+            />
 
-          <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-6xl">
-            {genre.name}
-          </h1>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-black/5" />
 
-          <p className="mt-5 max-w-2xl text-lg leading-8 text-[var(--muted)]">
-            Explore the reviews,
-            listening
-            impressions, gear
-            and contributors
-            connected to{" "}
-            {genre.name}.
-          </p>
+            <div className="absolute inset-x-0 bottom-0 p-8 text-white sm:p-10">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/70">
+                Genre
+              </p>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-6xl">
+                {genre.name}
+              </h1>
+
+              <p className="mt-5 max-w-2xl text-lg leading-8 text-white/75">
+                Explore the reviews,
+                listening impressions,
+                gear and contributors
+                connected to{" "}
+                {genre.name}.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-4 border-t border-[var(--border)] p-8 sm:grid-cols-2 sm:p-10 lg:grid-cols-4">
             <StatCard
               label="Reviews"
               value={genre.reviewCount.toString()}
@@ -400,6 +420,23 @@ function GenrePage() {
       </div>
     </main>
   )
+}
+
+function getGenreImageUrl(
+  slug: string,
+): string {
+  const {
+    data,
+  } =
+    supabase.storage
+      .from(
+        "genre-images",
+      )
+      .getPublicUrl(
+        `${slug}.png`,
+      )
+
+  return data.publicUrl
 }
 
 function StatCard({
