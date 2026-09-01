@@ -133,10 +133,9 @@ function BrandsPage() {
               <h1 className="mt-2 text-3xl font-semibold tracking-tight">
                 Stores that support our tours
               </h1>
-
             </div>
 
-            <div className="mt-8 grid gap-5 md:grid-cols-2">
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
               {stores.map(
                 (store) => (
                   <a
@@ -155,22 +154,32 @@ function BrandsPage() {
                         ? "noreferrer"
                         : undefined
                     }
-                    className="group flex min-h-[210px] flex-col rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7 transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
+                    className="group flex min-h-[150px] flex-col rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
                   >
-                    <div className="flex items-start justify-between gap-8">
-                      <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0">
                         {store.country && (
-                          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
-                            {formatCountry(
+                          <img
+                            src={`https://flagcdn.com/24x18/${normalizeCountryCode(
                               store.country,
-                            )}
-                          </p>
+                            ).toLowerCase()}.png`}
+                            srcSet={`https://flagcdn.com/48x36/${normalizeCountryCode(
+                              store.country,
+                            ).toLowerCase()}.png 2x`}
+                            width="24"
+                            height="18"
+                            alt={`${getCountryName(
+                              store.country,
+                            )} flag`}
+                            loading="lazy"
+                            className="h-[18px] w-6 rounded-sm object-cover"
+                          />
                         )}
 
                         <h2
-                          className={`break-words text-2xl font-semibold tracking-tight transition group-hover:text-[var(--accent)] ${
+                          className={`break-words text-lg font-semibold tracking-tight transition group-hover:text-[var(--accent)] ${
                             store.country
-                              ? "mt-2"
+                              ? "mt-3"
                               : ""
                           }`}
                         >
@@ -178,7 +187,7 @@ function BrandsPage() {
                         </h2>
                       </div>
 
-                      <div className="flex h-20 w-32 shrink-0 items-center justify-center rounded-xl bg-white p-3">
+                      <div className="flex h-14 w-20 shrink-0 items-center justify-center rounded-lg bg-white p-2">
                         <StoreLogo
                           name={
                             store.name
@@ -191,16 +200,8 @@ function BrandsPage() {
                       </div>
                     </div>
 
-                    {store.description && (
-                      <p className="mt-5 max-w-xl leading-7 text-[var(--muted)]">
-                        {
-                          store.description
-                        }
-                      </p>
-                    )}
-
                     {store.website && (
-                      <span className="mt-auto pt-6 font-semibold text-[var(--accent)]">
+                      <span className="mt-auto pt-5 text-sm font-semibold text-[var(--accent)]">
                         Visit store{" "}
                         <span aria-hidden="true">
                           ↗
@@ -282,7 +283,22 @@ function BrandsPage() {
   )
 }
 
-function formatCountry(
+function normalizeCountryCode(
+  country: string,
+): string {
+  const code =
+    country
+      .trim()
+      .toUpperCase()
+
+  if (code === "UK") {
+    return "GB"
+  }
+
+  return code
+}
+
+function getCountryName(
   country: string,
 ): string {
   const names: Record<
@@ -292,12 +308,18 @@ function formatCountry(
     CH: "Switzerland",
     UK: "United Kingdom",
     GB: "United Kingdom",
+    CN: "China",
+    HK: "Hong Kong",
   }
 
+  const code =
+    country
+      .trim()
+      .toUpperCase()
+
   return (
-    names[
-      country.toUpperCase()
-    ] ?? country
+    names[code] ??
+    country
   )
 }
 
