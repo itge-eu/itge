@@ -143,7 +143,7 @@ function ReviewPage() {
 
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
-      <article className="mx-auto max-w-4xl">
+      <article className="mx-auto max-w-6xl">
         <Breadcrumbs
           items={[
             {
@@ -345,12 +345,15 @@ function ReviewPage() {
             review.cons) && (
             <section className="grid gap-6 py-8 md:grid-cols-2">
               {review.pros && (
-                <div className="rounded-2xl border border-green-500/30 bg-green-500/10 p-6">
-                  <h2 className="text-lg font-semibold">
+                <div className="rounded-3xl border border-[var(--accent)]/35 bg-[var(--accent)]/[0.06] p-7">
+                  <h2 className="flex items-center gap-3 text-lg font-semibold">
+                    <span className="text-xl leading-none text-[var(--accent)]">
+                      +
+                    </span>
                     Pros
                   </h2>
 
-                  <p className="mt-3 whitespace-pre-line leading-7">
+                  <p className="mt-4 whitespace-pre-line leading-7">
                     {
                       review.pros
                     }
@@ -359,12 +362,15 @@ function ReviewPage() {
               )}
 
               {review.cons && (
-                <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-6">
-                  <h2 className="text-lg font-semibold">
+                <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface-soft)] p-7">
+                  <h2 className="flex items-center gap-3 text-lg font-semibold">
+                    <span className="text-xl leading-none text-[var(--muted)]">
+                      −
+                    </span>
                     Cons
                   </h2>
 
-                  <p className="mt-3 whitespace-pre-line leading-7">
+                  <p className="mt-4 whitespace-pre-line leading-7">
                     {
                       review.cons
                     }
@@ -387,7 +393,7 @@ function ReviewPage() {
           </figure>
         )}
 
-        <section className="py-12">
+        <section className="mx-auto max-w-4xl py-12">
           {review.body ? (
             <div
               className="review-content"
