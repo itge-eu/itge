@@ -159,7 +159,7 @@ function ReviewCard({
                   }
                 </Link>
 
-                <h2 className="mt-1 text-2xl font-semibold tracking-tight">
+                <h2 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
                   <Link
                     to={
                       productUrl
@@ -236,7 +236,9 @@ function RatingBadge({
 }) {
   return (
     <span className="shrink-0 rounded-full border border-[var(--border)] px-3 py-1 text-sm font-semibold">
-      ★{" "}
+      <span className="text-[var(--accent)]">
+        ★
+      </span>{" "}
       {rating.toFixed(
         1,
       )}

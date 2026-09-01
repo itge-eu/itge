@@ -230,20 +230,27 @@ function BrandPage() {
                 />
 
                 <StatCard
-                  label="Avg. review"
-                  value={
-                    brand.averageRating ==
-                    null
-                      ? "—"
-                      : `${brand.averageRating.toFixed(
-                          1,
-                        )} ★`
-                  }
+                  label="Contributors"
+                  value={brand.contributorCount.toString()}
                 />
 
                 <StatCard
-                  label="Contributors"
-                  value={brand.contributorCount.toString()}
+                  label="Avg. rating"
+                  value={
+                    brand.averageRating ==
+                    null ? (
+                      "—"
+                    ) : (
+                      <>
+                        {brand.averageRating.toFixed(
+                          1,
+                        )}{" "}
+                        <span className="text-[var(--accent)]">
+                          ★
+                        </span>
+                      </>
+                    )
+                  }
                 />
               </div>
             </div>
@@ -446,7 +453,7 @@ function StatCard({
   value,
 }: {
   label: string
-  value: string
+  value: React.ReactNode
 }) {
   return (
     <div className="flex min-h-28 flex-col items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5 text-center">

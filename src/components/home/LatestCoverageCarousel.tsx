@@ -515,7 +515,9 @@ function CoverageTile({
             {item.type ===
               "review" && (
               <span className="shrink-0 rounded-full border border-white/25 bg-black/20 px-2 py-1 font-semibold text-white">
-                ★{" "}
+                <span className="text-[var(--accent)]">
+                  ★
+                </span>{" "}
                 {item.rating.toFixed(
                   1,
                 )}

@@ -144,13 +144,20 @@ function AdminPage() {
               to="/admin/impressions"
               action="Manage impressions"
             />
-			
-			<AdminCard
-			  title="Hero images"
-			  description="Review imported images and choose the hero image for reviews and impressions."
-			  to="/admin/media"
-			  action="Manage hero images"
-			/>
+
+            <AdminCard
+              title="Hero images"
+              description="Review imported images and choose the hero image for reviews and impressions."
+              to="/admin/media"
+              action="Manage hero images"
+            />
+
+            <AdminCard
+              title="Artist images"
+              description="Upload and replace the 4:3 hero images used for artists across Explore."
+              to="/admin/artists"
+              action="Manage artist images"
+            />
           </div>
         </section>
 

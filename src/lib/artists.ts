@@ -15,6 +15,7 @@ export type ArtistSummary = {
   slug: string
   country: string | null
   artistType: string | null
+  imageUrl: string | null
 
   reviewCount: number
   impressionCount: number
@@ -73,6 +74,7 @@ type ArtistRow = {
   slug: string
   country: string | null
   artist_type: string | null
+  image_url: string | null
 }
 
 type ReviewArtistRelationRow = {
@@ -364,7 +366,8 @@ export async function getArtists(): Promise<
         name,
         slug,
         country,
-        artist_type
+        artist_type,
+        image_url
       `)
       .order(
         "name",
@@ -625,6 +628,9 @@ export async function getArtists(): Promise<
         artistType:
           artist.artist_type,
 
+        imageUrl:
+          artist.image_url,
+
         reviewCount,
 
         impressionCount,
@@ -664,7 +670,8 @@ export async function getArtistBySlug(
       name,
       slug,
       country,
-      artist_type
+      artist_type,
+      image_url
     `)
     .eq("slug", slug)
     .maybeSingle()
@@ -1116,6 +1123,9 @@ export async function getArtistBySlug(
 
     artistType:
       artist.artist_type,
+
+    imageUrl:
+      artist.image_url,
 
     reviewCount:
       mappedReviews.length,

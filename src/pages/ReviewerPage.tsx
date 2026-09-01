@@ -239,11 +239,18 @@ function ReviewerPage() {
               </p>
 
               <p className="mt-2 text-3xl font-semibold">
-                {averageRating == null
-                  ? "—"
-                  : `${averageRating.toFixed(
+                {averageRating == null ? (
+                  "—"
+                ) : (
+                  <>
+                    {averageRating.toFixed(
                       1,
-                    )}/5`}
+                    )}{" "}
+                    <span className="text-[var(--accent)]">
+                      ★
+                    </span>
+                  </>
+                )}
               </p>
             </div>
           </div>

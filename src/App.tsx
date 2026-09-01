@@ -7,6 +7,7 @@ import RequireAdmin from "./components/admin/RequireAdmin"
 import AdminLoginPage from "./pages/AdminLoginPage"
 import AdminPage from "./pages/AdminPage"
 import AdminMediaPage from "./pages/AdminMediaPage"
+import AdminArtistsPage from "./pages/AdminArtistsPage"
 
 import ImportReviewPage from "./pages/ImportReviewPage"
 import AdminEditReviewPage from "./pages/AdminEditReviewPage"
@@ -41,39 +42,31 @@ function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<HomePage />} />
-
         <Route path="/discover" element={<Navigate to="/reviews" replace />} />
-
         <Route path="/reviews" element={<DiscoverPage />} />
         <Route path="/reviews/:slug" element={<ReviewPage />} />
-
         <Route path="/impressions" element={<ImpressionsPage />} />
         <Route path="/impressions/:slug" element={<ImpressionPage />} />
-
         <Route path="/gear" element={<ProductsPage />} />
         <Route path="/gear/:slug" element={<ProductPage />} />
-
         <Route path="/brands" element={<BrandsPage />} />
         <Route path="/brands/:slug" element={<BrandPage />} />
-
         <Route path="/members" element={<ReviewersPage />} />
         <Route path="/members/:slug" element={<ReviewerPage />} />
-
         <Route path="/explore" element={<ExplorePage />} />
         <Route path="/artists" element={<Navigate to="/explore" replace />} />
         <Route path="/genres" element={<Navigate to="/explore?view=genres" replace />} />
         <Route path="/artists/:slug" element={<ArtistPage />} />
-        <Route path="/genres/:slug" element={<GenrePage />} />        
-
+        <Route path="/genres/:slug" element={<GenrePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/join" element={<JoinPage />} />
         <Route path="/for-brands" element={<ForBrandsPage />} />
-
         <Route path="/admin/login" element={<AdminLoginPage />} />
 
         <Route element={<RequireAdmin />}>
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/admin/media" element={<AdminMediaPage />} />
+          <Route path="/admin/artists" element={<AdminArtistsPage />} />
           <Route path="/admin/reviews" element={<AdminReviewsPage />} />
           <Route path="/admin/reviews/:id/edit" element={<AdminEditReviewPage />} />
           <Route path="/admin/impressions" element={<AdminImpressionsPage />} />

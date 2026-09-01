@@ -330,8 +330,10 @@ function ReviewPage() {
             <div className="w-fit shrink-0 rounded-full border border-[var(--border)] px-4 py-2 text-lg font-semibold">
               {review.rating.toFixed(
                 1,
-              )}
-              /5
+              )}{" "}
+              <span className="text-[var(--accent)]">
+                ★
+              </span>
             </div>
           </div>
 

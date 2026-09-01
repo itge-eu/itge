@@ -386,14 +386,10 @@ function ExplorePage() {
         <DirectoryControls className="mt-10">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-              Music
-            </p>
-
-            <p className="mt-2 text-sm font-semibold text-[var(--foreground)]">
               Explore by
             </p>
 
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="mt-4 flex flex-wrap gap-2">
               <ExploreViewButton
                 active={
                   view ===
@@ -584,28 +580,75 @@ function ArtistGrid({
               artist.id
             }
             to={`/artists/${artist.slug}`}
-            className="group rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
+            className="group overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
           >
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
-              {artist.artistType ??
-                "Artist"}
-            </p>
+            <div className="relative aspect-[4/3] overflow-hidden bg-[var(--surface-soft)]">
+              {artist.imageUrl ? (
+                <>
+                  <img
+                    src={
+                      artist.imageUrl
+                    }
+                    alt={
+                      artist.name
+                    }
+                    loading="lazy"
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+                  />
 
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight transition group-hover:text-[var(--accent)]">
-              {
-                artist.name
-              }
-            </h2>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/15 to-transparent" />
+                </>
+              ) : (
+                <div className="flex h-full items-center justify-center px-6 text-center">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
+                      {artist.artistType ??
+                        "Artist"}
+                    </p>
 
-            {artist.country && (
-              <p className="mt-2 text-sm text-[var(--muted)]">
-                {
-                  artist.country
-                }
-              </p>
-            )}
+                    <p className="mt-3 text-2xl font-semibold tracking-tight text-[var(--foreground)]">
+                      {
+                        artist.name
+                      }
+                    </p>
+                  </div>
+                </div>
+              )}
 
-            <div className="mt-6 grid grid-cols-2 gap-4 border-t border-[var(--border)] pt-5 sm:grid-cols-4">
+              {artist.imageUrl && (
+                <div className="absolute inset-x-0 bottom-0 p-6 text-white">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
+                    {artist.artistType ??
+                      "Artist"}
+                  </p>
+
+                  <h2 className="mt-1 text-3xl font-semibold leading-tight tracking-tight">
+                    {
+                      artist.name
+                    }
+                  </h2>
+
+                  {artist.country && (
+                    <p className="mt-2 text-sm text-white/70">
+                      {
+                        artist.country
+                      }
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {!artist.imageUrl &&
+              artist.country && (
+                <p className="px-6 pt-5 text-sm text-[var(--muted)]">
+                  {
+                    artist.country
+                  }
+                </p>
+              )}
+
+            <div className="grid grid-cols-2 gap-4 px-6 py-5 sm:grid-cols-4">
               <Metric
                 value={
                   artist.reviewCount
