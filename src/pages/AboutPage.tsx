@@ -185,23 +185,27 @@ function AboutPage() {
           </div>
         </section>
 
-        {/* CTAS */}
-        <section className="mt-10 grid items-stretch gap-6 md:grid-cols-2">
-          <CallToAction
-            eyebrow="For listeners"
-            title="Want to join ITGE?"
-            text="Interested in taking part in future tours and sharing your own listening experiences?"
-            linkLabel="Join ITGE"
-            to="/join"
-          />
+                {/* CTAS */}
+        <section className="mt-10">
+          <div className="grid items-stretch gap-6 md:grid-cols-2">
+            <CallToAction
+              eyebrow="For listeners"
+              title="Want to join ITGE?"
+              text="Interested in taking part in future tours and sharing your own listening experiences?"
+              linkLabel="Join ITGE"
+              to="/join"
+            />
 
-          <CallToAction
-            eyebrow="For brands"
-            title="Let ITGE tour your gear"
-            text="Have audio gear you'd like to put in front of multiple European listeners and reviewers?"
-            linkLabel="For brands"
-            to="/for-brands"
-          />
+            <CallToAction
+              eyebrow="For brands"
+              title="Let ITGE tour your gear"
+              text="Have audio gear you'd like to put in front of multiple European listeners and reviewers?"
+              linkLabel="For brands"
+              to="/for-brands"
+            />
+          </div>
+
+          <GetInTouch />
         </section>
       </PageContainer>
     </main>
@@ -268,6 +272,29 @@ function CallToAction({
         {linkLabel} →
       </span>
     </Link>
+  )
+}
+
+function GetInTouch() {
+  return (
+    <div className="mt-10 text-center">
+      <h2 className="text-xl font-semibold tracking-tight">
+        Get in touch
+      </h2>
+
+      <p className="mx-auto mt-3 max-w-2xl leading-7 text-[var(--muted)]">
+        Have a question, an idea, or something that doesn&apos;t
+        quite fit the options above? We&apos;d be happy to hear
+        from you.
+      </p>
+
+      <a
+        href="mailto:contact@itge.eu"
+        className="mt-3 inline-block font-semibold text-[var(--accent)] transition hover:opacity-75"
+      >
+        contact@itge.eu
+      </a>
+    </div>
   )
 }
 

@@ -64,6 +64,25 @@ function TakePartSection() {
             </span>
           </Link>
         </div>
+
+        <div className="mt-10 text-center">
+          <h3 className="text-xl font-semibold tracking-tight">
+            Get in touch
+          </h3>
+
+          <p className="mx-auto mt-3 max-w-2xl leading-7 text-[var(--muted)]">
+            Have a question, an idea, or something that doesn&apos;t
+            quite fit the options above? We&apos;d be happy to hear
+            from you.
+          </p>
+
+          <a
+            href="mailto:contact@itge.eu"
+            className="mt-3 inline-block font-semibold text-[var(--accent)] transition hover:opacity-75"
+          >
+            contact@itge.eu
+          </a>
+        </div>
       </div>
     </section>
   )
