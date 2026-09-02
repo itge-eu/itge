@@ -112,16 +112,6 @@ function HomePage() {
                 0.5,
             )
 
-        const selectedFeatured =
-          featuredPool.slice(
-            0,
-            4,
-          )
-
-        const remainingSlots =
-          4 -
-          selectedFeatured.length
-
         const fallbackPool =
           [...products]
             .filter(
@@ -139,13 +129,54 @@ function HomePage() {
                 0.5,
             )
 
+        const selectedFeatured =
+          featuredPool.slice(
+            0,
+            2,
+          )
+
+        const selectedFallback =
+          fallbackPool.slice(
+            0,
+            2,
+          )
+
         const featured = [
           ...selectedFeatured,
-          ...fallbackPool.slice(
-            0,
-            remainingSlots,
-          ),
+          ...selectedFallback,
         ]
+
+        if (
+          featured.length <
+          4
+        ) {
+          const selectedIds =
+            new Set(
+              featured.map(
+                (product) =>
+                  product.id,
+              ),
+            )
+
+          const remainingCandidates =
+            [
+              ...featuredPool,
+              ...fallbackPool,
+            ].filter(
+              (product) =>
+                !selectedIds.has(
+                  product.id,
+                ),
+            )
+
+          featured.push(
+            ...remainingCandidates.slice(
+              0,
+              4 -
+                featured.length,
+            ),
+          )
+        }
 
         setFeaturedGear(
           featured,
@@ -272,6 +303,7 @@ function HomePage() {
                   Together, we’re growing the personal audio community
                   across Europe and beyond.
                 </p>
+
                 <div className="mt-8">
                   <Link
                     to="/about"
