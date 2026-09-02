@@ -139,18 +139,32 @@ function ReviewersPage() {
     }
   }, [])
 
-  const activeCount =
+  const publicReviewers =
     useMemo(
       () =>
         reviewers.filter(
           (reviewer) =>
-            reviewer.active,
-        ).length,
+            reviewer.active ||
+            reviewer.reviewCount >
+              0 ||
+            reviewer.impressionCount >
+              0,
+        ),
       [reviewers],
     )
 
+  const activeCount =
+    useMemo(
+      () =>
+        publicReviewers.filter(
+          (reviewer) =>
+            reviewer.active,
+        ).length,
+      [publicReviewers],
+    )
+
   const formerCount =
-    reviewers.length -
+    publicReviewers.length -
     activeCount
 
   const visibleReviewers =
@@ -161,7 +175,7 @@ function ReviewersPage() {
           .toLocaleLowerCase()
 
       const filtered =
-        reviewers.filter(
+        publicReviewers.filter(
           (reviewer) => {
             if (
               status ===
@@ -221,7 +235,7 @@ function ReviewersPage() {
           ),
       )
     }, [
-      reviewers,
+      publicReviewers,
       searchQuery,
       status,
       sortMode,
@@ -253,7 +267,7 @@ function ReviewersPage() {
 
   return (
     <main className="min-h-screen bg-[var(--background)] py-16 text-[var(--foreground)]">
-     <PageContainer>
+      <PageContainer>
         <header>
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
             ITGE community
@@ -281,7 +295,7 @@ function ReviewersPage() {
           <div className="mt-10 rounded-2xl border border-red-500/30 bg-red-500/10 px-5 py-4">
             {error}
           </div>
-        ) : reviewers.length ===
+        ) : publicReviewers.length ===
           0 ? (
           <DirectoryMessage>
             No members are
@@ -316,7 +330,7 @@ function ReviewersPage() {
                 <StatusButton
                   label="All"
                   count={
-                    reviewers.length
+                    publicReviewers.length
                   }
                   active={
                     status ===
