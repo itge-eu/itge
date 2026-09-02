@@ -154,10 +154,26 @@ function BrandsPage() {
                         ? "noreferrer"
                         : undefined
                     }
-                    className="group flex min-h-[150px] flex-col rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
+                    className="group overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="min-w-0">
+                    <div className="flex h-32 items-center justify-center bg-white px-6 py-5">
+                      <StoreLogo
+                        name={
+                          store.name
+                        }
+                        slug={
+                          store.slug
+                        }
+                        className="max-h-full max-w-full object-contain"
+                      />
+                    </div>
+
+                    <div className="border-t border-[var(--border)] px-5 py-4">
+                      <div className="flex items-center justify-between gap-4">
+                        <h2 className="break-words text-lg font-semibold tracking-tight transition group-hover:text-[var(--accent)]">
+                          {store.name}
+                        </h2>
+
                         {store.country && (
                           <img
                             src={`https://flagcdn.com/24x18/${normalizeCountryCode(
@@ -172,42 +188,20 @@ function BrandsPage() {
                               store.country,
                             )} flag`}
                             loading="lazy"
-                            className="h-[18px] w-6 rounded-sm object-cover"
+                            className="h-[18px] w-6 shrink-0 rounded-sm object-cover"
                           />
                         )}
-
-                        <h2
-                          className={`break-words text-lg font-semibold tracking-tight transition group-hover:text-[var(--accent)] ${
-                            store.country
-                              ? "mt-3"
-                              : ""
-                          }`}
-                        >
-                          {store.name}
-                        </h2>
                       </div>
 
-                      <div className="flex h-14 w-20 shrink-0 items-center justify-center rounded-lg bg-white p-2">
-                        <StoreLogo
-                          name={
-                            store.name
-                          }
-                          slug={
-                            store.slug
-                          }
-                          className="max-h-full max-w-full"
-                        />
-                      </div>
-                    </div>
-
-                    {store.website && (
-                      <span className="mt-auto pt-5 text-sm font-semibold text-[var(--accent)]">
-                        Visit store{" "}
-                        <span aria-hidden="true">
-                          ↗
+                      {store.website && (
+                        <span className="mt-4 block text-sm font-semibold text-[var(--accent)]">
+                          Visit store{" "}
+                          <span aria-hidden="true">
+                            ↗
+                          </span>
                         </span>
-                      </span>
-                    )}
+                      )}
+                    </div>
                   </a>
                 ),
               )}
