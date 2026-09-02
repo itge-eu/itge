@@ -22,7 +22,10 @@ function TakePartSection() {
         </div>
 
         <div className="grid items-stretch gap-6 lg:grid-cols-2">
-          <article className="group flex h-full min-h-64 flex-col rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 transition duration-300 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg">
+          <Link
+            to="/join"
+            className="group flex h-full min-h-64 flex-col rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 transition duration-300 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
+          >
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
               For listeners
             </p>
@@ -35,15 +38,15 @@ function TakePartSection() {
               Take part in European audio gear tours, meet other enthusiasts and share what you hear through reviews and listening impressions.
             </p>
 
-            <Link
-              to="/join"
-              className="mt-auto inline-flex items-center pt-8 text-sm font-semibold text-[var(--accent)] transition group-hover:translate-x-0.5"
-            >
+            <span className="mt-auto inline-flex items-center pt-8 text-sm font-semibold text-[var(--accent)] transition group-hover:translate-x-0.5">
               Join ITGE →
-            </Link>
-          </article>
+            </span>
+          </Link>
 
-          <article className="group flex h-full min-h-64 flex-col rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 transition duration-300 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg">
+          <Link
+            to="/for-brands"
+            className="group flex h-full min-h-64 flex-col rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 transition duration-300 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
+          >
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
               For brands
             </p>
@@ -56,13 +59,10 @@ function TakePartSection() {
               Put your gear into the hands of experienced listeners across Europe through an organised ITGE tour with independent coverage.
             </p>
 
-            <Link
-              to="/for-brands"
-              className="mt-auto inline-flex items-center pt-8 text-sm font-semibold text-[var(--accent)] transition group-hover:translate-x-0.5"
-            >
+            <span className="mt-auto inline-flex items-center pt-8 text-sm font-semibold text-[var(--accent)] transition group-hover:translate-x-0.5">
               Work with ITGE →
-            </Link>
-          </article>
+            </span>
+          </Link>
         </div>
       </div>
     </section>
