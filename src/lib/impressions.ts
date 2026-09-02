@@ -40,13 +40,43 @@ export type ImpressionGenre = {
   slug: string
 }
 
-export type FullImpression = ImpressionSummary & {
-  source: string
-  sourceUrl: string | null
-  sourcePostId: string | null
+export type FullImpression =
+  ImpressionSummary & {
+    source: string
+    sourceUrl:
+      | string
+      | null
+    sourcePostId:
+      | string
+      | null
 
-  artists: ImpressionArtist[]
-  genres: ImpressionGenre[]
+    artists:
+      ImpressionArtist[]
+
+    genres:
+      ImpressionGenre[]
+  }
+
+type ImpressionProduct = {
+  id: number
+  model: string
+  slug: string
+  hero_image_url:
+    | string
+    | null
+
+  brands:
+    | {
+        id: number
+        name: string
+        slug: string
+      }
+    | {
+        id: number
+        name: string
+        slug: string
+      }[]
+    | null
 }
 
 type ImpressionRow = {
@@ -55,8 +85,12 @@ type ImpressionRow = {
   title: string | null
   summary: string | null
   body: string | null
-  hero_image_url: string | null
-  published_at: string | null
+  hero_image_url:
+    | string
+    | null
+  published_at:
+    | string
+    | null
 
   reviewers:
     | {
@@ -72,90 +106,74 @@ type ImpressionRow = {
     | null
 
   products:
-    | {
-        id: number
-        model: string
-        slug: string
-
-        brands:
-          | {
-              id: number
-              name: string
-              slug: string
-            }
-          | {
-              id: number
-              name: string
-              slug: string
-            }[]
-          | null
-      }
-    | {
-        id: number
-        model: string
-        slug: string
-
-        brands:
-          | {
-              id: number
-              name: string
-              slug: string
-            }
-          | {
-              id: number
-              name: string
-              slug: string
-            }[]
-          | null
-      }[]
+    | ImpressionProduct
+    | ImpressionProduct[]
     | null
 }
 
-type FullImpressionRow = ImpressionRow & {
-  source: string
-  source_url: string | null
-  source_post_id: string | null
+type FullImpressionRow =
+  ImpressionRow & {
+    source: string
 
-  impression_artists?:
-    | {
-        artists:
-          | {
-              id: number
-              name: string
-              slug: string
-            }
-          | {
-              id: number
-              name: string
-              slug: string
-            }[]
-          | null
-      }[]
-    | null
+    source_url:
+      | string
+      | null
 
-  impression_genres?:
-    | {
-        genres:
-          | {
-              id: number
-              name: string
-              slug: string
-            }
-          | {
-              id: number
-              name: string
-              slug: string
-            }[]
-          | null
-      }[]
-    | null
-}
+    source_post_id:
+      | string
+      | null
+
+    impression_artists?:
+      | {
+          artists:
+            | {
+                id: number
+                name: string
+                slug: string
+              }
+            | {
+                id: number
+                name: string
+                slug: string
+              }[]
+            | null
+        }[]
+      | null
+
+    impression_genres?:
+      | {
+          genres:
+            | {
+                id: number
+                name: string
+                slug: string
+              }
+            | {
+                id: number
+                name: string
+                slug: string
+              }[]
+            | null
+        }[]
+      | null
+  }
 
 function getSingleRelation<T>(
-  relation: T | T[] | null | undefined,
+  relation:
+    | T
+    | T[]
+    | null
+    | undefined,
 ): T | null {
-  if (Array.isArray(relation)) {
-    return relation[0] ?? null
+  if (
+    Array.isArray(
+      relation,
+    )
+  ) {
+    return (
+      relation[0] ??
+      null
+    )
   }
 
   return relation ?? null
@@ -164,85 +182,170 @@ function getSingleRelation<T>(
 function mapImpression(
   row: ImpressionRow,
 ): ImpressionSummary {
-  const reviewer = getSingleRelation(row.reviewers)
-  const product = getSingleRelation(row.products)
-  const brand = getSingleRelation(
-    product?.brands,
-  )
+  const reviewer =
+    getSingleRelation(
+      row.reviewers,
+    )
 
-  if (!reviewer || !product || !brand) {
+  const product =
+    getSingleRelation(
+      row.products,
+    )
+
+  const brand =
+    getSingleRelation(
+      product?.brands,
+    )
+
+  if (
+    !reviewer ||
+    !product ||
+    !brand
+  ) {
     throw new Error(
       `Impression ${row.id} has incomplete related data`,
     )
   }
 
   return {
-    id: Number(row.id),
-    slug: row.slug,
-    title: row.title,
-    summary: row.summary,
-    body: row.body,
-    heroImageUrl: row.hero_image_url,
-    publishedAt: row.published_at,
+    id:
+      Number(
+        row.id,
+      ),
+
+    slug:
+      row.slug,
+
+    title:
+      row.title,
+
+    summary:
+      row.summary,
+
+    body:
+      row.body,
+
+    heroImageUrl:
+      row.hero_image_url ??
+      product.hero_image_url ??
+      null,
+
+    publishedAt:
+      row.published_at,
 
     reviewer: {
-      id: Number(reviewer.id),
-      name: reviewer.name,
-      slug: reviewer.slug,
+      id:
+        Number(
+          reviewer.id,
+        ),
+
+      name:
+        reviewer.name,
+
+      slug:
+        reviewer.slug,
     },
 
     product: {
-      id: Number(product.id),
-      model: product.model,
-      slug: product.slug,
+      id:
+        Number(
+          product.id,
+        ),
+
+      model:
+        product.model,
+
+      slug:
+        product.slug,
 
       brand: {
-        id: Number(brand.id),
-        name: brand.name,
-        slug: brand.slug,
+        id:
+          Number(
+            brand.id,
+          ),
+
+        name:
+          brand.name,
+
+        slug:
+          brand.slug,
       },
     },
   }
 }
 
 function mapArtists(
-  rows: FullImpressionRow["impression_artists"],
+  rows:
+    FullImpressionRow[
+      "impression_artists"
+    ],
 ): ImpressionArtist[] {
-  return (rows ?? []).flatMap((row) => {
-    const artist = getSingleRelation(row.artists)
+  return (
+    rows ?? []
+  ).flatMap(
+    (row) => {
+      const artist =
+        getSingleRelation(
+          row.artists,
+        )
 
-    if (!artist) {
-      return []
-    }
+      if (!artist) {
+        return []
+      }
 
-    return [
-      {
-        id: Number(artist.id),
-        name: artist.name,
-        slug: artist.slug,
-      },
-    ]
-  })
+      return [
+        {
+          id:
+            Number(
+              artist.id,
+            ),
+
+          name:
+            artist.name,
+
+          slug:
+            artist.slug,
+        },
+      ]
+    },
+  )
 }
 
 function mapGenres(
-  rows: FullImpressionRow["impression_genres"],
+  rows:
+    FullImpressionRow[
+      "impression_genres"
+    ],
 ): ImpressionGenre[] {
-  return (rows ?? []).flatMap((row) => {
-    const genre = getSingleRelation(row.genres)
+  return (
+    rows ?? []
+  ).flatMap(
+    (row) => {
+      const genre =
+        getSingleRelation(
+          row.genres,
+        )
 
-    if (!genre) {
-      return []
-    }
+      if (!genre) {
+        return []
+      }
 
-    return [
-      {
-        id: Number(genre.id),
-        name: genre.name,
-        slug: genre.slug,
-      },
-    ]
-  })
+      return [
+        {
+          id:
+            Number(
+              genre.id,
+            ),
+
+          name:
+            genre.name,
+
+          slug:
+            genre.slug,
+        },
+      ]
+    },
+  )
 }
 
 export type ImpressionFilters = {
@@ -254,7 +357,8 @@ export type ImpressionFilters = {
 }
 
 export type ImpressionsResult = {
-  impressions: ImpressionSummary[]
+  impressions:
+    ImpressionSummary[]
 }
 
 function normalizeValue(
@@ -268,67 +372,96 @@ function normalizeValue(
 export async function getAllImpressions(): Promise<
   ImpressionSummary[]
 > {
-  const { data, error } = await supabase
-    .from("impressions")
-    .select(`
-      id,
-      slug,
-      title,
-      summary,
-      body,
-      hero_image_url,
-      published_at,
-
-      reviewers (
+  const {
+    data,
+    error,
+  } =
+    await supabase
+      .from(
+        "impressions",
+      )
+      .select(`
         id,
-        name,
-        slug
-      ),
-
-      products (
-        id,
-        model,
         slug,
+        title,
+        summary,
+        body,
+        hero_image_url,
+        published_at,
 
-        brands (
+        reviewers (
           id,
           name,
           slug
+        ),
+
+        products (
+          id,
+          model,
+          slug,
+          hero_image_url,
+
+          brands (
+            id,
+            name,
+            slug
+          )
         )
+      `)
+      .eq(
+        "published",
+        true,
       )
-    `)
-    .eq("published", true)
-    .order("published_at", {
-      ascending: false,
-    })
+      .order(
+        "published_at",
+        {
+          ascending:
+            false,
+        },
+      )
 
   if (error) {
     throw error
   }
 
   const rows =
-    (data ?? []) as unknown as ImpressionRow[]
+    (
+      data ?? []
+    ) as unknown as ImpressionRow[]
 
-  return rows.map(mapImpression)
+  return rows.map(
+    mapImpression,
+  )
 }
 
 export async function getFilteredAllImpressions(
-  filters: ImpressionFilters = {},
+  filters:
+    ImpressionFilters = {},
 ): Promise<ImpressionsResult> {
   const artistSlug =
-    filters.artistSlug?.trim() || null
+    filters.artistSlug
+      ?.trim() ||
+    null
 
   const genreSlug =
-    filters.genreSlug?.trim() || null
+    filters.genreSlug
+      ?.trim() ||
+    null
 
   const productName =
-    filters.productName?.trim() || null
+    filters.productName
+      ?.trim() ||
+    null
 
   const brandName =
-    filters.brandName?.trim() || null
+    filters.brandName
+      ?.trim() ||
+    null
 
   const reviewerName =
-    filters.reviewerName?.trim() || null
+    filters.reviewerName
+      ?.trim() ||
+    null
 
   let artistImpressionIds:
     | number[]
@@ -340,31 +473,46 @@ export async function getFilteredAllImpressions(
 
   if (artistSlug) {
     const {
-      data: artistData,
-      error: artistError,
+      data:
+        artistData,
+
+      error:
+        artistError,
     } =
       await supabase
-        .from("artists")
-        .select("id")
+        .from(
+          "artists",
+        )
+        .select(
+          "id",
+        )
         .eq(
           "slug",
           artistSlug,
         )
         .maybeSingle()
 
-    if (artistError) {
+    if (
+      artistError
+    ) {
       throw artistError
     }
 
-    if (!artistData) {
+    if (
+      !artistData
+    ) {
       return {
-        impressions: [],
+        impressions:
+          [],
       }
     }
 
     const {
-      data: relationData,
-      error: relationError,
+      data:
+        relationData,
+
+      error:
+        relationError,
     } =
       await supabase
         .from(
@@ -378,15 +526,20 @@ export async function getFilteredAllImpressions(
           artistData.id,
         )
 
-    if (relationError) {
+    if (
+      relationError
+    ) {
       throw relationError
     }
 
     artistImpressionIds =
       (
-        relationData ?? []
+        relationData ??
+        []
       ).map(
-        (relation) =>
+        (
+          relation,
+        ) =>
           Number(
             relation.impression_id,
           ),
@@ -395,31 +548,46 @@ export async function getFilteredAllImpressions(
 
   if (genreSlug) {
     const {
-      data: genreData,
-      error: genreError,
+      data:
+        genreData,
+
+      error:
+        genreError,
     } =
       await supabase
-        .from("genres")
-        .select("id")
+        .from(
+          "genres",
+        )
+        .select(
+          "id",
+        )
         .eq(
           "slug",
           genreSlug,
         )
         .maybeSingle()
 
-    if (genreError) {
+    if (
+      genreError
+    ) {
       throw genreError
     }
 
-    if (!genreData) {
+    if (
+      !genreData
+    ) {
       return {
-        impressions: [],
+        impressions:
+          [],
       }
     }
 
     const {
-      data: relationData,
-      error: relationError,
+      data:
+        relationData,
+
+      error:
+        relationError,
     } =
       await supabase
         .from(
@@ -433,15 +601,20 @@ export async function getFilteredAllImpressions(
           genreData.id,
         )
 
-    if (relationError) {
+    if (
+      relationError
+    ) {
       throw relationError
     }
 
     genreImpressionIds =
       (
-        relationData ?? []
+        relationData ??
+        []
       ).map(
-        (relation) =>
+        (
+          relation,
+        ) =>
           Number(
             relation.impression_id,
           ),
@@ -463,7 +636,9 @@ export async function getFilteredAllImpressions(
 
     impressionIds =
       artistImpressionIds.filter(
-        (impressionId) =>
+        (
+          impressionId,
+        ) =>
           genreIdSet.has(
             impressionId,
           ),
@@ -482,7 +657,8 @@ export async function getFilteredAllImpressions(
 
   if (
     impressionIds &&
-    impressionIds.length === 0
+    impressionIds.length ===
+      0
   ) {
     return {
       impressions: [],
@@ -491,7 +667,9 @@ export async function getFilteredAllImpressions(
 
   let query =
     supabase
-      .from("impressions")
+      .from(
+        "impressions",
+      )
       .select(`
         id,
         slug,
@@ -511,6 +689,7 @@ export async function getFilteredAllImpressions(
           id,
           model,
           slug,
+          hero_image_url,
 
           brands (
             id,
@@ -526,11 +705,14 @@ export async function getFilteredAllImpressions(
       .order(
         "published_at",
         {
-          ascending: false,
+          ascending:
+            false,
         },
       )
 
-  if (impressionIds) {
+  if (
+    impressionIds
+  ) {
     query =
       query.in(
         "id",
@@ -541,7 +723,8 @@ export async function getFilteredAllImpressions(
   const {
     data,
     error,
-  } = await query
+  } =
+    await query
 
   if (error) {
     throw error
@@ -563,7 +746,8 @@ export async function getFilteredAllImpressions(
         if (
           productName &&
           normalizeValue(
-            impression.product.model,
+            impression.product
+              .model,
           ) !==
             normalizeValue(
               productName,
@@ -609,64 +793,80 @@ export async function getFilteredAllImpressions(
 
 export async function getImpressionBySlug(
   slug: string,
-): Promise<FullImpression | null> {
-  const normalizedSlug = slug.trim()
+): Promise<
+  FullImpression | null
+> {
+  const normalizedSlug =
+    slug.trim()
 
   if (!normalizedSlug) {
     return null
   }
 
-  const { data, error } = await supabase
-    .from("impressions")
-    .select(`
-      id,
-      slug,
-      title,
-      summary,
-      body,
-      hero_image_url,
-      published_at,
-      source,
-      source_url,
-      source_post_id,
-
-      reviewers (
-        id,
-        name,
-        slug
-      ),
-
-      products (
-        id,
-        model,
-        slug,
-
-        brands (
-          id,
-          name,
-          slug
-        )
-      ),
-
-      impression_artists (
-        artists (
-          id,
-          name,
-          slug
-        )
-      ),
-
-      impression_genres (
-        genres (
-          id,
-          name,
-          slug
-        )
+  const {
+    data,
+    error,
+  } =
+    await supabase
+      .from(
+        "impressions",
       )
-    `)
-    .eq("slug", normalizedSlug)
-    .eq("published", true)
-    .maybeSingle()
+      .select(`
+        id,
+        slug,
+        title,
+        summary,
+        body,
+        hero_image_url,
+        published_at,
+        source,
+        source_url,
+        source_post_id,
+
+        reviewers (
+          id,
+          name,
+          slug
+        ),
+
+        products (
+          id,
+          model,
+          slug,
+          hero_image_url,
+
+          brands (
+            id,
+            name,
+            slug
+          )
+        ),
+
+        impression_artists (
+          artists (
+            id,
+            name,
+            slug
+          )
+        ),
+
+        impression_genres (
+          genres (
+            id,
+            name,
+            slug
+          )
+        )
+      `)
+      .eq(
+        "slug",
+        normalizedSlug,
+      )
+      .eq(
+        "published",
+        true,
+      )
+      .maybeSingle()
 
   if (error) {
     throw error
@@ -680,74 +880,111 @@ export async function getImpressionBySlug(
     data as unknown as FullImpressionRow
 
   return {
-    ...mapImpression(row),
-
-    source: row.source,
-    sourceUrl: row.source_url,
-    sourcePostId: row.source_post_id,
-
-    artists: mapArtists(
-      row.impression_artists,
+    ...mapImpression(
+      row,
     ),
 
-    genres: mapGenres(
-      row.impression_genres,
-    ),
+    source:
+      row.source,
+
+    sourceUrl:
+      row.source_url,
+
+    sourcePostId:
+      row.source_post_id,
+
+    artists:
+      mapArtists(
+        row.impression_artists,
+      ),
+
+    genres:
+      mapGenres(
+        row.impression_genres,
+      ),
   }
 }
 
 async function getFilteredImpressions(
-  column: "reviewer_id" | "product_id",
+  column:
+    | "reviewer_id"
+    | "product_id",
+
   id: number,
-): Promise<ImpressionSummary[]> {
-  const { data, error } = await supabase
-    .from("impressions")
-    .select(`
-      id,
-      slug,
-      title,
-      summary,
-      body,
-      hero_image_url,
-      published_at,
-
-      reviewers (
+): Promise<
+  ImpressionSummary[]
+> {
+  const {
+    data,
+    error,
+  } =
+    await supabase
+      .from(
+        "impressions",
+      )
+      .select(`
         id,
-        name,
-        slug
-      ),
-
-      products (
-        id,
-        model,
         slug,
+        title,
+        summary,
+        body,
+        hero_image_url,
+        published_at,
 
-        brands (
+        reviewers (
           id,
           name,
           slug
+        ),
+
+        products (
+          id,
+          model,
+          slug,
+          hero_image_url,
+
+          brands (
+            id,
+            name,
+            slug
+          )
         )
+      `)
+      .eq(
+        "published",
+        true,
       )
-    `)
-    .eq("published", true)
-    .eq(column, id)
-    .order("published_at", {
-      ascending: false,
-    })
+      .eq(
+        column,
+        id,
+      )
+      .order(
+        "published_at",
+        {
+          ascending:
+            false,
+        },
+      )
 
   if (error) {
     throw error
   }
 
   const rows =
-    (data ?? []) as unknown as ImpressionRow[]
+    (
+      data ?? []
+    ) as unknown as ImpressionRow[]
 
-  return rows.map(mapImpression)
+  return rows.map(
+    mapImpression,
+  )
 }
 
 export async function getImpressionsByReviewerId(
   reviewerId: number,
-): Promise<ImpressionSummary[]> {
+): Promise<
+  ImpressionSummary[]
+> {
   return getFilteredImpressions(
     "reviewer_id",
     reviewerId,
@@ -756,7 +993,9 @@ export async function getImpressionsByReviewerId(
 
 export async function getImpressionsByProductId(
   productId: number,
-): Promise<ImpressionSummary[]> {
+): Promise<
+  ImpressionSummary[]
+> {
   return getFilteredImpressions(
     "product_id",
     productId,

@@ -52,7 +52,14 @@ type RelatedProduct = {
   id: number
   model: string
   slug: string
-  product_type: ProductType | null
+
+  product_type:
+    | ProductType
+    | null
+
+  hero_image_url:
+    | string
+    | null
 
   brands:
     | {
@@ -80,9 +87,17 @@ type DiscoveryReviewRow = {
   rating: number
   title: string
   summary: string
-  body: string | null
-  hero_image_url: string | null
-  published_at: string | null
+  body:
+    | string
+    | null
+
+  hero_image_url:
+    | string
+    | null
+
+  published_at:
+    | string
+    | null
 
   reviewers:
     | RelatedReviewer
@@ -106,11 +121,26 @@ type DiscoveryReviewRow = {
 type DiscoveryImpressionRow = {
   id: number
   slug: string
-  title: string | null
-  summary: string | null
-  body: string | null
-  hero_image_url: string | null
-  published_at: string | null
+
+  title:
+    | string
+    | null
+
+  summary:
+    | string
+    | null
+
+  body:
+    | string
+    | null
+
+  hero_image_url:
+    | string
+    | null
+
+  published_at:
+    | string
+    | null
 
   reviewers:
     | RelatedReviewer
@@ -131,7 +161,8 @@ type DiscoveryImpressionRow = {
     | null
 }
 
-const FILTER_TYPES: DiscoveryFilterType[] =
+const FILTER_TYPES:
+  DiscoveryFilterType[] =
   [
     "gear_type",
     "product",
@@ -165,8 +196,10 @@ const GEAR_TYPES: Record<
 
   cable_accessory: {
     id: 4,
-    name: "Cables & accessories",
-    slug: "cable_accessory",
+    name:
+      "Cables & accessories",
+    slug:
+      "cable_accessory",
   },
 }
 
@@ -176,7 +209,10 @@ function normalizeProductType(
     | null
     | undefined,
 ): ProductType {
-  return value ?? "iem"
+  return (
+    value ??
+    "iem"
+  )
 }
 
 function getGearType(
@@ -186,7 +222,9 @@ function getGearType(
     | undefined,
 ): DiscoveryGearType {
   return GEAR_TYPES[
-    normalizeProductType(value)
+    normalizeProductType(
+      value,
+    )
   ]
 }
 
@@ -197,8 +235,15 @@ function getSingleRelation<T>(
     | null
     | undefined,
 ): T | null {
-  if (Array.isArray(relation)) {
-    return relation[0] ?? null
+  if (
+    Array.isArray(
+      relation,
+    )
+  ) {
+    return (
+      relation[0] ??
+      null
+    )
   }
 
   return relation ?? null
@@ -210,7 +255,9 @@ function mapArtists(
     | null
     | undefined,
 ): DiscoveryEntity[] {
-  return (rows ?? []).flatMap(
+  return (
+    rows ?? []
+  ).flatMap(
     (row) => {
       const artist =
         getSingleRelation(
@@ -223,11 +270,16 @@ function mapArtists(
 
       return [
         {
-          id: Number(
-            artist.id,
-          ),
-          name: artist.name,
-          slug: artist.slug,
+          id:
+            Number(
+              artist.id,
+            ),
+
+          name:
+            artist.name,
+
+          slug:
+            artist.slug,
         },
       ]
     },
@@ -240,7 +292,9 @@ function mapGenres(
     | null
     | undefined,
 ): DiscoveryEntity[] {
-  return (rows ?? []).flatMap(
+  return (
+    rows ?? []
+  ).flatMap(
     (row) => {
       const genre =
         getSingleRelation(
@@ -253,11 +307,16 @@ function mapGenres(
 
       return [
         {
-          id: Number(
-            genre.id,
-          ),
-          name: genre.name,
-          slug: genre.slug,
+          id:
+            Number(
+              genre.id,
+            ),
+
+          name:
+            genre.name,
+
+          slug:
+            genre.slug,
         },
       ]
     },
@@ -307,24 +366,30 @@ function buildCommonEntities(
       product.product_type,
     )
 
-  const brandEntity: DiscoveryEntity =
-    {
-      id: Number(
-        brand.id,
-      ),
+  const brandEntity:
+    DiscoveryEntity = {
+      id:
+        Number(
+          brand.id,
+        ),
+
       name:
         brand.name,
+
       slug:
         brand.slug,
     }
 
-  const productEntity: DiscoveryProduct =
-    {
-      id: Number(
-        product.id,
-      ),
+  const productEntity:
+    DiscoveryProduct = {
+      id:
+        Number(
+          product.id,
+        ),
+
       name:
         product.model,
+
       slug:
         product.slug,
 
@@ -339,13 +404,16 @@ function buildCommonEntities(
       gearType,
     }
 
-  const reviewerEntity: DiscoveryEntity =
-    {
-      id: Number(
-        reviewer.id,
-      ),
+  const reviewerEntity:
+    DiscoveryEntity = {
+      id:
+        Number(
+          reviewer.id,
+        ),
+
       name:
         reviewer.name,
+
       slug:
         reviewer.slug,
     }
@@ -362,7 +430,8 @@ function buildCommonEntities(
 }
 
 function mapDiscoveryReview(
-  row: DiscoveryReviewRow,
+  row:
+    DiscoveryReviewRow,
 ): DiscoveryReviewItem {
   const entities =
     buildCommonEntities(
@@ -378,11 +447,14 @@ function mapDiscoveryReview(
       row.published_at,
 
     review: {
-      id: Number(
-        row.id,
-      ),
+      id:
+        Number(
+          row.id,
+        ),
+
       slug:
         row.slug,
+
       rating:
         Number(
           row.rating,
@@ -390,8 +462,10 @@ function mapDiscoveryReview(
 
       title:
         row.title,
+
       summary:
         row.summary,
+
       body:
         row.body,
 
@@ -420,7 +494,10 @@ function mapDiscoveryReview(
           .slug,
 
       heroImageUrl:
-        row.hero_image_url,
+        row.hero_image_url ??
+        entities.product
+          .hero_image_url ??
+        null,
 
       publishedAt:
         row.published_at,
@@ -451,7 +528,8 @@ function mapDiscoveryReview(
 }
 
 function mapDiscoveryImpression(
-  row: DiscoveryImpressionRow,
+  row:
+    DiscoveryImpressionRow,
 ): DiscoveryImpressionItem {
   const entities =
     buildCommonEntities(
@@ -461,63 +539,81 @@ function mapDiscoveryImpression(
     )
 
   return {
-    type: "impression",
+    type:
+      "impression",
 
     publishedAt:
       row.published_at,
 
     impression: {
-      id: Number(
-        row.id,
-      ),
+      id:
+        Number(
+          row.id,
+        ),
+
       slug:
         row.slug,
+
       title:
         row.title,
+
       summary:
         row.summary,
+
       body:
         row.body,
 
       heroImageUrl:
-        row.hero_image_url,
+        row.hero_image_url ??
+        entities.product
+          .hero_image_url ??
+        null,
 
       publishedAt:
         row.published_at,
 
       reviewer: {
-        id: Number(
-          entities.reviewer
-            .id,
-        ),
+        id:
+          Number(
+            entities.reviewer
+              .id,
+          ),
+
         name:
           entities.reviewer
             .name,
+
         slug:
           entities.reviewer
             .slug,
       },
 
       product: {
-        id: Number(
-          entities.product
-            .id,
-        ),
+        id:
+          Number(
+            entities.product
+              .id,
+          ),
+
         model:
           entities.product
             .model,
+
         slug:
           entities.product
             .slug,
 
         brand: {
-          id: Number(
-            entities.brand
-              .id,
-          ),
+          id:
+            Number(
+              entities.brand
+                .id,
+            ),
+
           name:
             entities.brand
               .name,
+
           slug:
             entities.brand
               .slug,
@@ -550,7 +646,9 @@ function mapDiscoveryImpression(
 }
 
 function timestampValue(
-  value: string | null,
+  value:
+    | string
+    | null,
 ): number {
   if (!value) {
     return 0
@@ -574,110 +672,117 @@ export async function getDiscoveryItems(): Promise<
   const [
     reviewsResult,
     impressionsResult,
-  ] = await Promise.all([
-    supabase
-      .from("reviews")
-      .select(`
-        id,
-        slug,
-        rating,
-        title,
-        summary,
-        body,
-        hero_image_url,
-        published_at,
-
-        reviewers (
-          id,
-          name,
-          slug
-        ),
-
-        products (
-          id,
-          model,
-          slug,
-          product_type,
-
-          brands (
-            id,
-            name,
-            slug
-          )
-        ),
-
-        review_artists (
-          artists (
-            id,
-            name,
-            slug
-          )
-        ),
-
-        review_genres (
-          genres (
-            id,
-            name,
-            slug
-          )
+  ] =
+    await Promise.all([
+      supabase
+        .from(
+          "reviews",
         )
-      `)
-      .eq(
-        "published",
-        true,
-      ),
-
-    supabase
-      .from("impressions")
-      .select(`
-        id,
-        slug,
-        title,
-        summary,
-        body,
-        hero_image_url,
-        published_at,
-
-        reviewers (
+        .select(`
           id,
-          name,
-          slug
-        ),
-
-        products (
-          id,
-          model,
           slug,
-          product_type,
+          rating,
+          title,
+          summary,
+          body,
+          hero_image_url,
+          published_at,
 
-          brands (
+          reviewers (
             id,
             name,
             slug
+          ),
+
+          products (
+            id,
+            model,
+            slug,
+            product_type,
+            hero_image_url,
+
+            brands (
+              id,
+              name,
+              slug
+            )
+          ),
+
+          review_artists (
+            artists (
+              id,
+              name,
+              slug
+            )
+          ),
+
+          review_genres (
+            genres (
+              id,
+              name,
+              slug
+            )
           )
+        `)
+        .eq(
+          "published",
+          true,
         ),
 
-        impression_artists (
-          artists (
-            id,
-            name,
-            slug
-          )
-        ),
-
-        impression_genres (
-          genres (
-            id,
-            name,
-            slug
-          )
+      supabase
+        .from(
+          "impressions",
         )
-      `)
-      .eq(
-        "published",
-        true,
-      ),
-  ])
+        .select(`
+          id,
+          slug,
+          title,
+          summary,
+          body,
+          hero_image_url,
+          published_at,
+
+          reviewers (
+            id,
+            name,
+            slug
+          ),
+
+          products (
+            id,
+            model,
+            slug,
+            product_type,
+            hero_image_url,
+
+            brands (
+              id,
+              name,
+              slug
+            )
+          ),
+
+          impression_artists (
+            artists (
+              id,
+              name,
+              slug
+            )
+          ),
+
+          impression_genres (
+            genres (
+              id,
+              name,
+              slug
+            )
+          )
+        `)
+        .eq(
+          "published",
+          true,
+        ),
+    ])
 
   if (
     reviewsResult.error
@@ -692,14 +797,19 @@ export async function getDiscoveryItems(): Promise<
   }
 
   const reviewRows =
-    (reviewsResult.data ??
-      []) as unknown as DiscoveryReviewRow[]
+    (
+      reviewsResult.data ??
+      []
+    ) as unknown as DiscoveryReviewRow[]
 
   const impressionRows =
-    (impressionsResult.data ??
-      []) as unknown as DiscoveryImpressionRow[]
+    (
+      impressionsResult.data ??
+      []
+    ) as unknown as DiscoveryImpressionRow[]
 
-  const items: DiscoveryItem[] =
+  const items:
+    DiscoveryItem[] =
     [
       ...reviewRows.map(
         mapDiscoveryReview,
@@ -711,7 +821,10 @@ export async function getDiscoveryItems(): Promise<
     ]
 
   return items.sort(
-    (first, second) =>
+    (
+      first,
+      second,
+    ) =>
       timestampValue(
         second.publishedAt,
       ) -
@@ -724,8 +837,10 @@ export async function getDiscoveryItems(): Promise<
 export function buildDiscoveryState(
   discoveryItems:
     DiscoveryItem[],
+
   selectedFilters:
     SelectedDiscoveryFilters,
+
   contentType:
     DiscoveryContentType,
 ): DiscoveryState {
@@ -800,8 +915,10 @@ export function buildDiscoveryState(
 function buildSuggestionsForType(
   discoveryItems:
     DiscoveryItem[],
+
   selectedFilters:
     SelectedDiscoveryFilters,
+
   type:
     DiscoveryFilterType,
 ): DiscoveryFilterSuggestion[] {
@@ -831,9 +948,12 @@ function buildSuggestionsForType(
 }
 
 function itemMatchesFilters(
-  item: DiscoveryItem,
+  item:
+    DiscoveryItem,
+
   selectedFilters:
     SelectedDiscoveryFilters,
+
   ignoredType?:
     DiscoveryFilterType,
 ): boolean {
@@ -882,6 +1002,7 @@ function itemMatchesFilters(
 function getSelectedItemsForType(
   selectedFilters:
     SelectedDiscoveryFilters,
+
   type:
     DiscoveryFilterType,
 ): DiscoveryFilterSuggestion[] {
@@ -907,9 +1028,12 @@ function getSelectedItemsForType(
 }
 
 function itemMatchesFilter(
-  item: DiscoveryItem,
+  item:
+    DiscoveryItem,
+
   type:
     DiscoveryFilterType,
+
   selected:
     DiscoveryFilterSuggestion,
 ): boolean {
@@ -955,7 +1079,9 @@ function itemMatchesFilter(
 }
 
 function collectSuggestions(
-  items: DiscoveryItem[],
+  items:
+    DiscoveryItem[],
+
   type:
     DiscoveryFilterType,
 ): DiscoveryFilterSuggestion[] {
@@ -966,7 +1092,8 @@ function collectSuggestions(
     >()
 
   for (
-    const item of items
+    const item of
+    items
   ) {
     const entities =
       getEntitiesForType(
@@ -1002,12 +1129,16 @@ function collectSuggestions(
           "review"
         ) {
           existing.reviewResultCount =
-            (existing.reviewResultCount ??
-              0) + 1
+            (
+              existing.reviewResultCount ??
+              0
+            ) + 1
         } else {
           existing.impressionResultCount =
-            (existing.impressionResultCount ??
-              0) + 1
+            (
+              existing.impressionResultCount ??
+              0
+            ) + 1
         }
 
         continue
@@ -1018,9 +1149,12 @@ function collectSuggestions(
         {
           id:
             entity.id,
+
           type,
+
           name:
             entity.name,
+
           slug:
             entity.slug,
 
@@ -1032,7 +1166,8 @@ function collectSuggestions(
               ? entity.brandName
               : undefined,
 
-          reviewCount: 1,
+          reviewCount:
+            1,
 
           reviewResultCount:
             item.type ===
@@ -1058,12 +1193,14 @@ function collectSuggestions(
 }
 
 function getEntitiesForType(
-  item: DiscoveryItem,
+  item:
+    DiscoveryItem,
+
   type:
     DiscoveryFilterType,
 ): Array<
-  DiscoveryEntity |
-  DiscoveryProduct
+  | DiscoveryEntity
+  | DiscoveryProduct
 > {
   switch (type) {
     case "gear_type":
@@ -1097,6 +1234,7 @@ function getEntitiesForType(
 function ensureSelectedSuggestions(
   suggestions:
     DiscoveryFilterSuggestion[],
+
   selectedItems:
     DiscoveryFilterSuggestion[],
 ): DiscoveryFilterSuggestion[] {
@@ -1123,9 +1261,11 @@ function ensureSelectedSuggestions(
     ...missingSelected.map(
       (selected) => ({
         ...selected,
-        reviewCount: 0,
+        reviewCount:
+          0,
       }),
     ),
+
     ...suggestions,
   ]
 }
@@ -1133,6 +1273,7 @@ function ensureSelectedSuggestions(
 function compareSuggestions(
   first:
     DiscoveryFilterSuggestion,
+
   second:
     DiscoveryFilterSuggestion,
 ): number {
