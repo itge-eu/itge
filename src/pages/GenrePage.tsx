@@ -25,6 +25,13 @@ import {
   supabase,
 } from "../lib/supabase"
 
+const GENRE_IMAGE_EXTENSIONS = [
+  "webp",
+  "png",
+  "jpg",
+  "jpeg",
+]
+
 function GenrePage() {
   const { slug } =
     useParams<{
@@ -106,7 +113,7 @@ function GenrePage() {
   if (loading) {
     return (
       <PageState
-        eyebrow="Genre"
+        eyebrow="Explore"
         title="Loading genre…"
       />
     )
@@ -115,10 +122,10 @@ function GenrePage() {
   if (error) {
     return (
       <PageState
-        eyebrow="Genre"
+        eyebrow="Explore"
         title="Unable to load genre"
         message={error}
-        backTo="/genres"
+        backTo="/explore"
         backLabel="Back to genres"
       />
     )
@@ -130,16 +137,11 @@ function GenrePage() {
         eyebrow="404"
         title="Genre not found"
         message="The genre you were looking for doesn’t exist or is no longer available."
-        backTo="/genres"
+        backTo="/explore"
         backLabel="Back to genres"
       />
     )
   }
-
-  const imageUrl =
-    getGenreImageUrl(
-      genre.slug,
-    )
 
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
@@ -147,8 +149,8 @@ function GenrePage() {
         <Breadcrumbs
           items={[
             {
-              label: "Genres",
-              to: "/genres",
+              label: "Explore",
+              to: "/explore",
             },
             {
               label:
@@ -159,8 +161,10 @@ function GenrePage() {
 
         <header className="overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)]">
           <div className="relative aspect-[16/7] min-h-[280px] overflow-hidden">
-            <img
-              src={imageUrl}
+            <GenreImage
+              slug={
+                genre.slug
+              }
               alt={`${genre.name} genre`}
               className="h-full w-full object-cover"
             />
@@ -422,8 +426,66 @@ function GenrePage() {
   )
 }
 
+function GenreImage({
+  slug,
+  alt,
+  className = "",
+}: {
+  slug: string
+  alt: string
+  className?: string
+}) {
+  const [
+    extensionIndex,
+    setExtensionIndex,
+  ] =
+    useState(0)
+
+  const extension =
+    GENRE_IMAGE_EXTENSIONS[
+      extensionIndex
+    ]
+
+  if (!extension) {
+    return (
+      <div
+        className={`bg-[var(--surface-soft)] ${className}`}
+        role="img"
+        aria-label={alt}
+      />
+    )
+  }
+
+  const imageUrl =
+    getGenreImageUrl(
+      slug,
+      extension,
+    )
+
+  return (
+    <img
+      src={
+        imageUrl
+      }
+      alt={
+        alt
+      }
+      className={
+        className
+      }
+      onError={() =>
+        setExtensionIndex(
+          (current) =>
+            current + 1,
+        )
+      }
+    />
+  )
+}
+
 function getGenreImageUrl(
   slug: string,
+  extension: string,
 ): string {
   const {
     data,
@@ -433,7 +495,7 @@ function getGenreImageUrl(
         "genre-images",
       )
       .getPublicUrl(
-        `${slug}.png`,
+        `${slug}.${extension}`,
       )
 
   return data.publicUrl

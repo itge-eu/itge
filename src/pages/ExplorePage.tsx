@@ -62,6 +62,13 @@ const SORT_OPTIONS: {
   },
 ]
 
+const GENRE_IMAGE_EXTENSIONS = [
+  "webp",
+  "png",
+  "jpg",
+  "jpeg",
+]
+
 function ExplorePage() {
   const [
     searchParams,
@@ -711,99 +718,155 @@ function GenreGrid({
   return (
     <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {genres.map(
-        (genre) => {
-          const imageUrl =
-            getGenreImageUrl(
-              genre.slug,
-            )
+        (genre) => (
+          <Link
+            key={
+              genre.id
+            }
+            to={`/genres/${genre.slug}`}
+            className="group overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
+          >
+            <div className="relative aspect-[4/3] overflow-hidden bg-[var(--surface-soft)]">
+              <GenreImage
+                slug={
+                  genre.slug
+                }
+                alt={`${genre.name} genre`}
+                loading="lazy"
+                className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+              />
 
-          return (
-            <Link
-              key={
-                genre.id
-              }
-              to={`/genres/${genre.slug}`}
-              className="group overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
-            >
-              <div className="relative aspect-[4/3] overflow-hidden bg-[var(--surface-soft)]">
-                <img
-                  src={
-                    imageUrl
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/15 to-transparent" />
+
+              <div className="absolute inset-x-0 bottom-0 p-6 text-white">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
+                  Genre
+                </p>
+
+                <h2 className="mt-1 text-3xl font-semibold leading-tight tracking-tight">
+                  {
+                    genre.name
                   }
-                  alt={`${genre.name} genre`}
-                  loading="lazy"
-                  className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
-                />
-
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/15 to-transparent" />
-
-                <div className="absolute inset-x-0 bottom-0 p-6 text-white">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
-                    Genre
-                  </p>
-
-                  <h2 className="mt-1 text-3xl font-semibold leading-tight tracking-tight">
-                    {
-                      genre.name
-                    }
-                  </h2>
-                </div>
+                </h2>
               </div>
+            </div>
 
-              <div className="grid grid-cols-2 gap-4 px-6 py-5 sm:grid-cols-4">
-                <Metric
-                  value={
-                    genre.reviewCount
-                  }
-                  label={
-                    genre.reviewCount ===
-                    1
-                      ? "review"
-                      : "reviews"
-                  }
-                />
+            <div className="grid grid-cols-2 gap-4 px-6 py-5 sm:grid-cols-4">
+              <Metric
+                value={
+                  genre.reviewCount
+                }
+                label={
+                  genre.reviewCount ===
+                  1
+                    ? "review"
+                    : "reviews"
+                }
+              />
 
-                <Metric
-                  value={
-                    genre.impressionCount
-                  }
-                  label={
-                    genre.impressionCount ===
-                    1
-                      ? "impression"
-                      : "impressions"
-                  }
-                />
+              <Metric
+                value={
+                  genre.impressionCount
+                }
+                label={
+                  genre.impressionCount ===
+                  1
+                    ? "impression"
+                    : "impressions"
+                }
+              />
 
-                <Metric
-                  value={
-                    genre.productCount
-                  }
-                  label="gear"
-                />
+              <Metric
+                value={
+                  genre.productCount
+                }
+                label="gear"
+              />
 
-                <Metric
-                  value={
-                    genre.contributorCount
-                  }
-                  label={
-                    genre.contributorCount ===
-                    1
-                      ? "contributor"
-                      : "contributors"
-                  }
-                />
-              </div>
-            </Link>
-          )
-        },
+              <Metric
+                value={
+                  genre.contributorCount
+                }
+                label={
+                  genre.contributorCount ===
+                  1
+                    ? "contributor"
+                    : "contributors"
+                }
+              />
+            </div>
+          </Link>
+        ),
       )}
     </div>
   )
 }
 
+function GenreImage({
+  slug,
+  alt,
+  className = "",
+  loading,
+}: {
+  slug: string
+  alt: string
+  className?: string
+  loading?: "eager" | "lazy"
+}) {
+  const [
+    extensionIndex,
+    setExtensionIndex,
+  ] =
+    useState(0)
+
+  const extension =
+    GENRE_IMAGE_EXTENSIONS[
+      extensionIndex
+    ]
+
+  if (!extension) {
+    return (
+      <div
+        className={`bg-[var(--surface-soft)] ${className}`}
+        role="img"
+        aria-label={alt}
+      />
+    )
+  }
+
+  const imageUrl =
+    getGenreImageUrl(
+      slug,
+      extension,
+    )
+
+  return (
+    <img
+      src={
+        imageUrl
+      }
+      alt={
+        alt
+      }
+      loading={
+        loading
+      }
+      className={
+        className
+      }
+      onError={() =>
+        setExtensionIndex(
+          (current) =>
+            current + 1,
+        )
+      }
+    />
+  )
+}
+
 function getGenreImageUrl(
   slug: string,
+  extension: string,
 ): string {
   const {
     data,
@@ -813,7 +876,7 @@ function getGenreImageUrl(
         "genre-images",
       )
       .getPublicUrl(
-        `${slug}.png`,
+        `${slug}.${extension}`,
       )
 
   return data.publicUrl
