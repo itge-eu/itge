@@ -242,7 +242,7 @@ function ForBrandsPage() {
             </FormSection>
           </ContactForm>
 
-          <aside className="space-y-5 lg:sticky lg:top-8">
+          <aside className="space-y-5 lg:sticky lg:top-26">
             <InfoCard
               title="Independent coverage"
               text="Taking part in an ITGE tour does not guarantee positive coverage. Members are free to share their own experience and opinions."
@@ -260,7 +260,7 @@ function ForBrandsPage() {
 
             <InfoCard
               title="European tours"
-              text="ITGE focuses on organising tours across Europe. We can discuss routing, timing and return shipping once we know what you have in mind."
+              text="ITGE focuses on organising tours across Europe. We can discuss routing and timing once we know what you have in mind."
             />
           </aside>
         </div>

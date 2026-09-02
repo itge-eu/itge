@@ -251,7 +251,7 @@ function JoinPage() {
             </FormSection>
           </ContactForm>
 
-          <aside className="space-y-5 lg:sticky lg:top-8">
+          <aside className="space-y-5 lg:sticky lg:top-26">
             <InfoCard
               title="What happens next?"
               text="We review each application before adding new members. This helps us keep tours manageable and make sure everyone understands how the group works."
