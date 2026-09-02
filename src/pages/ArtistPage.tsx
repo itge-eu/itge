@@ -273,43 +273,10 @@ function ArtistPage() {
             <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {artist.products.map(
                 (product) => (
-                  <Link
+                  <GearCard
                     key={product.id}
-                    to={`/gear/${product.slug}`}
-                    className="group rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
-                  >
-                    <p className="text-sm uppercase tracking-[0.16em] text-[var(--accent)]">
-                      {
-                        product.brandName
-                      }
-                    </p>
-
-                    <h3 className="mt-2 text-2xl font-semibold tracking-tight transition group-hover:text-[var(--accent)]">
-                      {product.model}
-                    </h3>
-
-                    <div className="mt-5 flex flex-wrap gap-x-4 gap-y-1 text-sm text-[var(--muted)]">
-                      <span>
-                        {
-                          product.reviewCount
-                        }{" "}
-                        {product.reviewCount ===
-                        1
-                          ? "review"
-                          : "reviews"}
-                      </span>
-
-                      <span>
-                        {
-                          product.impressionCount
-                        }{" "}
-                        {product.impressionCount ===
-                        1
-                          ? "impression"
-                          : "impressions"}
-                      </span>
-                    </div>
-                  </Link>
+                    product={product}
+                  />
                 ),
               )}
             </div>
@@ -466,6 +433,70 @@ function ArtistPage() {
         )}
       </div>
     </main>
+  )
+}
+
+function GearCard({
+  product,
+}: {
+  product: ArtistProfile["products"][number]
+}) {
+  return (
+    <Link
+      to={`/gear/${product.slug}`}
+      className="group overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
+    >
+      <div className="relative aspect-[4/3] overflow-hidden bg-[var(--surface-soft)]">
+        {product.heroImageUrl ? (
+          <img
+            src={
+              product.heroImageUrl
+            }
+            alt={`${product.brandName} ${product.model}`}
+            loading="lazy"
+            className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[var(--muted)]">
+            No image available
+          </div>
+        )}
+      </div>
+
+      <div className="p-6">
+        <p className="text-sm uppercase tracking-[0.16em] text-[var(--accent)]">
+          {
+            product.brandName
+          }
+        </p>
+
+        <h3 className="mt-2 text-2xl font-semibold tracking-tight transition group-hover:text-[var(--accent)]">
+          {product.model}
+        </h3>
+
+        <div className="mt-5 flex flex-wrap gap-x-4 gap-y-1 text-sm text-[var(--muted)]">
+          <span>
+            {
+              product.reviewCount
+            }{" "}
+            {product.reviewCount ===
+            1
+              ? "review"
+              : "reviews"}
+          </span>
+
+          <span>
+            {
+              product.impressionCount
+            }{" "}
+            {product.impressionCount ===
+            1
+              ? "impression"
+              : "impressions"}
+          </span>
+        </div>
+      </div>
+    </Link>
   )
 }
 

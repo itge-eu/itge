@@ -39,6 +39,7 @@ export type ArtistProductSummary = {
   id: number
   model: string
   slug: string
+  heroImageUrl: string | null
 
   brandName: string
   brandSlug: string
@@ -125,6 +126,7 @@ type ArtistDetailReviewRow = {
         id: number
         model: string
         slug: string
+        hero_image_url: string | null
 
         brands:
           | {
@@ -143,6 +145,7 @@ type ArtistDetailReviewRow = {
         id: number
         model: string
         slug: string
+        hero_image_url: string | null
 
         brands:
           | {
@@ -187,6 +190,7 @@ type ArtistDetailImpressionRow = {
         id: number
         model: string
         slug: string
+        hero_image_url: string | null
 
         brands:
           | {
@@ -205,6 +209,7 @@ type ArtistDetailImpressionRow = {
         id: number
         model: string
         slug: string
+        hero_image_url: string | null
 
         brands:
           | {
@@ -279,7 +284,8 @@ function mapArtistReview(
       reviewer.slug,
 
     heroImageUrl:
-      row.hero_image_url,
+      row.hero_image_url ??
+      product.hero_image_url,
   }
 }
 
@@ -319,7 +325,8 @@ function mapArtistImpression(
     body: row.body,
 
     heroImageUrl:
-      row.hero_image_url,
+      row.hero_image_url ??
+      product.hero_image_url,
 
     publishedAt:
       row.published_at,
@@ -780,6 +787,7 @@ export async function getArtistBySlug(
               id,
               model,
               slug,
+              hero_image_url,
 
               brands (
                 id,
@@ -830,6 +838,7 @@ export async function getArtistBySlug(
               id,
               model,
               slug,
+              hero_image_url,
 
               brands (
                 id,
@@ -939,6 +948,8 @@ export async function getArtistBySlug(
           id: productId,
           model: product.model,
           slug: product.slug,
+          heroImageUrl:
+            product.hero_image_url,
 
           brandName:
             brand.name,
@@ -1028,6 +1039,8 @@ export async function getArtistBySlug(
           id: productId,
           model: product.model,
           slug: product.slug,
+          heroImageUrl:
+            product.hero_image_url,
 
           brandName:
             brand.name,

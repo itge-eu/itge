@@ -104,6 +104,7 @@ export type GenreProductSummary = {
   id: number
   model: string
   slug: string
+  heroImageUrl: string | null
 
   brandName: string
   brandSlug: string
@@ -184,6 +185,7 @@ type GenreDetailReviewRow = {
         id: number
         model: string
         slug: string
+        hero_image_url: string | null
 
         brands:
           | {
@@ -202,6 +204,7 @@ type GenreDetailReviewRow = {
         id: number
         model: string
         slug: string
+        hero_image_url: string | null
 
         brands:
           | {
@@ -246,6 +249,7 @@ type GenreDetailImpressionRow = {
         id: number
         model: string
         slug: string
+        hero_image_url: string | null
 
         brands:
           | {
@@ -264,6 +268,7 @@ type GenreDetailImpressionRow = {
         id: number
         model: string
         slug: string
+        hero_image_url: string | null
 
         brands:
           | {
@@ -346,7 +351,8 @@ function mapGenreReview(
       reviewer.slug,
 
     heroImageUrl:
-      row.hero_image_url,
+      row.hero_image_url ??
+      product.hero_image_url,
   }
 }
 
@@ -386,7 +392,8 @@ function mapGenreImpression(
     body: row.body,
 
     heroImageUrl:
-      row.hero_image_url,
+      row.hero_image_url ??
+      product.hero_image_url,
 
     publishedAt:
       row.published_at,
@@ -848,6 +855,7 @@ export async function getGenreBySlug(
               id,
               model,
               slug,
+              hero_image_url,
 
               brands (
                 id,
@@ -899,6 +907,7 @@ export async function getGenreBySlug(
               id,
               model,
               slug,
+              hero_image_url,
 
               brands (
                 id,
@@ -1011,6 +1020,8 @@ export async function getGenreBySlug(
           id: productId,
           model: product.model,
           slug: product.slug,
+          heroImageUrl:
+            product.hero_image_url,
 
           brandName:
             brand.name,
@@ -1104,6 +1115,8 @@ export async function getGenreBySlug(
           id: productId,
           model: product.model,
           slug: product.slug,
+          heroImageUrl:
+            product.hero_image_url,
 
           brandName:
             brand.name,
