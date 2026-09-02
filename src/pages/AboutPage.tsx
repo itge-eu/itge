@@ -35,11 +35,11 @@ function AboutPage() {
             />
           </div>
 
-          <h1 className="mt-10 text-2xl font-semibold tracking-tight text-[var(--accent)] sm:text-3xl">
+          <h1 className="mt-7 text-xl font-semibold tracking-tight text-[var(--accent)] sm:text-2xl">
             Connecting Europe with the world of personal audio
           </h1>
 
-          <div className="mt-5 space-y-5 text-base leading-8 text-[var(--muted)]">
+          <div className="mt-4 space-y-5 text-base leading-8 text-[var(--muted)]">
             <p>
               IEM Tour Group Europe is an independent,
               community-run collective connecting European
@@ -56,12 +56,12 @@ function AboutPage() {
         </header>
 
         {/* BETTER ACCESS */}
-        <section className="mt-16 max-w-4xl">
-          <h2 className="text-2xl font-semibold tracking-tight text-[var(--accent)] sm:text-3xl">
+        <section className="mt-10 max-w-4xl">
+          <h2 className="text-xl font-semibold tracking-tight text-[var(--accent)] sm:text-2xl">
             Better access, wider reach
           </h2>
 
-          <div className="mt-5 space-y-5 text-base leading-8 text-[var(--muted)]">
+          <div className="mt-4 space-y-5 text-base leading-8 text-[var(--muted)]">
             <p>
               Many specialist audio products are difficult to
               audition across Europe. Our tours place them with
@@ -78,12 +78,12 @@ function AboutPage() {
         </section>
 
         {/* COMMUNITY */}
-        <section className="mt-16 max-w-4xl">
-          <h2 className="text-2xl font-semibold tracking-tight text-[var(--accent)] sm:text-3xl">
+        <section className="mt-10 max-w-4xl">
+          <h2 className="text-xl font-semibold tracking-tight text-[var(--accent)] sm:text-2xl">
             Built around the community
           </h2>
 
-          <div className="mt-5 space-y-5 text-base leading-8 text-[var(--muted)]">
+          <div className="mt-4 space-y-5 text-base leading-8 text-[var(--muted)]">
             <p>
               Our group brings together dedicated enthusiasts,
               experienced reviewers and some of Europe&apos;s most
@@ -165,12 +165,12 @@ function AboutPage() {
         </section>
 
         {/* TAKE PART */}
-        <section className="mt-20 max-w-4xl">
-          <h2 className="text-2xl font-semibold tracking-tight text-[var(--accent)] sm:text-3xl">
+        <section className="mt-16 border-t border-[var(--border)] pt-12">
+          <h2 className="text-xl font-semibold tracking-tight text-[var(--accent)] sm:text-2xl">
             Take part
           </h2>
 
-          <div className="mt-5 space-y-5 text-base leading-8 text-[var(--muted)]">
+          <div className="mt-4 space-y-5 text-base leading-8 text-[var(--muted)]">
             <p>
               Whether you create, sell, review or simply enjoy
               personal audio, IEM Tour Group Europe is a place to
