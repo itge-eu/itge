@@ -65,16 +65,15 @@ export type DiscoveryItem =
   | DiscoveryImpressionItem
 
 /*
- * Product/Gear remains single-select.
+ * All discovery filters are multiselect.
  *
- * Gear type, Brands, Members, Artists and Genres are
- * multiselect. Multiple selections inside one category
- * are OR-ed together, while different categories are
- * combined with AND.
+ * Multiple selections inside one category are OR-ed
+ * together, while different categories are combined
+ * with AND.
  */
 export type SelectedDiscoveryFilters = {
   gear_type: DiscoveryFilterSuggestion[]
-  product: DiscoveryFilterSuggestion | null
+  product: DiscoveryFilterSuggestion[]
   brand: DiscoveryFilterSuggestion[]
   reviewer: DiscoveryFilterSuggestion[]
   artist: DiscoveryFilterSuggestion[]
@@ -95,7 +94,7 @@ export type DiscoveryState = {
 export const EMPTY_DISCOVERY_FILTERS: SelectedDiscoveryFilters =
   {
     gear_type: [],
-    product: null,
+    product: [],
     brand: [],
     reviewer: [],
     artist: [],

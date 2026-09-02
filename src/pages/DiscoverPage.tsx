@@ -319,20 +319,15 @@ function DiscoverPage() {
           switch (
             suggestion.type
           ) {
-            case "product": {
-              const selectingSameItem =
-                current.product
-                  ?.id ===
-                suggestion.id
-
+            case "product":
               return {
                 ...current,
                 product:
-                  selectingSameItem
-                    ? null
-                    : suggestion,
+                  toggleSuggestion(
+                    current.product,
+                    suggestion,
+                  ),
               }
-            }
 
             case "gear_type":
               return {
@@ -413,11 +408,13 @@ function DiscoverPage() {
               return {
                 ...current,
                 product:
-                  current.product
-                    ?.id ===
-                  id
-                    ? null
-                    : current.product,
+                  current.product.filter(
+                    (
+                      item,
+                    ) =>
+                      item.id !==
+                      id,
+                  ),
               }
 
             case "gear_type":
@@ -493,7 +490,7 @@ function DiscoverPage() {
     () => {
       setSelectedFilters({
         gear_type: [],
-        product: null,
+        product: [],
         brand: [],
         reviewer: [],
         artist: [],
@@ -829,13 +826,7 @@ function flattenSelectedFilters(
 ): DiscoveryFilterSuggestion[] {
   return [
     ...selectedFilters.gear_type,
-
-    ...(selectedFilters.product
-      ? [
-          selectedFilters.product,
-        ]
-      : []),
-
+    ...selectedFilters.product,
     ...selectedFilters.brand,
     ...selectedFilters.reviewer,
     ...selectedFilters.artist,

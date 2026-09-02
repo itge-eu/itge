@@ -891,10 +891,6 @@ function getSelectedItemsForType(
 
     case "product":
       return selectedFilters.product
-        ? [
-            selectedFilters.product,
-          ]
-        : []
 
     case "brand":
       return selectedFilters.brand

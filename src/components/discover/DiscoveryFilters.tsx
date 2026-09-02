@@ -126,10 +126,6 @@ function getSelectedItems(
 
     case "product":
       return selectedFilters.product
-        ? [
-            selectedFilters.product,
-          ]
-        : []
 
     case "brand":
       return selectedFilters.brand
@@ -151,9 +147,7 @@ function getActiveFilterCount(
 ): number {
   return (
     selectedFilters.gear_type.length +
-    (selectedFilters.product
-      ? 1
-      : 0) +
+    selectedFilters.product.length +
     selectedFilters.brand.length +
     selectedFilters.reviewer.length +
     selectedFilters.artist.length +
