@@ -102,7 +102,7 @@ function ArtistPage() {
   if (loading) {
     return (
       <PageState
-        eyebrow="Artist"
+        eyebrow="Explore"
         title="Loading artist…"
       />
     )
@@ -111,11 +111,11 @@ function ArtistPage() {
   if (error) {
     return (
       <PageState
-        eyebrow="Artist"
+        eyebrow="Explore"
         title="Unable to load artist"
         message={error}
-        backTo="/artists"
-        backLabel="Back to artists"
+        backTo="/explore?view=artists"
+        backLabel="Back to explore"
       />
     )
   }
@@ -126,8 +126,8 @@ function ArtistPage() {
         eyebrow="404"
         title="Artist not found"
         message="The artist you were looking for doesn’t exist or is no longer available."
-        backTo="/artists"
-        backLabel="Back to artists"
+        backTo="/explore?view=artists"
+        backLabel="Back to explore"
       />
     )
   }
@@ -138,8 +138,8 @@ function ArtistPage() {
         <Breadcrumbs
           items={[
             {
-              label: "Artists",
-              to: "/artists",
+              label: "Explore",
+              to: "/explore?view=artists",
             },
             {
               label:

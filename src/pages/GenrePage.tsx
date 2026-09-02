@@ -125,8 +125,8 @@ function GenrePage() {
         eyebrow="Explore"
         title="Unable to load genre"
         message={error}
-        backTo="/explore"
-        backLabel="Back to genres"
+        backTo="/explore?view=genres"
+        backLabel="Back to explore"
       />
     )
   }
@@ -137,8 +137,8 @@ function GenrePage() {
         eyebrow="404"
         title="Genre not found"
         message="The genre you were looking for doesn’t exist or is no longer available."
-        backTo="/explore"
-        backLabel="Back to genres"
+        backTo="/explore?view=genres"
+        backLabel="Back to explore"
       />
     )
   }
@@ -150,7 +150,7 @@ function GenrePage() {
           items={[
             {
               label: "Explore",
-              to: "/explore",
+              to: "/explore?view=genres",
             },
             {
               label:
