@@ -21,85 +21,80 @@ function AboutPage() {
             About ITGE
           </p>
 
-          <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-6xl">
-            Independent listening,
-            built around community.
-          </h1>
-        </header>
+          <div className="mt-8 max-w-[240px]">
+            <img
+              src={`${import.meta.env.BASE_URL}branding/logo-primary-light.svg`}
+              alt="IEM Tour Group Europe"
+              className="h-auto w-full dark:hidden"
+            />
 
-        {/* OUR STORY */}
-        <section className="mt-12 max-w-4xl">
-          <div className="grid gap-8 sm:grid-cols-[190px_minmax(0,1fr)] sm:items-center">
-            <div className="max-w-[190px]">
-              <img
-                src={`${import.meta.env.BASE_URL}branding/logo-primary-light.svg`}
-                alt="IEM Tour Group Europe"
-                className="h-auto w-full dark:hidden"
-              />
-
-              <img
-                src={`${import.meta.env.BASE_URL}branding/logo-primary-dark.svg`}
-                alt="IEM Tour Group Europe"
-                className="hidden h-auto w-full dark:block"
-              />
-            </div>
-
-            <p className="text-base leading-8 text-[var(--muted)]">
-              IEM Tour Group Europe is an independent,
-              community-driven collective connecting enthusiasts
-              and reviewers across Europe with manufacturers and
-              retailers from around the world. Audio gear is at
-              the heart of what we do, with tours covering
-              products across personal audio.
-            </p>
+            <img
+              src={`${import.meta.env.BASE_URL}branding/logo-primary-dark.svg`}
+              alt="IEM Tour Group Europe"
+              className="hidden h-auto w-full dark:block"
+            />
           </div>
 
-          <div className="mt-8 space-y-6 text-base leading-8 text-[var(--muted)]">
+          <h1 className="mt-10 text-2xl font-semibold tracking-tight text-[var(--accent)] sm:text-3xl">
+            Connecting Europe with the world of personal audio
+          </h1>
+
+          <div className="mt-5 space-y-5 text-base leading-8 text-[var(--muted)]">
             <p>
-              We organise tours that give our members the opportunity
-              to experience products they may not otherwise be able
-              to audition. They then share their experiences through
-              reviews, listening impressions and conversations that
-              help others discover new products and make more
-              informed choices.
+              IEM Tour Group Europe is an independent,
+              community-run collective connecting European
+              enthusiasts and reviewers with manufacturers and
+              retailers worldwide.
             </p>
 
             <p>
-              Our aim is to make the field more accessible and keep
-              the European personal audio community active, curious
-              and connected. We believe the best conversations
-              happen when brands, retailers and listeners come
-              together through a shared interest in great audio and
-              a shared respect for different perspectives.
+              Our main focus is IEMs, though we also arrange tours
+              for selected products from the wider personal audio
+              field.
+            </p>
+          </div>
+        </header>
+
+        {/* BETTER ACCESS */}
+        <section className="mt-16 max-w-4xl">
+          <h2 className="text-2xl font-semibold tracking-tight text-[var(--accent)] sm:text-3xl">
+            Better access, wider reach
+          </h2>
+
+          <div className="mt-5 space-y-5 text-base leading-8 text-[var(--muted)]">
+            <p>
+              Many specialist audio products are difficult to
+              audition across Europe. Our tours place them with
+              engaged listeners who share reviews, impressions and
+              conversations with the wider community.
             </p>
 
             <p>
-              For our partners, the tours offer a direct and natural
-              way to introduce their work to knowledgeable, engaged
-              listeners across Europe. For our members, they provide
-              access to interesting products, new experiences and a
-              community of people who truly care about the hobby.
+              Members gain access to products they may not otherwise
+              experience. Partners reach a knowledgeable and highly
+              relevant European audience in a direct, organic way.
+            </p>
+          </div>
+        </section>
+
+        {/* COMMUNITY */}
+        <section className="mt-16 max-w-4xl">
+          <h2 className="text-2xl font-semibold tracking-tight text-[var(--accent)] sm:text-3xl">
+            Built around the community
+          </h2>
+
+          <div className="mt-5 space-y-5 text-base leading-8 text-[var(--muted)]">
+            <p>
+              Our group brings together dedicated enthusiasts,
+              experienced reviewers and some of Europe&apos;s most
+              established voices in the audio scene.
             </p>
 
             <p>
-              Today our group includes dedicated enthusiasts and some
-              of the most established voices in the European audio
-              community. We are also proud to work with many of the
-              field&apos;s most respected manufacturers and retailers
-              worldwide.
-            </p>
-
-            <p>
-              Whether you create personal audio products, sell them,
-              write about them or simply enjoy discovering new ways
-              to listen, IEM Tour Group Europe is a place to connect,
-              exchange ideas and take part.
-            </p>
-
-            <p>
-              We are here to share our enthusiasm, make exceptional
-              audio easier to experience and help the hobby grow
-              across Europe and beyond.
+              We work with many of the world&apos;s most respected
+              personal audio manufacturers and retailers. These
+              relationships have developed into repeat collaborations
+              or ongoing partnerships.
             </p>
           </div>
         </section>
@@ -169,13 +164,34 @@ function AboutPage() {
           </div>
         </section>
 
+        {/* TAKE PART */}
+        <section className="mt-20 max-w-4xl">
+          <h2 className="text-2xl font-semibold tracking-tight text-[var(--accent)] sm:text-3xl">
+            Take part
+          </h2>
+
+          <div className="mt-5 space-y-5 text-base leading-8 text-[var(--muted)]">
+            <p>
+              Whether you create, sell, review or simply enjoy
+              personal audio, IEM Tour Group Europe is a place to
+              connect, share experiences and discover something new.
+            </p>
+
+            <p>
+              Our purpose is simple: make great audio more accessible
+              and help the community grow across Europe and beyond
+              together.
+            </p>
+          </div>
+        </section>
+
         {/* CTAS */}
-        <section className="mt-20 grid gap-6 md:grid-cols-2">
+        <section className="mt-10 grid items-stretch gap-6 md:grid-cols-2">
           <CallToAction
             eyebrow="For listeners"
             title="Want to join ITGE?"
             text="Interested in taking part in future tours and sharing your own listening experiences?"
-            buttonLabel="Join ITGE"
+            linkLabel="Join ITGE"
             to="/join"
           />
 
@@ -183,7 +199,7 @@ function AboutPage() {
             eyebrow="For brands"
             title="Let ITGE tour your gear"
             text="Have audio gear you'd like to put in front of multiple European listeners and reviewers?"
-            buttonLabel="For brands"
+            linkLabel="For brands"
             to="/for-brands"
           />
         </section>
@@ -222,36 +238,36 @@ function CallToAction({
   eyebrow,
   title,
   text,
-  buttonLabel,
+  linkLabel,
   to,
 }: {
   eyebrow: string
   title: string
   text: string
-  buttonLabel: string
+  linkLabel: string
   to: string
 }) {
   return (
-    <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7 sm:p-8">
+    <Link
+      to={to}
+      className="group flex h-full flex-col rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 transition duration-300 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
+    >
       <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
         {eyebrow}
       </p>
 
-      <h2 className="mt-3 text-2xl font-semibold tracking-tight">
+      <h2 className="mt-4 text-3xl font-semibold tracking-tight">
         {title}
       </h2>
 
-      <p className="mt-3 leading-7 text-[var(--muted)]">
+      <p className="mt-5 max-w-xl leading-7 text-[var(--muted)]">
         {text}
       </p>
 
-      <Link
-        to={to}
-        className="mt-6 inline-flex items-center justify-center rounded-2xl bg-[var(--accent)] px-5 py-3 font-semibold text-[var(--accent-foreground)] transition hover:bg-[var(--accent-hover)]"
-      >
-        {buttonLabel}
-      </Link>
-    </div>
+      <span className="mt-auto inline-flex items-center pt-8 text-sm font-semibold text-[var(--accent)] transition group-hover:translate-x-0.5">
+        {linkLabel} →
+      </span>
+    </Link>
   )
 }
 
