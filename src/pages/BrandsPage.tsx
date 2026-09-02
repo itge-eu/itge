@@ -169,32 +169,26 @@ function BrandsPage() {
                     </div>
 
                     <div className="border-t border-[var(--border)] px-5 py-4">
-                      <div className="flex items-center justify-between gap-4">
-                        <h2 className="break-words text-lg font-semibold tracking-tight transition group-hover:text-[var(--accent)]">
-                          {store.name}
-                        </h2>
+                      {store.country && (
+                        <p className="text-xs font-medium text-[var(--muted)]">
+                          {getCountryName(
+                            store.country,
+                          )}
+                        </p>
+                      )}
 
-                        {store.country && (
-                          <img
-                            src={`https://flagcdn.com/24x18/${normalizeCountryCode(
-                              store.country,
-                            ).toLowerCase()}.png`}
-                            srcSet={`https://flagcdn.com/48x36/${normalizeCountryCode(
-                              store.country,
-                            ).toLowerCase()}.png 2x`}
-                            width="24"
-                            height="18"
-                            alt={`${getCountryName(
-                              store.country,
-                            )} flag`}
-                            loading="lazy"
-                            className="h-[18px] w-6 shrink-0 rounded-sm object-cover"
-                          />
-                        )}
-                      </div>
+                      <h2
+                        className={`break-words text-lg font-semibold tracking-tight transition group-hover:text-[var(--accent)] ${
+                          store.country
+                            ? "mt-1"
+                            : ""
+                        }`}
+                      >
+                        {store.name}
+                      </h2>
 
                       {store.website && (
-                        <span className="mt-4 block text-sm font-semibold text-[var(--accent)]">
+                        <span className="mt-2 block text-sm font-semibold text-[var(--accent)]">
                           Visit store{" "}
                           <span aria-hidden="true">
                             ↗
@@ -275,21 +269,6 @@ function BrandsPage() {
       </div>
     </main>
   )
-}
-
-function normalizeCountryCode(
-  country: string,
-): string {
-  const code =
-    country
-      .trim()
-      .toUpperCase()
-
-  if (code === "UK") {
-    return "GB"
-  }
-
-  return code
 }
 
 function getCountryName(
