@@ -289,7 +289,7 @@ export async function getReviewerBySlug(
       summary,
       hero_image_url,
 
-      products (
+      products!reviews_iem_id_fkey (
         model,
         slug,
 
