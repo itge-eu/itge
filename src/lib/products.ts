@@ -611,7 +611,7 @@ export async function getProductBySlug(
         slug
       ),
 
-      products (
+      products!reviews_iem_id_fkey (
         model,
         slug,
 
@@ -772,7 +772,7 @@ export async function getProducts(): Promise<
         slug
       ),
 
-      reviews (
+      reviews!reviews_iem_id_fkey (
         id,
         rating,
         hero_image_url,

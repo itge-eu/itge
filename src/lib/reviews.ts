@@ -366,7 +366,7 @@ export async function getFeaturedReviews(): Promise<
           slug
         ),
 
-        products (
+        products!reviews_iem_id_fkey (
           model,
           slug,
           hero_image_url,
@@ -432,7 +432,7 @@ export async function getLatestReviews(
           slug
         ),
 
-        products (
+        products!reviews_iem_id_fkey (
           model,
           slug,
           hero_image_url,
@@ -761,7 +761,7 @@ export async function getAllReviews(
           slug
         ),
 
-        products (
+        products!reviews_iem_id_fkey (
           model,
           slug,
           hero_image_url,
@@ -890,7 +890,7 @@ export async function getReviewBySlug(
           slug
         ),
 
-        products (
+        products!reviews_iem_id_fkey (
           model,
           slug,
           hero_image_url,

@@ -694,7 +694,7 @@ export async function getDiscoveryItems(): Promise<
             slug
           ),
 
-          products (
+          products!reviews_iem_id_fkey (
             id,
             model,
             slug,
