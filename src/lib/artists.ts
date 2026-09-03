@@ -783,7 +783,7 @@ export async function getArtistBySlug(
               slug
             ),
 
-            products (
+            products!reviews_iem_id_fkey (
               id,
               model,
               slug,

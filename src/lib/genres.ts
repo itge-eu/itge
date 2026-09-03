@@ -851,7 +851,7 @@ export async function getGenreBySlug(
               slug
             ),
 
-            products (
+            products!reviews_iem_id_fkey (
               id,
               model,
               slug,
