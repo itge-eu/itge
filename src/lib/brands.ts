@@ -834,11 +834,10 @@ export async function getBrandBySlug(
           slug
         ),
 
-        products!inner (
+        products!reviews_iem_id_fkey!inner (
           id,
           model,
           slug,
-          product_type,
 
           brands!inner (
             id,
@@ -1035,7 +1034,7 @@ export async function getBrands(): Promise<
       products (
         id,
 
-        reviews (
+        reviews!reviews_iem_id_fkey (
           id,
           published
         ),
