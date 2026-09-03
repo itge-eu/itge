@@ -155,6 +155,9 @@ function AdminEditReviewPage() {
   const [products, setProducts] = useState<ProductOption[]>([]);
   const [primaryProductId, setPrimaryProductId] = useState<number | null>(null);
   const [coveredProductIds, setCoveredProductIds] = useState<number[]>([]);
+  const [coverageHeroImages, setCoverageHeroImages] = useState<
+    Record<number, string>
+  >({});
   const [gearSearch, setGearSearch] = useState("");
 
   useEffect(() => {
@@ -239,7 +242,7 @@ function AdminEditReviewPage() {
       const { data: coverageRows, error: coverageError } =
         await supabase
           .from("review_products")
-          .select("product_id")
+          .select("product_id, hero_image_url")
           .eq("review_id", id);
 
       if (coverageError) {
@@ -261,6 +264,18 @@ function AdminEditReviewPage() {
 
       setPrimaryProductId(loadedPrimaryProductId);
       setCoveredProductIds(loadedCoveredProductIds);
+      setCoverageHeroImages(
+        Object.fromEntries(
+          (coverageRows ?? []).flatMap((row) => {
+            const productId = Number(row.product_id);
+            const heroImageUrl = row.hero_image_url?.trim() ?? "";
+
+            return heroImageUrl
+              ? [[productId, heroImageUrl]]
+              : [];
+          }),
+        ),
+      );
 
       const { data: imageRows, error: imageRowsError } =
         await supabase
@@ -572,41 +587,83 @@ function AdminEditReviewPage() {
       new Set([primaryProductId, ...coveredProductIds]),
     );
 
-    const { error: deleteError } = await supabase
-      .from("review_products")
-      .delete()
-      .eq("review_id", reviewId);
+    const { data: existingRows, error: existingRowsError } =
+      await supabase
+        .from("review_products")
+        .select("product_id")
+        .eq("review_id", reviewId);
 
-    if (deleteError) {
+    if (existingRowsError) {
       throw new Error(
-        `Could not update Gear coverage: ${deleteError.message}`,
+        `Could not load current Gear coverage: ${existingRowsError.message}`,
       );
     }
 
-    const { error: insertError } = await supabase
-      .from("review_products")
-      .insert(
-        nextCoveredProductIds.map((productId) => ({
-          review_id: reviewId,
-          product_id: productId,
-        })),
-      );
+    const existingProductIds = new Set(
+      (existingRows ?? []).map((row) => Number(row.product_id)),
+    );
 
-    if (insertError) {
-      throw new Error(
-        `Could not attach Gear to review: ${insertError.message}`,
-      );
+    const nextProductIdSet = new Set(nextCoveredProductIds);
+
+    const productIdsToInsert = nextCoveredProductIds.filter(
+      (productId) => !existingProductIds.has(productId),
+    );
+
+    const productIdsToDelete = Array.from(existingProductIds).filter(
+      (productId) =>
+        !nextProductIdSet.has(productId) &&
+        productId !== primaryProductId,
+    );
+
+    if (productIdsToInsert.length > 0) {
+      const { error: insertError } = await supabase
+        .from("review_products")
+        .insert(
+          productIdsToInsert.map((productId) => ({
+            review_id: reviewId,
+            product_id: productId,
+            hero_image_url: coverageHeroImages[productId] || null,
+          })),
+        );
+
+      if (insertError) {
+        throw new Error(
+          `Could not attach Gear to review: ${insertError.message}`,
+        );
+      }
+    }
+
+    if (productIdsToDelete.length > 0) {
+      const { error: deleteError } = await supabase
+        .from("review_products")
+        .delete()
+        .eq("review_id", reviewId)
+        .in("product_id", productIdsToDelete);
+
+      if (deleteError) {
+        throw new Error(
+          `Could not remove Gear from review: ${deleteError.message}`,
+        );
+      }
+    }
+
+    for (const productId of nextCoveredProductIds) {
+      const { error: imageError } = await supabase
+        .from("review_products")
+        .update({
+          hero_image_url: coverageHeroImages[productId]?.trim() || null,
+        })
+        .eq("review_id", reviewId)
+        .eq("product_id", productId);
+
+      if (imageError) {
+        throw new Error(
+          `Could not update Gear card image: ${imageError.message}`,
+        );
+      }
     }
 
     setCoveredProductIds(nextCoveredProductIds);
-
-    const originalProduct = products.find(
-      (product) => product.id === primaryProductId,
-    );
-
-    if (originalProduct) {
-      updateField("productName", getProductLabel(originalProduct));
-    }
   }
 
   async function saveReview(options?: {
@@ -1227,6 +1284,75 @@ function AdminEditReviewPage() {
                           >
                             Remove
                           </button>
+                        )}
+                      </div>
+
+                      <div className="mt-4 border-t border-[var(--border)] pt-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
+                            Card image
+                          </p>
+
+                          {coverageHeroImages[productId] && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setCoverageHeroImages((current) => {
+                                  const next = { ...current };
+                                  delete next[productId];
+                                  return next;
+                                })
+                              }
+                              className="text-xs font-semibold text-[var(--accent)]"
+                            >
+                              Use default
+                            </button>
+                          )}
+                        </div>
+
+                        {uploadedImages.length > 0 ? (
+                          <div className="mt-3 grid grid-cols-3 gap-2">
+                            {uploadedImages.map((image) => {
+                              const selected =
+                                coverageHeroImages[productId] === image.publicUrl;
+
+                              return (
+                                <button
+                                  key={`${productId}-${image.storagePath}`}
+                                  type="button"
+                                  onClick={() =>
+                                    setCoverageHeroImages((current) => ({
+                                      ...current,
+                                      [productId]: image.publicUrl,
+                                    }))
+                                  }
+                                  title={image.alt || "Use this image"}
+                                  className={`relative overflow-hidden rounded-lg border-2 transition ${
+                                    selected
+                                      ? "border-[var(--accent)]"
+                                      : "border-transparent hover:border-[var(--border)]"
+                                  }`}
+                                >
+                                  <img
+                                    src={image.publicUrl}
+                                    alt={image.alt || ""}
+                                    className="aspect-square w-full object-cover"
+                                  />
+
+                                  {selected && (
+                                    <span className="absolute right-1.5 top-1.5 rounded-full bg-[var(--accent)] px-2 py-0.5 text-[10px] font-bold text-white">
+                                      ✓
+                                    </span>
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <p className="mt-3 text-xs leading-5 text-[var(--muted)]">
+                            Copy the imported review images to Supabase first,
+                            then you can choose a different card image for this Gear.
+                          </p>
                         )}
                       </div>
                     </div>

@@ -19,6 +19,12 @@ type MediaImage = {
   alt_text: string | null
 }
 
+type ReviewCoverage = {
+  productId: number
+  productName: string
+  hero_image_url: string | null
+}
+
 type MediaItem = {
   type:
     | "review"
@@ -35,6 +41,7 @@ type MediaItem = {
   productName: string
 
   images: MediaImage[]
+  coverages?: ReviewCoverage[]
 }
 
 type GearItem = {
@@ -80,6 +87,32 @@ function getSingleRelation<T>(
   }
 
   return relation ?? null
+}
+
+function isItemComplete(
+  item: AdminMediaItem,
+): boolean {
+  if (item.type !== "review") {
+    return item.hero_image_confirmed
+  }
+
+  if (!item.hero_image_confirmed) {
+    return false
+  }
+
+  const secondaryCoverages =
+    (item.coverages ?? []).filter(
+      (coverage) =>
+        coverage.productId !==
+        item.productId,
+    )
+
+  return secondaryCoverages.every(
+    (coverage) =>
+      Boolean(
+        coverage.hero_image_url,
+      ),
+  )
 }
 
 function AdminMediaPage() {
@@ -195,6 +228,33 @@ function AdminMediaPage() {
         }
 
         const {
+          data: reviewProductRows,
+          error: reviewProductError,
+        } =
+          await supabase
+            .from("review_products")
+            .select(`
+              review_id,
+              product_id,
+              hero_image_url,
+
+              products (
+                id,
+                model,
+                slug,
+                hero_image_url,
+
+                brands (
+                  name
+                )
+              )
+            `)
+
+        if (reviewProductError) {
+          throw reviewProductError
+        }
+
+        const {
           data:
             impressionRows,
           error:
@@ -216,7 +276,7 @@ function AdminMediaPage() {
                 name
               ),
 
-              products!reviews_iem_id_fkey (
+              products (
                 id,
                 model,
                 slug,
@@ -366,6 +426,56 @@ function AdminMediaPage() {
                   productName:
                     productName ||
                     "Unknown gear",
+
+                  coverages:
+                    (reviewProductRows ?? [])
+                      .filter(
+                        (coverage) =>
+                          Number(coverage.review_id) ===
+                          Number(row.id),
+                      )
+                      .flatMap(
+                        (coverage) => {
+                          const coverageProduct =
+                            getSingleRelation(
+                              coverage.products,
+                            )
+
+                          if (!coverageProduct) {
+                            return []
+                          }
+
+                          const coverageBrand =
+                            getSingleRelation(
+                              coverageProduct.brands,
+                            )
+
+                          const coverageProductName =
+                            [
+                              coverageBrand?.name,
+                              coverageProduct.model,
+                            ]
+                              .filter(Boolean)
+                              .join(" ")
+
+                          return [
+                            {
+                              productId:
+                                Number(
+                                  coverage.product_id,
+                                ),
+
+                              productName:
+                                coverageProductName ||
+                                "Unknown gear",
+
+                              hero_image_url:
+                                coverage.hero_image_url ??
+                                null,
+                            },
+                          ]
+                        },
+                      ),
 
                   images:
                     images.map(
@@ -667,6 +777,35 @@ function AdminMediaPage() {
         )
 
         ;(
+          reviewProductRows ??
+          []
+        ).forEach(
+          (row) => {
+            const product =
+              getSingleRelation(
+                row.products,
+              )
+
+            if (!product) {
+              return
+            }
+
+            productById.set(
+              Number(
+                product.id,
+              ),
+              {
+                slug:
+                  product.slug,
+                hero_image_url:
+                  product.hero_image_url ??
+                  null,
+              },
+            )
+          },
+        )
+
+        ;(
           impressionRows ??
           []
         ).forEach(
@@ -704,6 +843,37 @@ function AdminMediaPage() {
               ) ??
                 null,
             ),
+        )
+
+        reviewItems.forEach(
+          (item) => {
+            ;(
+              item.coverages ??
+              []
+            )
+              .filter(
+                (coverage) =>
+                  coverage.productId !==
+                  item.productId,
+              )
+              .forEach(
+                (coverage) => {
+                  addToGear(
+                    {
+                      ...item,
+                      productId:
+                        coverage.productId,
+                      productName:
+                        coverage.productName,
+                    },
+                    productById.get(
+                      coverage.productId,
+                    ) ??
+                      null,
+                  )
+                },
+              )
+          },
         )
 
         impressionItems.forEach(
@@ -865,6 +1035,90 @@ function AdminMediaPage() {
     setSavingKey(null)
   }
 
+  async function handleSelectCoverageHero(
+    reviewId: number,
+    productId: number,
+    image: MediaImage,
+  ) {
+    const key =
+      `coverage-${reviewId}-${productId}`
+
+    setSavingKey(key)
+    setError(null)
+
+    const {
+      data: updatedRows,
+      error: updateError,
+    } =
+      await supabase
+        .from("review_products")
+        .update({
+          hero_image_url:
+            image.public_url,
+        })
+        .eq("review_id", reviewId)
+        .eq("product_id", productId)
+        .select("review_id, product_id")
+
+    if (updateError) {
+      console.error(
+        "Updating Gear coverage image failed:",
+        updateError,
+      )
+
+      setError(
+        updateError.message,
+      )
+
+      setSavingKey(null)
+      return
+    }
+
+    if (
+      !updatedRows ||
+      updatedRows.length === 0
+    ) {
+      setError(
+        "No Gear coverage row was updated. Check Supabase RLS permissions.",
+      )
+
+      setSavingKey(null)
+      return
+    }
+
+    setItems(
+      (currentItems) =>
+        currentItems.map(
+          (currentItem) => {
+            if (
+              currentItem.type !== "review" ||
+              currentItem.id !== reviewId
+            ) {
+              return currentItem
+            }
+
+            return {
+              ...currentItem,
+
+              coverages:
+                (currentItem.coverages ?? []).map(
+                  (coverage) =>
+                    coverage.productId === productId
+                      ? {
+                          ...coverage,
+                          hero_image_url:
+                            image.public_url,
+                        }
+                      : coverage,
+                ),
+            }
+          },
+        ),
+    )
+
+    setSavingKey(null)
+  }
+
   const filteredItems =
     useMemo(() => {
       const normalizedSearch =
@@ -883,10 +1137,15 @@ function AdminMediaPage() {
             return false
           }
 
+          const itemComplete =
+            isItemComplete(
+              item,
+            )
+
           if (
             confirmationFilter ===
               "unchecked" &&
-            item.hero_image_confirmed
+            itemComplete
           ) {
             return false
           }
@@ -894,7 +1153,7 @@ function AdminMediaPage() {
           if (
             confirmationFilter ===
               "checked" &&
-            !item.hero_image_confirmed
+            !itemComplete
           ) {
             return false
           }
@@ -941,7 +1200,9 @@ function AdminMediaPage() {
   const uncheckedCount =
     items.filter(
       (item) =>
-        !item.hero_image_confirmed,
+        !isItemComplete(
+          item,
+        ),
     ).length
 
   const checkedCount =
@@ -1297,12 +1558,12 @@ function AdminMediaPage() {
 
                                 <span
                                   className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                                    item.hero_image_confirmed
+                                    isItemComplete(item)
                                       ? "bg-green-500/15 text-green-600"
                                       : "bg-amber-500/15 text-amber-600"
                                   }`}
                                 >
-                                  {item.hero_image_confirmed
+                                  {isItemComplete(item)
                                     ? "Checked"
                                     : "Unchecked"}
                                 </span>
@@ -1483,6 +1744,130 @@ function AdminMediaPage() {
                               )}
                             </div>
                           )}
+
+                          {item.type === "review" &&
+                            (item.coverages?.length ?? 0) > 1 &&
+                            item.images.length > 0 && (
+                              <div className="mt-8 border-t border-[var(--border)] pt-7">
+                                <div>
+                                  <p className="text-sm font-semibold">
+                                    Also covered Gear
+                                  </p>
+
+                                  <p className="mt-2 text-sm text-[var(--muted)]">
+                                    Choose a separate card image for additional Gear covered by this review.
+                                  </p>
+                                </div>
+
+                                <div className="mt-5 space-y-6">
+                                  {(item.coverages ?? [])
+                                    .filter(
+                                      (coverage) =>
+                                        coverage.productId !==
+                                        item.productId,
+                                    )
+                                    .map(
+                                    (coverage) => {
+                                      const coverageSavingKey =
+                                        `coverage-${item.id}-${coverage.productId}`
+
+                                      const isCoverageSaving =
+                                        savingKey ===
+                                        coverageSavingKey
+
+                                      return (
+                                        <div
+                                          key={coverage.productId}
+                                          className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-4"
+                                        >
+                                          <div className="flex flex-wrap items-center justify-between gap-3">
+                                            <p className="font-semibold">
+                                              {coverage.productName}
+                                            </p>
+
+                                            <span className="text-xs text-[var(--muted)]">
+                                              Card image
+                                            </span>
+                                          </div>
+
+                                          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+                                            {item.images.map(
+                                              (
+                                                image,
+                                                index,
+                                              ) => {
+                                                const isCoverageHero =
+                                                  coverage.hero_image_url ===
+                                                  image.public_url
+
+                                                return (
+                                                  <button
+                                                    key={`${coverage.productId}-${image.id}-${image.public_url}`}
+                                                    type="button"
+                                                    onClick={() =>
+                                                      void handleSelectCoverageHero(
+                                                        item.id,
+                                                        coverage.productId,
+                                                        image,
+                                                      )
+                                                    }
+                                                    disabled={
+                                                      isCoverageSaving
+                                                    }
+                                                    className={`group relative overflow-hidden rounded-xl border-2 text-left transition ${
+                                                      isCoverageHero
+                                                        ? "border-[var(--accent)]"
+                                                        : "border-[var(--border)] hover:border-[var(--accent)]"
+                                                    } disabled:cursor-not-allowed disabled:opacity-60`}
+                                                  >
+                                                    <img
+                                                      src={
+                                                        image.public_url
+                                                      }
+                                                      alt={
+                                                        image.alt_text ??
+                                                        ""
+                                                      }
+                                                      loading="lazy"
+                                                      className="aspect-square w-full object-cover"
+                                                    />
+
+                                                    <div className="flex items-center justify-between gap-2 bg-[var(--surface)] px-3 py-2 text-xs">
+                                                      <span>
+                                                        Image{" "}
+                                                        {index + 1}
+                                                      </span>
+
+                                                      {isCoverageHero && (
+                                                        <span className="font-semibold text-[var(--accent)]">
+                                                          Card
+                                                        </span>
+                                                      )}
+                                                    </div>
+
+                                                    {isCoverageHero && (
+                                                      <div className="absolute right-2 top-2 rounded-full bg-[var(--accent)] px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
+                                                        ✓
+                                                      </div>
+                                                    )}
+                                                  </button>
+                                                )
+                                              },
+                                            )}
+                                          </div>
+
+                                          {isCoverageSaving && (
+                                            <p className="mt-3 text-sm font-medium text-[var(--accent)]">
+                                              Saving card image…
+                                            </p>
+                                          )}
+                                        </div>
+                                      )
+                                    },
+                                  )}
+                                </div>
+                              </div>
+                            )}
                         </article>
                       )
                     },

@@ -119,6 +119,10 @@ type DiscoveryReviewRow = {
 type DiscoveryReviewProductRow = {
   product_id: number
 
+  hero_image_url:
+    | string
+    | null
+
   products:
     | RelatedProduct
     | RelatedProduct[]
@@ -525,6 +529,7 @@ function mapDiscoveryReviewProduct(
           .slug,
 
       heroImageUrl:
+        row.hero_image_url ??
         review.hero_image_url ??
         entities.product
           .hero_image_url ??
@@ -711,6 +716,7 @@ export async function getDiscoveryItems(): Promise<
         )
         .select(`
           product_id,
+          hero_image_url,
 
           products (
             id,
