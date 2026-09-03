@@ -13,6 +13,14 @@ export type ReviewGenre = {
   slug: string
 }
 
+export type ReviewCoveredProduct = {
+  id: number
+  model: string
+  slug: string
+  brand: string
+  brandSlug: string
+}
+
 export type FeaturedReview = {
   id: number
   slug: string
@@ -51,6 +59,7 @@ export type FullReview =
 
     artists: ReviewArtist[]
     genres: ReviewGenre[]
+    alsoCovers: ReviewCoveredProduct[]
   }
 
 type ReviewArtistRow = {
@@ -86,6 +95,7 @@ type ReviewGenreRow = {
 }
 
 type ReviewProduct = {
+  id?: number
   model: string
   slug: string
   hero_image_url:
@@ -114,6 +124,14 @@ type ReviewProduct = {
         name: string
         slug?: string
       }[]
+    | null
+}
+
+type ReviewProductRelationRow = {
+  product_id: number
+  products:
+    | ReviewProduct
+    | ReviewProduct[]
     | null
 }
 
@@ -155,6 +173,10 @@ type ReviewRow = {
 
   review_genres?:
     | ReviewGenreRow[]
+    | null
+
+  review_products?:
+    | ReviewProductRelationRow[]
     | null
 }
 
@@ -337,6 +359,62 @@ function mapReviewGenres(
 
           slug:
             genre.slug,
+        },
+      ]
+    },
+  )
+}
+
+function mapAlsoCoveredProducts(
+  rows:
+    | ReviewProductRelationRow[]
+    | null
+    | undefined,
+  originalProductSlug: string,
+): ReviewCoveredProduct[] {
+  return (
+    rows ?? []
+  ).flatMap(
+    (row) => {
+      const product =
+        getSingleRelation(
+          row.products,
+        )
+
+      const brand =
+        getSingleRelation(
+          product?.brands,
+        )
+
+      if (
+        !product ||
+        !brand ||
+        !brand.slug ||
+        product.slug ===
+          originalProductSlug
+      ) {
+        return []
+      }
+
+      return [
+        {
+          id:
+            Number(
+              product.id ??
+                row.product_id,
+            ),
+
+          model:
+            product.model,
+
+          slug:
+            product.slug,
+
+          brand:
+            brand.name,
+
+          brandSlug:
+            brand.slug,
         },
       ]
     },
@@ -920,6 +998,21 @@ export async function getReviewBySlug(
             name,
             slug
           )
+        ),
+
+        review_products (
+          product_id,
+
+          products (
+            id,
+            model,
+            slug,
+
+            brands (
+              name,
+              slug
+            )
+          )
         )
       `)
       .eq(
@@ -950,7 +1043,7 @@ export async function getReviewBySlug(
 
   if (!product) {
     throw new Error(
-      `Review ${row.id} has no associated IEM`,
+      `Review ${row.id} has no associated Gear`,
     )
   }
 
@@ -1014,9 +1107,15 @@ export async function getReviewBySlug(
         row.review_artists,
       ),
 
-    genres:
+        genres:
       mapReviewGenres(
         row.review_genres,
+      ),
+
+    alsoCovers:
+      mapAlsoCoveredProducts(
+        row.review_products,
+        product.slug,
       ),
   }
 }

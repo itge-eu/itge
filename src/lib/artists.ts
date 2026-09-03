@@ -22,16 +22,7 @@ export type ArtistSummary = {
   coverageCount: number
 
   productCount: number
-
-  /*
-   * Reviewers with at least one full review
-   * referencing this artist.
-   */
   reviewerCount: number
-
-  /*
-   * Unique people across reviews + impressions.
-   */
   contributorCount: number
 }
 
@@ -90,8 +81,12 @@ type ImpressionArtistRelationRow = {
 
 type PublishedReviewRow = {
   id: number
-  product_id: number | null
   reviewer_id: number | null
+}
+
+type PublishedReviewCoverageRow = {
+  review_id: number
+  product_id: number
 }
 
 type PublishedImpressionRow = {
@@ -107,6 +102,7 @@ type ArtistDetailReviewRow = {
   title: string
   summary: string
   hero_image_url: string | null
+  published_at: string | null
 
   reviewers:
     | {
@@ -120,46 +116,40 @@ type ArtistDetailReviewRow = {
         slug: string
       }[]
     | null
+}
 
-  products:
+type ArtistDetailProductRow = {
+  id: number
+  model: string
+  slug: string
+  hero_image_url: string | null
+
+  brands:
     | {
         id: number
-        model: string
+        name: string
         slug: string
-        hero_image_url: string | null
-
-        brands:
-          | {
-              id: number
-              name: string
-              slug: string
-            }
-          | {
-              id: number
-              name: string
-              slug: string
-            }[]
-          | null
       }
     | {
         id: number
-        model: string
+        name: string
         slug: string
-        hero_image_url: string | null
-
-        brands:
-          | {
-              id: number
-              name: string
-              slug: string
-            }
-          | {
-              id: number
-              name: string
-              slug: string
-            }[]
-          | null
       }[]
+    | null
+}
+
+type ArtistDetailReviewCoverageRow = {
+  review_id: number
+  product_id: number
+
+  reviews:
+    | ArtistDetailReviewRow
+    | ArtistDetailReviewRow[]
+    | null
+
+  products:
+    | ArtistDetailProductRow
+    | ArtistDetailProductRow[]
     | null
 }
 
@@ -186,49 +176,17 @@ type ArtistDetailImpressionRow = {
     | null
 
   products:
-    | {
-        id: number
-        model: string
-        slug: string
-        hero_image_url: string | null
-
-        brands:
-          | {
-              id: number
-              name: string
-              slug: string
-            }
-          | {
-              id: number
-              name: string
-              slug: string
-            }[]
-          | null
-      }
-    | {
-        id: number
-        model: string
-        slug: string
-        hero_image_url: string | null
-
-        brands:
-          | {
-              id: number
-              name: string
-              slug: string
-            }
-          | {
-              id: number
-              name: string
-              slug: string
-            }[]
-          | null
-      }[]
+    | ArtistDetailProductRow
+    | ArtistDetailProductRow[]
     | null
 }
 
 function getSingleRelation<T>(
-  relation: T | T[] | null | undefined,
+  relation:
+    | T
+    | T[]
+    | null
+    | undefined,
 ): T | null {
   if (Array.isArray(relation)) {
     return relation[0] ?? null
@@ -237,17 +195,37 @@ function getSingleRelation<T>(
   return relation ?? null
 }
 
-function mapArtistReview(
-  row: ArtistDetailReviewRow,
+function timestampValue(
+  value: string | null,
+): number {
+  if (!value) {
+    return 0
+  }
+
+  const time =
+    new Date(value).getTime()
+
+  return Number.isNaN(time)
+    ? 0
+    : time
+}
+
+function mapArtistReviewCoverage(
+  row: ArtistDetailReviewCoverageRow,
 ): FeaturedReview {
-  const reviewer =
+  const review =
     getSingleRelation(
-      row.reviewers,
+      row.reviews,
     )
 
   const product =
     getSingleRelation(
       row.products,
+    )
+
+  const reviewer =
+    getSingleRelation(
+      review?.reviewers,
     )
 
   const brand =
@@ -256,36 +234,39 @@ function mapArtistReview(
     )
 
   if (
+    !review ||
     !reviewer ||
     !product ||
     !brand
   ) {
     throw new Error(
-      `Review ${row.id} has incomplete artist data`,
+      `Review coverage ${row.review_id}/${row.product_id} has incomplete artist data`,
     )
   }
 
   return {
-    id: Number(row.id),
-    slug: row.slug,
-    rating: Number(row.rating),
-    title: row.title,
-    summary: row.summary,
+    id: Number(review.id),
+    slug: review.slug,
+    rating: Number(review.rating),
+    title: review.title,
+    summary: review.summary,
 
     brand: brand.name,
-    brandSlug:
-      brand.slug,
+    brandSlug: brand.slug,
 
     model: product.model,
     productSlug: product.slug,
 
     reviewer: reviewer.name,
-    reviewerSlug:
-      reviewer.slug,
+    reviewerSlug: reviewer.slug,
 
     heroImageUrl:
-      row.hero_image_url ??
-      product.hero_image_url,
+      review.hero_image_url ??
+      product.hero_image_url ??
+      null,
+
+    publishedAt:
+      review.published_at,
   }
 }
 
@@ -343,13 +324,9 @@ function mapArtistImpression(
       slug: product.slug,
 
       brand: {
-        id: Number(
-          brand.id,
-        ),
-        name:
-          brand.name,
-        slug:
-          brand.slug,
+        id: Number(brand.id),
+        name: brand.name,
+        slug: brand.slug,
       },
     },
   }
@@ -363,6 +340,7 @@ export async function getArtists(): Promise<
     reviewRelationsResult,
     impressionRelationsResult,
     reviewsResult,
+    reviewCoverageResult,
     impressionsResult,
   ] = await Promise.all([
     supabase
@@ -401,11 +379,25 @@ export async function getArtists(): Promise<
       .from("reviews")
       .select(`
         id,
-        product_id,
         reviewer_id
       `)
       .eq(
         "published",
+        true,
+      ),
+
+    supabase
+      .from("review_products")
+      .select(`
+        review_id,
+        product_id,
+
+        reviews!inner (
+          published
+        )
+      `)
+      .eq(
+        "reviews.published",
         true,
       ),
 
@@ -427,6 +419,7 @@ export async function getArtists(): Promise<
     reviewRelationsResult.error ||
     impressionRelationsResult.error ||
     reviewsResult.error ||
+    reviewCoverageResult.error ||
     impressionsResult.error
 
   if (firstError) {
@@ -449,6 +442,10 @@ export async function getArtists(): Promise<
     (reviewsResult.data ??
       []) as PublishedReviewRow[]
 
+  const publishedReviewCoverage =
+    (reviewCoverageResult.data ??
+      []) as unknown as PublishedReviewCoverageRow[]
+
   const publishedImpressions =
     (impressionsResult.data ??
       []) as PublishedImpressionRow[]
@@ -465,6 +462,41 @@ export async function getArtists(): Promise<
         ],
       ),
     )
+
+  const reviewCoverageMap =
+    new Map<
+      number,
+      number[]
+    >()
+
+  for (
+    const coverage of
+    publishedReviewCoverage
+  ) {
+    const reviewId =
+      Number(
+        coverage.review_id,
+      )
+
+    const productId =
+      Number(
+        coverage.product_id,
+      )
+
+    const productIds =
+      reviewCoverageMap.get(
+        reviewId,
+      ) ?? []
+
+    productIds.push(
+      productId,
+    )
+
+    reviewCoverageMap.set(
+      reviewId,
+      productIds,
+    )
+  }
 
   const publishedImpressionMap =
     new Map<
@@ -550,21 +582,28 @@ export async function getArtists(): Promise<
           continue
         }
 
-        reviewCount += 1
+        const coveredProductIds =
+          reviewCoverageMap.get(
+            reviewId,
+          ) ?? []
 
-        if (
-          review.product_id != null
+        reviewCount +=
+          coveredProductIds.length
+
+        for (
+          const productId of
+          coveredProductIds
         ) {
           productIds.add(
-            Number(
-              review.product_id,
-            ),
+            productId,
           )
         }
 
         if (
           review.reviewer_id !=
-          null
+          null &&
+          coveredProductIds.length >
+            0
         ) {
           const reviewerId =
             Number(
@@ -759,7 +798,7 @@ export async function getArtistBySlug(
     )
 
   const [
-    reviewsResult,
+    reviewCoverageResult,
     impressionsResult,
   ] = await Promise.all([
     reviewIds.length === 0
@@ -768,22 +807,31 @@ export async function getArtistBySlug(
           error: null,
         })
       : supabase
-          .from("reviews")
+          .from(
+            "review_products",
+          )
           .select(`
-            id,
-            slug,
-            rating,
-            title,
-            summary,
-            hero_image_url,
+            review_id,
+            product_id,
 
-            reviewers (
+            reviews!inner (
               id,
-              name,
-              slug
+              slug,
+              rating,
+              title,
+              summary,
+              hero_image_url,
+              published_at,
+              published,
+
+              reviewers (
+                id,
+                name,
+                slug
+              )
             ),
 
-            products!reviews_iem_id_fkey (
+            products (
               id,
               model,
               slug,
@@ -797,19 +845,12 @@ export async function getArtistBySlug(
             )
           `)
           .in(
-            "id",
+            "review_id",
             reviewIds,
           )
           .eq(
-            "published",
+            "reviews.published",
             true,
-          )
-          .order(
-            "published_at",
-            {
-              ascending:
-                false,
-            },
           ),
 
     impressionIds.length === 0
@@ -864,8 +905,10 @@ export async function getArtistBySlug(
           ),
   ])
 
-  if (reviewsResult.error) {
-    throw reviewsResult.error
+  if (
+    reviewCoverageResult.error
+  ) {
+    throw reviewCoverageResult.error
   }
 
   if (
@@ -875,16 +918,45 @@ export async function getArtistBySlug(
   }
 
   const reviewRows =
-    (reviewsResult.data ??
-      []) as unknown as ArtistDetailReviewRow[]
+    (
+      reviewCoverageResult.data ??
+      []
+    ) as unknown as ArtistDetailReviewCoverageRow[]
+
+  reviewRows.sort(
+    (first, second) => {
+      const firstReview =
+        getSingleRelation(
+          first.reviews,
+        )
+
+      const secondReview =
+        getSingleRelation(
+          second.reviews,
+        )
+
+      return (
+        timestampValue(
+          secondReview?.published_at ??
+            null,
+        ) -
+        timestampValue(
+          firstReview?.published_at ??
+            null,
+        )
+      )
+    },
+  )
 
   const impressionRows =
-    (impressionsResult.data ??
-      []) as unknown as ArtistDetailImpressionRow[]
+    (
+      impressionsResult.data ??
+      []
+    ) as unknown as ArtistDetailImpressionRow[]
 
   const mappedReviews =
     reviewRows.map(
-      mapArtistReview,
+      mapArtistReviewCoverage,
     )
 
   const mappedImpressions =
@@ -905,11 +977,16 @@ export async function getArtistBySlug(
     >()
 
   function addReviewCoverage(
-    row: ArtistDetailReviewRow,
+    row: ArtistDetailReviewCoverageRow,
   ) {
+    const review =
+      getSingleRelation(
+        row.reviews,
+      )
+
     const reviewer =
       getSingleRelation(
-        row.reviewers,
+        review?.reviewers,
       )
 
     const product =
@@ -923,6 +1000,7 @@ export async function getArtistBySlug(
       )
 
     if (
+      !review ||
       !reviewer ||
       !product ||
       !brand
@@ -934,11 +1012,14 @@ export async function getArtistBySlug(
       Number(product.id)
 
     const existingProduct =
-      productMap.get(productId)
+      productMap.get(
+        productId,
+      )
 
     if (existingProduct) {
       existingProduct.reviewCount +=
         1
+
       existingProduct.coverageCount +=
         1
     } else {
@@ -948,6 +1029,7 @@ export async function getArtistBySlug(
           id: productId,
           model: product.model,
           slug: product.slug,
+
           heroImageUrl:
             product.hero_image_url,
 
@@ -965,7 +1047,9 @@ export async function getArtistBySlug(
     }
 
     const reviewerId =
-      Number(reviewer.id)
+      Number(
+        reviewer.id,
+      )
 
     const existingReviewer =
       reviewerMap.get(
@@ -983,8 +1067,10 @@ export async function getArtistBySlug(
         reviewerId,
         {
           id: reviewerId,
-          name: reviewer.name,
-          slug: reviewer.slug,
+          name:
+            reviewer.name,
+          slug:
+            reviewer.slug,
 
           reviewCount: 1,
           impressionCount: 0,
@@ -1024,7 +1110,9 @@ export async function getArtistBySlug(
       Number(product.id)
 
     const existingProduct =
-      productMap.get(productId)
+      productMap.get(
+        productId,
+      )
 
     if (existingProduct) {
       existingProduct.impressionCount +=
@@ -1039,6 +1127,7 @@ export async function getArtistBySlug(
           id: productId,
           model: product.model,
           slug: product.slug,
+
           heroImageUrl:
             product.hero_image_url,
 
@@ -1056,7 +1145,9 @@ export async function getArtistBySlug(
     }
 
     const reviewerId =
-      Number(reviewer.id)
+      Number(
+        reviewer.id,
+      )
 
     const existingReviewer =
       reviewerMap.get(
@@ -1074,8 +1165,10 @@ export async function getArtistBySlug(
         reviewerId,
         {
           id: reviewerId,
-          name: reviewer.name,
-          slug: reviewer.slug,
+          name:
+            reviewer.name,
+          slug:
+            reviewer.slug,
 
           reviewCount: 0,
           impressionCount: 1,
@@ -1125,14 +1218,21 @@ export async function getArtistBySlug(
     ).length
 
   return {
-    id: Number(artist.id),
+    id: Number(
+      artist.id,
+    ),
 
     musicbrainzId:
       artist.musicbrainz_id,
 
-    name: artist.name,
-    slug: artist.slug,
-    country: artist.country,
+    name:
+      artist.name,
+
+    slug:
+      artist.slug,
+
+    country:
+      artist.country,
 
     artistType:
       artist.artist_type,

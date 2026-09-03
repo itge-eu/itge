@@ -17,6 +17,35 @@ import {
   type Genre,
 } from "../lib/genres";
 
+type ProductOption = {
+  id: number;
+  model: string;
+  slug: string;
+  brands: {
+    name: string;
+  } | {
+    name: string;
+  }[] | null;
+};
+
+function getSingleRelation<T>(
+  relation: T | T[] | null | undefined,
+): T | null {
+  if (Array.isArray(relation)) {
+    return relation[0] ?? null;
+  }
+
+  return relation ?? null;
+}
+
+function getProductLabel(product: ProductOption) {
+  const brand = getSingleRelation(product.brands);
+
+  return [brand?.name?.trim(), product.model?.trim()]
+    .filter(Boolean)
+    .join(" ");
+}
+
 type ReviewForm = {
   id: number;
   title: string;
@@ -123,6 +152,11 @@ function AdminEditReviewPage() {
     Genre[]
   >([]);
 
+  const [products, setProducts] = useState<ProductOption[]>([]);
+  const [primaryProductId, setPrimaryProductId] = useState<number | null>(null);
+  const [coveredProductIds, setCoveredProductIds] = useState<number[]>([]);
+  const [gearSearch, setGearSearch] = useState("");
+
   useEffect(() => {
     async function loadReview() {
       if (!id) {
@@ -156,11 +190,14 @@ function AdminEditReviewPage() {
           source_url,
           created_at,
           updated_at,
+          product_id,
           reviewers (
             name
           ),
-          products (
+          products!reviews_iem_id_fkey (
+            id,
             model,
+            slug,
             brands (
               name
             )
@@ -175,6 +212,55 @@ function AdminEditReviewPage() {
         setLoading(false);
         return;
       }
+
+      const { data: productRows, error: productRowsError } =
+        await supabase
+          .from("products")
+          .select(`
+            id,
+            model,
+            slug,
+            brands (
+              name
+            )
+          `)
+          .order("model");
+
+      if (productRowsError) {
+        console.error("Loading gear failed:", productRowsError);
+        setError(productRowsError.message);
+        setLoading(false);
+        return;
+      }
+
+      const loadedProducts = (productRows ?? []) as unknown as ProductOption[];
+      setProducts(loadedProducts);
+
+      const { data: coverageRows, error: coverageError } =
+        await supabase
+          .from("review_products")
+          .select("product_id")
+          .eq("review_id", id);
+
+      if (coverageError) {
+        console.error("Loading review Gear coverage failed:", coverageError);
+        setError(coverageError.message);
+        setLoading(false);
+        return;
+      }
+
+      const loadedPrimaryProductId =
+        data.product_id == null ? null : Number(data.product_id);
+
+      const loadedCoveredProductIds = Array.from(
+        new Set([
+          ...(coverageRows ?? []).map((row) => Number(row.product_id)),
+          ...(loadedPrimaryProductId == null ? [] : [loadedPrimaryProductId]),
+        ]),
+      );
+
+      setPrimaryProductId(loadedPrimaryProductId);
+      setCoveredProductIds(loadedCoveredProductIds);
 
       const { data: imageRows, error: imageRowsError } =
         await supabase
@@ -356,7 +442,7 @@ function AdminEditReviewPage() {
         createdAt: data.created_at ?? "",
         updatedAt: data.updated_at ?? "",
         reviewerName: reviewerRelation?.name ?? "Unknown reviewer",
-        productName: productName || "Unknown IEM",
+        productName: productName || "Unknown Gear",
         pendingImages,
       });
 
@@ -477,6 +563,52 @@ function AdminEditReviewPage() {
     }
   }
 
+  async function saveReviewProducts(reviewId: number) {
+    if (primaryProductId == null) {
+      throw new Error("This review has no original Gear item.");
+    }
+
+    const nextCoveredProductIds = Array.from(
+      new Set([primaryProductId, ...coveredProductIds]),
+    );
+
+    const { error: deleteError } = await supabase
+      .from("review_products")
+      .delete()
+      .eq("review_id", reviewId);
+
+    if (deleteError) {
+      throw new Error(
+        `Could not update Gear coverage: ${deleteError.message}`,
+      );
+    }
+
+    const { error: insertError } = await supabase
+      .from("review_products")
+      .insert(
+        nextCoveredProductIds.map((productId) => ({
+          review_id: reviewId,
+          product_id: productId,
+        })),
+      );
+
+    if (insertError) {
+      throw new Error(
+        `Could not attach Gear to review: ${insertError.message}`,
+      );
+    }
+
+    setCoveredProductIds(nextCoveredProductIds);
+
+    const originalProduct = products.find(
+      (product) => product.id === primaryProductId,
+    );
+
+    if (originalProduct) {
+      updateField("productName", getProductLabel(originalProduct));
+    }
+  }
+
   async function saveReview(options?: {
     publish?: boolean;
   }) {
@@ -489,6 +621,11 @@ function AdminEditReviewPage() {
 
     if (!review.slug.trim()) {
       setError("The review slug cannot be empty.");
+      return;
+    }
+
+    if (primaryProductId == null) {
+      setError("This review has no original Gear item.");
       return;
     }
 
@@ -567,18 +704,19 @@ function AdminEditReviewPage() {
     }
 
     try {
+      await saveReviewProducts(review.id);
       await saveReviewArtists(review.id);
-	  await saveReviewGenres(review.id);
-    } catch (artistError) {
+      await saveReviewGenres(review.id);
+    } catch (relatedContentError) {
       console.error(
-        "Saving review artists failed:",
-        artistError,
+        "Saving review relationships failed:",
+        relatedContentError,
       );
 
       setError(
-        artistError instanceof Error
-          ? artistError.message
-          : "The review was saved, but its artists could not be saved.",
+        relatedContentError instanceof Error
+          ? relatedContentError.message
+          : "The review was saved, but its related content could not be saved.",
       );
       setSaving(false);
       setPublishing(false);
@@ -1033,19 +1171,129 @@ function AdminEditReviewPage() {
 
             <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
               <h2 className="text-lg font-semibold">
+                Gear covered
+              </h2>
+
+              <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+                One review can cover multiple Gear items. The original Gear is
+                highlighted; additional Gear can be added or removed.
+              </p>
+
+              <div className="mt-6 space-y-3">
+                {coveredProductIds.map((productId) => {
+                  const product = products.find(
+                    (candidate) => candidate.id === productId,
+                  );
+
+                  if (!product) {
+                    return null;
+                  }
+
+                  const isOriginal = productId === primaryProductId;
+
+                  return (
+                    <div
+                      key={productId}
+                      className={`rounded-xl border px-4 py-3 ${
+                        isOriginal
+                          ? "border-[var(--accent)] bg-[var(--accent)]/10"
+                          : "border-[var(--border)] bg-[var(--background)]"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="font-semibold">
+                            {getProductLabel(product)}
+                          </p>
+
+                          <p className="mt-1 text-xs text-[var(--muted)]">
+                            {product.slug}
+                          </p>
+                        </div>
+
+                        {isOriginal ? (
+                          <span className="shrink-0 rounded-full bg-[var(--accent)] px-2.5 py-1 text-xs font-semibold text-white">
+                            Original Gear
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setCoveredProductIds((current) =>
+                                current.filter((id) => id !== productId),
+                              )
+                            }
+                            className="shrink-0 text-xs font-semibold text-red-600"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-5">
+                <label
+                  htmlFor="gear-search"
+                  className="block text-sm font-semibold"
+                >
+                  Add Gear
+                </label>
+
+                <input
+                  id="gear-search"
+                  type="search"
+                  value={gearSearch}
+                  onChange={(event) => setGearSearch(event.target.value)}
+                  placeholder="Search brand or model"
+                  className="mt-3 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition focus:border-[var(--accent)]"
+                />
+
+                {gearSearch.trim() && (
+                  <div className="mt-2 max-h-64 overflow-y-auto rounded-xl border border-[var(--border)] bg-[var(--background)] p-2">
+                    {products
+                      .filter((product) => !coveredProductIds.includes(product.id))
+                      .filter((product) => {
+                        const query = gearSearch.trim().toLowerCase();
+                        const searchable = `${getProductLabel(product)} ${product.slug}`.toLowerCase();
+                        return searchable.includes(query);
+                      })
+                      .slice(0, 10)
+                      .map((product) => (
+                        <button
+                          key={product.id}
+                          type="button"
+                          onClick={() => {
+                            setCoveredProductIds((current) =>
+                              Array.from(new Set([...current, product.id])),
+                            );
+
+                            setGearSearch("");
+                          }}
+                          className="block w-full rounded-lg px-3 py-3 text-left transition hover:bg-[var(--surface)]"
+                        >
+                          <span className="block font-medium">
+                            {getProductLabel(product)}
+                          </span>
+
+                          <span className="mt-1 block text-xs text-[var(--muted)]">
+                            {product.slug}
+                          </span>
+                        </button>
+                      ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
+              <h2 className="text-lg font-semibold">
                 Review details
               </h2>
 
               <dl className="mt-6 space-y-5 text-sm">
-                <div>
-                  <dt className="text-[var(--muted)]">
-                    IEM
-                  </dt>
-                  <dd className="mt-1 font-semibold">
-                    {review.productName}
-                  </dd>
-                </div>
-
                 <div>
                   <dt className="text-[var(--muted)]">
                     Reviewer

@@ -237,6 +237,45 @@ function ReviewPage() {
                 </div>
               )}
 
+              {review.alsoCovers.length > 0 && (
+                <div className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-2 text-sm">
+                  <span className="font-semibold text-[var(--muted)]">
+                    Also covers:
+                  </span>
+
+                  {review.alsoCovers.map(
+                    (
+                      product,
+                      index,
+                    ) => (
+                      <span
+                        key={
+                          product.id
+                        }
+                        className="inline-flex items-center gap-2"
+                      >
+                        {index > 0 && (
+                          <span
+                            aria-hidden="true"
+                            className="text-[var(--muted)]"
+                          >
+                            ·
+                          </span>
+                        )}
+
+                        <Link
+                          to={`/gear/${product.slug}`}
+                          className="font-semibold text-[var(--accent)] transition hover:opacity-70"
+                        >
+                          {product.brand}{" "}
+                          {product.model}
+                        </Link>
+                      </span>
+                    ),
+                  )}
+                </div>
+              )}
+
               <Link
                 to={`/members/${review.reviewerSlug}`}
                 className="mt-5 inline-flex items-center gap-3 rounded-xl transition hover:opacity-80"

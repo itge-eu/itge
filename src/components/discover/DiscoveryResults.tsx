@@ -193,7 +193,7 @@ function DiscoveryResults({
                 ) {
                   return (
                     <div
-                      key={`review-${item.review.id}`}
+                      key={`review-${item.review.id}-product-${item.product.id}`}
                     >
                       {contentType ===
                         "all" && (

@@ -30,50 +30,67 @@ export type ReviewerSummary = {
   impressionCount: number
 }
 
-type ReviewRow = {
+type ReviewerReviewRow = {
   id: number
   slug: string
   rating: number
   title: string
   summary: string
-  hero_image_url: string | null
 
-  products:
+  hero_image_url:
+    | string
+    | null
+
+  published_at:
+    | string
+    | null
+
+  published: boolean
+  reviewer_id: number
+}
+
+type ReviewerProductRow = {
+  id: number
+  model: string
+  slug: string
+
+  hero_image_url:
+    | string
+    | null
+
+  brands:
     | {
-        model: string
+        name: string
         slug: string
-
-        brands:
-          | {
-              name: string
-              slug: string
-            }
-          | {
-              name: string
-              slug: string
-            }[]
-          | null
       }
     | {
-        model: string
+        name: string
         slug: string
-
-        brands:
-          | {
-              name: string
-              slug: string
-            }
-          | {
-              name: string
-              slug: string
-            }[]
-          | null
       }[]
     | null
 }
 
+type ReviewerReviewProductRow = {
+  review_id: number
+  product_id: number
+
+  reviews:
+    | ReviewerReviewRow
+    | ReviewerReviewRow[]
+    | null
+
+  products:
+    | ReviewerProductRow
+    | ReviewerProductRow[]
+    | null
+}
+
 function getSingleRelation<T>(
-  relation: T | T[] | null | undefined,
+  relation:
+    | T
+    | T[]
+    | null
+    | undefined,
 ): T | null {
   if (Array.isArray(relation)) {
     return relation[0] ?? null
@@ -82,34 +99,72 @@ function getSingleRelation<T>(
   return relation ?? null
 }
 
-function mapReview(
-  row: ReviewRow,
+function timestampValue(
+  value: string | null,
+): number {
+  if (!value) {
+    return 0
+  }
+
+  const time =
+    new Date(value).getTime()
+
+  return Number.isNaN(time)
+    ? 0
+    : time
+}
+
+function mapReviewCoverage(
+  row: ReviewerReviewProductRow,
 ): FeaturedReview {
-  const product = getSingleRelation(row.products)
+  const review =
+    getSingleRelation(
+      row.reviews,
+    )
 
-  const brand = getSingleRelation(
-    product?.brands,
-  )
+  const product =
+    getSingleRelation(
+      row.products,
+    )
 
-  if (!product || !brand) {
+  const brand =
+    getSingleRelation(
+      product?.brands,
+    )
+
+  if (
+    !review ||
+    !product ||
+    !brand
+  ) {
     throw new Error(
-      `Review ${row.id} has incomplete data.`,
+      `Review coverage ${row.review_id}/${row.product_id} has incomplete member data.`,
     )
   }
 
   return {
-    id: row.id,
-    slug: row.slug,
-    rating: Number(row.rating),
-    title: row.title,
-    summary: row.summary,
+    id: Number(review.id),
+    slug: review.slug,
+    rating: Number(review.rating),
+    title: review.title,
+    summary: review.summary,
+
     brand: brand.name,
     brandSlug: brand.slug,
+
     model: product.model,
     productSlug: product.slug,
+
     reviewer: "",
     reviewerSlug: "",
-    heroImageUrl: row.hero_image_url,
+
+    heroImageUrl:
+      review.hero_image_url ??
+      product.hero_image_url ??
+      null,
+
+    publishedAt:
+      review.published_at,
   }
 }
 
@@ -167,16 +222,23 @@ export async function getReviewers(): Promise<
   }
 
   const [
-    reviewsResult,
+    reviewCoverageResult,
     impressionsResult,
   ] = await Promise.all([
     supabase
-      .from("reviews")
+      .from("review_products")
       .select(`
-        id,
-        reviewer_id
+        review_id,
+
+        reviews!inner (
+          reviewer_id,
+          published
+        )
       `)
-      .eq("published", true),
+      .eq(
+        "reviews.published",
+        true,
+      ),
 
     supabase
       .from("impressions")
@@ -187,8 +249,8 @@ export async function getReviewers(): Promise<
       .eq("published", true),
   ])
 
-  if (reviewsResult.error) {
-    throw reviewsResult.error
+  if (reviewCoverageResult.error) {
+    throw reviewCoverageResult.error
   }
 
   if (impressionsResult.error) {
@@ -201,7 +263,28 @@ export async function getReviewers(): Promise<
   const impressionCounts =
     new Map<number, number>()
 
-  for (const review of reviewsResult.data ?? []) {
+  for (
+    const coverage of
+    reviewCoverageResult.data ?? []
+  ) {
+    const review =
+      getSingleRelation(
+        coverage.reviews as
+          | {
+              reviewer_id: number
+              published: boolean
+            }
+          | {
+              reviewer_id: number
+              published: boolean
+            }[]
+          | null,
+      )
+
+    if (!review) {
+      continue
+    }
+
     const reviewerId =
       Number(review.reviewer_id)
 
@@ -277,40 +360,96 @@ export async function getReviewerBySlug(
   }
 
   const {
-    data: reviews,
+    data: reviewCoverage,
     error: reviewsError,
   } = await supabase
-    .from("reviews")
+    .from("review_products")
     .select(`
-      id,
-      slug,
-      rating,
-      title,
-      summary,
-      hero_image_url,
+      review_id,
+      product_id,
 
-      products!reviews_iem_id_fkey (
+      products (
+        id,
         model,
         slug,
+        hero_image_url,
 
         brands (
           name,
           slug
         )
+      ),
+
+      reviews!inner (
+        id,
+        slug,
+        rating,
+        title,
+        summary,
+        hero_image_url,
+        published_at,
+        published,
+        reviewer_id
       )
     `)
     .eq(
-      "reviewer_id",
+      "reviews.reviewer_id",
       reviewer.id,
     )
-    .eq("published", true)
-    .order("published_at", {
-      ascending: false,
-    })
+    .eq(
+      "reviews.published",
+      true,
+    )
 
   if (reviewsError) {
     throw reviewsError
   }
+
+  const reviews =
+    (
+      reviewCoverage ?? []
+    )
+      .map(
+        (row) =>
+          row as unknown as ReviewerReviewProductRow,
+      )
+      .sort(
+        (first, second) => {
+          const firstReview =
+            getSingleRelation(
+              first.reviews,
+            )
+
+          const secondReview =
+            getSingleRelation(
+              second.reviews,
+            )
+
+          return (
+            timestampValue(
+              secondReview?.published_at ??
+                null,
+            ) -
+            timestampValue(
+              firstReview?.published_at ??
+                null,
+            )
+          )
+        },
+      )
+      .map(
+        (row) => ({
+          ...mapReviewCoverage(
+            row,
+          ),
+
+          reviewer:
+            reviewer.name,
+
+          reviewerSlug:
+            reviewer.slug,
+        }),
+      )
 
   const impressions =
     await getImpressionsByReviewerId(
@@ -327,16 +466,7 @@ export async function getReviewerBySlug(
     country: reviewer.country,
     headfiUrl: reviewer.headfi_url,
 
-    reviews: (reviews ?? []).map(
-      (review) => ({
-        ...mapReview(
-          review as unknown as ReviewRow,
-        ),
-        reviewer: reviewer.name,
-        reviewerSlug: reviewer.slug,
-      }),
-    ),
-
+    reviews,
     impressions,
   }
 }

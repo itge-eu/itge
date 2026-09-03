@@ -57,7 +57,7 @@ function AdminReviewsPage() {
           reviewers (
             name
           ),
-          products (
+          products!reviews_iem_id_fkey (
             model,
             brands (
               name

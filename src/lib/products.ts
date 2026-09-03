@@ -943,7 +943,34 @@ export async function getProductBySlug(
 
   const reviews =
     rows.map(
-      mapFeaturedReview,
+      (row) => {
+        const review =
+          mapFeaturedReview(
+            row,
+          )
+
+        return {
+          ...review,
+
+          brand:
+            brand.name,
+
+          brandSlug:
+            brand.slug,
+
+          model:
+            product.model,
+
+          productSlug:
+            product.slug,
+
+          heroImageUrl:
+            row.hero_image_url ??
+            product.hero_image_url ??
+            review.heroImageUrl ??
+            null,
+        }
+      },
     )
 
   const impressions =

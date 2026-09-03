@@ -68,6 +68,7 @@ type BrandReviewRow = {
   summary: string
   hero_image_url: string | null
   published_at: string | null
+  published: boolean
 
   reviewers:
     | {
@@ -86,6 +87,7 @@ type BrandReviewRow = {
         model: string
         slug: string
         product_type: ProductType | null
+        hero_image_url: string | null
 
         brands:
           | {
@@ -105,6 +107,100 @@ type BrandReviewRow = {
         model: string
         slug: string
         product_type: ProductType | null
+        hero_image_url: string | null
+
+        brands:
+          | {
+              id: number
+              name: string
+              slug: string
+            }
+          | {
+              id: number
+              name: string
+              slug: string
+            }[]
+          | null
+      }[]
+    | null
+}
+
+type BrandReviewProductRow = {
+  review_id: number
+  product_id: number
+
+  reviews:
+    | {
+        id: number
+        slug: string
+        rating: number
+        title: string
+        summary: string
+        hero_image_url: string | null
+        published_at: string | null
+        published: boolean
+
+        reviewers:
+          | {
+              name: string
+              slug: string
+            }
+          | {
+              name: string
+              slug: string
+            }[]
+          | null
+      }
+    | {
+        id: number
+        slug: string
+        rating: number
+        title: string
+        summary: string
+        hero_image_url: string | null
+        published_at: string | null
+        published: boolean
+
+        reviewers:
+          | {
+              name: string
+              slug: string
+            }
+          | {
+              name: string
+              slug: string
+            }[]
+          | null
+      }[]
+    | null
+
+  products:
+    | {
+        id: number
+        model: string
+        slug: string
+        product_type: ProductType | null
+        hero_image_url: string | null
+
+        brands:
+          | {
+              id: number
+              name: string
+              slug: string
+            }
+          | {
+              id: number
+              name: string
+              slug: string
+            }[]
+          | null
+      }
+    | {
+        id: number
+        model: string
+        slug: string
+        product_type: ProductType | null
+        hero_image_url: string | null
 
         brands:
           | {
@@ -221,6 +317,51 @@ function timestampValue(
     : time
 }
 
+function mapReviewCoverage(
+  row: BrandReviewProductRow,
+): BrandReviewRow | null {
+  const review =
+    getSingleRelation(
+      row.reviews,
+    )
+
+  const product =
+    getSingleRelation(
+      row.products,
+    )
+
+  if (
+    !review ||
+    !review.published ||
+    !product
+  ) {
+    return null
+  }
+
+  return {
+    id: Number(review.id),
+    slug: review.slug,
+    rating: Number(review.rating),
+    title: review.title,
+    summary: review.summary,
+
+    hero_image_url:
+      review.hero_image_url,
+
+    published_at:
+      review.published_at,
+
+    published:
+      review.published,
+
+    reviewers:
+      review.reviewers,
+
+    products:
+      product,
+  }
+}
+
 function mapFeaturedReview(
   row: BrandReviewRow,
 ): FeaturedReview {
@@ -256,19 +397,31 @@ function mapFeaturedReview(
     title: row.title,
     summary: row.summary,
 
-    brand: brand.name,
+    brand:
+      brand.name,
+
     brandSlug:
       brand.slug,
 
-    model: product.model,
-    productSlug: product.slug,
+    model:
+      product.model,
 
-    reviewer: reviewer.name,
+    productSlug:
+      product.slug,
+
+    reviewer:
+      reviewer.name,
+
     reviewerSlug:
       reviewer.slug,
 
     heroImageUrl:
-      row.hero_image_url,
+      row.hero_image_url ??
+      product.hero_image_url ??
+      null,
+
+    publishedAt:
+      row.published_at,
   }
 }
 
@@ -343,38 +496,49 @@ function collectContributors(
       BrandContributor
     >()
 
-  reviewRows.forEach((row) => {
-    const reviewer =
-      getSingleRelation(
-        row.reviewers,
-      )
+  reviewRows.forEach(
+    (row) => {
+      const reviewer =
+        getSingleRelation(
+          row.reviewers,
+        )
 
-    if (!reviewer) {
-      return
-    }
+      if (!reviewer) {
+        return
+      }
 
-    const existing =
-      contributors.get(
+      const existing =
+        contributors.get(
+          reviewer.slug,
+        )
+
+      if (existing) {
+        existing.reviewCount += 1
+        existing.coverageCount += 1
+        return
+      }
+
+      contributors.set(
         reviewer.slug,
+        {
+          name:
+            reviewer.name,
+
+          slug:
+            reviewer.slug,
+
+          reviewCount:
+            1,
+
+          impressionCount:
+            0,
+
+          coverageCount:
+            1,
+        },
       )
-
-    if (existing) {
-      existing.reviewCount += 1
-      existing.coverageCount += 1
-      return
-    }
-
-    contributors.set(
-      reviewer.slug,
-      {
-        name: reviewer.name,
-        slug: reviewer.slug,
-        reviewCount: 1,
-        impressionCount: 0,
-        coverageCount: 1,
-      },
-    )
-  })
+    },
+  )
 
   impressionRows.forEach(
     (row) => {
@@ -395,18 +559,30 @@ function collectContributors(
       if (existing) {
         existing.impressionCount +=
           1
-        existing.coverageCount += 1
+
+        existing.coverageCount +=
+          1
+
         return
       }
 
       contributors.set(
         reviewer.slug,
         {
-          name: reviewer.name,
-          slug: reviewer.slug,
-          reviewCount: 0,
-          impressionCount: 1,
-          coverageCount: 1,
+          name:
+            reviewer.name,
+
+          slug:
+            reviewer.slug,
+
+          reviewCount:
+            0,
+
+          impressionCount:
+            1,
+
+          coverageCount:
+            1,
         },
       )
     },
@@ -421,7 +597,8 @@ function collectContributors(
         first.coverageCount
 
       if (
-        coverageDifference !== 0
+        coverageDifference !==
+        0
       ) {
         return coverageDifference
       }
@@ -442,6 +619,7 @@ function collectProducts(
     model: string
     slug: string
     productType: ProductType
+    heroImageUrl: string | null
 
     brand: {
       id: number
@@ -464,8 +642,13 @@ function collectProducts(
       id: number
       model: string
       slug: string
+
       product_type:
         | ProductType
+        | null
+
+      hero_image_url?:
+        | string
         | null
 
       brands:
@@ -501,32 +684,41 @@ function collectProducts(
       return existing
     }
 
-    const created: CollectedProduct =
-      {
-        id,
-        model: product.model,
-        slug: product.slug,
+    const created:
+      CollectedProduct = {
+      id,
 
-        productType:
-          normalizeProductType(
-            product.product_type,
-          ),
+      model:
+        product.model,
 
-        brand: {
-          id: Number(
+      slug:
+        product.slug,
+
+      productType:
+        normalizeProductType(
+          product.product_type,
+        ),
+
+      heroImageUrl:
+        product.hero_image_url ??
+        null,
+
+      brand: {
+        id:
+          Number(
             brand.id,
           ),
 
-          name:
-            brand.name,
+        name:
+          brand.name,
 
-          slug:
-            brand.slug,
-        },
+        slug:
+          brand.slug,
+      },
 
-        reviews: [],
-        impressions: [],
-      }
+      reviews: [],
+      impressions: [],
+    }
 
     products.set(
       id,
@@ -536,22 +728,24 @@ function collectProducts(
     return created
   }
 
-  reviewRows.forEach((row) => {
-    const product =
-      getSingleRelation(
-        row.products,
+  reviewRows.forEach(
+    (row) => {
+      const product =
+        getSingleRelation(
+          row.products,
+        )
+
+      if (!product) {
+        return
+      }
+
+      ensureProduct(
+        product,
+      )?.reviews.push(
+        row,
       )
-
-    if (!product) {
-      return
-    }
-
-    ensureProduct(
-      product,
-    )?.reviews.push(
-      row,
-    )
-  })
+    },
+  )
 
   impressionRows.forEach(
     (row) => {
@@ -575,168 +769,183 @@ function collectProducts(
   return Array.from(
     products.values(),
   )
-    .map((product) => {
-      const sortedReviews = [
-        ...product.reviews,
-      ].sort(
-        (first, second) =>
-          timestampValue(
-            second.published_at,
-          ) -
-          timestampValue(
-            first.published_at,
-          ),
-      )
-
-      const sortedImpressions = [
-        ...product.impressions,
-      ].sort(
-        (first, second) =>
-          timestampValue(
-            second.published_at,
-          ) -
-          timestampValue(
-            first.published_at,
-          ),
-      )
-
-      const reviewReviewerSlugs =
-        new Set<string>()
-
-      const contributorSlugs =
-        new Set<string>()
-
-      sortedReviews.forEach(
-        (review) => {
-          const reviewer =
-            getSingleRelation(
-              review.reviewers,
-            )
-
-          if (!reviewer) {
-            return
-          }
-
-          reviewReviewerSlugs.add(
-            reviewer.slug,
-          )
-
-          contributorSlugs.add(
-            reviewer.slug,
-          )
-        },
-      )
-
-      sortedImpressions.forEach(
-        (impression) => {
-          const reviewer =
-            getSingleRelation(
-              impression.reviewers,
-            )
-
-          if (!reviewer) {
-            return
-          }
-
-          contributorSlugs.add(
-            reviewer.slug,
-          )
-        },
-      )
-
-      const ratingTotal =
-        sortedReviews.reduce(
-          (
-            total,
-            review,
-          ) =>
-            total +
-            Number(
-              review.rating,
+    .map(
+      (product) => {
+        const sortedReviews = [
+          ...product.reviews,
+        ].sort(
+          (first, second) =>
+            timestampValue(
+              second.published_at,
+            ) -
+            timestampValue(
+              first.published_at,
             ),
-          0,
         )
 
-      const latestReviewAt =
-        sortedReviews[0]
-          ?.published_at ??
-        null
+        const sortedImpressions = [
+          ...product.impressions,
+        ].sort(
+          (first, second) =>
+            timestampValue(
+              second.published_at,
+            ) -
+            timestampValue(
+              first.published_at,
+            ),
+        )
 
-      const latestImpressionAt =
-        sortedImpressions[0]
-          ?.published_at ??
-        null
+        const reviewReviewerSlugs =
+          new Set<string>()
 
-      const latestActivityAt =
-        timestampValue(
+        const contributorSlugs =
+          new Set<string>()
+
+        sortedReviews.forEach(
+          (review) => {
+            const reviewer =
+              getSingleRelation(
+                review.reviewers,
+              )
+
+            if (!reviewer) {
+              return
+            }
+
+            reviewReviewerSlugs.add(
+              reviewer.slug,
+            )
+
+            contributorSlugs.add(
+              reviewer.slug,
+            )
+          },
+        )
+
+        sortedImpressions.forEach(
+          (impression) => {
+            const reviewer =
+              getSingleRelation(
+                impression.reviewers,
+              )
+
+            if (!reviewer) {
+              return
+            }
+
+            contributorSlugs.add(
+              reviewer.slug,
+            )
+          },
+        )
+
+        const ratingTotal =
+          sortedReviews.reduce(
+            (
+              total,
+              review,
+            ) =>
+              total +
+              Number(
+                review.rating,
+              ),
+            0,
+          )
+
+        const latestReviewAt =
+          sortedReviews[0]
+            ?.published_at ??
+          null
+
+        const latestImpressionAt =
+          sortedImpressions[0]
+            ?.published_at ??
+          null
+
+        const latestActivityAt =
+          timestampValue(
+            latestReviewAt,
+          ) >=
+          timestampValue(
+            latestImpressionAt,
+          )
+            ? latestReviewAt
+            : latestImpressionAt
+
+        const fallbackHeroImageUrl =
+          sortedReviews.find(
+            (review) =>
+              review.hero_image_url !==
+              null,
+          )?.hero_image_url ??
+          sortedImpressions.find(
+            (impression) =>
+              impression.hero_image_url !==
+              null,
+          )?.hero_image_url ??
+          null
+
+        const heroImageUrl =
+          product.heroImageUrl ??
+          fallbackHeroImageUrl
+
+        return {
+          id:
+            product.id,
+
+          model:
+            product.model,
+
+          slug:
+            product.slug,
+
+          productType:
+            product.productType,
+
+          brand:
+            product.brand,
+
+          heroImageUrl,
+
+          reviewCount:
+            sortedReviews.length,
+
+          impressionCount:
+            sortedImpressions.length,
+
+          coverageCount:
+            sortedReviews.length +
+            sortedImpressions.length,
+
+          reviewerCount:
+            reviewReviewerSlugs.size,
+
+          contributorCount:
+            contributorSlugs.size,
+
+          averageRating:
+            sortedReviews.length ===
+            0
+              ? null
+              : ratingTotal /
+                sortedReviews.length,
+
           latestReviewAt,
-        ) >=
-        timestampValue(
-          latestImpressionAt,
-        )
-          ? latestReviewAt
-          : latestImpressionAt
-
-      const heroImageUrl =
-        sortedReviews.find(
-          (review) =>
-            review.hero_image_url !==
-            null,
-        )?.hero_image_url ??
-        sortedImpressions.find(
-          (impression) =>
-            impression.hero_image_url !==
-            null,
-        )?.hero_image_url ??
-        null
-
-      return {
-        id: product.id,
-        model: product.model,
-        slug: product.slug,
-
-        productType:
-          product.productType,
-
-        brand:
-          product.brand,
-
-        heroImageUrl,
-
-        reviewCount:
-          sortedReviews.length,
-
-        impressionCount:
-          sortedImpressions.length,
-
-        coverageCount:
-          sortedReviews.length +
-          sortedImpressions.length,
-
-        reviewerCount:
-          reviewReviewerSlugs.size,
-
-        contributorCount:
-          contributorSlugs.size,
-
-        averageRating:
-          sortedReviews.length ===
-          0
-            ? null
-            : ratingTotal /
-              sortedReviews.length,
-
-        latestReviewAt,
-        latestActivityAt,
-      }
-    })
+          latestActivityAt,
+        }
+      },
+    )
     .sort(
       (first, second) => {
         const coverageDifference =
-          (second.coverageCount ??
-            0) -
-          (first.coverageCount ??
-            0)
+          (
+            second.coverageCount ??
+            0
+          ) -
+          (
+            first.coverageCount ??
+            0
+          )
 
         if (
           coverageDifference !==
@@ -756,7 +965,8 @@ function calculateAverageRating(
   reviews: FeaturedReview[],
 ): number | null {
   if (
-    reviews.length === 0
+    reviews.length ===
+    0
   ) {
     return null
   }
@@ -764,7 +974,8 @@ function calculateAverageRating(
   const total =
     reviews.reduce(
       (sum, review) =>
-        sum + review.rating,
+        sum +
+        review.rating,
       0,
     )
 
@@ -813,34 +1024,40 @@ export async function getBrandBySlug(
     brandData as BrandRow
 
   const [
-    reviewsResult,
+    reviewCoverageResult,
     impressionsResult,
   ] = await Promise.all([
     supabase
-      .from("reviews")
+      .from("review_products")
       .select(`
-        id,
-        slug,
-        rating,
-        title,
-        summary,
-        body,
-        hero_image_url,
-        published_at,
+        review_id,
+        product_id,
 
-        reviewers (
-          id,
-          name,
-          slug
-        ),
-
-        products!reviews_iem_id_fkey!inner (
+        products!inner (
           id,
           model,
           slug,
+          product_type,
+          hero_image_url,
 
           brands!inner (
             id,
+            name,
+            slug
+          )
+        ),
+
+        reviews!inner (
+          id,
+          slug,
+          rating,
+          title,
+          summary,
+          hero_image_url,
+          published_at,
+          published,
+
+          reviewers (
             name,
             slug
           )
@@ -853,14 +1070,8 @@ export async function getBrandBySlug(
         ),
       )
       .eq(
-        "published",
+        "reviews.published",
         true,
-      )
-      .order(
-        "published_at",
-        {
-          ascending: false,
-        },
       ),
 
     supabase
@@ -907,15 +1118,16 @@ export async function getBrandBySlug(
       .order(
         "published_at",
         {
-          ascending: false,
+          ascending:
+            false,
         },
       ),
   ])
 
   if (
-    reviewsResult.error
+    reviewCoverageResult.error
   ) {
-    throw reviewsResult.error
+    throw reviewCoverageResult.error
   }
 
   if (
@@ -925,12 +1137,37 @@ export async function getBrandBySlug(
   }
 
   const reviewRows =
-    (reviewsResult.data ??
-      []) as unknown as BrandReviewRow[]
+    (
+      reviewCoverageResult.data ??
+      []
+    )
+      .map(
+        (row) =>
+          mapReviewCoverage(
+            row as unknown as BrandReviewProductRow,
+          ),
+      )
+      .filter(
+        (
+          row,
+        ): row is BrandReviewRow =>
+          row !== null,
+      )
+      .sort(
+        (first, second) =>
+          timestampValue(
+            second.published_at,
+          ) -
+          timestampValue(
+            first.published_at,
+          ),
+      )
 
   const impressionRows =
-    (impressionsResult.data ??
-      []) as unknown as BrandImpressionRow[]
+    (
+      impressionsResult.data ??
+      []
+    ) as unknown as BrandImpressionRow[]
 
   const reviews =
     reviewRows.map(
@@ -968,9 +1205,10 @@ export async function getBrandBySlug(
     null
 
   return {
-    id: Number(
-      brand.id,
-    ),
+    id:
+      Number(
+        brand.id,
+      ),
 
     name:
       brand.name,
@@ -1021,148 +1259,235 @@ export async function getBrandBySlug(
 export async function getBrands(): Promise<
   BrandDirectoryItem[]
 > {
-  const {
-    data,
-    error,
-  } = await supabase
-    .from("brands")
-    .select(`
-      id,
-      name,
-      slug,
-
-      products (
+  const [
+    brandsResult,
+    productsResult,
+    reviewCoverageResult,
+    impressionsResult,
+  ] = await Promise.all([
+    supabase
+      .from("brands")
+      .select(`
         id,
+        name,
+        slug
+      `),
 
-        reviews!reviews_iem_id_fkey (
-          id,
-          published
-        ),
+    supabase
+      .from("products")
+      .select(`
+        id,
+        brand_id
+      `),
 
-        impressions (
-          id,
+    supabase
+      .from("review_products")
+      .select(`
+        product_id,
+
+        reviews!inner (
           published
         )
-      )
-    `)
+      `)
+      .eq(
+        "reviews.published",
+        true,
+      ),
 
-  if (error) {
-    throw error
+    supabase
+      .from("impressions")
+      .select(`
+        id,
+        product_id,
+        published
+      `)
+      .eq(
+        "published",
+        true,
+      ),
+  ])
+
+  if (brandsResult.error) {
+    throw brandsResult.error
   }
 
-  const rows =
-    (data ??
-      []) as unknown as {
-      id: number
-      name: string
-      slug: string
+  if (productsResult.error) {
+    throw productsResult.error
+  }
 
-      products:
-        | {
-            id: number
+  if (reviewCoverageResult.error) {
+    throw reviewCoverageResult.error
+  }
 
-            reviews:
-              | {
-                  id: number
-                  published: boolean
-                }[]
-              | null
+  if (impressionsResult.error) {
+    throw impressionsResult.error
+  }
 
-            impressions:
-              | {
-                  id: number
-                  published: boolean
-                }[]
-              | null
-          }[]
-        | null
-    }[]
+  const productBrandIds =
+    new Map<number, number>()
 
-  return rows
-    .map((brand) => {
-      const products =
-        brand.products ??
-        []
+  for (
+    const product of
+    productsResult.data ??
+    []
+  ) {
+    productBrandIds.set(
+      Number(product.id),
+      Number(product.brand_id),
+    )
+  }
 
-      const coveredProducts =
-        products.filter(
-          (product) => {
-            const hasReview =
-              (
-                product.reviews ??
-                []
-              ).some(
-                (review) =>
-                  review.published,
-              )
+  const brandProductIds =
+    new Map<
+      number,
+      Set<number>
+    >()
 
-            const hasImpression =
-              (
-                product.impressions ??
-                []
-              ).some(
-                (impression) =>
-                  impression.published,
-              )
+  const brandReviewCounts =
+    new Map<number, number>()
 
-            return (
-              hasReview ||
-              hasImpression
-            )
-          },
-        )
+  const brandImpressionCounts =
+    new Map<number, number>()
 
-      const reviewCount =
-        coveredProducts.reduce(
-          (total, product) =>
-            total +
-            (
-              product.reviews ??
-              []
-            ).filter(
-              (review) =>
-                review.published,
-            ).length,
-          0,
-        )
+  for (
+    const coverage of
+    reviewCoverageResult.data ??
+    []
+  ) {
+    const productId =
+      Number(
+        coverage.product_id,
+      )
 
-      const impressionCount =
-        coveredProducts.reduce(
-          (total, product) =>
-            total +
-            (
-              product.impressions ??
-                []
-            ).filter(
-              (impression) =>
-                impression.published,
-            ).length,
-          0,
-        )
+    const brandId =
+      productBrandIds.get(
+        productId,
+      )
 
-      return {
-        id: Number(
-          brand.id,
-        ),
+    if (brandId == null) {
+      continue
+    }
 
-        name:
-          brand.name,
+    const productIds =
+      brandProductIds.get(
+        brandId,
+      ) ??
+      new Set<number>()
 
-        slug:
-          brand.slug,
+    productIds.add(
+      productId,
+    )
 
-        productCount:
-          coveredProducts.length,
+    brandProductIds.set(
+      brandId,
+      productIds,
+    )
 
-        reviewCount,
+    brandReviewCounts.set(
+      brandId,
+      (
+        brandReviewCounts.get(
+          brandId,
+        ) ??
+        0
+      ) + 1,
+    )
+  }
 
-        impressionCount,
+  for (
+    const impression of
+    impressionsResult.data ??
+    []
+  ) {
+    const productId =
+      Number(
+        impression.product_id,
+      )
 
-        coverageCount:
-          reviewCount +
+    const brandId =
+      productBrandIds.get(
+        productId,
+      )
+
+    if (brandId == null) {
+      continue
+    }
+
+    const productIds =
+      brandProductIds.get(
+        brandId,
+      ) ??
+      new Set<number>()
+
+    productIds.add(
+      productId,
+    )
+
+    brandProductIds.set(
+      brandId,
+      productIds,
+    )
+
+    brandImpressionCounts.set(
+      brandId,
+      (
+        brandImpressionCounts.get(
+          brandId,
+        ) ??
+        0
+      ) + 1,
+    )
+  }
+
+  return (
+    brandsResult.data ??
+    []
+  )
+    .map(
+      (brand) => {
+        const brandId =
+          Number(
+            brand.id,
+          )
+
+        const reviewCount =
+          brandReviewCounts.get(
+            brandId,
+          ) ??
+          0
+
+        const impressionCount =
+          brandImpressionCounts.get(
+            brandId,
+          ) ??
+          0
+
+        return {
+          id:
+            brandId,
+
+          name:
+            brand.name,
+
+          slug:
+            brand.slug,
+
+          productCount:
+            brandProductIds.get(
+              brandId,
+            )?.size ??
+            0,
+
+          reviewCount,
+
           impressionCount,
-      }
-    })
+
+          coverageCount:
+            reviewCount +
+            impressionCount,
+        }
+      },
+    )
     .filter(
       (brand) =>
         brand.coverageCount >

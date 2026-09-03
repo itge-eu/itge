@@ -87,6 +87,7 @@ type DiscoveryReviewRow = {
   rating: number
   title: string
   summary: string
+
   body:
     | string
     | null
@@ -99,14 +100,11 @@ type DiscoveryReviewRow = {
     | string
     | null
 
+  published: boolean
+
   reviewers:
     | RelatedReviewer
     | RelatedReviewer[]
-    | null
-
-  products:
-    | RelatedProduct
-    | RelatedProduct[]
     | null
 
   review_artists?:
@@ -115,6 +113,20 @@ type DiscoveryReviewRow = {
 
   review_genres?:
     | GenreRelationRow[]
+    | null
+}
+
+type DiscoveryReviewProductRow = {
+  product_id: number
+
+  products:
+    | RelatedProduct
+    | RelatedProduct[]
+    | null
+
+  reviews:
+    | DiscoveryReviewRow
+    | DiscoveryReviewRow[]
     | null
 }
 
@@ -429,45 +441,64 @@ function buildCommonEntities(
   }
 }
 
-function mapDiscoveryReview(
+function mapDiscoveryReviewProduct(
   row:
-    DiscoveryReviewRow,
+    DiscoveryReviewProductRow,
 ): DiscoveryReviewItem {
+  const review =
+    getSingleRelation(
+      row.reviews,
+    )
+
+  const product =
+    getSingleRelation(
+      row.products,
+    )
+
+  if (
+    !review ||
+    !product
+  ) {
+    throw new Error(
+      `Review product link for product ${row.product_id} has incomplete discovery data`,
+    )
+  }
+
   const entities =
     buildCommonEntities(
-      row.reviewers,
-      row.products,
-      `Review ${row.id}`,
+      review.reviewers,
+      product,
+      `Review ${review.id}`,
     )
 
   return {
     type: "review",
 
     publishedAt:
-      row.published_at,
+      review.published_at,
 
     review: {
       id:
         Number(
-          row.id,
+          review.id,
         ),
 
       slug:
-        row.slug,
+        review.slug,
 
       rating:
         Number(
-          row.rating,
+          review.rating,
         ),
 
       title:
-        row.title,
+        review.title,
 
       summary:
-        row.summary,
+        review.summary,
 
       body:
-        row.body,
+        review.body,
 
       brand:
         entities.brand
@@ -494,13 +525,13 @@ function mapDiscoveryReview(
           .slug,
 
       heroImageUrl:
-        row.hero_image_url ??
+        review.hero_image_url ??
         entities.product
           .hero_image_url ??
         null,
 
       publishedAt:
-        row.published_at,
+        review.published_at,
     },
 
     gearType:
@@ -517,12 +548,12 @@ function mapDiscoveryReview(
 
     artists:
       mapArtists(
-        row.review_artists,
+        review.review_artists,
       ),
 
     genres:
       mapGenres(
-        row.review_genres,
+        review.review_genres,
       ),
   }
 }
@@ -670,31 +701,18 @@ export async function getDiscoveryItems(): Promise<
   DiscoveryItem[]
 > {
   const [
-    reviewsResult,
+    reviewProductsResult,
     impressionsResult,
   ] =
     await Promise.all([
       supabase
         .from(
-          "reviews",
+          "review_products",
         )
         .select(`
-          id,
-          slug,
-          rating,
-          title,
-          summary,
-          body,
-          hero_image_url,
-          published_at,
+          product_id,
 
-          reviewers (
-            id,
-            name,
-            slug
-          ),
-
-          products!reviews_iem_id_fkey (
+          products (
             id,
             model,
             slug,
@@ -708,26 +726,40 @@ export async function getDiscoveryItems(): Promise<
             )
           ),
 
-          review_artists (
-            artists (
-              id,
-              name,
-              slug
-            )
-          ),
+          reviews (
+            id,
+            slug,
+            rating,
+            title,
+            summary,
+            body,
+            hero_image_url,
+            published_at,
+            published,
 
-          review_genres (
-            genres (
+            reviewers (
               id,
               name,
               slug
+            ),
+
+            review_artists (
+              artists (
+                id,
+                name,
+                slug
+              )
+            ),
+
+            review_genres (
+              genres (
+                id,
+                name,
+                slug
+              )
             )
           )
-        `)
-        .eq(
-          "published",
-          true,
-        ),
+        `),
 
       supabase
         .from(
@@ -785,9 +817,9 @@ export async function getDiscoveryItems(): Promise<
     ])
 
   if (
-    reviewsResult.error
+    reviewProductsResult.error
   ) {
-    throw reviewsResult.error
+    throw reviewProductsResult.error
   }
 
   if (
@@ -796,11 +828,11 @@ export async function getDiscoveryItems(): Promise<
     throw impressionsResult.error
   }
 
-  const reviewRows =
+  const reviewProductRows =
     (
-      reviewsResult.data ??
+      reviewProductsResult.data ??
       []
-    ) as unknown as DiscoveryReviewRow[]
+    ) as unknown as DiscoveryReviewProductRow[]
 
   const impressionRows =
     (
@@ -808,12 +840,33 @@ export async function getDiscoveryItems(): Promise<
       []
     ) as unknown as DiscoveryImpressionRow[]
 
+  const reviewItems =
+    reviewProductRows.flatMap(
+      (row) => {
+        const review =
+          getSingleRelation(
+            row.reviews,
+          )
+
+        if (
+          !review ||
+          !review.published
+        ) {
+          return []
+        }
+
+        return [
+          mapDiscoveryReviewProduct(
+            row,
+          ),
+        ]
+      },
+    )
+
   const items:
     DiscoveryItem[] =
     [
-      ...reviewRows.map(
-        mapDiscoveryReview,
-      ),
+      ...reviewItems,
 
       ...impressionRows.map(
         mapDiscoveryImpression,

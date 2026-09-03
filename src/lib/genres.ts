@@ -8,10 +8,6 @@ import type {
   ImpressionSummary,
 } from "./impressions"
 
-/**
- * Existing admin-facing genre type.
- * Keep this because GenrePicker/AdminEditReviewPage use it.
- */
 export type Genre = {
   id: number
   name: string
@@ -26,10 +22,6 @@ type GenreRow = {
   sort_order: number
 }
 
-/**
- * Existing function used by admin pages.
- * Keep its return type and behaviour unchanged.
- */
 export async function getGenres(): Promise<
   Genre[]
 > {
@@ -67,15 +59,14 @@ export async function getGenres(): Promise<
     id: Number(genre.id),
     name: genre.name,
     slug: genre.slug,
-    sortOrder: Number(
-      genre.sort_order,
-    ),
+
+    sortOrder:
+      Number(
+        genre.sort_order,
+      ),
   }))
 }
 
-/**
- * Public directory/profile types.
- */
 export type GenreSummary = {
   id: number
   name: string
@@ -86,17 +77,7 @@ export type GenreSummary = {
   coverageCount: number
 
   productCount: number
-
-  /**
-   * Reviewers with at least one
-   * full review in this genre.
-   */
   reviewerCount: number
-
-  /**
-   * Unique people across both
-   * reviews and impressions.
-   */
   contributorCount: number
 }
 
@@ -127,14 +108,10 @@ export type GenreReviewerSummary = {
 export type GenreProfile =
   GenreSummary & {
     reviews: FeaturedReview[]
-
-    impressions:
-      ImpressionSummary[]
+    impressions: ImpressionSummary[]
 
     products: GenreProductSummary[]
-
-    reviewers:
-      GenreReviewerSummary[]
+    reviewers: GenreReviewerSummary[]
   }
 
 type ReviewGenreRelationRow = {
@@ -149,8 +126,12 @@ type ImpressionGenreRelationRow = {
 
 type PublishedReviewRow = {
   id: number
-  product_id: number | null
   reviewer_id: number | null
+}
+
+type PublishedReviewCoverageRow = {
+  review_id: number
+  product_id: number
 }
 
 type PublishedImpressionRow = {
@@ -166,6 +147,7 @@ type GenreDetailReviewRow = {
   title: string
   summary: string
   hero_image_url: string | null
+  published_at: string | null
 
   reviewers:
     | {
@@ -179,46 +161,40 @@ type GenreDetailReviewRow = {
         slug: string
       }[]
     | null
+}
 
-  products:
+type GenreDetailProductRow = {
+  id: number
+  model: string
+  slug: string
+  hero_image_url: string | null
+
+  brands:
     | {
         id: number
-        model: string
+        name: string
         slug: string
-        hero_image_url: string | null
-
-        brands:
-          | {
-              id: number
-              name: string
-              slug: string
-            }
-          | {
-              id: number
-              name: string
-              slug: string
-            }[]
-          | null
       }
     | {
         id: number
-        model: string
+        name: string
         slug: string
-        hero_image_url: string | null
-
-        brands:
-          | {
-              id: number
-              name: string
-              slug: string
-            }
-          | {
-              id: number
-              name: string
-              slug: string
-            }[]
-          | null
       }[]
+    | null
+}
+
+type GenreDetailReviewCoverageRow = {
+  review_id: number
+  product_id: number
+
+  reviews:
+    | GenreDetailReviewRow
+    | GenreDetailReviewRow[]
+    | null
+
+  products:
+    | GenreDetailProductRow
+    | GenreDetailProductRow[]
     | null
 }
 
@@ -245,44 +221,8 @@ type GenreDetailImpressionRow = {
     | null
 
   products:
-    | {
-        id: number
-        model: string
-        slug: string
-        hero_image_url: string | null
-
-        brands:
-          | {
-              id: number
-              name: string
-              slug: string
-            }
-          | {
-              id: number
-              name: string
-              slug: string
-            }[]
-          | null
-      }
-    | {
-        id: number
-        model: string
-        slug: string
-        hero_image_url: string | null
-
-        brands:
-          | {
-              id: number
-              name: string
-              slug: string
-            }
-          | {
-              id: number
-              name: string
-              slug: string
-            }[]
-          | null
-      }[]
+    | GenreDetailProductRow
+    | GenreDetailProductRow[]
     | null
 }
 
@@ -300,17 +240,37 @@ function getSingleRelation<T>(
   return relation ?? null
 }
 
-function mapGenreReview(
-  row: GenreDetailReviewRow,
+function timestampValue(
+  value: string | null,
+): number {
+  if (!value) {
+    return 0
+  }
+
+  const time =
+    new Date(value).getTime()
+
+  return Number.isNaN(time)
+    ? 0
+    : time
+}
+
+function mapGenreReviewCoverage(
+  row: GenreDetailReviewCoverageRow,
 ): FeaturedReview {
-  const reviewer =
+  const review =
     getSingleRelation(
-      row.reviewers,
+      row.reviews,
     )
 
   const product =
     getSingleRelation(
       row.products,
+    )
+
+  const reviewer =
+    getSingleRelation(
+      review?.reviewers,
     )
 
   const brand =
@@ -319,21 +279,22 @@ function mapGenreReview(
     )
 
   if (
+    !review ||
     !reviewer ||
     !product ||
     !brand
   ) {
     throw new Error(
-      `Review ${row.id} has incomplete genre data`,
+      `Review coverage ${row.review_id}/${row.product_id} has incomplete genre data`,
     )
   }
 
   return {
-    id: Number(row.id),
-    slug: row.slug,
-    rating: Number(row.rating),
-    title: row.title,
-    summary: row.summary,
+    id: Number(review.id),
+    slug: review.slug,
+    rating: Number(review.rating),
+    title: review.title,
+    summary: review.summary,
 
     brand:
       brand.name,
@@ -341,8 +302,11 @@ function mapGenreReview(
     brandSlug:
       brand.slug,
 
-    model: product.model,
-    productSlug: product.slug,
+    model:
+      product.model,
+
+    productSlug:
+      product.slug,
 
     reviewer:
       reviewer.name,
@@ -351,8 +315,12 @@ function mapGenreReview(
       reviewer.slug,
 
     heroImageUrl:
-      row.hero_image_url ??
-      product.hero_image_url,
+      review.hero_image_url ??
+      product.hero_image_url ??
+      null,
+
+    publishedAt:
+      review.published_at,
   }
 }
 
@@ -399,24 +367,39 @@ function mapGenreImpression(
       row.published_at,
 
     reviewer: {
-      id: Number(
-        reviewer.id,
-      ),
-      name: reviewer.name,
-      slug: reviewer.slug,
+      id:
+        Number(
+          reviewer.id,
+        ),
+
+      name:
+        reviewer.name,
+
+      slug:
+        reviewer.slug,
     },
 
     product: {
-      id: Number(product.id),
-      model: product.model,
-      slug: product.slug,
+      id:
+        Number(
+          product.id,
+        ),
+
+      model:
+        product.model,
+
+      slug:
+        product.slug,
 
       brand: {
-        id: Number(
-          brand.id,
-        ),
+        id:
+          Number(
+            brand.id,
+          ),
+
         name:
           brand.name,
+
         slug:
           brand.slug,
       },
@@ -424,13 +407,6 @@ function mapGenreImpression(
   }
 }
 
-/**
- * Public genre directory.
- *
- * Separate from getGenres()
- * so admin behaviour remains
- * unchanged.
- */
 export async function getGenreDirectory(): Promise<
   GenreSummary[]
 > {
@@ -439,6 +415,7 @@ export async function getGenreDirectory(): Promise<
     reviewRelationsResult,
     impressionRelationsResult,
     reviewsResult,
+    reviewCoverageResult,
     impressionsResult,
   ] = await Promise.all([
     supabase
@@ -480,11 +457,25 @@ export async function getGenreDirectory(): Promise<
       .from("reviews")
       .select(`
         id,
-        product_id,
         reviewer_id
       `)
       .eq(
         "published",
+        true,
+      ),
+
+    supabase
+      .from("review_products")
+      .select(`
+        review_id,
+        product_id,
+
+        reviews!inner (
+          published
+        )
+      `)
+      .eq(
+        "reviews.published",
         true,
       ),
 
@@ -506,6 +497,7 @@ export async function getGenreDirectory(): Promise<
     reviewRelationsResult.error ||
     impressionRelationsResult.error ||
     reviewsResult.error ||
+    reviewCoverageResult.error ||
     impressionsResult.error
 
   if (firstError) {
@@ -528,6 +520,10 @@ export async function getGenreDirectory(): Promise<
     (reviewsResult.data ??
       []) as PublishedReviewRow[]
 
+  const publishedReviewCoverage =
+    (reviewCoverageResult.data ??
+      []) as unknown as PublishedReviewCoverageRow[]
+
   const publishedImpressions =
     (impressionsResult.data ??
       []) as PublishedImpressionRow[]
@@ -544,6 +540,41 @@ export async function getGenreDirectory(): Promise<
         ],
       ),
     )
+
+  const reviewCoverageMap =
+    new Map<
+      number,
+      number[]
+    >()
+
+  for (
+    const coverage of
+    publishedReviewCoverage
+  ) {
+    const reviewId =
+      Number(
+        coverage.review_id,
+      )
+
+    const productId =
+      Number(
+        coverage.product_id,
+      )
+
+    const productIds =
+      reviewCoverageMap.get(
+        reviewId,
+      ) ?? []
+
+    productIds.push(
+      productId,
+    )
+
+    reviewCoverageMap.set(
+      reviewId,
+      productIds,
+    )
+  }
 
   const publishedImpressionMap =
     new Map<
@@ -629,22 +660,28 @@ export async function getGenreDirectory(): Promise<
           continue
         }
 
-        reviewCount += 1
+        const coveredProductIds =
+          reviewCoverageMap.get(
+            reviewId,
+          ) ?? []
 
-        if (
-          review.product_id !=
-          null
+        reviewCount +=
+          coveredProductIds.length
+
+        for (
+          const productId of
+          coveredProductIds
         ) {
           productIds.add(
-            Number(
-              review.product_id,
-            ),
+            productId,
           )
         }
 
         if (
           review.reviewer_id !=
-          null
+          null &&
+          coveredProductIds.length >
+            0
         ) {
           const reviewerId =
             Number(
@@ -674,7 +711,8 @@ export async function getGenreDirectory(): Promise<
           continue
         }
 
-        impressionCount += 1
+        impressionCount +=
+          1
 
         if (
           impression.product_id !=
@@ -700,12 +738,16 @@ export async function getGenreDirectory(): Promise<
       }
 
       return {
-        id: Number(
-          genre.id,
-        ),
+        id:
+          Number(
+            genre.id,
+          ),
 
-        name: genre.name,
-        slug: genre.slug,
+        name:
+          genre.name,
+
+        slug:
+          genre.slug,
 
         reviewCount,
 
@@ -827,7 +869,7 @@ export async function getGenreBySlug(
     )
 
   const [
-    reviewsResult,
+    reviewCoverageResult,
     impressionsResult,
   ] = await Promise.all([
     reviewIds.length === 0
@@ -836,22 +878,31 @@ export async function getGenreBySlug(
           error: null,
         })
       : supabase
-          .from("reviews")
+          .from(
+            "review_products",
+          )
           .select(`
-            id,
-            slug,
-            rating,
-            title,
-            summary,
-            hero_image_url,
+            review_id,
+            product_id,
 
-            reviewers (
+            reviews!inner (
               id,
-              name,
-              slug
+              slug,
+              rating,
+              title,
+              summary,
+              hero_image_url,
+              published_at,
+              published,
+
+              reviewers (
+                id,
+                name,
+                slug
+              )
             ),
 
-            products!reviews_iem_id_fkey (
+            products (
               id,
               model,
               slug,
@@ -865,19 +916,12 @@ export async function getGenreBySlug(
             )
           `)
           .in(
-            "id",
+            "review_id",
             reviewIds,
           )
           .eq(
-            "published",
+            "reviews.published",
             true,
-          )
-          .order(
-            "published_at",
-            {
-              ascending:
-                false,
-            },
           ),
 
     impressionIds.length ===
@@ -934,9 +978,9 @@ export async function getGenreBySlug(
   ])
 
   if (
-    reviewsResult.error
+    reviewCoverageResult.error
   ) {
-    throw reviewsResult.error
+    throw reviewCoverageResult.error
   }
 
   if (
@@ -946,16 +990,45 @@ export async function getGenreBySlug(
   }
 
   const reviewRows =
-    (reviewsResult.data ??
-      []) as unknown as GenreDetailReviewRow[]
+    (
+      reviewCoverageResult.data ??
+      []
+    ) as unknown as GenreDetailReviewCoverageRow[]
+
+  reviewRows.sort(
+    (first, second) => {
+      const firstReview =
+        getSingleRelation(
+          first.reviews,
+        )
+
+      const secondReview =
+        getSingleRelation(
+          second.reviews,
+        )
+
+      return (
+        timestampValue(
+          secondReview?.published_at ??
+            null,
+        ) -
+        timestampValue(
+          firstReview?.published_at ??
+            null,
+        )
+      )
+    },
+  )
 
   const impressionRows =
-    (impressionsResult.data ??
-      []) as unknown as GenreDetailImpressionRow[]
+    (
+      impressionsResult.data ??
+      []
+    ) as unknown as GenreDetailImpressionRow[]
 
   const mappedReviews =
     reviewRows.map(
-      mapGenreReview,
+      mapGenreReviewCoverage,
     )
 
   const mappedImpressions =
@@ -976,11 +1049,16 @@ export async function getGenreBySlug(
     >()
 
   function addReviewCoverage(
-    row: GenreDetailReviewRow,
+    row: GenreDetailReviewCoverageRow,
   ) {
+    const review =
+      getSingleRelation(
+        row.reviews,
+      )
+
     const reviewer =
       getSingleRelation(
-        row.reviewers,
+        review?.reviewers,
       )
 
     const product =
@@ -994,6 +1072,7 @@ export async function getGenreBySlug(
       )
 
     if (
+      !review ||
       !reviewer ||
       !product ||
       !brand
@@ -1002,10 +1081,14 @@ export async function getGenreBySlug(
     }
 
     const productId =
-      Number(product.id)
+      Number(
+        product.id,
+      )
 
     const existingProduct =
-      productMap.get(productId)
+      productMap.get(
+        productId,
+      )
 
     if (existingProduct) {
       existingProduct.reviewCount +=
@@ -1017,9 +1100,15 @@ export async function getGenreBySlug(
       productMap.set(
         productId,
         {
-          id: productId,
-          model: product.model,
-          slug: product.slug,
+          id:
+            productId,
+
+          model:
+            product.model,
+
+          slug:
+            product.slug,
+
           heroImageUrl:
             product.hero_image_url,
 
@@ -1029,9 +1118,14 @@ export async function getGenreBySlug(
           brandSlug:
             brand.slug,
 
-          reviewCount: 1,
-          impressionCount: 0,
-          coverageCount: 1,
+          reviewCount:
+            1,
+
+          impressionCount:
+            0,
+
+          coverageCount:
+            1,
         },
       )
     }
@@ -1056,15 +1150,23 @@ export async function getGenreBySlug(
       reviewerMap.set(
         reviewerId,
         {
-          id: reviewerId,
+          id:
+            reviewerId,
+
           name:
             reviewer.name,
+
           slug:
             reviewer.slug,
 
-          reviewCount: 1,
-          impressionCount: 0,
-          coverageCount: 1,
+          reviewCount:
+            1,
+
+          impressionCount:
+            0,
+
+          coverageCount:
+            1,
         },
       )
     }
@@ -1097,10 +1199,14 @@ export async function getGenreBySlug(
     }
 
     const productId =
-      Number(product.id)
+      Number(
+        product.id,
+      )
 
     const existingProduct =
-      productMap.get(productId)
+      productMap.get(
+        productId,
+      )
 
     if (existingProduct) {
       existingProduct.impressionCount +=
@@ -1112,9 +1218,15 @@ export async function getGenreBySlug(
       productMap.set(
         productId,
         {
-          id: productId,
-          model: product.model,
-          slug: product.slug,
+          id:
+            productId,
+
+          model:
+            product.model,
+
+          slug:
+            product.slug,
+
           heroImageUrl:
             product.hero_image_url,
 
@@ -1124,9 +1236,14 @@ export async function getGenreBySlug(
           brandSlug:
             brand.slug,
 
-          reviewCount: 0,
-          impressionCount: 1,
-          coverageCount: 1,
+          reviewCount:
+            0,
+
+          impressionCount:
+            1,
+
+          coverageCount:
+            1,
         },
       )
     }
@@ -1151,15 +1268,23 @@ export async function getGenreBySlug(
       reviewerMap.set(
         reviewerId,
         {
-          id: reviewerId,
+          id:
+            reviewerId,
+
           name:
             reviewer.name,
+
           slug:
             reviewer.slug,
 
-          reviewCount: 0,
-          impressionCount: 1,
-          coverageCount: 1,
+          reviewCount:
+            0,
+
+          impressionCount:
+            1,
+
+          coverageCount:
+            1,
         },
       )
     }
@@ -1205,11 +1330,16 @@ export async function getGenreBySlug(
     ).length
 
   return {
-    id: Number(
-      genre.id,
-    ),
-    name: genre.name,
-    slug: genre.slug,
+    id:
+      Number(
+        genre.id,
+      ),
+
+    name:
+      genre.name,
+
+    slug:
+      genre.slug,
 
     reviewCount:
       mappedReviews.length,

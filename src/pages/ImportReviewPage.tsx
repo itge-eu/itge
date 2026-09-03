@@ -243,6 +243,12 @@ function ImportReviewPage() {
     useState(false)
 
   const [
+    linking,
+    setLinking,
+  ] =
+    useState(false)
+
+  const [
     existingReview,
     setExistingReview,
   ] =
@@ -677,6 +683,141 @@ function ImportReviewPage() {
     }
   }
 
+  async function handleAddGearToExistingReview() {
+    if (!existingReview) {
+      setError(
+        "No existing review was found.",
+      )
+
+      return
+    }
+
+    if (!selectedProductId) {
+      setError(
+        "Select the additional Gear covered by this review.",
+      )
+
+      return
+    }
+
+    const productId =
+      Number(
+        selectedProductId,
+      )
+
+    if (
+      Number.isNaN(
+        productId,
+      )
+    ) {
+      setError(
+        "The selected Gear item is invalid.",
+      )
+
+      return
+    }
+
+    setLinking(true)
+    setError(null)
+
+    try {
+      const {
+        data:
+          existingAssociation,
+
+        error:
+          associationCheckError,
+      } =
+        await supabase
+          .from(
+            "review_products",
+          )
+          .select(
+            "review_id, product_id",
+          )
+          .eq(
+            "review_id",
+            Number(
+              existingReview.id,
+            ),
+          )
+          .eq(
+            "product_id",
+            productId,
+          )
+          .maybeSingle()
+
+      if (
+        associationCheckError
+      ) {
+        throw associationCheckError
+      }
+
+      if (
+        existingAssociation
+      ) {
+        setError(
+          "This Gear item is already covered by the existing review.",
+        )
+
+        return
+      }
+
+      const {
+        error:
+          insertError,
+      } =
+        await supabase
+          .from(
+            "review_products",
+          )
+          .insert({
+            review_id:
+              Number(
+                existingReview.id,
+              ),
+
+            product_id:
+              productId,
+          })
+
+      if (insertError) {
+        if (
+          insertError.code ===
+          "23505"
+        ) {
+          setError(
+            "This Gear item is already covered by the existing review.",
+          )
+
+          return
+        }
+
+        throw insertError
+      }
+
+      navigate(
+        `/admin/reviews/${existingReview.id}/edit`,
+      )
+    } catch (
+      linkError
+    ) {
+      console.error(
+        "Linking Gear to review failed:",
+        linkError,
+      )
+
+      setError(
+        linkError instanceof
+          Error
+          ? linkError.message
+          : "The Gear item could not be linked to the existing review.",
+      )
+    } finally {
+      setLinking(false)
+    }
+  }
+
   async function handleSaveDraft() {
     if (!importData) {
       setError(
@@ -1085,9 +1226,19 @@ function ImportReviewPage() {
                   imported.
                 </p>
 
+                <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+                  If the same Head-Fi
+                  article covers another
+                  Gear item, select that
+                  Gear below and add it
+                  to the existing ITGE
+                  review instead of
+                  creating a duplicate.
+                </p>
+
                 <Link
                   to={`/admin/reviews/${existingReview.id}/edit`}
-                  className="mt-2 inline-block text-[var(--accent)] underline"
+                  className="mt-3 inline-block text-[var(--accent)] underline"
                 >
                   Edit existing
                   ITGE review
@@ -1215,7 +1366,7 @@ function ImportReviewPage() {
                     htmlFor="product-search"
                     className="block text-sm font-semibold"
                   >
-                    ITGE product
+                    ITGE Gear
                   </label>
 
                   <input
@@ -1336,7 +1487,7 @@ function ImportReviewPage() {
                     <div className="mt-3 flex items-center justify-between gap-4 rounded-xl border border-[var(--accent)] bg-[var(--accent)]/10 px-4 py-3">
                       <div>
                         <p className="text-xs uppercase tracking-[0.14em] text-[var(--muted)]">
-                          Selected product
+                          Selected Gear
                         </p>
 
                         <p className="mt-1 font-semibold">
@@ -1506,38 +1657,53 @@ function ImportReviewPage() {
                 </div>
               )}
 
-              <button
-                type="button"
-                onClick={() =>
-                  void handleSaveDraft()
-                }
-                disabled={
-                  saving ||
-                  Boolean(
-                    existingReview,
-                  ) ||
-                  !selectedReviewerId ||
-                  !selectedProductId
-                }
-                className="rounded-xl bg-[var(--accent)] px-5 py-3 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {saving
-                  ? "Saving…"
-                  : "Save draft"}
-              </button>
-
-              {!selectedReviewerId && (
-                <span className="text-sm text-[var(--muted)]">
-                  Select a member
-                  before saving.
-                </span>
+              {existingReview ? (
+                <button
+                  type="button"
+                  onClick={() =>
+                    void handleAddGearToExistingReview()
+                  }
+                  disabled={
+                    linking ||
+                    !selectedProductId
+                  }
+                  className="rounded-xl bg-[var(--accent)] px-5 py-3 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {linking
+                    ? "Adding Gear…"
+                    : "Add Gear to existing review"}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() =>
+                    void handleSaveDraft()
+                  }
+                  disabled={
+                    saving ||
+                    !selectedReviewerId ||
+                    !selectedProductId
+                  }
+                  className="rounded-xl bg-[var(--accent)] px-5 py-3 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {saving
+                    ? "Saving…"
+                    : "Save draft"}
+                </button>
               )}
 
-              {selectedReviewerId &&
-                !selectedProductId && (
+              {!existingReview &&
+                !selectedReviewerId && (
+                  <span className="text-sm text-[var(--muted)]">
+                    Select a member
+                    before saving.
+                  </span>
+                )}
+
+              {!selectedProductId && (
                 <span className="text-sm text-[var(--muted)]">
-                  Select a product
-                  before saving.
+                  Select Gear
+                  before continuing.
                 </span>
               )}
             </div>
