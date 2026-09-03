@@ -1,6 +1,8 @@
 import { Link } from "react-router"
 
-import type { ImpressionSummary } from "../../lib/impressions"
+import type {
+  ImpressionSummary,
+} from "../../lib/impressions"
 
 type ImpressionCardProps = {
   impression: ImpressionSummary
@@ -25,7 +27,9 @@ function ImpressionCard({
 
   const excerpt =
     impression.summary?.trim() ||
-    stripHtml(impression.body ?? "").slice(0, 220)
+    stripHtml(
+      impression.body ?? "",
+    ).slice(0, 220)
 
   const imageSize =
     variant === "compact"
@@ -33,20 +37,22 @@ function ImpressionCard({
       : "sm:w-40 md:w-48"
 
   return (
-    <article className="group relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] transition duration-200 hover:-translate-y-0.5 hover:border-[var(--accent)] hover:shadow-md focus-within:border-[var(--accent)]">
+    <article className="group relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg focus-within:border-[var(--accent)]">
       <Link
         to={impressionUrl}
         aria-label={`Read impression of ${impression.product.brand.name} ${impression.product.model} by ${impression.reviewer.name}`}
         className="absolute inset-0 z-0 rounded-3xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]"
       />
 
-      <div className="relative z-10 pointer-events-none flex flex-col sm:flex-row">
+      <div className="pointer-events-none relative z-10 flex flex-col sm:flex-row">
         {impression.heroImageUrl && (
           <div
             className={`shrink-0 overflow-hidden bg-[var(--surface-soft)] ${imageSize}`}
           >
             <img
-              src={impression.heroImageUrl}
+              src={
+                impression.heroImageUrl
+              }
               alt={`${impression.product.brand.name} ${impression.product.model}`}
               loading="lazy"
               className="aspect-[16/9] h-full w-full object-cover transition duration-300 group-hover:scale-[1.025] sm:aspect-square"
@@ -59,51 +65,70 @@ function ImpressionCard({
             <div className="min-w-0">
               <Link
                 to={brandUrl}
-                className="pointer-events-auto relative z-20 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--accent)] transition hover:opacity-70"
+                className="pointer-events-auto relative z-20 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)] transition hover:opacity-70"
               >
-                {impression.product.brand.name}
+                {
+                  impression.product
+                    .brand.name
+                }
               </Link>
 
-              <h2 className="mt-1 text-xl font-semibold tracking-tight">
+              <h2 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
                 <Link
                   to={productUrl}
                   className="pointer-events-auto relative z-20 transition hover:text-[var(--accent)]"
                 >
-                  {impression.product.model}
+                  {
+                    impression.product
+                      .model
+                  }
                 </Link>
               </h2>
             </div>
 
             {impression.publishedAt && (
               <span className="shrink-0 text-xs text-[var(--muted)]">
-                {formatDate(impression.publishedAt)}
+                {formatDate(
+                  impression.publishedAt,
+                )}
               </span>
             )}
           </div>
 
           <p className="mt-1 text-sm text-[var(--muted)]">
             Impression by{" "}
+
             <Link
               to={reviewerUrl}
               className="pointer-events-auto relative z-20 font-semibold text-[var(--accent)] hover:underline"
             >
-              {impression.reviewer.name}
+              {
+                impression.reviewer
+                  .name
+              }
             </Link>
           </p>
 
           {impression.title && (
-            <p className="mt-3 line-clamp-1 font-medium">
-              {impression.title}
+            <p className="mt-4 line-clamp-1 font-semibold">
+              {
+                impression.title
+              }
             </p>
           )}
 
           {excerpt && (
-            <p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--muted)]">
+            <p className="mt-1 line-clamp-2 text-sm leading-6 text-[var(--muted)]">
               {excerpt}
             </p>
           )}
 
-          <div className="mt-auto flex justify-end pt-4">
+          <div className="mt-auto flex items-center justify-between gap-4 pt-4">
+            <span
+              aria-hidden="true"
+              className="h-[30px]"
+            />
+
             <span className="text-sm font-medium text-[var(--accent)] transition group-hover:translate-x-0.5">
               Read impression →
             </span>
@@ -117,20 +142,32 @@ function ImpressionCard({
 function formatDate(
   value: string,
 ): string {
-  const date = new Date(value)
+  const date =
+    new Date(
+      value,
+    )
 
-  if (Number.isNaN(date.getTime())) {
+  if (
+    Number.isNaN(
+      date.getTime(),
+    )
+  ) {
     return ""
   }
 
   return new Intl.DateTimeFormat(
     "en-GB",
     {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
+      day:
+        "numeric",
+      month:
+        "short",
+      year:
+        "numeric",
     },
-  ).format(date)
+  ).format(
+    date,
+  )
 }
 
 function stripHtml(
@@ -144,8 +181,12 @@ function stripHtml(
 
   return (
     document.body.textContent
-      ?.replace(/\s+/g, " ")
-      .trim() ?? ""
+      ?.replace(
+        /\s+/g,
+        " ",
+      )
+      .trim() ??
+    ""
   )
 }
 

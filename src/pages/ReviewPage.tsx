@@ -415,6 +415,8 @@ function ReviewPage() {
               to="/reviews"
               className="group flex items-center justify-between gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-5 py-4 transition hover:border-[var(--accent)]"
             >
+              <ArrowLeftIcon />
+
               <span>
                 <span className="block text-sm text-[var(--muted)]">
                   Back to
@@ -424,8 +426,6 @@ function ReviewPage() {
                   All reviews
                 </span>
               </span>
-
-              <ArrowLeftIcon />
             </Link>
 
             <Link
