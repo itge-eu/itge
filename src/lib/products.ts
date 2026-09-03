@@ -30,16 +30,20 @@ export type ProductDirectoryItem = {
   productType: ProductType
   featured?: boolean
   launchPrice?: number | null
+
   brand: {
     id: number
     name: string
     slug: string
   }
+
   heroImageUrl: string | null
+
   reviewCount: number
   reviewerCount: number
   averageRating: number | null
   latestReviewAt: string | null
+
   impressionCount?: number
   coverageCount?: number
   contributorCount?: number
@@ -77,13 +81,31 @@ type ProductRow = {
   id: number
   model: string
   slug: string
-  product_type: ProductType | null
-  hero_image_url: string | null
 
-  release_year: number | null
-  driver_configuration: string | null
-  launch_price: string | number | null
-  launch_currency: string | null
+  product_type:
+    | ProductType
+    | null
+
+  hero_image_url:
+    | string
+    | null
+
+  release_year:
+    | number
+    | null
+
+  driver_configuration:
+    | string
+    | null
+
+  launch_price:
+    | string
+    | number
+    | null
+
+  launch_currency:
+    | string
+    | null
 
   brands:
     | {
@@ -99,27 +121,17 @@ type ProductRow = {
     | null
 }
 
-type ProductDirectoryReviewRow = {
-  id: number
-  rating: number
-  hero_image_url: string | null
-  published_at: string | null
-  published: boolean
-
-  reviewers:
-    | {
-        slug: string
-      }
-    | {
-        slug: string
-      }[]
-    | null
-}
-
 type ProductDirectoryImpressionRow = {
   id: number
-  hero_image_url: string | null
-  published_at: string | null
+
+  hero_image_url:
+    | string
+    | null
+
+  published_at:
+    | string
+    | null
+
   published: boolean
 
   reviewers:
@@ -136,10 +148,23 @@ type ProductDirectoryRow = {
   id: number
   model: string
   slug: string
-  product_type: ProductType | null
-  featured: boolean | null
-  launch_price: string | number | null
-  hero_image_url: string | null
+
+  product_type:
+    | ProductType
+    | null
+
+  featured:
+    | boolean
+    | null
+
+  launch_price:
+    | string
+    | number
+    | null
+
+  hero_image_url:
+    | string
+    | null
 
   brands:
     | {
@@ -152,10 +177,6 @@ type ProductDirectoryRow = {
         name: string
         slug: string
       }[]
-    | null
-
-  reviews:
-    | ProductDirectoryReviewRow[]
     | null
 
   impressions:
@@ -201,7 +222,16 @@ type ProductReviewRow = {
   rating: number
   title: string
   summary: string
-  hero_image_url: string | null
+
+  hero_image_url:
+    | string
+    | null
+
+  published_at:
+    | string
+    | null
+
+  published: boolean
 
   reviewers:
     | {
@@ -219,6 +249,10 @@ type ProductReviewRow = {
         model: string
         slug: string
 
+        hero_image_url:
+          | string
+          | null
+
         brands:
           | {
               name: string
@@ -233,6 +267,10 @@ type ProductReviewRow = {
     | {
         model: string
         slug: string
+
+        hero_image_url:
+          | string
+          | null
 
         brands:
           | {
@@ -256,11 +294,31 @@ type ProductReviewRow = {
     | null
 }
 
+type ReviewProductLinkRow = {
+  product_id: number
+
+  reviews:
+    | ProductReviewRow
+    | ProductReviewRow[]
+    | null
+}
+
 function getSingleRelation<T>(
-  relation: T | T[] | null | undefined,
+  relation:
+    | T
+    | T[]
+    | null
+    | undefined,
 ): T | null {
-  if (Array.isArray(relation)) {
-    return relation[0] ?? null
+  if (
+    Array.isArray(
+      relation,
+    )
+  ) {
+    return (
+      relation[0] ??
+      null
+    )
   }
 
   return relation ?? null
@@ -286,7 +344,10 @@ export function getProductTypeLabel(
 }
 
 function normalizeProductType(
-  value: ProductType | null | undefined,
+  value:
+    | ProductType
+    | null
+    | undefined,
 ): ProductType {
   return value ?? "iem"
 }
@@ -295,10 +356,14 @@ function mapFeaturedReview(
   row: ProductReviewRow,
 ): FeaturedReview {
   const reviewer =
-    getSingleRelation(row.reviewers)
+    getSingleRelation(
+      row.reviewers,
+    )
 
   const product =
-    getSingleRelation(row.products)
+    getSingleRelation(
+      row.products,
+    )
 
   const brand =
     getSingleRelation(
@@ -316,73 +381,116 @@ function mapFeaturedReview(
   }
 
   return {
-    id: Number(row.id),
-    slug: row.slug,
-    rating: Number(row.rating),
-    title: row.title,
-    summary: row.summary,
+    id:
+      Number(
+        row.id,
+      ),
 
-    brand: brand.name,
+    slug:
+      row.slug,
+
+    rating:
+      Number(
+        row.rating,
+      ),
+
+    title:
+      row.title,
+
+    summary:
+      row.summary,
+
+    brand:
+      brand.name,
+
     brandSlug:
       brand.slug,
 
-    model: product.model,
-    productSlug: product.slug,
+    model:
+      product.model,
 
-    reviewer: reviewer.name,
-    reviewerSlug: reviewer.slug,
+    productSlug:
+      product.slug,
+
+    reviewer:
+      reviewer.name,
+
+    reviewerSlug:
+      reviewer.slug,
 
     heroImageUrl:
-      row.hero_image_url,
+      row.hero_image_url ??
+      product.hero_image_url ??
+      null,
+
+    publishedAt:
+      row.published_at,
   }
 }
 
 function collectReviewers(
-  rows: ProductReviewRow[],
+  rows:
+    ProductReviewRow[],
 ): ProductReviewer[] {
   const reviewers =
-    new Map<string, ProductReviewer>()
+    new Map<
+      string,
+      ProductReviewer
+    >()
 
-  rows.forEach((row) => {
-    const reviewer =
-      getSingleRelation(
-        row.reviewers,
-      )
+  rows.forEach(
+    (row) => {
+      const reviewer =
+        getSingleRelation(
+          row.reviewers,
+        )
 
-    if (!reviewer) {
-      return
-    }
+      if (!reviewer) {
+        return
+      }
 
-    const existing =
-      reviewers.get(
+      const existing =
+        reviewers.get(
+          reviewer.slug,
+        )
+
+      if (existing) {
+        existing.reviewCount +=
+          1
+
+        return
+      }
+
+      reviewers.set(
         reviewer.slug,
+        {
+          name:
+            reviewer.name,
+
+          slug:
+            reviewer.slug,
+
+          reviewCount:
+            1,
+        },
       )
-
-    if (existing) {
-      existing.reviewCount += 1
-      return
-    }
-
-    reviewers.set(
-      reviewer.slug,
-      {
-        name: reviewer.name,
-        slug: reviewer.slug,
-        reviewCount: 1,
-      },
-    )
-  })
+    },
+  )
 
   return Array.from(
     reviewers.values(),
   ).sort(
-    (first, second) => {
+    (
+      first,
+      second,
+    ) => {
       const countDifference =
         second.reviewCount -
         first.reviewCount
 
       if (
-        countDifference !== 0
+        countDifference !==
+        0
       ) {
         return countDifference
       }
@@ -395,7 +503,8 @@ function collectReviewers(
 }
 
 function collectArtists(
-  rows: ProductReviewRow[],
+  rows:
+    ProductReviewRow[],
 ): ReviewArtist[] {
   const artists =
     new Map<
@@ -403,43 +512,61 @@ function collectArtists(
       ReviewArtist
     >()
 
-  rows.forEach((row) => {
-    ;(
-      row.review_artists ?? []
-    ).forEach((relation) => {
-      const artist =
-        getSingleRelation(
-          relation.artists,
-        )
+  rows.forEach(
+    (row) => {
+      ;(
+        row.review_artists ??
+        []
+      ).forEach(
+        (relation) => {
+          const artist =
+            getSingleRelation(
+              relation.artists,
+            )
 
-      if (
-        !artist ||
-        artists.has(
-          Number(artist.id),
-        )
-      ) {
-        return
-      }
+          if (
+            !artist ||
+            artists.has(
+              Number(
+                artist.id,
+              ),
+            )
+          ) {
+            return
+          }
 
-      artists.set(
-        Number(artist.id),
-        {
-          id: Number(
-            artist.id,
-          ),
-          musicbrainzId:
-            artist.musicbrainz_id,
-          name: artist.name,
-          slug: artist.slug,
+          artists.set(
+            Number(
+              artist.id,
+            ),
+            {
+              id:
+                Number(
+                  artist.id,
+                ),
+
+              musicbrainzId:
+                artist.musicbrainz_id,
+
+              name:
+                artist.name,
+
+              slug:
+                artist.slug,
+            },
+          )
         },
       )
-    })
-  })
+    },
+  )
 
   return Array.from(
     artists.values(),
   ).sort(
-    (first, second) =>
+    (
+      first,
+      second,
+    ) =>
       first.name.localeCompare(
         second.name,
       ),
@@ -447,7 +574,8 @@ function collectArtists(
 }
 
 function collectGenres(
-  rows: ProductReviewRow[],
+  rows:
+    ProductReviewRow[],
 ): ReviewGenre[] {
   const genres =
     new Map<
@@ -455,41 +583,58 @@ function collectGenres(
       ReviewGenre
     >()
 
-  rows.forEach((row) => {
-    ;(
-      row.review_genres ?? []
-    ).forEach((relation) => {
-      const genre =
-        getSingleRelation(
-          relation.genres,
-        )
+  rows.forEach(
+    (row) => {
+      ;(
+        row.review_genres ??
+        []
+      ).forEach(
+        (relation) => {
+          const genre =
+            getSingleRelation(
+              relation.genres,
+            )
 
-      if (
-        !genre ||
-        genres.has(
-          Number(genre.id),
-        )
-      ) {
-        return
-      }
+          if (
+            !genre ||
+            genres.has(
+              Number(
+                genre.id,
+              ),
+            )
+          ) {
+            return
+          }
 
-      genres.set(
-        Number(genre.id),
-        {
-          id: Number(
-            genre.id,
-          ),
-          name: genre.name,
-          slug: genre.slug,
+          genres.set(
+            Number(
+              genre.id,
+            ),
+            {
+              id:
+                Number(
+                  genre.id,
+                ),
+
+              name:
+                genre.name,
+
+              slug:
+                genre.slug,
+            },
+          )
         },
       )
-    })
-  })
+    },
+  )
 
   return Array.from(
     genres.values(),
   ).sort(
-    (first, second) =>
+    (
+      first,
+      second,
+    ) =>
       first.name.localeCompare(
         second.name,
       ),
@@ -497,18 +642,24 @@ function collectGenres(
 }
 
 function calculateAverageRating(
-  reviews: FeaturedReview[],
+  reviews:
+    FeaturedReview[],
 ): number | null {
   if (
-    reviews.length === 0
+    reviews.length ===
+    0
   ) {
     return null
   }
 
   const total =
     reviews.reduce(
-      (sum, review) =>
-        sum + review.rating,
+      (
+        sum,
+        review,
+      ) =>
+        sum +
+        review.rating,
       0,
     )
 
@@ -519,63 +670,248 @@ function calculateAverageRating(
 }
 
 function timestampValue(
-  value: string | null,
+  value:
+    | string
+    | null,
 ): number {
   if (!value) {
     return 0
   }
 
   const time =
-    new Date(value).getTime()
+    new Date(
+      value,
+    ).getTime()
 
-  return Number.isNaN(time)
+  return Number.isNaN(
+    time,
+  )
     ? 0
     : time
 }
 
+function extractReviewRows(
+  links:
+    ReviewProductLinkRow[],
+): ProductReviewRow[] {
+  return links
+    .flatMap(
+      (link) => {
+        const review =
+          getSingleRelation(
+            link.reviews,
+          )
+
+        if (
+          !review ||
+          !review.published
+        ) {
+          return []
+        }
+
+        return [
+          review,
+        ]
+      },
+    )
+    .sort(
+      (
+        first,
+        second,
+      ) =>
+        timestampValue(
+          second.published_at,
+        ) -
+        timestampValue(
+          first.published_at,
+        ),
+    )
+}
+
+async function getReviewLinksForProduct(
+  productId: number,
+): Promise<
+  ReviewProductLinkRow[]
+> {
+  const {
+    data,
+    error,
+  } =
+    await supabase
+      .from(
+        "review_products",
+      )
+      .select(`
+        product_id,
+
+        reviews (
+          id,
+          slug,
+          rating,
+          title,
+          summary,
+          hero_image_url,
+          published_at,
+          published,
+
+          reviewers (
+            name,
+            slug
+          ),
+
+          products!reviews_iem_id_fkey (
+            model,
+            slug,
+            hero_image_url,
+
+            brands (
+              name,
+              slug
+            )
+          ),
+
+          review_artists (
+            artists (
+              id,
+              musicbrainz_id,
+              name,
+              slug
+            )
+          ),
+
+          review_genres (
+            genres (
+              id,
+              name,
+              slug
+            )
+          )
+        )
+      `)
+      .eq(
+        "product_id",
+        productId,
+      )
+
+  if (error) {
+    throw error
+  }
+
+  return (
+    data ??
+    []
+  ) as unknown as ReviewProductLinkRow[]
+}
+
+async function getAllReviewLinks(): Promise<
+  ReviewProductLinkRow[]
+> {
+  const {
+    data,
+    error,
+  } =
+    await supabase
+      .from(
+        "review_products",
+      )
+      .select(`
+        product_id,
+
+        reviews (
+          id,
+          slug,
+          rating,
+          title,
+          summary,
+          hero_image_url,
+          published_at,
+          published,
+
+          reviewers (
+            name,
+            slug
+          ),
+
+          products!reviews_iem_id_fkey (
+            model,
+            slug,
+            hero_image_url,
+
+            brands (
+              name,
+              slug
+            )
+          )
+        )
+      `)
+
+  if (error) {
+    throw error
+  }
+
+  return (
+    data ??
+    []
+  ) as unknown as ReviewProductLinkRow[]
+}
+
 export async function getProductBySlug(
   slug: string,
-): Promise<ProductProfile | null> {
+): Promise<
+  ProductProfile | null
+> {
   const normalizedSlug =
     slug.trim()
 
-  if (!normalizedSlug) {
+  if (
+    !normalizedSlug
+  ) {
     return null
   }
 
   const {
-    data: productData,
-    error: productError,
-  } = await supabase
-    .from("products")
-    .select(`
-      id,
-      model,
-      slug,
-      product_type,
-      hero_image_url,
-      release_year,
-      driver_configuration,
-      launch_price,
-      launch_currency,
+    data:
+      productData,
 
-      brands (
-        id,
-        name,
-        slug
+    error:
+      productError,
+  } =
+    await supabase
+      .from(
+        "products",
       )
-    `)
-    .eq(
-      "slug",
-      normalizedSlug,
-    )
-    .maybeSingle()
+      .select(`
+        id,
+        model,
+        slug,
+        product_type,
+        hero_image_url,
+        release_year,
+        driver_configuration,
+        launch_price,
+        launch_currency,
 
-  if (productError) {
+        brands (
+          id,
+          name,
+          slug
+        )
+      `)
+      .eq(
+        "slug",
+        normalizedSlug,
+      )
+      .maybeSingle()
+
+  if (
+    productError
+  ) {
     throw productError
   }
 
-  if (!productData) {
+  if (
+    !productData
+  ) {
     return null
   }
 
@@ -593,73 +929,17 @@ export async function getProductBySlug(
     )
   }
 
-  const {
-    data: reviewData,
-    error: reviewError,
-  } = await supabase
-    .from("reviews")
-    .select(`
-      id,
-      slug,
-      rating,
-      title,
-      summary,
-      hero_image_url,
-
-      reviewers (
-        name,
-        slug
+  const reviewLinks =
+    await getReviewLinksForProduct(
+      Number(
+        product.id,
       ),
-
-      products!reviews_iem_id_fkey (
-        model,
-        slug,
-
-        brands (
-          name,
-          slug
-        )
-      ),
-
-      review_artists (
-        artists (
-          id,
-          musicbrainz_id,
-          name,
-          slug
-        )
-      ),
-
-      review_genres (
-        genres (
-          id,
-          name,
-          slug
-        )
-      )
-    `)
-    .eq(
-      "product_id",
-      Number(product.id),
     )
-    .eq(
-      "published",
-      true,
-    )
-    .order(
-      "published_at",
-      {
-        ascending: false,
-      },
-    )
-
-  if (reviewError) {
-    throw reviewError
-  }
 
   const rows =
-    (reviewData ??
-      []) as unknown as ProductReviewRow[]
+    extractReviewRows(
+      reviewLinks,
+    )
 
   const reviews =
     rows.map(
@@ -668,7 +948,9 @@ export async function getProductBySlug(
 
   const impressions =
     await getImpressionsByProductId(
-      Number(product.id),
+      Number(
+        product.id,
+      ),
     )
 
   const fallbackHeroImageUrl =
@@ -689,9 +971,16 @@ export async function getProductBySlug(
     fallbackHeroImageUrl
 
   return {
-    id: Number(product.id),
-    model: product.model,
-    slug: product.slug,
+    id:
+      Number(
+        product.id,
+      ),
+
+    model:
+      product.model,
+
+    slug:
+      product.slug,
 
     productType:
       normalizeProductType(
@@ -699,11 +988,16 @@ export async function getProductBySlug(
       ),
 
     brand: {
-      id: Number(
-        brand.id,
-      ),
-      name: brand.name,
-      slug: brand.slug,
+      id:
+        Number(
+          brand.id,
+        ),
+
+      name:
+        brand.name,
+
+      slug:
+        brand.slug,
     },
 
     releaseYear:
@@ -736,13 +1030,19 @@ export async function getProductBySlug(
     heroImageUrl,
 
     reviewers:
-      collectReviewers(rows),
+      collectReviewers(
+        rows,
+      ),
 
     artists:
-      collectArtists(rows),
+      collectArtists(
+        rows,
+      ),
 
     genres:
-      collectGenres(rows),
+      collectGenres(
+        rows,
+      ),
 
     reviews,
     impressions,
@@ -752,57 +1052,120 @@ export async function getProductBySlug(
 export async function getProducts(): Promise<
   ProductDirectoryItem[]
 > {
-  const {
-    data,
-    error,
-  } = await supabase
-    .from("products")
-    .select(`
-      id,
-      model,
-      slug,
-      product_type,
-      featured,
-      launch_price,
-      hero_image_url,
-
-      brands (
-        id,
-        name,
-        slug
-      ),
-
-      reviews!reviews_iem_id_fkey (
-        id,
-        rating,
-        hero_image_url,
-        published_at,
-        published,
-
-        reviewers (
-          slug
+  const [
+    productsResult,
+    reviewLinks,
+  ] =
+    await Promise.all([
+      supabase
+        .from(
+          "products",
         )
-      ),
+        .select(`
+          id,
+          model,
+          slug,
+          product_type,
+          featured,
+          launch_price,
+          hero_image_url,
 
-      impressions (
-        id,
-        hero_image_url,
-        published_at,
-        published,
+          brands (
+            id,
+            name,
+            slug
+          ),
 
-        reviewers (
-          slug
-        )
-      )
-    `)
+          impressions (
+            id,
+            hero_image_url,
+            published_at,
+            published,
 
-  if (error) {
-    throw error
+            reviewers (
+              slug
+            )
+          )
+        `),
+
+      getAllReviewLinks(),
+    ])
+
+  if (
+    productsResult.error
+  ) {
+    throw productsResult.error
   }
 
   const rows =
-    (data ??
-      []) as unknown as ProductDirectoryRow[]
+    (
+      productsResult.data ??
+      []
+    ) as unknown as ProductDirectoryRow[]
+
+  const reviewsByProduct =
+    new Map<
+      number,
+      ProductReviewRow[]
+    >()
+
+  reviewLinks.forEach(
+    (link) => {
+      const review =
+        getSingleRelation(
+          link.reviews,
+        )
+
+      if (
+        !review ||
+        !review.published
+      ) {
+        return
+      }
+
+      const productId =
+        Number(
+          link.product_id,
+        )
+
+      const existing =
+        reviewsByProduct.get(
+          productId,
+        )
+
+      if (existing) {
+        existing.push(
+          review,
+        )
+
+        return
+      }
+
+      reviewsByProduct.set(
+        productId,
+        [
+          review,
+        ],
+      )
+    },
+  )
+
+  reviewsByProduct.forEach(
+    (reviews) => {
+      reviews.sort(
+        (
+          first,
+          second,
+        ) =>
+          timestampValue(
+            second.published_at,
+          ) -
+          timestampValue(
+            first.published_at,
+          ),
+      )
+    },
+  )
 
   return rows.flatMap(
     (row) => {
@@ -815,34 +1178,29 @@ export async function getProducts(): Promise<
         return []
       }
 
-      const reviews = [
-        ...(row.reviews ??
-          []),
-      ]
-        .filter(
-          (review) =>
-            review.published,
-        )
-        .sort(
-          (first, second) =>
-            timestampValue(
-              second.published_at,
-            ) -
-            timestampValue(
-              first.published_at,
-            ),
-        )
+      const reviews =
+        reviewsByProduct.get(
+          Number(
+            row.id,
+          ),
+        ) ??
+        []
 
       const impressions = [
-        ...(row.impressions ??
-          []),
+        ...(
+          row.impressions ??
+          []
+        ),
       ]
         .filter(
           (impression) =>
             impression.published,
         )
         .sort(
-          (first, second) =>
+          (
+            first,
+            second,
+          ) =>
             timestampValue(
               second.published_at,
             ) -
@@ -852,7 +1210,8 @@ export async function getProducts(): Promise<
         )
 
       if (
-        reviews.length === 0 &&
+        reviews.length ===
+          0 &&
         impressions.length ===
           0
       ) {
@@ -872,7 +1231,9 @@ export async function getProducts(): Promise<
               review.reviewers,
             )
 
-          if (!reviewer) {
+          if (
+            !reviewer
+          ) {
             return
           }
 
@@ -893,7 +1254,9 @@ export async function getProducts(): Promise<
               impression.reviewers,
             )
 
-          if (!reviewer) {
+          if (
+            !reviewer
+          ) {
             return
           }
 
@@ -917,7 +1280,8 @@ export async function getProducts(): Promise<
         )
 
       const averageRating =
-        reviews.length === 0
+        reviews.length ===
+        0
           ? null
           : ratingTotal /
             reviews.length
@@ -961,12 +1325,16 @@ export async function getProducts(): Promise<
 
       return [
         {
-          id: Number(
-            row.id,
-          ),
+          id:
+            Number(
+              row.id,
+            ),
 
-          model: row.model,
-          slug: row.slug,
+          model:
+            row.model,
+
+          slug:
+            row.slug,
 
           productType:
             normalizeProductType(
@@ -986,11 +1354,14 @@ export async function getProducts(): Promise<
                 ),
 
           brand: {
-            id: Number(
-              brand.id,
-            ),
+            id:
+              Number(
+                brand.id,
+              ),
+
             name:
               brand.name,
+
             slug:
               brand.slug,
           },
