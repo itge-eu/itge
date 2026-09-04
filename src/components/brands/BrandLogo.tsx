@@ -1,11 +1,5 @@
 import {
-  useEffect,
-  useState,
-} from "react"
-
-import {
   getBrandLogoUrl,
-  MANUFACTURER_LOGO_EXTENSIONS,
 } from "../../lib/brandLogos"
 
 type BrandLogoSize =
@@ -43,29 +37,10 @@ function BrandLogo({
   className = "",
   eager = false,
 }: BrandLogoProps) {
-  const [
-    extensionIndex,
-    setExtensionIndex,
-  ] = useState(0)
-
-  useEffect(() => {
-    setExtensionIndex(0)
-  }, [slug])
-
-  const extension =
-    MANUFACTURER_LOGO_EXTENSIONS[
-      extensionIndex
-    ]
-
-  if (!extension) {
-    return null
-  }
-
   return (
     <img
       src={getBrandLogoUrl(
         slug,
-        extension,
       )}
       alt={`${name} logo`}
       loading={
@@ -74,12 +49,6 @@ function BrandLogo({
           : "lazy"
       }
       decoding="async"
-      onError={() => {
-        setExtensionIndex(
-          (current) =>
-            current + 1,
-        )
-      }}
       className={`block object-contain object-center ${SIZE_CLASSES[size]} ${className}`}
     />
   )
