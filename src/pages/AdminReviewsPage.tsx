@@ -1,4 +1,8 @@
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Link } from "react-router";
 import { supabase } from "../lib/supabase";
 
@@ -34,9 +38,10 @@ function AdminReviewsPage() {
   const [reviews, setReviews] = useState<AdminReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [deletingReviewId, setDeletingReviewId] = useState<number | null>(
-    null,
-  );
+  const [searchQuery, setSearchQuery] = useState("");
+  const [deletingReviewId, setDeletingReviewId] = useState<
+    number | null
+  >(null);
 
   useEffect(() => {
     async function loadReviews() {
@@ -67,22 +72,66 @@ function AdminReviewsPage() {
         .order("created_at", { ascending: false });
 
       if (queryError) {
-        console.error("Loading admin reviews failed:", queryError);
+        console.error(
+          "Loading admin reviews failed:",
+          queryError,
+        );
         setError(queryError.message);
         setLoading(false);
         return;
       }
 
-      setReviews((data ?? []) as unknown as AdminReview[]);
+      setReviews(
+        (data ?? []) as unknown as AdminReview[],
+      );
       setLoading(false);
     }
 
     void loadReviews();
   }, []);
 
-  async function handleDeleteReview(review: AdminReview) {
+  const filteredReviews = useMemo(() => {
+    const normalizedQuery = searchQuery
+      .trim()
+      .toLowerCase();
+
+    if (!normalizedQuery) {
+      return reviews;
+    }
+
+    return reviews.filter((review) => {
+      const brandName =
+        review.products?.brands?.name ?? "";
+
+      const modelName =
+        review.products?.model ?? "";
+
+      const reviewerName =
+        review.reviewers?.name ?? "";
+
+      const searchableText = [
+        review.title ?? "",
+        brandName,
+        modelName,
+        `${brandName} ${modelName}`,
+        reviewerName,
+        review.slug,
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return searchableText.includes(
+        normalizedQuery,
+      );
+    });
+  }, [reviews, searchQuery]);
+
+  async function handleDeleteReview(
+    review: AdminReview,
+  ) {
     const displayName =
-      review.title?.trim() || `/reviews/${review.slug}`;
+      review.title?.trim() ||
+      `/reviews/${review.slug}`;
 
     const confirmed = window.confirm(
       `Delete "${displayName}" permanently?\n\n` +
@@ -109,7 +158,9 @@ function AdminReviewsPage() {
         });
 
       if (functionError) {
-        throw new Error(functionError.message);
+        throw new Error(
+          functionError.message,
+        );
       }
 
       if (data?.error) {
@@ -123,7 +174,10 @@ function AdminReviewsPage() {
         ),
       );
     } catch (deleteError) {
-      console.error("Deleting review failed:", deleteError);
+      console.error(
+        "Deleting review failed:",
+        deleteError,
+      );
 
       setError(
         deleteError instanceof Error
@@ -137,9 +191,11 @@ function AdminReviewsPage() {
 
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)] lg:px-8">
-
       <div className="mx-auto max-w-6xl">
-        <Link to="/" className="text-sm font-medium text-[var(--accent)]">
+        <Link
+          to="/"
+          className="text-sm font-medium text-[var(--accent)]"
+        >
           ← Back to homepage
         </Link>
 
@@ -154,8 +210,8 @@ function AdminReviewsPage() {
             </h1>
 
             <p className="mt-5 max-w-2xl text-lg leading-8 text-[var(--muted)]">
-              Manage imported reviews, edit drafts and publish completed
-              reviews.
+              Manage imported reviews, edit drafts and
+              publish completed reviews.
             </p>
           </div>
 
@@ -169,131 +225,227 @@ function AdminReviewsPage() {
 
         {loading && (
           <div className="mt-12 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
-            <p className="text-[var(--muted)]">Loading reviews…</p>
+            <p className="text-[var(--muted)]">
+              Loading reviews…
+            </p>
           </div>
         )}
 
         {error && (
           <div className="mt-12 rounded-2xl border border-red-500/30 bg-red-500/10 px-5 py-4">
-            <p className="font-semibold">Reviews could not be loaded.</p>
-            <p className="mt-2 text-sm">{error}</p>
-          </div>
-        )}
-
-        {!loading && !error && reviews.length === 0 && (
-          <div className="mt-12 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
-            <h2 className="text-xl font-semibold">No reviews yet</h2>
-
-            <p className="mt-3 text-[var(--muted)]">
-              Import your first Head-Fi review to get started.
+            <p className="font-semibold">
+              Reviews could not be loaded.
+            </p>
+            <p className="mt-2 text-sm">
+              {error}
             </p>
           </div>
         )}
 
-        {!loading && !error && reviews.length > 0 && (
-          <section className="mt-12 overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)]">
-            <div className="border-b border-[var(--border)] px-6 py-4">
-              <p className="text-sm text-[var(--muted)]">
-                {reviews.length} {reviews.length === 1 ? "review" : "reviews"}
+        {!loading &&
+          !error &&
+          reviews.length === 0 && (
+            <div className="mt-12 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
+              <h2 className="text-xl font-semibold">
+                No reviews yet
+              </h2>
+
+              <p className="mt-3 text-[var(--muted)]">
+                Import your first Head-Fi review to get
+                started.
               </p>
             </div>
+          )}
 
-            <div className="divide-y divide-[var(--border)]">
-              {reviews.map((review) => {
-                const brandName =
-                  review.products?.brands?.name ?? "";
+        {!loading &&
+          !error &&
+          reviews.length > 0 && (
+            <>
+              <div className="mt-12">
+                <label
+                  htmlFor="review-search"
+                  className="sr-only"
+                >
+                  Search reviews
+                </label>
 
-                const modelName = review.products?.model ?? "Unknown IEM";
-
-                const fullProductName = [brandName, modelName]
-                  .filter(Boolean)
-                  .join(" ");
-
-                return (
-                  <article
-                    key={review.id}
-                    className="flex flex-col gap-5 px-6 py-6 transition hover:bg-[var(--background)] sm:flex-row sm:items-center sm:justify-between"
+                <div className="relative">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    aria-hidden="true"
+                    className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--muted)]"
                   >
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                            review.published
-                              ? "bg-green-500/15 text-green-600"
-                              : "bg-amber-500/15 text-amber-600"
-                          }`}
+                    <circle
+                      cx="11"
+                      cy="11"
+                      r="8"
+                    />
+                    <path d="m21 21-4.35-4.35" />
+                  </svg>
+
+                  <input
+                    id="review-search"
+                    type="search"
+                    value={searchQuery}
+                    onChange={(event) =>
+                      setSearchQuery(
+                        event.target.value,
+                      )
+                    }
+                    placeholder="Search by review, Gear, brand, reviewer or slug…"
+                    autoComplete="off"
+                    className="w-full rounded-2xl border border-[var(--border)] bg-[var(--surface)] py-4 pl-12 pr-5 text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--accent)]"
+                  />
+                </div>
+              </div>
+
+              <section className="mt-5 overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)]">
+                <div className="border-b border-[var(--border)] px-6 py-4">
+                  <p className="text-sm text-[var(--muted)]">
+                    {searchQuery.trim()
+                      ? `${filteredReviews.length} of ${reviews.length} reviews`
+                      : `${reviews.length} ${
+                          reviews.length === 1
+                            ? "review"
+                            : "reviews"
+                        }`}
+                  </p>
+                </div>
+
+                {filteredReviews.length === 0 ? (
+                  <div className="px-6 py-12 text-center">
+                    <h2 className="text-lg font-semibold">
+                      No matching reviews
+                    </h2>
+
+                    <p className="mt-2 text-sm text-[var(--muted)]">
+                      Try another review, Gear, brand or
+                      reviewer.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-[var(--border)]">
+                    {filteredReviews.map((review) => {
+                      const brandName =
+                        review.products?.brands?.name ??
+                        "";
+
+                      const modelName =
+                        review.products?.model ??
+                        "Unknown IEM";
+
+                      const fullProductName = [
+                        brandName,
+                        modelName,
+                      ]
+                        .filter(Boolean)
+                        .join(" ");
+
+                      return (
+                        <article
+                          key={review.id}
+                          className="flex flex-col gap-5 px-6 py-6 transition hover:bg-[var(--background)] sm:flex-row sm:items-center sm:justify-between"
                         >
-                          {review.published ? "Published" : "Draft"}
-                        </span>
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span
+                                className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                                  review.published
+                                    ? "bg-green-500/15 text-green-600"
+                                    : "bg-amber-500/15 text-amber-600"
+                                }`}
+                              >
+                                {review.published
+                                  ? "Published"
+                                  : "Draft"}
+                              </span>
 
-                        {review.featured && (
-                          <span className="rounded-full bg-purple-500/15 px-3 py-1 text-xs font-semibold text-purple-600">
-                            Featured
-                          </span>
-                        )}
+                              {review.featured && (
+                                <span className="rounded-full bg-purple-500/15 px-3 py-1 text-xs font-semibold text-purple-600">
+                                  Featured
+                                </span>
+                              )}
 
-                        {review.rating != null && (
-                          <span className="rounded-full border border-[var(--border)] px-3 py-1 text-xs">
-                            {Number(review.rating).toFixed(1)} / 5
-                          </span>
-                        )}
-                      </div>
+                              {review.rating !=
+                                null && (
+                                <span className="rounded-full border border-[var(--border)] px-3 py-1 text-xs">
+                                  {Number(
+                                    review.rating,
+                                  ).toFixed(1)}{" "}
+                                  / 5
+                                </span>
+                              )}
+                            </div>
 
-                      <h2 className="mt-3 truncate text-xl font-semibold">
-                        {review.title || fullProductName}
-                      </h2>
+                            <h2 className="mt-3 truncate text-xl font-semibold">
+                              {review.title ||
+                                fullProductName}
+                            </h2>
 
-                      <p className="mt-2 text-sm text-[var(--muted)]">
-                        {fullProductName}
-                        {review.reviewers?.name
-                          ? ` · ${review.reviewers.name}`
-                          : ""}
-                        {review.created_at
-                          ? ` · ${formatDate(review.created_at)}`
-                          : ""}
-                      </p>
+                            <p className="mt-2 text-sm text-[var(--muted)]">
+                              {fullProductName}
+                              {review.reviewers?.name
+                                ? ` · ${review.reviewers.name}`
+                                : ""}
+                              {review.created_at
+                                ? ` · ${formatDate(
+                                    review.created_at,
+                                  )}`
+                                : ""}
+                            </p>
 
-                      <p className="mt-2 truncate font-mono text-xs text-[var(--muted)]">
-                        /reviews/{review.slug}
-                      </p>
-                    </div>
+                            <p className="mt-2 truncate font-mono text-xs text-[var(--muted)]">
+                              /reviews/{review.slug}
+                            </p>
+                          </div>
 
-                    <div className="flex shrink-0 flex-wrap gap-3">
-                      {review.published && (
-                        <Link
-                          to={`/reviews/${review.slug}`}
-                          className="rounded-xl border border-[var(--border)] px-4 py-2 text-sm font-semibold transition hover:bg-[var(--surface)]"
-                        >
-                          View
-                        </Link>
-                      )}
+                          <div className="flex shrink-0 flex-wrap gap-3">
+                            {review.published && (
+                              <Link
+                                to={`/reviews/${review.slug}`}
+                                className="rounded-xl border border-[var(--border)] px-4 py-2 text-sm font-semibold transition hover:bg-[var(--surface)]"
+                              >
+                                View
+                              </Link>
+                            )}
 
-                      <Link
-                        to={`/admin/reviews/${review.id}/edit`}
-                        className="rounded-xl bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
-                      >
-                        Edit
-                      </Link>
+                            <Link
+                              to={`/admin/reviews/${review.id}/edit`}
+                              className="rounded-xl bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+                            >
+                              Edit
+                            </Link>
 
-                      <button
-                        type="button"
-                        onClick={() =>
-                          void handleDeleteReview(review)
-                        }
-                        disabled={deletingReviewId !== null}
-                        className="rounded-xl border border-red-500/40 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {deletingReviewId === review.id
-                          ? "Deleting…"
-                          : "Delete"}
-                      </button>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          </section>
-        )}
+                            <button
+                              type="button"
+                              onClick={() =>
+                                void handleDeleteReview(
+                                  review,
+                                )
+                              }
+                              disabled={
+                                deletingReviewId !==
+                                null
+                              }
+                              className="rounded-xl border border-red-500/40 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              {deletingReviewId ===
+                              review.id
+                                ? "Deleting…"
+                                : "Delete"}
+                            </button>
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
+                )}
+              </section>
+            </>
+          )}
       </div>
     </main>
   );
