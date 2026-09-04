@@ -297,6 +297,10 @@ type ProductReviewRow = {
 type ReviewProductLinkRow = {
   product_id: number
 
+  hero_image_url:
+    | string
+    | null
+
   reviews:
     | ProductReviewRow
     | ProductReviewRow[]
@@ -710,7 +714,13 @@ function extractReviewRows(
         }
 
         return [
-          review,
+          {
+            ...review,
+
+            hero_image_url:
+              link.hero_image_url ??
+              review.hero_image_url,
+          },
         ]
       },
     )
@@ -743,6 +753,7 @@ async function getReviewLinksForProduct(
       )
       .select(`
         product_id,
+        hero_image_url,
 
         reviews (
           id,
@@ -816,6 +827,7 @@ async function getAllReviewLinks(): Promise<
       )
       .select(`
         product_id,
+        hero_image_url,
 
         reviews (
           id,

@@ -128,6 +128,7 @@ type BrandReviewRow = {
 type BrandReviewProductRow = {
   review_id: number
   product_id: number
+  hero_image_url: string | null
 
   reviews:
     | {
@@ -346,6 +347,7 @@ function mapReviewCoverage(
     summary: review.summary,
 
     hero_image_url:
+      row.hero_image_url ??
       review.hero_image_url,
 
     published_at:
@@ -1032,6 +1034,7 @@ export async function getBrandBySlug(
       .select(`
         review_id,
         product_id,
+        hero_image_url,
 
         products!inner (
           id,
