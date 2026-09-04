@@ -363,12 +363,6 @@ function AdminReviewsPage() {
                                   : "Draft"}
                               </span>
 
-                              {review.featured && (
-                                <span className="rounded-full bg-purple-500/15 px-3 py-1 text-xs font-semibold text-purple-600">
-                                  Featured
-                                </span>
-                              )}
-
                               {review.rating !=
                                 null && (
                                 <span className="rounded-full border border-[var(--border)] px-3 py-1 text-xs">
