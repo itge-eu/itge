@@ -22,6 +22,7 @@ export type LatestCoverageItem =
       type: "review"
       id: number
       slug: string
+      productSlug: string
       brand: string
       model: string
       member: string
@@ -32,6 +33,7 @@ export type LatestCoverageItem =
       type: "impression"
       id: number
       slug: string
+      productSlug: string
       brand: string
       model: string
       member: string
@@ -552,6 +554,9 @@ export function buildLatestCoverageItems(
         slug:
           review.slug,
 
+        productSlug:
+          review.productSlug,
+
         brand:
           review.brand,
 
@@ -590,10 +595,13 @@ export function buildLatestCoverageItems(
           slug:
             impression.slug,
 
+          productSlug:
+            impression.product
+              .slug,
+
           brand:
             impression.product
-              .brand
-              .name,
+              .brand.name,
 
           model:
             impression.product
@@ -611,22 +619,45 @@ export function buildLatestCoverageItems(
         }),
       )
 
-  return [
+  const chronological = [
     ...reviewItems,
     ...impressionItems,
-  ]
-    .sort(
-      (
-        first,
-        second,
-      ) =>
-        timestamp(
-          second.publishedAt,
-        ) -
-        timestamp(
-          first.publishedAt,
-        ),
+  ].sort(
+    (
+      first,
+      second,
+    ) =>
+      timestamp(
+        second.publishedAt,
+      ) -
+      timestamp(
+        first.publishedAt,
+      ),
+  )
+
+  const seenProducts =
+    new Set<string>()
+
+  const diversified =
+    chronological.filter(
+      (item) => {
+        if (
+          seenProducts.has(
+            item.productSlug,
+          )
+        ) {
+          return false
+        }
+
+        seenProducts.add(
+          item.productSlug,
+        )
+
+        return true
+      },
     )
+
+  return diversified
     .slice(
       0,
       16,

@@ -1433,3 +1433,228 @@ export async function getProducts(): Promise<
     },
   )
 }
+
+export async function getHomepageFeaturedProducts(): Promise<
+  ProductDirectoryItem[]
+> {
+  const {
+    data,
+    error,
+  } =
+    await supabase
+      .from(
+        "products",
+      )
+      .select(`
+        id,
+        model,
+        slug,
+        product_type,
+        featured,
+        launch_price,
+        hero_image_url,
+
+        brands (
+          id,
+          name,
+          slug
+        )
+      `)
+      .or(
+        "featured.eq.true,launch_price.gte.1500",
+      )
+      .not(
+        "hero_image_url",
+        "is",
+        null,
+      )
+
+  if (error) {
+    throw error
+  }
+
+  const rows =
+    (
+      data ?? []
+    ) as unknown as ProductDirectoryRow[]
+
+  const products =
+    rows.flatMap(
+      (row) => {
+        const brand =
+          getSingleRelation(
+            row.brands,
+          )
+
+        if (!brand) {
+          return []
+        }
+
+        return [
+          {
+            id:
+              Number(
+                row.id,
+              ),
+
+            model:
+              row.model,
+
+            slug:
+              row.slug,
+
+            productType:
+              normalizeProductType(
+                row.product_type,
+              ),
+
+            featured:
+              row.featured ??
+              false,
+
+            launchPrice:
+              row.launch_price ==
+              null
+                ? null
+                : Number(
+                    row.launch_price,
+                  ),
+
+            brand: {
+              id:
+                Number(
+                  brand.id,
+                ),
+
+              name:
+                brand.name,
+
+              slug:
+                brand.slug,
+            },
+
+            heroImageUrl:
+              row.hero_image_url,
+
+            reviewCount:
+              0,
+
+            reviewerCount:
+              0,
+
+            averageRating:
+              null,
+
+            latestReviewAt:
+              null,
+
+            impressionCount:
+              0,
+
+            coverageCount:
+              0,
+
+            contributorCount:
+              0,
+
+            latestActivityAt:
+              null,
+          } satisfies ProductDirectoryItem,
+        ]
+      },
+    )
+
+  const shuffle = <T,>(
+    values: T[],
+  ): T[] =>
+    [...values].sort(
+      () =>
+        Math.random() -
+        0.5,
+    )
+
+  const featuredPool =
+    shuffle(
+      products.filter(
+        (product) =>
+          product.featured,
+      ),
+    )
+
+  const expensivePool =
+    shuffle(
+      products.filter(
+        (product) =>
+          !product.featured &&
+          product.launchPrice !=
+            null &&
+          product.launchPrice >=
+            1500,
+      ),
+    )
+
+  const selected =
+    featuredPool.slice(
+      0,
+      2,
+    )
+
+  const selectedIds =
+    new Set(
+      selected.map(
+        (product) =>
+          product.id,
+      ),
+    )
+
+  selected.push(
+    ...expensivePool
+      .filter(
+        (product) =>
+          !selectedIds.has(
+            product.id,
+          ),
+      )
+      .slice(
+        0,
+        2,
+      ),
+  )
+
+  if (
+    selected.length <
+    4
+  ) {
+    const currentIds =
+      new Set(
+        selected.map(
+          (product) =>
+            product.id,
+        ),
+      )
+
+    const remaining =
+      shuffle([
+        ...featuredPool,
+        ...expensivePool,
+      ]).filter(
+        (product) =>
+          !currentIds.has(
+            product.id,
+          ),
+      )
+
+    selected.push(
+      ...remaining.slice(
+        0,
+        4 -
+          selected.length,
+      ),
+    )
+  }
+
+  return selected.slice(
+    0,
+    4,
+  )
+}

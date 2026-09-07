@@ -434,6 +434,76 @@ export async function getAllImpressions(): Promise<
   )
 }
 
+export async function getLatestImpressions(
+  limit = 20,
+): Promise<
+  ImpressionSummary[]
+> {
+  const {
+    data,
+    error,
+  } =
+    await supabase
+      .from(
+        "impressions",
+      )
+      .select(`
+        id,
+        slug,
+        title,
+        summary,
+        body,
+        hero_image_url,
+        published_at,
+
+        reviewers (
+          id,
+          name,
+          slug
+        ),
+
+        products (
+          id,
+          model,
+          slug,
+          hero_image_url,
+
+          brands (
+            id,
+            name,
+            slug
+          )
+        )
+      `)
+      .eq(
+        "published",
+        true,
+      )
+      .order(
+        "published_at",
+        {
+          ascending:
+            false,
+        },
+      )
+      .limit(
+        limit,
+      )
+
+  if (error) {
+    throw error
+  }
+
+  const rows =
+    (
+      data ?? []
+    ) as unknown as ImpressionRow[]
+
+  return rows.map(
+    mapImpression,
+  )
+}
+
 export async function getFilteredAllImpressions(
   filters:
     ImpressionFilters = {},

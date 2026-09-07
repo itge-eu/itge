@@ -12,11 +12,11 @@ import {
 } from "../lib/reviews"
 
 import {
-  getAllImpressions,
+  getLatestImpressions,
 } from "../lib/impressions"
 
 import {
-  getProducts,
+  getHomepageFeaturedProducts,
   type ProductDirectoryItem,
 } from "../lib/products"
 
@@ -51,14 +51,28 @@ function HomePage() {
     useState(0)
 
   const [
-    contentLoading,
-    setContentLoading,
+    featuredLoading,
+    setFeaturedLoading,
   ] =
     useState(true)
 
   const [
-    contentError,
-    setContentError,
+    featuredError,
+    setFeaturedError,
+  ] =
+    useState<
+      string | null
+    >(null)
+
+  const [
+    coverageLoading,
+    setCoverageLoading,
+  ] =
+    useState(true)
+
+  const [
+    coverageError,
+    setCoverageError,
   ] =
     useState<
       string | null
@@ -68,147 +82,102 @@ function HomePage() {
     let cancelled =
       false
 
-    async function loadHomepageContent() {
-      setContentLoading(
+    async function loadFeaturedGear() {
+      setFeaturedLoading(
         true,
       )
 
-      setContentError(
+      setFeaturedError(
         null,
       )
 
       try {
-        const [
-          products,
-          latestReviews,
-          impressions,
-        ] =
-          await Promise.all([
-            getProducts(),
-
-            getLatestReviews(
-              20,
-            ),
-
-            getAllImpressions(),
-          ])
+        const products =
+          await getHomepageFeaturedProducts()
 
         if (cancelled) {
           return
         }
 
-        const featuredPool =
-          [...products]
-            .filter(
-              (product) =>
-                product.featured &&
-                Boolean(
-                  product.heroImageUrl,
-                ),
-            )
-            .sort(
-              () =>
-                Math.random() -
-                0.5,
-            )
-
-        const fallbackPool =
-          [...products]
-            .filter(
-              (product) =>
-                !product.featured &&
-                Boolean(
-                  product.heroImageUrl,
-                ) &&
-                product.launchPrice != null &&
-                product.launchPrice >= 1500,
-            )
-            .sort(
-              () =>
-                Math.random() -
-                0.5,
-            )
-
-        const selectedFeatured =
-          featuredPool.slice(
-            0,
-            2,
-          )
-
-        const selectedFallback =
-          fallbackPool.slice(
-            0,
-            2,
-          )
-
-        const featured = [
-          ...selectedFeatured,
-          ...selectedFallback,
-        ]
-
-        if (
-          featured.length <
-          4
-        ) {
-          const selectedIds =
-            new Set(
-              featured.map(
-                (product) =>
-                  product.id,
-              ),
-            )
-
-          const remainingCandidates =
-            [
-              ...featuredPool,
-              ...fallbackPool,
-            ].filter(
-              (product) =>
-                !selectedIds.has(
-                  product.id,
-                ),
-            )
-
-          featured.push(
-            ...remainingCandidates.slice(
-              0,
-              4 -
-                featured.length,
-            ),
-          )
-        }
-
         setFeaturedGear(
-          featured,
-        )
-
-        setLatestCoverage(
-          buildLatestCoverageItems(
-            latestReviews,
-            impressions,
-          ),
+          products,
         )
       } catch (error) {
         console.error(
-          "Could not load homepage content:",
+          "Could not load featured gear:",
           error,
         )
 
         if (!cancelled) {
-          setContentError(
-            "The latest ITGE content could not be loaded.",
+          setFeaturedError(
+            "Featured gear could not be loaded.",
           )
         }
       } finally {
         if (!cancelled) {
-          setContentLoading(
+          setFeaturedLoading(
             false,
           )
         }
       }
     }
 
-    void loadHomepageContent()
+    async function loadLatestCoverage() {
+      setCoverageLoading(
+        true,
+      )
+
+      setCoverageError(
+        null,
+      )
+
+      try {
+        const [
+          latestReviews,
+          latestImpressions,
+        ] =
+          await Promise.all([
+            getLatestReviews(
+              20,
+            ),
+
+            getLatestImpressions(
+              20,
+            ),
+          ])
+
+        if (cancelled) {
+          return
+        }
+
+        setLatestCoverage(
+          buildLatestCoverageItems(
+            latestReviews,
+            latestImpressions,
+          ),
+        )
+      } catch (error) {
+        console.error(
+          "Could not load latest coverage:",
+          error,
+        )
+
+        if (!cancelled) {
+          setCoverageError(
+            "The latest ITGE content could not be loaded.",
+          )
+        }
+      } finally {
+        if (!cancelled) {
+          setCoverageLoading(
+            false,
+          )
+        }
+      }
+    }
+
+    void loadFeaturedGear()
+    void loadLatestCoverage()
 
     return () => {
       cancelled =
@@ -335,12 +304,12 @@ function HomePage() {
                   </Link>
                 </div>
 
-                {contentLoading ? (
+                {featuredLoading ? (
                   <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
                     Loading
                     featured gear…
                   </div>
-                ) : contentError ? (
+                ) : featuredError ? (
                   <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
                     <p className="font-medium">
                       Unable to load
@@ -349,7 +318,7 @@ function HomePage() {
 
                     <p className="mt-2 text-sm text-[var(--muted)]">
                       {
-                        contentError
+                        featuredError
                       }
                     </p>
                   </div>
@@ -423,8 +392,8 @@ function HomePage() {
             </div>
           </div>
 
-          {!contentLoading &&
-            !contentError &&
+          {!coverageLoading &&
+            !coverageError &&
             latestCoverage.length >
               0 && (
               <div className="mt-10">
@@ -436,11 +405,20 @@ function HomePage() {
               </div>
             )}
 
-          {contentError && (
+          {coverageLoading && (
+            <div className="mx-auto mt-10 max-w-7xl px-6 lg:px-8">
+              <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
+                Loading latest
+                coverage…
+              </div>
+            </div>
+          )}
+
+          {coverageError && (
             <div className="mx-auto mt-10 max-w-7xl px-6 lg:px-8">
               <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
                 {
-                  contentError
+                  coverageError
                 }
               </div>
             </div>
