@@ -233,13 +233,18 @@ function BrandsPage() {
                 (
                   brand,
                 ) => (
-                  <Link
+                  <div
                     key={
                       brand.id
                     }
-                    to={`/brands/${brand.slug}`}
-                    className="group overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
+                    className="group relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
                   >
+                    <Link
+                      to={`/brands/${brand.slug}`}
+                      aria-label={`View ${brand.name} on ITGE`}
+                      className="absolute inset-0 z-10"
+                    />
+
                     <div className="flex aspect-[4/3] items-center justify-center bg-white p-7">
                       <BrandLogo
                         name={
@@ -253,14 +258,30 @@ function BrandsPage() {
                       />
                     </div>
 
-                    <div className="border-t border-[var(--border)] px-5 py-4">
+                    <div className="flex items-center justify-between gap-4 border-t border-[var(--border)] px-5 py-4">
                       <h3 className="break-words text-lg font-semibold tracking-tight transition group-hover:text-[var(--accent)]">
                         {
                           brand.name
                         }
                       </h3>
+
+                      {brand.website && (
+                        <a
+                          href={
+                            brand.website
+                          }
+                          target="_blank"
+                          rel="noreferrer"
+                          className="relative z-20 shrink-0 text-sm font-semibold text-[var(--accent)] transition hover:opacity-75"
+                        >
+                          Visit{" "}
+                          <span aria-hidden="true">
+                            ↗
+                          </span>
+                        </a>
+                      )}
                     </div>
-                  </Link>
+                  </div>
                 ),
               )}
             </div>

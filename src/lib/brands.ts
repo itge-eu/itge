@@ -46,6 +46,7 @@ export type BrandDirectoryItem = {
   id: number
   name: string
   slug: string
+  website: string | null
 
   productCount: number
   reviewCount: number
@@ -1273,7 +1274,8 @@ export async function getBrands(): Promise<
       .select(`
         id,
         name,
-        slug
+        slug,
+        website
       `),
 
     supabase
@@ -1474,6 +1476,10 @@ export async function getBrands(): Promise<
 
           slug:
             brand.slug,
+
+          website:
+            brand.website ??
+            null,
 
           productCount:
             brandProductIds.get(
