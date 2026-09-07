@@ -9,8 +9,7 @@ import {
 } from "react-router"
 
 import Breadcrumbs from "../components/navigation/Breadcrumbs"
-import ReviewGrid from "../components/reviews/ReviewGrid"
-import ImpressionCard from "../components/impressions/ImpressionCard"
+import GroupedCoverage from "../components/explore/GroupedCoverage"
 import ReviewerAvatar from "../components/reviewers/ReviewerAvatar"
 import PageState from "../components/layout/PageState"
 
@@ -213,112 +212,21 @@ function GenrePage() {
           </div>
         </header>
 
-        {genre.products.length >
-          0 && (
-          <section className="mt-14">
-            <SectionHeader
-              eyebrow="Gear coverage"
-              title={`Gear heard with ${genre.name}`}
-              description={`${genre.products.length} ${
-                genre.products.length ===
-                1
-                  ? "piece of gear has"
-                  : "pieces of gear have"
-              } published coverage connected to ${genre.name}.`}
-            />
-
-            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {genre.products.map(
-                (product) => (
-                  <GearCard
-                    key={product.id}
-                    product={product}
-                  />
-                ),
-              )}
-            </div>
-          </section>
-        )}
-
-        <section className="mt-14 border-t border-[var(--border)] pt-14">
-          <SectionHeader
-            eyebrow="Full reviews"
-            title={`Reviews covering ${genre.name}`}
-            description={
-              genre.reviews.length ===
-              0
-                ? "No published reviews are associated with this genre yet."
-                : `${genre.reviews.length} ${
-                    genre.reviews
-                      .length === 1
-                      ? "published review covers"
-                      : "published reviews cover"
-                  } ${genre.name}.`
-            }
-          />
-
-          {genre.reviews.length ===
-          0 ? (
-            <EmptyPanel>
-              No published reviews
-              are associated with
-              this genre yet.
-            </EmptyPanel>
-          ) : (
-            <div className="mt-8">
-              <ReviewGrid
-                reviews={
-                  genre.reviews
-                }
-              />
-            </div>
-          )}
-        </section>
-
-        <section className="mt-14 border-t border-[var(--border)] pt-14">
-          <SectionHeader
-            eyebrow="Listening notes"
-            title={`Impressions covering ${genre.name}`}
-            description={
-              genre.impressions
-                .length === 0
-                ? "No published impressions are associated with this genre yet."
-                : `${genre.impressions.length} ${
-                    genre.impressions
-                      .length === 1
-                      ? "published impression covers"
-                      : "published impressions cover"
-                  } ${genre.name}.`
-            }
-          />
-
-          {genre.impressions
-            .length === 0 ? (
-            <EmptyPanel>
-              No published
-              impressions are
-              associated with this
-              genre yet.
-            </EmptyPanel>
-          ) : (
-            <div className="mt-8 grid gap-6 lg:grid-cols-2">
-              {genre.impressions.map(
-                (
-                  impression,
-                ) => (
-                  <ImpressionCard
-                    key={
-                      impression.id
-                    }
-                    impression={
-                      impression
-                    }
-                  />
-                ),
-              )}
-            </div>
-          )}
-        </section>
+        <GroupedCoverage
+          subjectName={
+            genre.name
+          }
+          subjectKind="genre"
+          reviews={
+            genre.reviews
+          }
+          impressions={
+            genre.impressions
+          }
+          products={
+            genre.products
+          }
+        />
 
         {genre.reviewers.length >
           0 && (
@@ -390,70 +298,6 @@ function GenrePage() {
         )}
       </div>
     </main>
-  )
-}
-
-function GearCard({
-  product,
-}: {
-  product: GenreProfile["products"][number]
-}) {
-  return (
-    <Link
-      to={`/gear/${product.slug}`}
-      className="group overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] transition duration-200 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
-    >
-      <div className="relative aspect-[4/3] overflow-hidden bg-[var(--surface-soft)]">
-        {product.heroImageUrl ? (
-          <img
-            src={
-              product.heroImageUrl
-            }
-            alt={`${product.brandName} ${product.model}`}
-            loading="lazy"
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[var(--muted)]">
-            No image available
-          </div>
-        )}
-      </div>
-
-      <div className="p-6">
-        <p className="text-sm uppercase tracking-[0.16em] text-[var(--accent)]">
-          {
-            product.brandName
-          }
-        </p>
-
-        <h3 className="mt-2 text-2xl font-semibold tracking-tight transition group-hover:text-[var(--accent)]">
-          {product.model}
-        </h3>
-
-        <div className="mt-5 flex flex-wrap gap-x-4 gap-y-1 text-sm text-[var(--muted)]">
-          <span>
-            {
-              product.reviewCount
-            }{" "}
-            {product.reviewCount ===
-            1
-              ? "review"
-              : "reviews"}
-          </span>
-
-          <span>
-            {
-              product.impressionCount
-            }{" "}
-            {product.impressionCount ===
-            1
-              ? "impression"
-              : "impressions"}
-          </span>
-        </div>
-      </div>
-    </Link>
   )
 }
 
@@ -574,18 +418,6 @@ function SectionHeader({
       <p className="mt-3 max-w-2xl text-[var(--muted)]">
         {description}
       </p>
-    </div>
-  )
-}
-
-function EmptyPanel({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return (
-    <div className="mt-8 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
-      {children}
     </div>
   )
 }
