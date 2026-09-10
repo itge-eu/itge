@@ -1463,6 +1463,10 @@ export async function getHomepageFeaturedProducts(): Promise<
       .or(
         "featured.eq.true,launch_price.gte.1500",
       )
+      .neq(
+        "product_type",
+        "cable_accessory",
+      )
       .not(
         "hero_image_url",
         "is",
