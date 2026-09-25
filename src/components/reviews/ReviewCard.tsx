@@ -58,6 +58,9 @@ function ReviewCard({
                 alt={`${review.brand} ${review.model}`}
                 loading="lazy"
                 className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.025]"
+                style={{
+                  objectPosition: `${review.heroPositionX}% ${review.heroPositionY}%`,
+                }}
               />
             </div>
           ) : (
@@ -141,6 +144,9 @@ function ReviewCard({
                 alt={`${review.brand} ${review.model}`}
                 loading="lazy"
                 className="aspect-[16/9] h-full w-full object-cover transition duration-300 group-hover:scale-[1.025] sm:aspect-square"
+                style={{
+                  objectPosition: `${review.heroPositionX}% ${review.heroPositionY}%`,
+                }}
               />
             </div>
           )}

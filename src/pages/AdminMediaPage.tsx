@@ -35,6 +35,8 @@ type MediaItem = {
   slug: string
   hero_image_url: string | null
   hero_image_confirmed: boolean
+  hero_position_x: number
+  hero_position_y: number
 
   reviewerName: string
   productId: number
@@ -51,6 +53,8 @@ type GearItem = {
   slug: string
   hero_image_url: string | null
   hero_image_confirmed: boolean
+  hero_position_x: number
+  hero_position_y: number
 
   reviewerName: string
   productId: number
@@ -193,6 +197,8 @@ function AdminMediaPage() {
               product_id,
               hero_image_url,
               hero_image_confirmed,
+              hero_position_x,
+              hero_position_y,
 
               reviewers (
                 name
@@ -203,6 +209,8 @@ function AdminMediaPage() {
                 model,
                 slug,
                 hero_image_url,
+                hero_position_x,
+                hero_position_y,
 
                 brands (
                   name
@@ -243,6 +251,8 @@ function AdminMediaPage() {
                 model,
                 slug,
                 hero_image_url,
+                hero_position_x,
+                hero_position_y,
 
                 brands (
                   name
@@ -271,6 +281,8 @@ function AdminMediaPage() {
               product_id,
               hero_image_url,
               hero_image_confirmed,
+              hero_position_x,
+              hero_position_y,
 
               reviewers (
                 name
@@ -281,6 +293,8 @@ function AdminMediaPage() {
                 model,
                 slug,
                 hero_image_url,
+                hero_position_x,
+                hero_position_y,
 
                 brands (
                   name
@@ -412,6 +426,12 @@ function AdminMediaPage() {
                     Boolean(
                       row.hero_image_confirmed,
                     ),
+
+                  hero_position_x:
+                    Number(row.hero_position_x ?? 50),
+
+                  hero_position_y:
+                    Number(row.hero_position_y ?? 50),
 
                   reviewerName:
                     reviewer
@@ -596,6 +616,12 @@ function AdminMediaPage() {
                       row.hero_image_confirmed,
                     ),
 
+                  hero_position_x:
+                    Number(row.hero_position_x ?? 50),
+
+                  hero_position_y:
+                    Number(row.hero_position_y ?? 50),
+
                   reviewerName:
                     reviewer
                       ?.name ??
@@ -651,6 +677,12 @@ function AdminMediaPage() {
                 slug: string
                 hero_image_url:
                   | string
+                  | null
+                hero_position_x:
+                  | number
+                  | null
+                hero_position_y:
+                  | number
                   | null
               }
             | null,
@@ -718,6 +750,16 @@ function AdminMediaPage() {
                     ?.hero_image_url,
                 ),
 
+              hero_position_x:
+                Number(
+                  product?.hero_position_x ?? 50,
+                ),
+
+              hero_position_y:
+                Number(
+                  product?.hero_position_y ?? 50,
+                ),
+
               reviewerName:
                 "",
 
@@ -743,6 +785,12 @@ function AdminMediaPage() {
               slug: string
               hero_image_url:
                 | string
+                | null
+              hero_position_x:
+                | number
+                | null
+              hero_position_y:
+                | number
                 | null
             }
           >()
@@ -771,6 +819,14 @@ function AdminMediaPage() {
                 hero_image_url:
                   product.hero_image_url ??
                   null,
+                hero_position_x:
+                  Number(
+                    product.hero_position_x ?? 50,
+                  ),
+                hero_position_y:
+                  Number(
+                    product.hero_position_y ?? 50,
+                  ),
               },
             )
           },
@@ -800,6 +856,14 @@ function AdminMediaPage() {
                 hero_image_url:
                   product.hero_image_url ??
                   null,
+                hero_position_x:
+                  Number(
+                    product.hero_position_x ?? 50,
+                  ),
+                hero_position_y:
+                  Number(
+                    product.hero_position_y ?? 50,
+                  ),
               },
             )
           },
@@ -829,6 +893,14 @@ function AdminMediaPage() {
                 hero_image_url:
                   product.hero_image_url ??
                   null,
+                hero_position_x:
+                  Number(
+                    product.hero_position_x ?? 50,
+                  ),
+                hero_position_y:
+                  Number(
+                    product.hero_position_y ?? 50,
+                  ),
               },
             )
           },
@@ -1113,6 +1185,85 @@ function AdminMediaPage() {
                 ),
             }
           },
+        ),
+    )
+
+    setSavingKey(null)
+  }
+
+  async function handleFocalPointChange(
+    item: AdminMediaItem,
+    x: number,
+    y: number,
+  ) {
+    const key =
+      `position-${item.type}-${item.id}`
+
+    const clampedX =
+      Math.max(
+        0,
+        Math.min(100, x),
+      )
+
+    const clampedY =
+      Math.max(
+        0,
+        Math.min(100, y),
+      )
+
+    setSavingKey(key)
+    setError(null)
+
+    const tableName =
+      item.type === "gear"
+        ? "products"
+        : item.type === "review"
+          ? "reviews"
+          : "impressions"
+
+    const {
+      error: updateError,
+    } =
+      await supabase
+        .from(tableName)
+        .update({
+          hero_position_x:
+            clampedX,
+          hero_position_y:
+            clampedY,
+        })
+        .eq("id", item.id)
+
+    if (updateError) {
+      console.error(
+        "Updating hero focal point failed:",
+        updateError,
+      )
+
+      setError(
+        updateError.message,
+      )
+
+      setSavingKey(null)
+      return
+    }
+
+    setItems(
+      (currentItems) =>
+        currentItems.map(
+          (currentItem) =>
+            currentItem.type ===
+              item.type &&
+            currentItem.id ===
+              item.id
+              ? {
+                  ...currentItem,
+                  hero_position_x:
+                    clampedX,
+                  hero_position_y:
+                    clampedY,
+                }
+              : currentItem,
         ),
     )
 
@@ -1706,7 +1857,7 @@ function AdminMediaPage() {
                                             ""
                                           }
                                           loading="lazy"
-                                          className="aspect-square w-full object-cover"
+                                          className="h-[270px] w-[192px] w-full object-cover"
                                         />
 
                                         <div className="flex items-center justify-between gap-2 bg-[var(--background)] px-3 py-2 text-xs">
@@ -1741,6 +1892,41 @@ function AdminMediaPage() {
                                   Saving hero
                                   image…
                                 </p>
+                              )}
+
+                              {item.hero_image_url && (
+                                <FocalPointEditor
+                                  imageUrl={
+                                    item.hero_image_url
+                                  }
+                                  x={
+                                    item.hero_position_x
+                                  }
+                                  y={
+                                    item.hero_position_y
+                                  }
+                                  saving={
+                                    savingKey ===
+                                    `position-${item.type}-${item.id}`
+                                  }
+                                  onChange={(
+                                    x,
+                                    y,
+                                  ) =>
+                                    void handleFocalPointChange(
+                                      item,
+                                      x,
+                                      y,
+                                    )
+                                  }
+                                  onReset={() =>
+                                    void handleFocalPointChange(
+                                      item,
+                                      50,
+                                      50,
+                                    )
+                                  }
+                                />
                               )}
                             </div>
                           )}
@@ -1829,7 +2015,7 @@ function AdminMediaPage() {
                                                         ""
                                                       }
                                                       loading="lazy"
-                                                      className="aspect-square w-full object-cover"
+                                                      className="h-[270px] w-[192px] w-full object-cover"
                                                     />
 
                                                     <div className="flex items-center justify-between gap-2 bg-[var(--surface)] px-3 py-2 text-xs">
@@ -1878,6 +2064,183 @@ function AdminMediaPage() {
           )}
       </div>
     </main>
+  )
+}
+
+function FocalPointEditor({
+  imageUrl,
+  x,
+  y,
+  saving,
+  onChange,
+  onReset,
+}: {
+  imageUrl: string
+  x: number
+  y: number
+  saving: boolean
+  onChange: (
+    x: number,
+    y: number,
+  ) => void
+  onReset: () => void
+}) {
+  function choosePoint(
+    event:
+      React.MouseEvent<HTMLDivElement>,
+  ) {
+    if (saving) {
+      return
+    }
+
+    const rect =
+      event.currentTarget
+        .getBoundingClientRect()
+
+    const nextX =
+      ((event.clientX -
+        rect.left) /
+        rect.width) *
+      100
+
+    const nextY =
+      ((event.clientY -
+        rect.top) /
+        rect.height) *
+      100
+
+    onChange(
+      nextX,
+      nextY,
+    )
+  }
+
+  return (
+    <div className="mt-8 border-t border-[var(--border)] pt-7">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-semibold">
+            Hero framing
+          </p>
+
+          <p className="mt-2 max-w-2xl text-sm text-[var(--muted)]">
+            Click the important part
+            of the image. The 16:9
+            preview shows how the hero
+            will be framed.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={onReset}
+          disabled={
+            saving ||
+            (x === 50 &&
+              y === 50)
+          }
+          className="rounded-xl border border-[var(--border)] px-4 py-2 text-sm font-semibold transition hover:border-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Reset to center
+        </button>
+      </div>
+
+      <div className="mt-5 grid gap-5 lg:grid-cols-2">
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
+            Choose focal point
+          </p>
+
+          <div
+            role="button"
+            tabIndex={0}
+            aria-label="Choose hero focal point"
+            onClick={
+              choosePoint
+            }
+            className={`relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)] ${
+              saving
+                ? "cursor-wait opacity-70"
+                : "cursor-crosshair"
+            }`}
+          >
+            <img
+              src={imageUrl}
+              alt=""
+              className="block max-h-[460px] w-full object-contain"
+            />
+
+            <span
+              className="pointer-events-none absolute h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-black/35 shadow-lg"
+              style={{
+                left: `${x}%`,
+                top: `${y}%`,
+              }}
+            >
+              <span className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white" />
+            </span>
+          </div>
+        </div>
+
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
+            Result previews
+          </p>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <p className="mb-2 text-xs text-[var(--muted)]">
+                Listing card
+              </p>
+
+              <div className="h-[270px] w-[192px] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)]">
+                <img
+                  src={imageUrl}
+                  alt=""
+                  className="h-full w-full object-cover"
+                  style={{
+                    objectPosition:
+                      `${x}% ${y}%`,
+                  }}
+                />
+              </div>
+            </div>
+
+            <div>
+              <p className="mb-2 text-xs text-[var(--muted)]">
+                Wide card
+              </p>
+
+              <div className="aspect-[16/10] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)]">
+                <img
+                  src={imageUrl}
+                  alt=""
+                  className="h-full w-full object-cover"
+                  style={{
+                    objectPosition:
+                      `${x}% ${y}%`,
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-3 flex items-center justify-between gap-4 text-xs text-[var(--muted)]">
+            <span>
+              Focal point:{" "}
+              {Math.round(x)}% ×{" "}
+              {Math.round(y)}%
+            </span>
+
+            {saving && (
+              <span className="font-semibold text-[var(--accent)]">
+                Saving…
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 

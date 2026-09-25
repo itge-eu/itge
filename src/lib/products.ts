@@ -227,6 +227,9 @@ type ProductReviewRow = {
     | string
     | null
 
+  hero_position_x: number | null
+  hero_position_y: number | null
+
   published_at:
     | string
     | null
@@ -253,6 +256,9 @@ type ProductReviewRow = {
           | string
           | null
 
+        hero_position_x: number | null
+        hero_position_y: number | null
+
         brands:
           | {
               name: string
@@ -271,6 +277,9 @@ type ProductReviewRow = {
         hero_image_url:
           | string
           | null
+
+        hero_position_x: number | null
+        hero_position_y: number | null
 
         brands:
           | {
@@ -426,6 +435,17 @@ function mapFeaturedReview(
       row.hero_image_url ??
       product.hero_image_url ??
       null,
+
+    heroPositionX: Number(
+      row.hero_image_url
+        ? row.hero_position_x ?? 50
+        : product.hero_position_x ?? 50,
+    ),
+    heroPositionY: Number(
+      row.hero_image_url
+        ? row.hero_position_y ?? 50
+        : product.hero_position_y ?? 50,
+    ),
 
     publishedAt:
       row.published_at,
@@ -762,6 +782,8 @@ async function getReviewLinksForProduct(
           title,
           summary,
           hero_image_url,
+          hero_position_x,
+          hero_position_y,
           published_at,
           published,
 
@@ -774,6 +796,8 @@ async function getReviewLinksForProduct(
             model,
             slug,
             hero_image_url,
+            hero_position_x,
+            hero_position_y,
 
             brands (
               name,
@@ -836,6 +860,8 @@ async function getAllReviewLinks(): Promise<
           title,
           summary,
           hero_image_url,
+          hero_position_x,
+          hero_position_y,
           published_at,
           published,
 
@@ -848,6 +874,8 @@ async function getAllReviewLinks(): Promise<
             model,
             slug,
             hero_image_url,
+            hero_position_x,
+            hero_position_y,
 
             brands (
               name,

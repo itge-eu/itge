@@ -41,6 +41,9 @@ type ReviewerReviewRow = {
     | string
     | null
 
+  hero_position_x: number | null
+  hero_position_y: number | null
+
   published_at:
     | string
     | null
@@ -57,6 +60,9 @@ type ReviewerProductRow = {
   hero_image_url:
     | string
     | null
+
+  hero_position_x: number | null
+  hero_position_y: number | null
 
   brands:
     | {
@@ -162,6 +168,18 @@ function mapReviewCoverage(
       review.hero_image_url ??
       product.hero_image_url ??
       null,
+
+    heroPositionX: Number(
+      review.hero_image_url
+        ? review.hero_position_x ?? 50
+        : product.hero_position_x ?? 50,
+    ),
+
+    heroPositionY: Number(
+      review.hero_image_url
+        ? review.hero_position_y ?? 50
+        : product.hero_position_y ?? 50,
+    ),
 
     publishedAt:
       review.published_at,
@@ -373,6 +391,8 @@ export async function getReviewerBySlug(
         model,
         slug,
         hero_image_url,
+        hero_position_x,
+        hero_position_y,
 
         brands (
           name,
@@ -387,6 +407,8 @@ export async function getReviewerBySlug(
         title,
         summary,
         hero_image_url,
+        hero_position_x,
+        hero_position_y,
         published_at,
         published,
         reviewer_id

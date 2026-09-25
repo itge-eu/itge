@@ -7,6 +7,8 @@ export type ImpressionSummary = {
   summary: string | null
   body: string | null
   heroImageUrl: string | null
+  heroPositionX: number
+  heroPositionY: number
   publishedAt: string | null
 
   reviewer: {
@@ -64,6 +66,8 @@ type ImpressionProduct = {
   hero_image_url:
     | string
     | null
+  hero_position_x?: number | null
+  hero_position_y?: number | null
 
   brands:
     | {
@@ -88,6 +92,8 @@ type ImpressionRow = {
   hero_image_url:
     | string
     | null
+  hero_position_x: number | null
+  hero_position_y: number | null
   published_at:
     | string
     | null
@@ -229,6 +235,20 @@ function mapImpression(
       row.hero_image_url ??
       product.hero_image_url ??
       null,
+
+    heroPositionX:
+      Number(
+        row.hero_image_url
+          ? row.hero_position_x ?? 50
+          : product.hero_position_x ?? 50,
+      ),
+
+    heroPositionY:
+      Number(
+        row.hero_image_url
+          ? row.hero_position_y ?? 50
+          : product.hero_position_y ?? 50,
+      ),
 
     publishedAt:
       row.published_at,
@@ -387,6 +407,8 @@ export async function getAllImpressions(): Promise<
         summary,
         body,
         hero_image_url,
+        hero_position_x,
+        hero_position_y,
         published_at,
 
         reviewers (
@@ -400,6 +422,8 @@ export async function getAllImpressions(): Promise<
           model,
           slug,
           hero_image_url,
+          hero_position_x,
+          hero_position_y,
 
           brands (
             id,
@@ -454,6 +478,8 @@ export async function getLatestImpressions(
         summary,
         body,
         hero_image_url,
+        hero_position_x,
+        hero_position_y,
         published_at,
 
         reviewers (
@@ -467,6 +493,8 @@ export async function getLatestImpressions(
           model,
           slug,
           hero_image_url,
+          hero_position_x,
+          hero_position_y,
 
           brands (
             id,
@@ -747,6 +775,8 @@ export async function getFilteredAllImpressions(
         summary,
         body,
         hero_image_url,
+        hero_position_x,
+        hero_position_y,
         published_at,
 
         reviewers (
@@ -760,6 +790,8 @@ export async function getFilteredAllImpressions(
           model,
           slug,
           hero_image_url,
+          hero_position_x,
+          hero_position_y,
 
           brands (
             id,
@@ -888,6 +920,8 @@ export async function getImpressionBySlug(
         summary,
         body,
         hero_image_url,
+        hero_position_x,
+        hero_position_y,
         published_at,
         source,
         source_url,
@@ -904,6 +938,8 @@ export async function getImpressionBySlug(
           model,
           slug,
           hero_image_url,
+          hero_position_x,
+          hero_position_y,
 
           brands (
             id,
@@ -999,6 +1035,8 @@ async function getFilteredImpressions(
         summary,
         body,
         hero_image_url,
+        hero_position_x,
+        hero_position_y,
         published_at,
 
         reviewers (
@@ -1012,6 +1050,8 @@ async function getFilteredImpressions(
           model,
           slug,
           hero_image_url,
+          hero_position_x,
+          hero_position_y,
 
           brands (
             id,

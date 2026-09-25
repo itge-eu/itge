@@ -35,6 +35,8 @@ export type FeaturedReview = {
   reviewer: string
   reviewerSlug: string
   heroImageUrl: string | null
+  heroPositionX: number
+  heroPositionY: number
   publishedAt?: string | null
 }
 
@@ -101,6 +103,8 @@ type ReviewProduct = {
   hero_image_url:
     | string
     | null
+  hero_position_x?: number | null
+  hero_position_y?: number | null
   release_year?:
     | number
     | null
@@ -147,6 +151,8 @@ type ReviewRow = {
   hero_image_url:
     | string
     | null
+  hero_position_x: number | null
+  hero_position_y: number | null
   published_at:
     | string
     | null
@@ -282,6 +288,20 @@ function mapReview(
       row.hero_image_url ??
       product.hero_image_url ??
       null,
+
+    heroPositionX:
+      Number(
+        row.hero_image_url
+          ? row.hero_position_x ?? 50
+          : product.hero_position_x ?? 50,
+      ),
+
+    heroPositionY:
+      Number(
+        row.hero_image_url
+          ? row.hero_position_y ?? 50
+          : product.hero_position_y ?? 50,
+      ),
 
     publishedAt:
       row.published_at,
@@ -437,6 +457,8 @@ export async function getFeaturedReviews(): Promise<
         title,
         summary,
         hero_image_url,
+        hero_position_x,
+        hero_position_y,
         published_at,
 
         reviewers (
@@ -448,6 +470,8 @@ export async function getFeaturedReviews(): Promise<
           model,
           slug,
           hero_image_url,
+          hero_position_x,
+          hero_position_y,
 
           brands (
             name,
@@ -503,6 +527,8 @@ export async function getLatestReviews(
         title,
         summary,
         hero_image_url,
+        hero_position_x,
+        hero_position_y,
         published_at,
 
         reviewers (
@@ -514,6 +540,8 @@ export async function getLatestReviews(
           model,
           slug,
           hero_image_url,
+          hero_position_x,
+          hero_position_y,
 
           brands (
             name,
@@ -832,6 +860,8 @@ export async function getAllReviews(
         summary,
         body,
         hero_image_url,
+        hero_position_x,
+        hero_position_y,
         published_at,
 
         reviewers (
@@ -843,6 +873,8 @@ export async function getAllReviews(
           model,
           slug,
           hero_image_url,
+          hero_position_x,
+          hero_position_y,
 
           brands (
             name,
@@ -961,6 +993,8 @@ export async function getReviewBySlug(
         cons,
         body,
         hero_image_url,
+        hero_position_x,
+        hero_position_y,
         published_at,
 
         reviewers (
@@ -972,6 +1006,8 @@ export async function getReviewBySlug(
           model,
           slug,
           hero_image_url,
+          hero_position_x,
+          hero_position_y,
           release_year,
           driver_configuration,
           launch_price,

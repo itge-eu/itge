@@ -68,6 +68,8 @@ type BrandReviewRow = {
   title: string
   summary: string
   hero_image_url: string | null
+  hero_position_x: number | null
+  hero_position_y: number | null
   published_at: string | null
   published: boolean
 
@@ -89,6 +91,8 @@ type BrandReviewRow = {
         slug: string
         product_type: ProductType | null
         hero_image_url: string | null
+        hero_position_x: number | null
+        hero_position_y: number | null
 
         brands:
           | {
@@ -109,6 +113,8 @@ type BrandReviewRow = {
         slug: string
         product_type: ProductType | null
         hero_image_url: string | null
+        hero_position_x: number | null
+        hero_position_y: number | null
 
         brands:
           | {
@@ -139,6 +145,8 @@ type BrandReviewProductRow = {
         title: string
         summary: string
         hero_image_url: string | null
+        hero_position_x: number | null
+        hero_position_y: number | null
         published_at: string | null
         published: boolean
 
@@ -160,6 +168,8 @@ type BrandReviewProductRow = {
         title: string
         summary: string
         hero_image_url: string | null
+        hero_position_x: number | null
+        hero_position_y: number | null
         published_at: string | null
         published: boolean
 
@@ -183,6 +193,8 @@ type BrandReviewProductRow = {
         slug: string
         product_type: ProductType | null
         hero_image_url: string | null
+        hero_position_x: number | null
+        hero_position_y: number | null
 
         brands:
           | {
@@ -203,6 +215,8 @@ type BrandReviewProductRow = {
         slug: string
         product_type: ProductType | null
         hero_image_url: string | null
+        hero_position_x: number | null
+        hero_position_y: number | null
 
         brands:
           | {
@@ -227,6 +241,8 @@ type BrandImpressionRow = {
   summary: string | null
   body: string | null
   hero_image_url: string | null
+  hero_position_x: number | null
+  hero_position_y: number | null
   published_at: string | null
   source_url: string | null
 
@@ -351,6 +367,16 @@ function mapReviewCoverage(
       row.hero_image_url ??
       review.hero_image_url,
 
+    hero_position_x:
+      row.hero_image_url
+        ? 50
+        : review.hero_position_x ?? 50,
+
+    hero_position_y:
+      row.hero_image_url
+        ? 50
+        : review.hero_position_y ?? 50,
+
     published_at:
       review.published_at,
 
@@ -423,6 +449,18 @@ function mapFeaturedReview(
       product.hero_image_url ??
       null,
 
+    heroPositionX: Number(
+      row.hero_image_url
+        ? row.hero_position_x ?? 50
+        : product.hero_position_x ?? 50,
+    ),
+
+    heroPositionY: Number(
+      row.hero_image_url
+        ? row.hero_position_y ?? 50
+        : product.hero_position_y ?? 50,
+    ),
+
     publishedAt:
       row.published_at,
   }
@@ -465,6 +503,14 @@ function mapImpression(
 
     heroImageUrl:
       row.hero_image_url,
+
+    heroPositionX: Number(
+      row.hero_position_x ?? 50,
+    ),
+
+    heroPositionY: Number(
+      row.hero_position_y ?? 50,
+    ),
 
     publishedAt:
       row.published_at,
@@ -1058,6 +1104,8 @@ export async function getBrandBySlug(
           title,
           summary,
           hero_image_url,
+          hero_position_x,
+          hero_position_y,
           published_at,
           published,
 
@@ -1087,6 +1135,8 @@ export async function getBrandBySlug(
         summary,
         body,
         hero_image_url,
+        hero_position_x,
+        hero_position_y,
         published_at,
         source_url,
 

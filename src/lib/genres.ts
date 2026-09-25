@@ -147,6 +147,8 @@ type GenreDetailReviewRow = {
   title: string
   summary: string
   hero_image_url: string | null
+  hero_position_x: number | null
+  hero_position_y: number | null
   published_at: string | null
 
   reviewers:
@@ -168,6 +170,8 @@ type GenreDetailProductRow = {
   model: string
   slug: string
   hero_image_url: string | null
+  hero_position_x: number | null
+  hero_position_y: number | null
 
   brands:
     | {
@@ -205,6 +209,8 @@ type GenreDetailImpressionRow = {
   summary: string | null
   body: string | null
   hero_image_url: string | null
+  hero_position_x: number | null
+  hero_position_y: number | null
   published_at: string | null
 
   reviewers:
@@ -319,6 +325,17 @@ function mapGenreReviewCoverage(
       product.hero_image_url ??
       null,
 
+    heroPositionX: Number(
+      review.hero_image_url
+        ? review.hero_position_x ?? 50
+        : product.hero_position_x ?? 50,
+    ),
+    heroPositionY: Number(
+      review.hero_image_url
+        ? review.hero_position_y ?? 50
+        : product.hero_position_y ?? 50,
+    ),
+
     publishedAt:
       review.published_at,
   }
@@ -362,6 +379,17 @@ function mapGenreImpression(
     heroImageUrl:
       row.hero_image_url ??
       product.hero_image_url,
+
+    heroPositionX: Number(
+      row.hero_image_url
+        ? row.hero_position_x ?? 50
+        : product.hero_position_x ?? 50,
+    ),
+    heroPositionY: Number(
+      row.hero_image_url
+        ? row.hero_position_y ?? 50
+        : product.hero_position_y ?? 50,
+    ),
 
     publishedAt:
       row.published_at,
@@ -892,6 +920,8 @@ export async function getGenreBySlug(
               title,
               summary,
               hero_image_url,
+              hero_position_x,
+              hero_position_y,
               published_at,
               published,
 
@@ -907,6 +937,8 @@ export async function getGenreBySlug(
               model,
               slug,
               hero_image_url,
+              hero_position_x,
+              hero_position_y,
 
               brands (
                 id,
@@ -939,6 +971,8 @@ export async function getGenreBySlug(
             summary,
             body,
             hero_image_url,
+            hero_position_x,
+            hero_position_y,
             published_at,
 
             reviewers (
@@ -952,6 +986,8 @@ export async function getGenreBySlug(
               model,
               slug,
               hero_image_url,
+              hero_position_x,
+              hero_position_y,
 
               brands (
                 id,
