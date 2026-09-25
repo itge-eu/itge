@@ -258,28 +258,12 @@ function BrandsPage() {
                       />
                     </div>
 
-                    <div className="flex items-center justify-between gap-4 border-t border-[var(--border)] px-5 py-4">
+                    <div className="border-t border-[var(--border)] px-5 py-4">
                       <h3 className="break-words text-lg font-semibold tracking-tight transition group-hover:text-[var(--accent)]">
                         {
                           brand.name
                         }
                       </h3>
-
-                      {brand.website && (
-                        <a
-                          href={
-                            brand.website
-                          }
-                          target="_blank"
-                          rel="noreferrer"
-                          className="relative z-20 shrink-0 text-sm font-semibold text-[var(--accent)] transition hover:opacity-75"
-                        >
-                          Visit{" "}
-                          <span aria-hidden="true">
-                            ↗
-                          </span>
-                        </a>
-                      )}
                     </div>
                   </div>
                 ),

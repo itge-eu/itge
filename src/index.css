@@ -131,12 +131,34 @@ a {
 /*
  * Normal review images
  */
+/*
+ * Normal review images
+ */
 .review-content img {
   display: block;
   max-width: 100%;
   height: auto;
   margin: 1.5rem auto;
   border-radius: 1rem;
+}
+
+/*
+ * YouTube embeds
+ *
+ * Keep embedded review videos centred,
+ * responsive and large enough to sit naturally
+ * within the review column.
+ */
+.review-content iframe[src*="youtube.com"],
+.review-content iframe[src*="youtu.be"] {
+  display: block;
+  width: min(100%, 720px);
+  aspect-ratio: 16 / 9;
+  height: auto;
+  margin: 2rem auto;
+  border: 0;
+  border-radius: 1rem;
+  overflow: hidden;
 }
 
 /*
