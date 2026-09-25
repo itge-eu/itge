@@ -569,6 +569,36 @@ function prepareReviewHtml(
       "text/html",
     )
 
+  document
+    .querySelectorAll<HTMLElement>(
+      ".bbImageWrapper",
+    )
+    .forEach((wrapper) => {
+      wrapper.removeAttribute("title")
+      wrapper.style.cursor = "default"
+
+      const image =
+        wrapper.querySelector<HTMLImageElement>(
+          "img",
+        )
+
+      if (!image) return
+
+      image.removeAttribute("title")
+
+      const alt =
+        image.getAttribute("alt")
+
+      if (
+        alt &&
+        /\.(jpe?g|png|webp|gif|avif)$/i.test(
+          alt.trim(),
+        )
+      ) {
+        image.removeAttribute("alt")
+      }
+    })
+
   if (heroImageUrl) {
     const firstImage =
       document.querySelector<HTMLImageElement>(
