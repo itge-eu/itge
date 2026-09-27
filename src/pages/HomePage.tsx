@@ -25,8 +25,6 @@ import LatestCoverageCarousel, {
   type LatestCoverageItem,
 } from "../components/home/LatestCoverageCarousel"
 
-import TakePartSection from "../components/home/TakePartSection"
-
 function HomePage() {
   const [
     featuredGear,
@@ -425,7 +423,6 @@ function HomePage() {
           )}
         </section>
 
-        <TakePartSection />
       </main>
     </div>
   )
