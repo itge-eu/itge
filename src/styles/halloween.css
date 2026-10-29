@@ -22,3 +22,32 @@
 
   --secondary-accent: #ff6500;
 }
+
+@keyframes halloween-scroll-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(7px);
+  }
+}
+
+.halloween-scroll-arrow {
+  display: block;
+  animation:
+    halloween-scroll-bob
+    1.8s ease-in-out infinite;
+  filter:
+    drop-shadow(
+      0 0 7px
+      rgba(255, 101, 0, 0.45)
+    );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .halloween-scroll-arrow {
+    animation: none;
+  }
+}

@@ -220,10 +220,36 @@ function HalloweenHomePage() {
             <p className="mt-5 max-w-2xl text-lg leading-8 text-[var(--muted)]">
               Independent reviews. Questionable lighting. Excellent taste in audio.
             </p>
+
+            <button
+                type="button"
+                onClick={() => {
+                    document
+                    .getElementById(
+                        "haunted-gallery",
+                    )
+                    ?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                    })
+                }}
+                className="group mt-10 inline-flex flex-col items-center gap-1 text-[#ff6500] transition hover:text-[#ff7a22]"
+                >
+                <span className="text-sm font-semibold uppercase tracking-[0.28em] sm:text-base">
+                    Scroll down if you dare
+                </span>
+
+                <span
+                    aria-hidden="true"
+                    className="halloween-scroll-arrow text-3xl leading-none"
+                >
+                    ↓
+                </span>
+            </button>
           </div>
         </section>
 
-        <section className="relative py-16 lg:py-20">
+        <section id="haunted-gallery" className="relative py-16 lg:py-20">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
               <div>
