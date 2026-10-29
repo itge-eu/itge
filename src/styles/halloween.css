@@ -1,0 +1,24 @@
+/*
+ * ITGE Halloween theme
+ *
+ * This file contains temporary seasonal styling only.
+ * Normal ITGE styling remains untouched.
+ */
+
+.halloween {
+  color-scheme: dark;
+
+  --background: #080808;
+  --surface: #121212;
+  --surface-soft: #1a1715;
+
+  --foreground: #f8f8f8;
+  --muted: #b9b1aa;
+  --border: #3a2a20;
+
+  --accent: #ff6500;
+  --accent-hover: #ff7a22;
+  --accent-foreground: #080808;
+
+  --secondary-accent: #ff6500;
+}

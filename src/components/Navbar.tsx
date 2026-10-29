@@ -8,6 +8,10 @@ import {
   useLocation,
 } from "react-router-dom"
 
+import {
+  useSeasonalTheme,
+} from "../context/SeasonalThemeContext"
+
 type Theme =
   | "light"
   | "dark"
@@ -58,11 +62,23 @@ function Navbar() {
   const location =
     useLocation()
 
+  const {
+    halloweenMode,
+  } =
+    useSeasonalTheme()
+
+  const halloweenActive =
+    halloweenMode &&
+    !location.pathname.startsWith(
+      "/admin",
+    )
+
   useEffect(() => {
     const root =
       document.documentElement
 
     const isDark =
+      halloweenActive ||
       theme === "dark"
 
     root.classList.toggle(
@@ -70,11 +86,16 @@ function Navbar() {
       isDark,
     )
 
-    localStorage.setItem(
-      "itge-theme",
-      theme,
-    )
-  }, [theme])
+    if (!halloweenActive) {
+      localStorage.setItem(
+        "itge-theme",
+        theme,
+      )
+    }
+  }, [
+    theme,
+    halloweenActive,
+  ])
 
   useEffect(() => {
     setMobileMenuOpen(false)
@@ -211,47 +232,54 @@ function Navbar() {
             closeDesktopMenus()
           }}
         >
-          <span className="flex items-center dark:hidden">
-            <img
-              src={`${
-                import.meta.env
-                  .BASE_URL
-              }branding/icon-light.svg`}
-              alt=""
-              aria-hidden="true"
-              className="h-11 w-auto sm:hidden"
-            />
+          {halloweenActive ? (
+            <span className="flex items-center">
+              <img
+                src={`${import.meta.env.BASE_URL}halloween/icon.png`}
+                alt=""
+                aria-hidden="true"
+                className="h-11 w-auto sm:hidden"
+              />
 
-            <img
-              src={`${
-                import.meta.env
-                  .BASE_URL
-              }branding/logo-compact-light.svg`}
-              alt="IEM Tour Group Europe"
-              className="hidden h-14 w-auto sm:block"
-            />
-          </span>
+              <img
+                src={`${import.meta.env.BASE_URL}halloween/logo-compact.png`}
+                alt="IEM Tour Group Europe"
+                className="hidden h-14 w-auto sm:block"
+              />
+            </span>
+          ) : (
+            <>
+              <span className="flex items-center dark:hidden">
+                <img
+                  src={`${import.meta.env.BASE_URL}branding/icon-light.svg`}
+                  alt=""
+                  aria-hidden="true"
+                  className="h-11 w-auto sm:hidden"
+                />
 
-          <span className="hidden items-center dark:flex">
-            <img
-              src={`${
-                import.meta.env
-                  .BASE_URL
-              }branding/icon-dark.svg`}
-              alt=""
-              aria-hidden="true"
-              className="h-11 w-auto sm:hidden"
-            />
+                <img
+                  src={`${import.meta.env.BASE_URL}branding/logo-compact-light.svg`}
+                  alt="IEM Tour Group Europe"
+                  className="hidden h-14 w-auto sm:block"
+                />
+              </span>
 
-            <img
-              src={`${
-                import.meta.env
-                  .BASE_URL
-              }branding/logo-compact-dark.svg`}
-              alt="IEM Tour Group Europe"
-              className="hidden h-14 w-auto sm:block"
-            />
-          </span>
+              <span className="hidden items-center dark:flex">
+                <img
+                  src={`${import.meta.env.BASE_URL}branding/icon-dark.svg`}
+                  alt=""
+                  aria-hidden="true"
+                  className="h-11 w-auto sm:hidden"
+                />
+
+                <img
+                  src={`${import.meta.env.BASE_URL}branding/logo-compact-dark.svg`}
+                  alt="IEM Tour Group Europe"
+                  className="hidden h-14 w-auto sm:block"
+                />
+              </span>
+            </>
+          )}
         </Link>
 
         <nav
@@ -415,32 +443,34 @@ function Navbar() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={
-              toggleTheme
-            }
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] transition hover:border-[var(--accent)] hover:bg-[var(--surface-soft)]"
-            aria-label={`Switch to ${
-              theme ===
-              "dark"
-                ? "light"
-                : "dark"
-            } mode`}
-            title={`Switch to ${
-              theme ===
-              "dark"
-                ? "light"
-                : "dark"
-            } mode`}
-          >
-            {theme ===
-            "dark" ? (
-              <SunIcon />
-            ) : (
-              <MoonIcon />
-            )}
-          </button>
+          {!halloweenActive && (
+            <button
+              type="button"
+              onClick={
+                toggleTheme
+              }
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] transition hover:border-[var(--accent)] hover:bg-[var(--surface-soft)]"
+              aria-label={`Switch to ${
+                theme ===
+                "dark"
+                  ? "light"
+                  : "dark"
+              } mode`}
+              title={`Switch to ${
+                theme ===
+                "dark"
+                  ? "light"
+                  : "dark"
+              } mode`}
+            >
+              {theme ===
+              "dark" ? (
+                <SunIcon />
+              ) : (
+                <MoonIcon />
+              )}
+            </button>
+          )}
 
           <button
             type="button"

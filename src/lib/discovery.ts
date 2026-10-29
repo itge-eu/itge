@@ -69,6 +69,8 @@ type RelatedProduct = {
     | number
     | null
 
+  hero_zoom: number | null
+
   brands:
     | {
         id: number
@@ -111,6 +113,8 @@ type DiscoveryReviewRow = {
   hero_position_y:
     | number
     | null
+
+  hero_zoom: number | null
 
   published_at:
     | string
@@ -177,6 +181,8 @@ type DiscoveryImpressionRow = {
   hero_position_y:
     | number
     | null
+
+  hero_zoom: number | null
 
   published_at:
     | string
@@ -583,6 +589,16 @@ function mapDiscoveryReviewProduct(
                 50,
         ),
 
+        
+      heroZoom:
+        Number(
+          row.hero_image_url
+            ? 1
+            : review.hero_image_url
+              ? review.hero_zoom ?? 1
+              : entities.product.hero_zoom ?? 1,
+        ),
+
       publishedAt:
         review.published_at,
     },
@@ -794,6 +810,7 @@ export async function getDiscoveryItems(): Promise<
             hero_image_url,
             hero_position_x,
             hero_position_y,
+            hero_zoom,
 
             brands (
               id,
@@ -812,6 +829,7 @@ export async function getDiscoveryItems(): Promise<
             hero_image_url,
             hero_position_x,
             hero_position_y,
+            hero_zoom,
             published_at,
             published,
 
@@ -852,6 +870,7 @@ export async function getDiscoveryItems(): Promise<
           hero_image_url,
           hero_position_x,
           hero_position_y,
+          hero_zoom,
           published_at,
 
           reviewers (
@@ -868,6 +887,7 @@ export async function getDiscoveryItems(): Promise<
             hero_image_url,
             hero_position_x,
             hero_position_y,
+            hero_zoom,
 
             brands (
               id,

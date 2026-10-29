@@ -229,7 +229,8 @@ type ProductReviewRow = {
 
   hero_position_x: number | null
   hero_position_y: number | null
-
+  hero_zoom: number | null
+  
   published_at:
     | string
     | null
@@ -258,6 +259,7 @@ type ProductReviewRow = {
 
         hero_position_x: number | null
         hero_position_y: number | null
+        hero_zoom: number | null
 
         brands:
           | {
@@ -280,6 +282,7 @@ type ProductReviewRow = {
 
         hero_position_x: number | null
         hero_position_y: number | null
+        hero_zoom: number | null
 
         brands:
           | {
@@ -445,6 +448,12 @@ function mapFeaturedReview(
       row.hero_image_url
         ? row.hero_position_y ?? 50
         : product.hero_position_y ?? 50,
+    ),
+
+    heroZoom: Number(
+      row.hero_image_url
+        ? row.hero_zoom ?? 1
+        : product.hero_zoom ?? 1,
     ),
 
     publishedAt:

@@ -12,6 +12,8 @@ import {
   supabase,
 } from "../lib/supabase"
 
+import SeasonalThemeControl from "../components/admin/SeasonalThemeControl"
+
 function AdminPage() {
   const navigate =
     useNavigate()
@@ -124,6 +126,8 @@ function AdminPage() {
             </p>
           )}
         </header>
+
+        <SeasonalThemeControl />
 
         <section className="mt-12">
           <h2 className="text-xl font-semibold">

@@ -149,6 +149,7 @@ type GenreDetailReviewRow = {
   hero_image_url: string | null
   hero_position_x: number | null
   hero_position_y: number | null
+  hero_zoom: number | null
   published_at: string | null
 
   reviewers:
@@ -172,6 +173,7 @@ type GenreDetailProductRow = {
   hero_image_url: string | null
   hero_position_x: number | null
   hero_position_y: number | null
+  hero_zoom: number | null
 
   brands:
     | {
@@ -211,6 +213,7 @@ type GenreDetailImpressionRow = {
   hero_image_url: string | null
   hero_position_x: number | null
   hero_position_y: number | null
+  hero_zoom: number | null
   published_at: string | null
 
   reviewers:
@@ -334,6 +337,12 @@ function mapGenreReviewCoverage(
       review.hero_image_url
         ? review.hero_position_y ?? 50
         : product.hero_position_y ?? 50,
+    ),
+
+    heroZoom: Number(
+      review.hero_image_url
+        ? review.hero_zoom ?? 1
+        : product.hero_zoom ?? 1,
     ),
 
     publishedAt:
@@ -922,6 +931,7 @@ export async function getGenreBySlug(
               hero_image_url,
               hero_position_x,
               hero_position_y,
+              hero_zoom,
               published_at,
               published,
 
@@ -939,6 +949,7 @@ export async function getGenreBySlug(
               hero_image_url,
               hero_position_x,
               hero_position_y,
+              hero_zoom,
 
               brands (
                 id,
@@ -973,6 +984,7 @@ export async function getGenreBySlug(
             hero_image_url,
             hero_position_x,
             hero_position_y,
+            hero_zoom,
             published_at,
 
             reviewers (
@@ -988,6 +1000,7 @@ export async function getGenreBySlug(
               hero_image_url,
               hero_position_x,
               hero_position_y,
+              hero_zoom,
 
               brands (
                 id,

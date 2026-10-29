@@ -37,6 +37,7 @@ type MediaItem = {
   hero_image_confirmed: boolean
   hero_position_x: number
   hero_position_y: number
+  hero_zoom: number
 
   reviewerName: string
   productId: number
@@ -55,6 +56,7 @@ type GearItem = {
   hero_image_confirmed: boolean
   hero_position_x: number
   hero_position_y: number
+  hero_zoom: number
 
   reviewerName: string
   productId: number
@@ -199,6 +201,7 @@ function AdminMediaPage() {
               hero_image_confirmed,
               hero_position_x,
               hero_position_y,
+              hero_zoom,
 
               reviewers (
                 name
@@ -211,6 +214,7 @@ function AdminMediaPage() {
                 hero_image_url,
                 hero_position_x,
                 hero_position_y,
+                hero_zoom,
 
                 brands (
                   name
@@ -253,6 +257,7 @@ function AdminMediaPage() {
                 hero_image_url,
                 hero_position_x,
                 hero_position_y,
+                hero_zoom,
 
                 brands (
                   name
@@ -283,6 +288,7 @@ function AdminMediaPage() {
               hero_image_confirmed,
               hero_position_x,
               hero_position_y,
+              hero_zoom,
 
               reviewers (
                 name
@@ -295,6 +301,7 @@ function AdminMediaPage() {
                 hero_image_url,
                 hero_position_x,
                 hero_position_y,
+                hero_zoom,
 
                 brands (
                   name
@@ -432,6 +439,9 @@ function AdminMediaPage() {
 
                   hero_position_y:
                     Number(row.hero_position_y ?? 50),
+
+                  hero_zoom:
+                    Number(row.hero_zoom ?? 1),
 
                   reviewerName:
                     reviewer
@@ -622,6 +632,9 @@ function AdminMediaPage() {
                   hero_position_y:
                     Number(row.hero_position_y ?? 50),
 
+                  hero_zoom:
+                    Number(row.hero_zoom ?? 1),
+
                   reviewerName:
                     reviewer
                       ?.name ??
@@ -682,6 +695,9 @@ function AdminMediaPage() {
                   | number
                   | null
                 hero_position_y:
+                  | number
+                  | null
+                hero_zoom:
                   | number
                   | null
               }
@@ -760,6 +776,11 @@ function AdminMediaPage() {
                   product?.hero_position_y ?? 50,
                 ),
 
+              hero_zoom:
+                Number(
+                  product?.hero_zoom ?? 1,
+                ),
+
               reviewerName:
                 "",
 
@@ -790,6 +811,9 @@ function AdminMediaPage() {
                 | number
                 | null
               hero_position_y:
+                | number
+                | null
+              hero_zoom:
                 | number
                 | null
             }
@@ -826,6 +850,10 @@ function AdminMediaPage() {
                 hero_position_y:
                   Number(
                     product.hero_position_y ?? 50,
+                  ),
+                hero_zoom:
+                  Number(
+                    product.hero_zoom ?? 1,
                   ),
               },
             )
@@ -864,6 +892,10 @@ function AdminMediaPage() {
                   Number(
                     product.hero_position_y ?? 50,
                   ),
+                hero_zoom:
+                  Number(
+                    product.hero_zoom ?? 1,
+                  ),
               },
             )
           },
@@ -900,6 +932,10 @@ function AdminMediaPage() {
                 hero_position_y:
                   Number(
                     product.hero_position_y ?? 50,
+                  ),
+                hero_zoom:
+                  Number(
+                    product.hero_zoom ?? 1,
                   ),
               },
             )
@@ -1185,85 +1221,6 @@ function AdminMediaPage() {
                 ),
             }
           },
-        ),
-    )
-
-    setSavingKey(null)
-  }
-
-  async function handleFocalPointChange(
-    item: AdminMediaItem,
-    x: number,
-    y: number,
-  ) {
-    const key =
-      `position-${item.type}-${item.id}`
-
-    const clampedX =
-      Math.max(
-        0,
-        Math.min(100, x),
-      )
-
-    const clampedY =
-      Math.max(
-        0,
-        Math.min(100, y),
-      )
-
-    setSavingKey(key)
-    setError(null)
-
-    const tableName =
-      item.type === "gear"
-        ? "products"
-        : item.type === "review"
-          ? "reviews"
-          : "impressions"
-
-    const {
-      error: updateError,
-    } =
-      await supabase
-        .from(tableName)
-        .update({
-          hero_position_x:
-            clampedX,
-          hero_position_y:
-            clampedY,
-        })
-        .eq("id", item.id)
-
-    if (updateError) {
-      console.error(
-        "Updating hero focal point failed:",
-        updateError,
-      )
-
-      setError(
-        updateError.message,
-      )
-
-      setSavingKey(null)
-      return
-    }
-
-    setItems(
-      (currentItems) =>
-        currentItems.map(
-          (currentItem) =>
-            currentItem.type ===
-              item.type &&
-            currentItem.id ===
-              item.id
-              ? {
-                  ...currentItem,
-                  hero_position_x:
-                    clampedX,
-                  hero_position_y:
-                    clampedY,
-                }
-              : currentItem,
         ),
     )
 
@@ -1905,27 +1862,108 @@ function AdminMediaPage() {
                                   y={
                                     item.hero_position_y
                                   }
+                                  zoom={
+                                    item.hero_zoom
+                                  }
                                   saving={
                                     savingKey ===
-                                    `position-${item.type}-${item.id}`
+                                    `framing-${item.type}-${item.id}`
                                   }
-                                  onChange={(
+                                  onSave={async (
                                     x,
                                     y,
-                                  ) =>
-                                    void handleFocalPointChange(
-                                      item,
-                                      x,
-                                      y,
+                                    zoom,
+                                  ) => {
+                                    const key =
+                                      `framing-${item.type}-${item.id}`
+
+                                    const clampedX =
+                                      Math.max(
+                                        0,
+                                        Math.min(100, x),
+                                      )
+
+                                    const clampedY =
+                                      Math.max(
+                                        0,
+                                        Math.min(100, y),
+                                      )
+
+                                    const clampedZoom =
+                                      Math.max(
+                                        1,
+                                        Math.min(3, zoom),
+                                      )
+
+                                    setSavingKey(key)
+                                    setError(null)
+
+                                    const tableName =
+                                      item.type === "gear"
+                                        ? "products"
+                                        : item.type === "review"
+                                          ? "reviews"
+                                          : "impressions"
+
+                                    const {
+                                      error: updateError,
+                                    } =
+                                      await supabase
+                                        .from(tableName)
+                                        .update({
+                                          hero_position_x:
+                                            clampedX,
+                                          hero_position_y:
+                                            clampedY,
+                                          hero_zoom:
+                                            clampedZoom,
+                                        })
+                                        .eq(
+                                          "id",
+                                          item.id,
+                                        )
+
+                                    if (updateError) {
+                                      console.error(
+                                        "Updating hero framing failed:",
+                                        updateError,
+                                      )
+
+                                      setError(
+                                        updateError.message,
+                                      )
+
+                                      setSavingKey(null)
+                                      return
+                                    }
+
+                                    setItems(
+                                      (
+                                        currentItems,
+                                      ) =>
+                                        currentItems.map(
+                                          (
+                                            currentItem,
+                                          ) =>
+                                            currentItem.type ===
+                                              item.type &&
+                                            currentItem.id ===
+                                              item.id
+                                              ? {
+                                                  ...currentItem,
+                                                  hero_position_x:
+                                                    clampedX,
+                                                  hero_position_y:
+                                                    clampedY,
+                                                  hero_zoom:
+                                                    clampedZoom,
+                                                }
+                                              : currentItem,
+                                        ),
                                     )
-                                  }
-                                  onReset={() =>
-                                    void handleFocalPointChange(
-                                      item,
-                                      50,
-                                      50,
-                                    )
-                                  }
+
+                                    setSavingKey(null)
+                                  }}
                                 />
                               )}
                             </div>
@@ -2071,20 +2109,52 @@ function FocalPointEditor({
   imageUrl,
   x,
   y,
+  zoom,
   saving,
-  onChange,
-  onReset,
+  onSave,
 }: {
   imageUrl: string
   x: number
   y: number
+  zoom: number
   saving: boolean
-  onChange: (
+  onSave: (
     x: number,
     y: number,
-  ) => void
-  onReset: () => void
+    zoom: number,
+  ) => Promise<void>
 }) {
+  const [draftX, setDraftX] =
+    useState(x)
+
+  const [draftY, setDraftY] =
+    useState(y)
+
+  const [draftZoom, setDraftZoom] =
+    useState(zoom)
+
+  useEffect(() => {
+    setDraftX(x)
+    setDraftY(y)
+    setDraftZoom(zoom)
+  }, [
+    x,
+    y,
+    zoom,
+    imageUrl,
+  ])
+
+  const hasChanges =
+    Math.abs(
+      draftX - x,
+    ) > 0.001 ||
+    Math.abs(
+      draftY - y,
+    ) > 0.001 ||
+    Math.abs(
+      draftZoom - zoom,
+    ) > 0.001
+
   function choosePoint(
     event:
       React.MouseEvent<HTMLDivElement>,
@@ -2097,22 +2167,31 @@ function FocalPointEditor({
       event.currentTarget
         .getBoundingClientRect()
 
-    const nextX =
+    setDraftX(
       ((event.clientX -
         rect.left) /
         rect.width) *
-      100
+        100,
+    )
 
-    const nextY =
+    setDraftY(
       ((event.clientY -
         rect.top) /
         rect.height) *
-      100
-
-    onChange(
-      nextX,
-      nextY,
+        100,
     )
+  }
+
+  function revertDraft() {
+    setDraftX(x)
+    setDraftY(y)
+    setDraftZoom(zoom)
+  }
+
+  function resetDraft() {
+    setDraftX(50)
+    setDraftY(50)
+    setDraftZoom(1)
   }
 
   return (
@@ -2125,24 +2204,63 @@ function FocalPointEditor({
 
           <p className="mt-2 max-w-2xl text-sm text-[var(--muted)]">
             Click the important part
-            of the image. The 16:9
-            preview shows how the hero
-            will be framed.
+            of the image, then adjust
+            zoom. Changes stay in the
+            preview until you save them.
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={onReset}
-          disabled={
-            saving ||
-            (x === 50 &&
-              y === 50)
-          }
-          className="rounded-xl border border-[var(--border)] px-4 py-2 text-sm font-semibold transition hover:border-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          Reset to center
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={
+              resetDraft
+            }
+            disabled={
+              saving ||
+              (draftX === 50 &&
+                draftY === 50 &&
+                draftZoom === 1)
+            }
+            className="rounded-xl border border-[var(--border)] px-4 py-2 text-sm font-semibold transition hover:border-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Reset framing
+          </button>
+
+          <button
+            type="button"
+            onClick={
+              revertDraft
+            }
+            disabled={
+              saving ||
+              !hasChanges
+            }
+            className="rounded-xl border border-[var(--border)] px-4 py-2 text-sm font-semibold transition hover:border-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Revert
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              void onSave(
+                draftX,
+                draftY,
+                draftZoom,
+              )
+            }
+            disabled={
+              saving ||
+              !hasChanges
+            }
+            className="rounded-xl bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {saving
+              ? "Saving…"
+              : "Save framing"}
+          </button>
+        </div>
       </div>
 
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
@@ -2165,7 +2283,9 @@ function FocalPointEditor({
             }`}
           >
             <img
-              src={imageUrl}
+              src={
+                imageUrl
+              }
               alt=""
               className="block max-h-[460px] w-full object-contain"
             />
@@ -2173,8 +2293,10 @@ function FocalPointEditor({
             <span
               className="pointer-events-none absolute h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-black/35 shadow-lg"
               style={{
-                left: `${x}%`,
-                top: `${y}%`,
+                left:
+                  `${draftX}%`,
+                top:
+                  `${draftY}%`,
               }}
             >
               <span className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white" />
@@ -2195,12 +2317,16 @@ function FocalPointEditor({
 
               <div className="h-[270px] w-[192px] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)]">
                 <img
-                  src={imageUrl}
+                  src={
+                    imageUrl
+                  }
                   alt=""
                   className="h-full w-full object-cover"
                   style={{
                     objectPosition:
-                      `${x}% ${y}%`,
+                      `${draftX}% ${draftY}%`,
+                    transform:
+                      `scale(${draftZoom})`,
                   }}
                 />
               </div>
@@ -2213,30 +2339,81 @@ function FocalPointEditor({
 
               <div className="aspect-[16/10] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)]">
                 <img
-                  src={imageUrl}
+                  src={
+                    imageUrl
+                  }
                   alt=""
                   className="h-full w-full object-cover"
                   style={{
                     objectPosition:
-                      `${x}% ${y}%`,
+                      `${draftX}% ${draftY}%`,
+                    transform:
+                      `scale(${draftZoom})`,
                   }}
                 />
               </div>
             </div>
           </div>
 
-          <div className="mt-3 flex items-center justify-between gap-4 text-xs text-[var(--muted)]">
+          <div className="mt-5">
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
+                Zoom
+              </span>
+
+              <span className="text-xs font-semibold text-[var(--foreground)]">
+                {draftZoom.toFixed(
+                  2,
+                )}
+                ×
+              </span>
+            </div>
+
+            <input
+              type="range"
+              min="1"
+              max="3"
+              step="0.05"
+              value={
+                draftZoom
+              }
+              disabled={
+                saving
+              }
+              aria-label="Hero zoom"
+              onChange={(
+                event,
+              ) =>
+                setDraftZoom(
+                  Number(
+                    event
+                      .target
+                      .value,
+                  ),
+                )
+              }
+              className="mt-3 w-full accent-[var(--accent)]"
+            />
+          </div>
+
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-4 text-xs text-[var(--muted)]">
             <span>
               Focal point:{" "}
-              {Math.round(x)}% ×{" "}
-              {Math.round(y)}%
+              {Math.round(
+                draftX,
+              )}
+              % ×{" "}
+              {Math.round(
+                draftY,
+              )}
+              %
             </span>
 
-            {saving && (
-              <span className="font-semibold text-[var(--accent)]">
-                Saving…
-              </span>
-            )}
+            <span>
+              {hasChanges
+                ? "Unsaved changes"
+                : "Saved framing"}
+            </span>
           </div>
         </div>
       </div>

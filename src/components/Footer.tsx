@@ -1,6 +1,21 @@
-import { Link } from "react-router"
+import { Link, useLocation } from "react-router"
+
+import {
+  useSeasonalTheme,
+} from "../context/SeasonalThemeContext"
 
 function Footer() {
+  const location = useLocation()
+
+  const {
+    halloweenMode,
+  } =
+    useSeasonalTheme()
+
+  const halloweenActive =
+    halloweenMode &&
+    !location.pathname.startsWith("/admin")
+
   return (
     <footer className="border-t border-[var(--border)] bg-[var(--background)] px-6 py-16 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -11,17 +26,27 @@ function Footer() {
               aria-label="IEM Tour Group Europe homepage"
               className="inline-flex cursor-pointer"
             >
-              <img
-                src={`${import.meta.env.BASE_URL}branding/logo-primary-light.svg`}
-                alt="IEM Tour Group Europe"
-                className="h-28 w-auto dark:hidden"
-              />
+              {halloweenActive ? (
+                <img
+                  src={`${import.meta.env.BASE_URL}halloween/logo-footer.png`}
+                  alt="IEM Tour Group Europe"
+                  className="h-28 w-auto"
+                />
+              ) : (
+                <>
+                  <img
+                    src={`${import.meta.env.BASE_URL}branding/logo-primary-light.svg`}
+                    alt="IEM Tour Group Europe"
+                    className="h-28 w-auto dark:hidden"
+                  />
 
-              <img
-                src={`${import.meta.env.BASE_URL}branding/logo-primary-dark.svg`}
-                alt="IEM Tour Group Europe"
-                className="hidden h-28 w-auto dark:block"
-              />
+                  <img
+                    src={`${import.meta.env.BASE_URL}branding/logo-primary-dark.svg`}
+                    alt="IEM Tour Group Europe"
+                    className="hidden h-28 w-auto dark:block"
+                  />
+                </>
+              )}
             </Link>
 
             <p className="mt-6 max-w-xl leading-7 text-[var(--muted)]">

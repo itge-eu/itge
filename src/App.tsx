@@ -1,4 +1,14 @@
-import { Navigate, Route, Routes } from "react-router"
+import {
+  useEffect,
+  useState,
+} from "react"
+
+import {
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router"
 
 import Layout from "./components/Layout"
 
@@ -18,6 +28,7 @@ import AdminEditImpressionPage from "./pages/AdminEditImpressionPage"
 import AdminImpressionsPage from "./pages/AdminImpressionsPage"
 
 import HomePage from "./pages/HomePage"
+import HalloweenHomePage from "./pages/HalloweenHomePage"
 import ReviewPage from "./pages/ReviewPage"
 import ReviewersPage from "./pages/ReviewersPage"
 import ReviewerPage from "./pages/ReviewerPage"
@@ -37,47 +48,115 @@ import ForBrandsPage from "./pages/ForBrandsPage"
 import AboutPage from "./pages/AboutPage"
 import ExplorePage from "./pages/ExplorePage"
 
+import {
+  getSeasonalTheme,
+} from "./lib/siteSettings"
+
+import "./styles/halloween.css"
+
+import {
+  SeasonalThemeProvider,
+} from "./context/SeasonalThemeContext"
+
 function App() {
+  const location =
+    useLocation()
+
+  const [
+    seasonalTheme,
+    setSeasonalTheme,
+  ] =
+    useState<"none" | "halloween">(
+      "none",
+    )
+
+  useEffect(() => {
+    let active = true
+
+    async function loadSeasonalTheme() {
+      const theme =
+        await getSeasonalTheme()
+
+      if (active) {
+        setSeasonalTheme(theme)
+      }
+    }
+
+    void loadSeasonalTheme()
+
+    return () => {
+      active = false
+    }
+  }, [])
+
+  const halloweenMode =
+    seasonalTheme === "halloween"
+
+  const halloweenActive =
+    halloweenMode &&
+    !location.pathname.startsWith(
+      "/admin",
+    )
+
   return (
-    <Routes>
-      <Route element={<Layout />}>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/discover" element={<Navigate to="/reviews" replace />} />
-        <Route path="/reviews" element={<DiscoverPage />} />
-        <Route path="/reviews/:slug" element={<ReviewPage />} />
-        <Route path="/impressions" element={<ImpressionsPage />} />
-        <Route path="/impressions/:slug" element={<ImpressionPage />} />
-        <Route path="/gear" element={<ProductsPage />} />
-        <Route path="/gear/:slug" element={<ProductPage />} />
-        <Route path="/brands" element={<BrandsPage />} />
-        <Route path="/brands/:slug" element={<BrandPage />} />
-        <Route path="/members" element={<ReviewersPage />} />
-        <Route path="/members/:slug" element={<ReviewerPage />} />
-        <Route path="/explore" element={<ExplorePage />} />
-        <Route path="/artists" element={<Navigate to="/explore" replace />} />
-        <Route path="/genres" element={<Navigate to="/explore?view=genres" replace />} />
-        <Route path="/artists/:slug" element={<ArtistPage />} />
-        <Route path="/genres/:slug" element={<GenrePage />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/join" element={<JoinPage />} />
-        <Route path="/for-brands" element={<ForBrandsPage />} />
-        <Route path="/admin/login" element={<AdminLoginPage />} />
+    <SeasonalThemeProvider
+      seasonalTheme={seasonalTheme}
+    >
+      <div
+        className={
+          halloweenActive
+            ? "halloween"
+            : undefined
+        }
+      >
+      <Routes>
+        <Route element={<Layout />}>
+          <Route
+            path="/"
+            element={
+              halloweenMode
+                ? <HalloweenHomePage />
+                : <HomePage />
+            }
+          />
+          <Route path="/discover" element={<Navigate to="/reviews" replace />} />
+          <Route path="/reviews" element={<DiscoverPage />} />
+          <Route path="/reviews/:slug" element={<ReviewPage />} />
+          <Route path="/impressions" element={<ImpressionsPage />} />
+          <Route path="/impressions/:slug" element={<ImpressionPage />} />
+          <Route path="/gear" element={<ProductsPage />} />
+          <Route path="/gear/:slug" element={<ProductPage />} />
+          <Route path="/brands" element={<BrandsPage />} />
+          <Route path="/brands/:slug" element={<BrandPage />} />
+          <Route path="/members" element={<ReviewersPage />} />
+          <Route path="/members/:slug" element={<ReviewerPage />} />
+          <Route path="/explore" element={<ExplorePage />} />
+          <Route path="/artists" element={<Navigate to="/explore" replace />} />
+          <Route path="/genres" element={<Navigate to="/explore?view=genres" replace />} />
+          <Route path="/artists/:slug" element={<ArtistPage />} />
+          <Route path="/genres/:slug" element={<GenrePage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/join" element={<JoinPage />} />
+          <Route path="/for-brands" element={<ForBrandsPage />} />
+          <Route path="/admin/login" element={<AdminLoginPage />} />
 
-        <Route element={<RequireAdmin />}>
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="/admin/media" element={<AdminMediaPage />} />
-          <Route path="/admin/artists" element={<AdminArtistsPage />} />
-          <Route path="/admin/reviews" element={<AdminReviewsPage />} />
-          <Route path="/admin/reviews/:id/edit" element={<AdminEditReviewPage />} />
-          <Route path="/admin/impressions" element={<AdminImpressionsPage />} />
-          <Route path="/admin/impressions/:id/edit" element={<AdminEditImpressionPage />} />
-          <Route path="/admin/import" element={<ImportReviewPage />} />
-          <Route path="/admin/import-impression" element={<ImportImpressionPage />} />
+          <Route element={<RequireAdmin />}>
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/admin/media" element={<AdminMediaPage />} />
+            <Route path="/admin/artists" element={<AdminArtistsPage />} />
+            <Route path="/admin/reviews" element={<AdminReviewsPage />} />
+            <Route path="/admin/reviews/:id/edit" element={<AdminEditReviewPage />} />
+            <Route path="/admin/impressions" element={<AdminImpressionsPage />} />
+            <Route path="/admin/impressions/:id/edit" element={<AdminEditImpressionPage />} />
+            <Route path="/admin/import" element={<ImportReviewPage />} />
+            <Route path="/admin/import-impression" element={<ImportImpressionPage />} />
+          </Route>
+
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
-
-        <Route path="*" element={<NotFoundPage />} />
-      </Route>
-    </Routes>
+      </Routes>
+    </div>
+  </SeasonalThemeProvider>
   )
 }
 

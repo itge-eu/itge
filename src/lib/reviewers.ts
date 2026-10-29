@@ -43,6 +43,7 @@ type ReviewerReviewRow = {
 
   hero_position_x: number | null
   hero_position_y: number | null
+  hero_zoom: number | null
 
   published_at:
     | string
@@ -63,6 +64,7 @@ type ReviewerProductRow = {
 
   hero_position_x: number | null
   hero_position_y: number | null
+  hero_zoom: number | null
 
   brands:
     | {
@@ -179,6 +181,12 @@ function mapReviewCoverage(
       review.hero_image_url
         ? review.hero_position_y ?? 50
         : product.hero_position_y ?? 50,
+    ),
+
+    heroZoom: Number(
+      review.hero_image_url
+        ? review.hero_zoom ?? 1
+        : product.hero_zoom ?? 1,
     ),
 
     publishedAt:

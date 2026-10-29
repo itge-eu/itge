@@ -70,6 +70,7 @@ type BrandReviewRow = {
   hero_image_url: string | null
   hero_position_x: number | null
   hero_position_y: number | null
+  hero_zoom: number | null
   published_at: string | null
   published: boolean
 
@@ -93,6 +94,7 @@ type BrandReviewRow = {
         hero_image_url: string | null
         hero_position_x: number | null
         hero_position_y: number | null
+        hero_zoom: number | null
 
         brands:
           | {
@@ -115,6 +117,7 @@ type BrandReviewRow = {
         hero_image_url: string | null
         hero_position_x: number | null
         hero_position_y: number | null
+        hero_zoom: number | null
 
         brands:
           | {
@@ -147,6 +150,7 @@ type BrandReviewProductRow = {
         hero_image_url: string | null
         hero_position_x: number | null
         hero_position_y: number | null
+        hero_zoom: number | null
         published_at: string | null
         published: boolean
 
@@ -170,6 +174,7 @@ type BrandReviewProductRow = {
         hero_image_url: string | null
         hero_position_x: number | null
         hero_position_y: number | null
+        hero_zoom: number | null
         published_at: string | null
         published: boolean
 
@@ -195,6 +200,7 @@ type BrandReviewProductRow = {
         hero_image_url: string | null
         hero_position_x: number | null
         hero_position_y: number | null
+        hero_zoom: number | null
 
         brands:
           | {
@@ -217,6 +223,7 @@ type BrandReviewProductRow = {
         hero_image_url: string | null
         hero_position_x: number | null
         hero_position_y: number | null
+        hero_zoom: number | null
 
         brands:
           | {
@@ -243,6 +250,7 @@ type BrandImpressionRow = {
   hero_image_url: string | null
   hero_position_x: number | null
   hero_position_y: number | null
+  hero_zoom: number | null
   published_at: string | null
   source_url: string | null
 
@@ -377,6 +385,11 @@ function mapReviewCoverage(
         ? 50
         : review.hero_position_y ?? 50,
 
+    hero_zoom:
+      row.hero_image_url
+        ? 1
+        : review.hero_zoom ?? 1,
+
     published_at:
       review.published_at,
 
@@ -459,6 +472,12 @@ function mapFeaturedReview(
       row.hero_image_url
         ? row.hero_position_y ?? 50
         : product.hero_position_y ?? 50,
+    ),
+
+    heroZoom: Number(
+      row.hero_image_url
+        ? row.hero_zoom ?? 1
+        : product.hero_zoom ?? 1,
     ),
 
     publishedAt:
@@ -1106,6 +1125,7 @@ export async function getBrandBySlug(
           hero_image_url,
           hero_position_x,
           hero_position_y,
+          hero_zoom,
           published_at,
           published,
 
@@ -1137,6 +1157,7 @@ export async function getBrandBySlug(
         hero_image_url,
         hero_position_x,
         hero_position_y,
+        hero_zoom,
         published_at,
         source_url,
 

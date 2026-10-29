@@ -1,9 +1,22 @@
 import { Link } from "react-router-dom"
 
+import {
+  useSeasonalTheme,
+} from "../context/SeasonalThemeContext"
+
 import usePageMetadata from "../hooks/usePageMetadata"
 import PageContainer from "../components/layout/PageContainer"
 
 function AboutPage() {
+  
+  const {
+    halloweenMode,
+  } =
+    useSeasonalTheme()
+
+  const halloweenActive =
+    halloweenMode
+
   usePageMetadata({
     title:
       "About ITGE | IEM Tour Group Europe",
@@ -22,17 +35,27 @@ function AboutPage() {
           </p>
 
           <div className="mt-8 max-w-[240px]">
-            <img
-              src={`${import.meta.env.BASE_URL}branding/logo-primary-light.svg`}
-              alt="IEM Tour Group Europe"
-              className="h-auto w-full dark:hidden"
-            />
+            {halloweenActive ? (
+                <img
+                  src={`${import.meta.env.BASE_URL}halloween/logo-footer.png`}
+                  alt="IEM Tour Group Europe"
+                  className="h-28 w-auto"
+                />
+              ) : (
+                <>
+                  <img
+                    src={`${import.meta.env.BASE_URL}branding/logo-primary-light.svg`}
+                    alt="IEM Tour Group Europe"
+                    className="h-auto w-full dark:hidden"
+                  />
 
-            <img
-              src={`${import.meta.env.BASE_URL}branding/logo-primary-dark.svg`}
-              alt="IEM Tour Group Europe"
-              className="hidden h-auto w-full dark:block"
-            />
+                  <img
+                    src={`${import.meta.env.BASE_URL}branding/logo-primary-dark.svg`}
+                    alt="IEM Tour Group Europe"
+                    className="hidden h-auto w-full dark:block"
+                  />
+            </>
+            )}
           </div>
 
           <h1 className="mt-7 text-xl font-semibold tracking-tight text-[var(--accent)] sm:text-2xl">
