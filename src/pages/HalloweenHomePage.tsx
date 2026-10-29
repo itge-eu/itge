@@ -105,8 +105,8 @@ const halloweenGallery: HalloweenGalleryItem[] = [
   {
     image: "/halloween/gallery/xsoundscapex-fatfreq-grand-maestro.jpg",
     title: "FatFreq Grand Maestro",
-    credit: "ToobinTobes",
-    href: "/members/toobintobes",
+    credit: "xSoundscapeX",
+    href: "/members/xsoundscapex",
     orientation: "portrait",
   },
   {
