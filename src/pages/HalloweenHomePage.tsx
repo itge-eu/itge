@@ -130,6 +130,14 @@ const halloweenGallery: HalloweenGalleryItem[] = [
     href: "/members/pseudonym031",
     orientation: "portrait",
   },
+  {
+    image:
+      "/halloween/gallery/ori73-thieaudio-monarch-mkii.jpg",
+    title: "ThieAudio Monarch MkII",
+    credit: "Ori73",
+    href: "/members/ori73",
+    orientation: "portrait",
+  },
 ]
 
 function HalloweenHomePage() {
