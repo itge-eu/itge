@@ -25,97 +25,111 @@ type HalloweenGalleryItem = {
   title: string
   credit: string
   href: string
-  featured?: boolean
-  orientation: string
+  orientation:
+    | "portrait"
+    | "landscape"
 }
 
-// Add/remove Halloween photos here. Files live in public/halloween/gallery/.
+// Add/remove Halloween photos here.
+// Files live in public/halloween/gallery/.
 const halloweenGallery: HalloweenGalleryItem[] = [
   {
-    image: "/halloween/gallery/cinisi-brice-kimmel-lily-of-the-valley.jpeg",
-    title: "Bryce&Kimmel Lily of the Valley",
+    image:
+      "/halloween/gallery/cinisi-brice-kimmel-lily-of-the-valley.jpeg",
+    title:
+      "Bryce&Kimmel Lily of the Valley",
     credit: "cinisi",
     href: "/members/cinisi",
-    featured: true,
     orientation: "landscape",
   },
   {
-    image: "/halloween/gallery/faxepremium-io-volare.jpeg",
+    image:
+      "/halloween/gallery/faxepremium-io-volare.jpeg",
     title: "I/O Volare",
     credit: "Faxepremium",
     href: "/members/faxepremium",
     orientation: "portrait",
   },
   {
-    image: "/halloween/gallery/mr-martin-melody-wings-neptune.jpeg",
+    image:
+      "/halloween/gallery/mr-martin-melody-wings-neptune.jpeg",
     title: "Melody Wings Neptune",
     credit: "Mr Martin",
     href: "/members/mr-martin",
     orientation: "landscape",
   },
   {
-    image: "/halloween/gallery/mr-martin-penon-archangel.jpeg",
+    image:
+      "/halloween/gallery/mr-martin-penon-archangel.jpeg",
     title: "Penon Archangel",
     credit: "Mr Martin",
     href: "/members/mr-martin",
     orientation: "landscape",
   },
   {
-    image: "/halloween/gallery/pseudonym031-letshuoer-ej10.jpeg",
+    image:
+      "/halloween/gallery/pseudonym031-letshuoer-ej10.jpeg",
     title: "Letshuoer EJ10",
     credit: "Pseudonym031",
     href: "/members/pseudonym031",
     orientation: "portrait",
   },
   {
-    image: "/halloween/gallery/raymondvanmil-tangzu-dont-waneer.jpeg",
+    image:
+      "/halloween/gallery/raymondvanmil-tangzu-dont-waneer.jpeg",
     title: "Tangzu Wan'Er",
     credit: "RaymondVanMil",
     href: "/members/raymondvanmil",
     orientation: "portrait",
   },
   {
-    image: "/halloween/gallery/rinderkappajoe-letshuoer-cadenza-12.jpeg",
+    image:
+      "/halloween/gallery/rinderkappajoe-letshuoer-cadenza-12.jpeg",
     title: "Letshuoer Cadenza 12",
     credit: "rinderkappajoe",
     href: "/members/rinderkappajoe",
     orientation: "landscape",
   },
   {
-    image: "/halloween/gallery/themattyb-letshuoer-sonata.jpeg",
+    image:
+      "/halloween/gallery/themattyb-letshuoer-sonata.jpeg",
     title: "Letshuoer Sonata",
     credit: "themattyb",
     href: "/members/themattyb",
     orientation: "landscape",
   },
   {
-    image: "/halloween/gallery/themattyb-txn-diamond.jpeg",
+    image:
+      "/halloween/gallery/themattyb-txn-diamond.jpeg",
     title: "TXN Diamond",
     credit: "themattyb",
     href: "/members/themattyb",
     orientation: "portrait",
   },
   {
-    image: "/halloween/gallery/vic29-spiral-ear-se3-nebula.jpeg",
+    image:
+      "/halloween/gallery/vic29-spiral-ear-se3-nebula.jpeg",
     title: "Spiral Ear SE3 Nebula",
     credit: "Vic29",
     href: "/members/vic29",
     orientation: "portrait",
   },
   {
-    image: "/halloween/gallery/xsoundscapex-fatfreq-grand-maestro.jpg",
+    image:
+      "/halloween/gallery/xsoundscapex-fatfreq-grand-maestro.jpg",
     title: "FatFreq Grand Maestro",
     credit: "xSoundscapeX",
     href: "/members/xsoundscapex",
-    orientation: "portrait",
+    orientation: "landscape",
   },
   {
-    image: "/halloween/gallery/pseudonym031-final-a10000.jpg",
+    image:
+      "/halloween/gallery/pseudonym031-final-a10000.jpg",
     title: "Final Audio A10000",
     credit: "Pseudonym031",
     href: "/members/pseudonym031",
     orientation: "portrait",
-  }
+  },
 ]
 
 function HalloweenHomePage() {
@@ -157,7 +171,10 @@ function HalloweenHomePage() {
       setCoverageError(null)
 
       try {
-        const [latestReviews, latestImpressions] =
+        const [
+          latestReviews,
+          latestImpressions,
+        ] =
           await Promise.all([
             getLatestReviews(20),
             getLatestImpressions(20),
@@ -184,7 +201,9 @@ function HalloweenHomePage() {
         }
       } finally {
         if (!cancelled) {
-          setCoverageLoading(false)
+          setCoverageLoading(
+            false,
+          )
         }
       }
     }
@@ -214,53 +233,69 @@ function HalloweenHomePage() {
             </p>
 
             <h1 className="mt-4 max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
-              Something wicked this way comes.
+              Something wicked this
+              way comes.
             </h1>
 
             <p className="mt-5 max-w-2xl text-lg leading-8 text-[var(--muted)]">
-              Independent reviews. Questionable lighting. Excellent taste in audio.
+              Independent reviews.
+              Questionable lighting.
+              Excellent taste in
+              audio.
             </p>
 
             <button
-                type="button"
-                onClick={() => {
-                    document
-                    .getElementById(
-                        "haunted-gallery",
-                    )
-                    ?.scrollIntoView({
-                        behavior: "smooth",
-                        block: "start",
-                    })
-                }}
-                className="group mt-10 inline-flex flex-col items-center gap-1 text-[#ff6500] transition hover:text-[#ff7a22]"
-                >
-                <span className="text-sm font-semibold uppercase tracking-[0.28em] sm:text-base">
-                    Scroll down if you dare
-                </span>
+              type="button"
+              onClick={() => {
+                document
+                  .getElementById(
+                    "haunted-gallery",
+                  )
+                  ?.scrollIntoView({
+                    behavior:
+                      "smooth",
+                    block: "start",
+                  })
+              }}
+              className="group mt-10 inline-flex flex-col items-center gap-1 text-[#ff6500] transition hover:text-[#ff7a22]"
+            >
+              <span className="text-sm font-semibold uppercase tracking-[0.28em] sm:text-base">
+                Scroll down if you
+                dare
+              </span>
 
-                <span
-                    aria-hidden="true"
-                    className="halloween-scroll-arrow text-3xl leading-none"
-                >
-                    ↓
-                </span>
+              <span
+                aria-hidden="true"
+                className="halloween-scroll-arrow text-3xl leading-none"
+              >
+                ↓
+              </span>
             </button>
           </div>
         </section>
 
-        <section id="haunted-gallery" className="relative py-16 lg:py-20">
+        <section
+          id="haunted-gallery"
+          className="relative py-16 lg:py-20"
+        >
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--accent)]">
                   Trick or treat?
                 </p>
+
                 <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
                   The haunted gallery
                 </h2>
+
                 <p className="mt-4 max-w-2xl text-[var(--muted)]">
-                  A Halloween selection from the ITGE community. Pick a creature to explore the gear behind the photo.
+                  A Halloween selection
+                  from the ITGE
+                  community. Pick a
+                  creature to explore
+                  the gear behind the
+                  photo.
                 </p>
               </div>
 
@@ -272,20 +307,11 @@ function HalloweenHomePage() {
               </Link>
             </div>
 
-            <div className="mt-10 grid auto-rows-[190px] grid-cols-1 gap-4 sm:grid-cols-2 sm:auto-rows-[220px] lg:grid-cols-3 lg:auto-rows-[240px]">
-              {shuffledGallery.map((item, index) => {
-                const large =
-                  item.featured || index % 7 === 0
-
-                return (
-                  <HalloweenGalleryCard
-                    key={`${item.image}-${item.href}`}
-                    item={item}
-                    large={large}
-                  />
-                )
-              })}
-            </div>
+            <HalloweenGallery
+              items={
+                shuffledGallery
+              }
+            />
           </div>
         </section>
 
@@ -296,11 +322,17 @@ function HalloweenHomePage() {
                 <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--accent)]">
                   Fresh from the crypt
                 </p>
+
                 <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
                   Latest coverage
                 </h2>
+
                 <p className="mt-4 max-w-2xl text-[var(--muted)]">
-                  The newest reviews and listening impressions from ITGE members across Europe.
+                  The newest reviews
+                  and listening
+                  impressions from ITGE
+                  members across
+                  Europe.
                 </p>
               </div>
 
@@ -315,10 +347,13 @@ function HalloweenHomePage() {
 
           {!coverageLoading &&
             !coverageError &&
-            latestCoverage.length > 0 && (
+            latestCoverage.length >
+              0 && (
               <div className="mt-10">
                 <LatestCoverageCarousel
-                  items={latestCoverage}
+                  items={
+                    latestCoverage
+                  }
                 />
               </div>
             )}
@@ -326,7 +361,9 @@ function HalloweenHomePage() {
           {coverageLoading && (
             <div className="mx-auto mt-10 max-w-7xl px-6 lg:px-8">
               <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-[var(--muted)]">
-                Raising the latest coverage from the dead…
+                Raising the latest
+                coverage from the
+                dead…
               </div>
             </div>
           )}
@@ -341,6 +378,119 @@ function HalloweenHomePage() {
         </section>
       </main>
     </div>
+  )
+}
+
+function HalloweenGallery({
+  items,
+}: {
+  items: HalloweenGalleryItem[]
+}) {
+  const leftColumn:
+    HalloweenGalleryItem[] = []
+  const rightColumn:
+    HalloweenGalleryItem[] = []
+
+  let leftWeight = 0
+  let rightWeight = 0
+
+  for (const item of items) {
+    /*
+     * We don't force the photos into
+     * 2:1 / 1:2 boxes.
+     *
+     * Portrait photos simply count as
+     * taller when balancing the two
+     * desktop columns.
+     */
+    const weight =
+      item.orientation ===
+      "portrait"
+        ? 1.5
+        : 0.75
+
+    if (
+      leftWeight <=
+      rightWeight
+    ) {
+      leftColumn.push(item)
+      leftWeight += weight
+    } else {
+      rightColumn.push(item)
+      rightWeight += weight
+    }
+  }
+
+  return (
+    <>
+      {/* Mobile: simple natural stack */}
+      <div className="mt-10 flex flex-col gap-3 sm:hidden">
+        {items.map((item) => (
+          <HalloweenGalleryCard
+            key={`${item.image}-${item.href}`}
+            item={item}
+          />
+        ))}
+      </div>
+
+      {/* Desktop: two balanced columns */}
+      <div className="mt-10 hidden grid-cols-2 items-start gap-3 sm:grid">
+        <div className="flex min-w-0 flex-col gap-3">
+          {leftColumn.map(
+            (item) => (
+              <HalloweenGalleryCard
+                key={`${item.image}-${item.href}`}
+                item={item}
+              />
+            ),
+          )}
+        </div>
+
+        <div className="flex min-w-0 flex-col gap-3">
+          {rightColumn.map(
+            (item) => (
+              <HalloweenGalleryCard
+                key={`${item.image}-${item.href}`}
+                item={item}
+              />
+            ),
+          )}
+        </div>
+      </div>
+    </>
+  )
+}
+
+function HalloweenGalleryCard({
+  item,
+}: {
+  item: HalloweenGalleryItem
+}) {
+  return (
+    <Link
+      to={item.href}
+      className="group relative block overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] transition duration-500 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-[0_0_32px_rgba(255,101,0,0.16)]"
+    >
+      <img
+        src={item.image}
+        alt={item.title}
+        loading="lazy"
+        className="block h-auto w-full transition duration-700 group-hover:scale-[1.015]"
+      />
+
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/5 to-transparent opacity-90 transition group-hover:opacity-100" />
+
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 p-5 text-white sm:p-6">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#ff8a3d] sm:text-xs">
+          Photo by{" "}
+          {item.credit}
+        </p>
+
+        <h3 className="mt-1 text-xl font-semibold leading-tight">
+          {item.title}
+        </h3>
+      </div>
+    </Link>
   )
 }
 
@@ -374,96 +524,6 @@ function shuffleGallery<T>(
   }
 
   return shuffled
-}
-
-function HalloweenGalleryCard({
-  item,
-  large,
-}: {
-  item: HalloweenGalleryItem
-  large: boolean
-}) {
-  const [
-    orientation,
-    setOrientation,
-  ] = useState<
-    "portrait" |
-    "landscape" |
-    "square"
-  >("square")
-
-  function handleImageLoad(
-    event:
-      React.SyntheticEvent<
-        HTMLImageElement
-      >,
-  ) {
-    const image =
-      event.currentTarget
-
-    const ratio =
-      image.naturalWidth /
-      image.naturalHeight
-
-    if (ratio > 1.2) {
-      setOrientation(
-        "landscape",
-      )
-    } else if (ratio < 0.8) {
-      setOrientation(
-        "portrait",
-      )
-    } else {
-      setOrientation(
-        "square",
-      )
-    }
-  }
-
-  const sizeClass =
-    orientation === "portrait"
-        ? "sm:row-span-2"
-        : orientation === "landscape"
-        ? "sm:col-span-2 sm:row-span-2"
-        : large
-            ? "sm:col-span-2 sm:row-span-2"
-            : ""
-
-  return (
-    <Link
-      to={item.href}
-      className={`group relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] transition duration-500 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-[0_0_32px_rgba(255,101,0,0.16)] ${sizeClass}`}
-    >
-      <img
-        src={item.image}
-        alt={item.title}
-        loading="lazy"
-        onLoad={
-          handleImageLoad
-        }
-        className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.035]"
-      />
-
-      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/15 to-transparent opacity-90 transition group-hover:opacity-100" />
-
-      <div className="relative flex h-full flex-col justify-end p-5 text-white sm:p-6">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#ff8a3d] sm:text-xs">
-          Photo by{" "}
-          {item.credit}
-        </p>
-
-        <h3
-          className={`${
-            large
-              ? "text-2xl sm:text-3xl"
-              : "text-xl"
-          } mt-1 font-semibold leading-tight`}
-        >
-          {item.title}
-        </h3>
-      </div>
-    </Link>
-  )
 }
 
 export default HalloweenHomePage
