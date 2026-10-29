@@ -69,7 +69,7 @@ const halloweenGallery: HalloweenGalleryItem[] = [
   },
   {
     image: "/halloween/gallery/raymondvanmil-tangzu-dont-waneer.jpeg",
-    title: "Tanzu Wan'Er",
+    title: "Tangzu Wan'Er",
     credit: "RaymondVanMil",
     href: "/members/raymondvanmil",
     orientation: "portrait",
