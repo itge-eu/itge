@@ -138,6 +138,14 @@ const halloweenGallery: HalloweenGalleryItem[] = [
     href: "/members/ori73",
     orientation: "portrait",
   },
+  {
+    image:
+      "/halloween/gallery/j3n5-dita-ventura.jpg",
+    title: "Dita Ventura",
+    credit: "J3n5",
+    href: "/members/j3n5",
+    orientation: "portrait",
+  },
 ]
 
 function HalloweenHomePage() {
