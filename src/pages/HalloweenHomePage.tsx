@@ -146,6 +146,14 @@ const halloweenGallery: HalloweenGalleryItem[] = [
     href: "/members/j3n5",
     orientation: "portrait",
   },
+  {
+    image:
+      "/halloween/gallery/athar-punch-audio-martilo.jpg",
+    title: "Punch Audio Martilo",
+    credit: "Athar",
+    href: "/members/athar",
+    orientation: "landscape",
+  },
 ]
 
 function HalloweenHomePage() {
