@@ -94,7 +94,7 @@ const halloweenGallery: HalloweenGalleryItem[] = [
     image:
       "/halloween/gallery/themattyb-letshuoer-sonata.jpeg",
     title: "Letshuoer Sonata",
-    credit: "themattyb",
+    credit: "Themattyb",
     href: "/members/themattyb",
     orientation: "landscape",
   },
@@ -102,7 +102,7 @@ const halloweenGallery: HalloweenGalleryItem[] = [
     image:
       "/halloween/gallery/themattyb-txn-diamond.jpeg",
     title: "TXN Diamond",
-    credit: "themattyb",
+    credit: "Themattyb",
     href: "/members/themattyb",
     orientation: "portrait",
   },
@@ -152,6 +152,22 @@ const halloweenGallery: HalloweenGalleryItem[] = [
     title: "Punch Audio Martilo",
     credit: "Athar",
     href: "/members/athar",
+    orientation: "landscape",
+  },
+  {
+    image:
+      "/halloween/gallery/gww1-final-a10000.jpeg",
+    title: "Final Audio A10000",
+    credit: "gww1",
+    href: "/members/gww1",
+    orientation: "landscape",
+  },
+  {
+    image:
+      "/halloween/gallery/themattyb-letshuoer-ember.jpeg",
+    title: "Letshuoer Ember",
+    credit: "Themattyb",
+    href: "/members/themattyb",
     orientation: "landscape",
   },
 ]
