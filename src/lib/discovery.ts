@@ -689,6 +689,12 @@ function mapDiscoveryImpression(
               50,
         ),
 
+      heroZoom: Number(
+        row.hero_image_url
+          ? row.hero_zoom ?? 1
+          : entities.product.hero_zoom ?? 1,
+        ),
+
       publishedAt:
         row.published_at,
 

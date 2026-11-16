@@ -38,6 +38,9 @@ export type ProductDirectoryItem = {
   }
 
   heroImageUrl: string | null
+  heroPositionX: number
+  heroPositionY: number
+  heroZoom: number
 
   reviewCount: number
   reviewerCount: number
@@ -69,6 +72,9 @@ export type ProductProfile = {
 
   averageRating: number | null
   heroImageUrl: string | null
+  heroPositionX: number
+  heroPositionY: number
+  heroZoom: number
 
   reviewers: ProductReviewer[]
   artists: ReviewArtist[]
@@ -89,6 +95,9 @@ type ProductRow = {
   hero_image_url:
     | string
     | null
+  hero_position_x: number | null
+  hero_position_y: number | null
+  hero_zoom: number | null
 
   release_year:
     | number
@@ -123,6 +132,9 @@ type ProductRow = {
 
 type ProductDirectoryImpressionRow = {
   id: number
+  hero_position_x: number | null
+  hero_position_y: number | null
+  hero_zoom: number | null
 
   hero_image_url:
     | string
@@ -165,6 +177,10 @@ type ProductDirectoryRow = {
   hero_image_url:
     | string
     | null
+  
+  hero_position_x: number | null
+  hero_position_y: number | null
+  hero_zoom: number | null
 
   brands:
     | {
@@ -793,6 +809,7 @@ async function getReviewLinksForProduct(
           hero_image_url,
           hero_position_x,
           hero_position_y,
+          hero_zoom,
           published_at,
           published,
 
@@ -807,6 +824,7 @@ async function getReviewLinksForProduct(
             hero_image_url,
             hero_position_x,
             hero_position_y,
+            hero_zoom,
 
             brands (
               name,
@@ -871,6 +889,7 @@ async function getAllReviewLinks(): Promise<
           hero_image_url,
           hero_position_x,
           hero_position_y,
+          hero_zoom,
           published_at,
           published,
 
@@ -885,6 +904,7 @@ async function getAllReviewLinks(): Promise<
             hero_image_url,
             hero_position_x,
             hero_position_y,
+            hero_zoom,
 
             brands (
               name,
@@ -935,6 +955,9 @@ export async function getProductBySlug(
         slug,
         product_type,
         hero_image_url,
+        hero_position_x,
+        hero_position_y,
+        hero_zoom,
         release_year,
         driver_configuration,
         launch_price,
@@ -1104,6 +1127,15 @@ export async function getProductBySlug(
       ),
 
     heroImageUrl,
+    heroPositionX: product.hero_image_url
+      ? Number(product.hero_position_x ?? 50)
+      : Number(reviews.find(r => r.heroImageUrl === fallbackHeroImageUrl)?.heroPositionX ?? impressions.find(i => i.heroImageUrl === fallbackHeroImageUrl)?.heroPositionX ?? 50),
+    heroPositionY: product.hero_image_url
+      ? Number(product.hero_position_y ?? 50)
+      : Number(reviews.find(r => r.heroImageUrl === fallbackHeroImageUrl)?.heroPositionY ?? impressions.find(i => i.heroImageUrl === fallbackHeroImageUrl)?.heroPositionY ?? 50),
+    heroZoom: product.hero_image_url
+      ? Number(product.hero_zoom ?? 1)
+      : Number(reviews.find(r => r.heroImageUrl === fallbackHeroImageUrl)?.heroZoom ?? impressions.find(i => i.heroImageUrl === fallbackHeroImageUrl)?.heroZoom ?? 1),
 
     reviewers:
       collectReviewers(
@@ -1145,6 +1177,9 @@ export async function getProducts(): Promise<
           featured,
           launch_price,
           hero_image_url,
+          hero_position_x,
+          hero_position_y,
+          hero_zoom,
 
           brands (
             id,
@@ -1155,6 +1190,9 @@ export async function getProducts(): Promise<
           impressions (
             id,
             hero_image_url,
+            hero_position_x,
+            hero_position_y,
+            hero_zoom,
             published_at,
             published,
 
@@ -1443,6 +1481,15 @@ export async function getProducts(): Promise<
           },
 
           heroImageUrl,
+          heroPositionX: Number(row.hero_image_url
+            ? row.hero_position_x ?? 50
+            : reviews.find(r => r.hero_image_url === fallbackHeroImageUrl)?.hero_position_x ?? impressions.find(i => i.hero_image_url === fallbackHeroImageUrl)?.hero_position_x ?? 50),
+          heroPositionY: Number(row.hero_image_url
+            ? row.hero_position_y ?? 50
+            : reviews.find(r => r.hero_image_url === fallbackHeroImageUrl)?.hero_position_y ?? impressions.find(i => i.hero_image_url === fallbackHeroImageUrl)?.hero_position_y ?? 50),
+          heroZoom: Number(row.hero_image_url
+            ? row.hero_zoom ?? 1
+            : reviews.find(r => r.hero_image_url === fallbackHeroImageUrl)?.hero_zoom ?? impressions.find(i => i.hero_image_url === fallbackHeroImageUrl)?.hero_zoom ?? 1),
 
           reviewCount:
             reviews.length,
@@ -1490,6 +1537,9 @@ export async function getHomepageFeaturedProducts(): Promise<
         featured,
         launch_price,
         hero_image_url,
+        hero_position_x,
+        hero_position_y,
+        hero_zoom,
 
         brands (
           id,
@@ -1576,6 +1626,9 @@ export async function getHomepageFeaturedProducts(): Promise<
 
             heroImageUrl:
               row.hero_image_url,
+            heroPositionX: Number(row.hero_position_x ?? 50),
+            heroPositionY: Number(row.hero_position_y ?? 50),
+            heroZoom: Number(row.hero_zoom ?? 1),
 
             reviewCount:
               0,

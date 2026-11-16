@@ -346,6 +346,12 @@ function mapArtistImpression(
         : product.hero_position_y ?? 50,
     ),
 
+    heroZoom: Number(
+      row.hero_image_url
+        ? row.hero_zoom ?? 1
+        : product.hero_zoom ?? 1,
+    ),
+
     publishedAt:
       row.published_at,
 

@@ -55,9 +55,10 @@ function ImpressionCard({
               }
               alt={`${impression.product.brand.name} ${impression.product.model}`}
               loading="lazy"
-              className="aspect-[16/9] h-full w-full object-cover transition duration-300 group-hover:scale-[1.025] sm:aspect-square"
+              className="aspect-[16/9] h-full w-full object-cover transition duration-300 sm:aspect-square"
               style={{
                 objectPosition: `${impression.heroPositionX}% ${impression.heroPositionY}%`,
+                  transform: `scale(${impression.heroZoom})`,
               }}
             />
           </div>

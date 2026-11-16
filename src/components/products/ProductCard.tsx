@@ -41,7 +41,11 @@ function ProductCard({
               }
               alt={`${product.brand.name} ${product.model}`}
               loading="lazy"
-              className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+              className="h-full w-full object-cover transition duration-500"
+              style={{
+                objectPosition: `${product.heroPositionX}% ${product.heroPositionY}%`,
+                transform: `scale(${product.heroZoom})`,
+              }}
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center px-6 text-center text-sm text-[var(--muted)]">
@@ -61,21 +65,7 @@ function ProductCard({
             )}
           </span>
 
-          {product.averageRating !=
-            null && (
-            <span className="flex items-center gap-1.5 rounded-full border border-white/25 bg-black/45 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
-              <span
-                aria-hidden="true"
-                className="text-[var(--accent)]"
-              >
-                ★
-              </span>
 
-              {product.averageRating.toFixed(
-                1,
-              )}
-            </span>
-          )}
         </div>
 
         {product.heroImageUrl && (

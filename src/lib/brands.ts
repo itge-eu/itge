@@ -531,6 +531,8 @@ function mapImpression(
       row.hero_position_y ?? 50,
     ),
 
+    heroZoom: Number(row.hero_zoom ?? 1),
+
     publishedAt:
       row.published_at,
 
@@ -957,6 +959,10 @@ function collectProducts(
           product.heroImageUrl ??
           fallbackHeroImageUrl
 
+        const heroPositionX = 50
+        const heroPositionY = 50
+        const heroZoom = 1
+
         return {
           id:
             product.id,
@@ -974,6 +980,9 @@ function collectProducts(
             product.brand,
 
           heroImageUrl,
+          heroPositionX,
+          heroPositionY,
+          heroZoom,
 
           reviewCount:
             sortedReviews.length,
