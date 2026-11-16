@@ -213,7 +213,7 @@ function BrandPage() {
                 </a>
               )}
 
-              <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+              <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <StatCard
                   label="Gear"
                   value={brand.products.length.toString()}
@@ -232,25 +232,6 @@ function BrandPage() {
                 <StatCard
                   label="Contributors"
                   value={brand.contributorCount.toString()}
-                />
-
-                <StatCard
-                  label="Avg. rating"
-                  value={
-                    brand.averageRating ==
-                    null ? (
-                      "—"
-                    ) : (
-                      <>
-                        {brand.averageRating.toFixed(
-                          1,
-                        )}{" "}
-                        <span className="text-[var(--accent)]">
-                          ★
-                        </span>
-                      </>
-                    )
-                  }
                 />
               </div>
             </div>
